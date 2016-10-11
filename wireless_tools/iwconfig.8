@@ -1,0 +1,108 @@
+.\" Jean II - HPLB - 96
+.\" iwconfig.8
+.\"
+.TH IWCONFIG 8 "31 October 1996" "net-tools" "Linux Programmer's Manual"
+.\"
+.\" NAME part
+.\"
+.SH NAME
+iwconfig \- configure a wireless network interface
+.\"
+.\" SYNOPSIS part
+.\"
+.SH SYNOPSIS
+.BI "iwconfig [" interface ]
+.br
+.BI "iwconfig " interface " [nwid " N "] [freq " F ]
+.\"
+.\" DESCRIPTION part
+.\"
+.SH DESCRIPTION
+.B Iwconfig
+is similar to
+.IR ifconfig (8),
+but is dedicated to the wireless interfaces. It is used to set the
+parameters of the network interface which are specific to the wireless
+operation (for example : the frequency).
+.B Iwconfig
+may also be used to display those parameters, and the wireless
+statistics (extracted from
+.IR /proc/net/wireless ).
+.PP
+All these parameters and statistics are device dependant. Each driver
+will provide only some of them depending on the hardware support, and
+the range of value may change. Please refer to the man page of each
+device for details.
+.\"
+.\" PARAMETER part
+.\"
+.SH PARAMETERS
+.TP
+.B nwid
+Set the Network ID (in some products it is also called Domain). As all
+adjacent wireless networks share the same medium, this number is used
+to differenciate them (create virtual networks).
+.TP
+.BR freq / channel
+Set the operating frequency or channel in the device. Value below 1000
+are the channel number, value over this is the frequency in Hz. You
+may prepend the suffix k, M or G to the value (for example, "2.46G"
+for 2.46 GHz frequency).
+.\"
+.\" DISPLAY part
+.\"
+.SH DISPLAY
+For each device which support wireless extensions,
+.I iwconfig
+will display the name of the
+.B MAC protocol
+used (name of device for proprietary protocols), the
+.B NWID
+and the
+.B frequency
+(if available).
+.PP
+If
+.I /proc/net/wireless
+exists,
+.I iwconfig
+will also display its content :
+.TP
+.B Link quality
+Quality of the link or the modulation (how good the received signal is).
+.TP
+.B Signal level
+Received signal strength (how strong the received signal is).
+.TP
+.B Noise level
+Background noise level (when no packet is transmited).
+.TP
+.B invalid nwid
+Number of packets received with a different NWID. Used to detect
+configuration problems or adjacent network existence.
+.TP
+.B invalid crypt
+Number of packets that the hardware was unable to decrypt.
+.TP
+.B invalid misc
+Other packets lost in relation with specific wireless operations.
+.\"
+.\" AUTHOR part
+.\"
+.SH AUTHOR
+Jean Tourrilhes \- jt@hplb.hpl.hp.com
+.\"
+.\" FILES part
+.\"
+.SH FILES
+.I /proc/net/wireless
+.\"
+.\" SEE ALSO part
+.\"
+.SH SEE ALSO
+.BR ifconfig (8),
+.BR iwspy (8),
+.BR iwpriv (8),
+.BR wavelan (4),
+.BR wavelan_cs (4),
+.BR xircnw_cs (4).
