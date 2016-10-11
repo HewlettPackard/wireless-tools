@@ -57,8 +57,17 @@ get_info(int			skfd,
 
   /* Get wireless name */
   if(iw_get_ext(skfd, ifname, SIOCGIWNAME, &wrq) < 0)
-    /* If no wireless name : no wireless extensions */
-    return(-1);
+    {
+      /* If no wireless name : no wireless extensions */
+      /* But let's check if the interface exists at all */
+      struct ifreq ifr;
+
+      strcpy(ifr.ifr_name, ifname);
+      if(ioctl(skfd, SIOCGIFFLAGS, &ifr) < 0)
+	return(-ENODEV);
+      else
+	return(-ENOTSUP);
+    }
   else
     strcpy(info->name, wrq.u.name);
 
@@ -147,9 +156,9 @@ get_info(int			skfd,
   /* Get operation mode */
   if(iw_get_ext(skfd, ifname, SIOCGIWMODE, &wrq) >= 0)
     {
-      if((wrq.u.mode < IW_NUM_OPER_MODE) && (wrq.u.mode >= 0))
-	info->has_mode = 1;
       info->mode = wrq.u.mode;
+      if((info->mode < IW_NUM_OPER_MODE) && (info->mode >= 0))
+	info->has_mode = 1;
     }
 
   /* Get Power Management settings */
@@ -198,7 +207,7 @@ display_info(struct wireless_info *	info,
 {
   char		buffer[128];	/* Temporary buffer */
 
-  /* One token is more of less 5 character, 14 tokens per line */
+  /* One token is more of less 5 characters, 14 tokens per line */
   int	tokens = 3;	/* For name */
 
   /* Display device name and wireless name (name of the protocol used) */
@@ -253,20 +262,8 @@ display_info(struct wireless_info *	info,
   /* Display frequency / channel */
   if(info->has_freq)
     {
-      if(info->freq < KILO)
-	printf("Channel:%g  ", info->freq);
-      else
-	{
-	  if(info->freq >= GIGA)
-	    printf("Frequency:%gGHz  ", info->freq / GIGA);
-	  else
-	    {
-	      if(info->freq >= MEGA)
-		printf("Frequency:%gMHz  ", info->freq / MEGA);
-	      else
-		printf("Frequency:%gkHz  ", info->freq / KILO);
-	    }
-	}
+      iw_print_freq(buffer, info->freq);
+      printf("%s  ", buffer);
       tokens +=4;
     }
 
@@ -300,20 +297,9 @@ display_info(struct wireless_info *	info,
 	}
       tokens +=3;
 
-      /* Fixed ? */
-      if(info->bitrate.fixed)
-	printf("Bit Rate=");
-      else
-	printf("Bit Rate:");
-
-      if(info->bitrate.value >= GIGA)
-	printf("%gGb/s", info->bitrate.value / GIGA);
-      else
-	if(info->bitrate.value >= MEGA)
-	  printf("%gMb/s", info->bitrate.value / MEGA);
-	else
-	  printf("%gkb/s", info->bitrate.value / KILO);
-      printf("   ");
+      /* Display it */
+      iw_print_bitrate(buffer, info->bitrate.value);
+      printf("Bit Rate%c%s   ", (info->bitrate.fixed ? '=' : ':'), buffer);
     }
 
 #if WIRELESS_EXT > 9
@@ -498,7 +484,7 @@ display_info(struct wireless_info *	info,
 	  if(info->power.flags & IW_POWER_TYPE)
 	    {
 	      iw_print_pm_value(buffer, info->power.value, info->power.flags);
-	      printf("%s", buffer);
+	      printf("%s  ", buffer);
 	    }
 
 	  /* Let's check the mode */
@@ -543,48 +529,35 @@ display_info(struct wireless_info *	info,
  * Print on the screen in a neat fashion all the info we have collected
  * on a device.
  */
-static void
+static int
 print_info(int		skfd,
-	   char *	ifname)
+	   char *	ifname,
+	   char *	args[],
+	   int		count)
 {
   struct wireless_info	info;
+  int			rc;
 
-  if(get_info(skfd, ifname, &info) < 0)
+  /* Avoid "Unused parameter" warning */
+  args = args; count = count;
+
+  rc = get_info(skfd, ifname, &info);
+  switch(rc)
     {
+    case 0:	/* Success */
+      /* Display it ! */
+      display_info(&info, ifname);
+      break;
+
+    case -ENOTSUP:
       fprintf(stderr, "%-8.8s  no wireless extensions.\n\n",
 	      ifname);
-      return;
+      break;
+
+    default:
+      fprintf(stderr, "%-8.8s  %s\n\n", ifname, strerror(-rc));
     }
-
-  /* Display it ! */
-  display_info(&info, ifname);
-}
-
-/*------------------------------------------------------------------*/
-/*
- * Get info on all devices and print it on the screen
- */
-static void
-print_devices(int	skfd)
-{
-  char buff[1024];
-  struct ifconf ifc;
-  struct ifreq *ifr;
-  int i;
-
-  /* Get list of active devices */
-  ifc.ifc_len = sizeof(buff);
-  ifc.ifc_buf = buff;
-  if(ioctl(skfd, SIOCGIFCONF, &ifc) < 0)
-    {
-      fprintf(stderr, "SIOCGIFCONF: %s\n", strerror(errno));
-      return;
-    }
-  ifr = ifc.ifc_req;
-
-  /* Print them */
-  for(i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; ifr++)
-    print_info(skfd, ifr->ifr_name);
+  return(rc);
 }
 
 /************************* SETTING ROUTINES **************************/
@@ -771,61 +744,22 @@ set_info(int		skfd,		/* The socket */
 	    }
 	  else
 	    {
-	      char *	buff;
-	      char *	p;
-	      int		temp;
-	      int		k = 0;
-	      int		gotone = 1;
+	      int	gotone = 1;
+	      int	keylen;
+	      int	temp;
 
 	      wrq.u.data.pointer = (caddr_t) NULL;
 	      wrq.u.data.flags = 0;
 	      wrq.u.data.length = 0;
 
 	      /* -- Check for the key -- */
-	      if(!strncmp(args[i], "s:", 2))
+	      keylen = iw_in_key(args[i], key);
+	      if(keylen > 0)
 		{
-		  /* First case : as an ASCII string */
-		  wrq.u.data.length = strlen(args[i] + 2);
-		  if(wrq.u.data.length > IW_ENCODING_TOKEN_MAX)
-		    wrq.u.data.length = IW_ENCODING_TOKEN_MAX;
-		  strncpy(key, args[i] + 2, wrq.u.data.length);
+		  wrq.u.data.length = keylen;
 		  wrq.u.data.pointer = (caddr_t) key;
 		  ++i;
 		  gotone = 1;
-		}
-	      else
-		{
-		  /* Second case : as hexadecimal digits */
-		  buff = malloc(strlen(args[i]) + 1);
-		  if(buff == NULL)
-		    {
-		      fprintf(stderr, "Set Encode : Malloc failed (string too long ?)\n");
-		      return(-10);
-		    }
-		  strcpy(buff, args[i]);
-
-		  p = strtok(buff, "-:;.,");
-		  while((p != (char *) NULL) && (k < IW_ENCODING_TOKEN_MAX))
-		    {
-		      if(sscanf(p, "%2X", &temp) != 1)
-			{
-			  gotone = 0;
-			  break;
-			}
-		      key[k++] = (unsigned char) (temp & 0xFF);
-		      if(strlen(p) > 2)	/* Token not finished yet */
-			p += 2;
-		      else
-			p = strtok((char *) NULL, "-:;.,");
-		    }
-		  free(buff);
-
-		  if(gotone)
-		    {
-		      ++i;
-		      wrq.u.data.length = k;
-		      wrq.u.data.pointer = (caddr_t) key;
-		    }
 		}
 
 	      /* -- Check for token index -- */
@@ -855,7 +789,7 @@ set_info(int		skfd,		/* The socket */
 		}
 	      /* Pointer is absent in new API */
 	      if(wrq.u.data.pointer == NULL)
-		wrq.u.data.flags = IW_ENCODE_NOKEY;
+		wrq.u.data.flags |= IW_ENCODE_NOKEY;
 
 	      if(!gotone)
 		ABORT_ARG_TYPE("Set Encode", SIOCSIWENCODE, args[i]);
@@ -927,9 +861,26 @@ set_info(int		skfd,		/* The socket */
 	  if(++i >= count)
 	    ABORT_ARG_NUM("Set AP Address", SIOCSIWAP);
 
-	  /* Get the address and check if the interface supports it */
-	  if(iw_in_addr(skfd, ifname, args[i++], &(wrq.u.ap_addr)) < 0)
-	    ABORT_ARG_TYPE("Set AP Address", SIOCSIWAP, args[i-1]);
+	  if((!strcasecmp(args[i], "auto")) ||
+	     (!strcasecmp(args[i], "any")))
+	    {
+	      /* Send a broadcast address */
+	      iw_broad_ether(&(wrq.u.ap_addr));
+	    }
+	  else
+	    {
+	      if(!strcasecmp(args[i], "off"))
+		{
+		  /* Send a NULL address */
+		  iw_null_ether(&(wrq.u.ap_addr));
+		}
+	      else
+		{
+		  /* Get the address and check if the interface supports it */
+		  if(iw_in_addr(skfd, ifname, args[i++], &(wrq.u.ap_addr)) < 0)
+		    ABORT_ARG_TYPE("Set AP Address", SIOCSIWAP, args[i-1]);
+		}
+	    }
 
 	  IW_SET_EXT_ERR(skfd, ifname, SIOCSIWAP, &wrq,
 			 "Set AP Address");
@@ -1243,13 +1194,18 @@ set_info(int		skfd,		/* The socket */
 		    ismwatt = (index(args[i], 'm') != NULL);
 
 		    /* Convert */
-		    if(!ismwatt && (range.txpower_capa & IW_TXPOW_MWATT))
+		    if(range.txpower_capa & IW_TXPOW_MWATT)
 		      {
-			power = iw_dbm2mwatt(power);
+			if(!ismwatt)
+			  power = iw_dbm2mwatt(power);
 			wrq.u.data.flags = IW_TXPOW_MWATT;
 		      }
-		    if(ismwatt && !(range.txpower_capa & IW_TXPOW_MWATT))
-		      power = iw_mwatt2dbm(power);
+		    else
+		      {
+			if(ismwatt)
+			  power = iw_mwatt2dbm(power);
+			wrq.u.data.flags = IW_TXPOW_DBM;
+		      }
 		    wrq.u.bitrate.value = power;
 
 		    /* Check for an additional argument */
@@ -1364,7 +1320,7 @@ int
 main(int	argc,
      char **	argv)
 {
-  int skfd = -1;		/* generic raw socket desc.	*/
+  int skfd;		/* generic raw socket desc.	*/
   int goterr = 0;
 
   /* Create a channel to the NET kernel. */
@@ -1376,31 +1332,19 @@ main(int	argc,
 
   /* No argument : show the list of all device + info */
   if(argc == 1)
-    {
-      print_devices(skfd);
-      close(skfd);
-      exit(0);
-    }
-
-  /* Special case for help... */
-  if((!strncmp(argv[1], "-h", 9)) ||
-     (!strcmp(argv[1], "--help")))
-    {
+    iw_enum_devices(skfd, &print_info, NULL, 0);
+  else
+    /* Special case for help... */
+    if((!strncmp(argv[1], "-h", 9)) ||
+       (!strcmp(argv[1], "--help")))
       iw_usage();
-      close(skfd);
-      exit(0);
-    }
-
-  /* The device name must be the first argument */
-  if(argc == 2)
-    {
-      print_info(skfd, argv[1]);
-      close(skfd);
-      exit(0);
-    }
-
-  /* The other args on the line specify options to be set... */
-  goterr = set_info(skfd, argv + 2, argc - 2, argv[1]);
+    else
+      /* The device name must be the first argument */
+      if(argc == 2)
+	print_info(skfd, argv[1], NULL, 0);
+      else
+	/* The other args on the line specify options to be set... */
+	goterr = set_info(skfd, argv + 2, argc - 2, argv[1]);
 
   /* Close the socket. */
   close(skfd);

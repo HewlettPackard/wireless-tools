@@ -15,6 +15,8 @@ iwlist \- Get wireless statistics from specific nodes
 .br
 .BI "iwlist " interface " ap"
 .br
+.BI "iwlist " interface " scan"
+.br
 .BI "iwlist " interface " rate"
 .br
 .BI "iwlist " interface " key"
@@ -46,7 +48,22 @@ displayed and channel numbers.
 .TP
 .BR ap / accesspoint
 Give the list of Access Points in range, and optionally the quality of
-link to them.
+link to them. This feature is obsolte and now deprecated in favor of
+scanning support (below), and it will disappear in the future.
+.TP
+.BR scan [ning]
+Give the list of Access Points and Ad-Hoc cells in range, and
+optionally a whole bunch of information about them (ESSID, Quality,
+Frequency, Mode...). The type of information returned depend on what
+the card support.
+.br
+Triggering scanning is a priviledged operation
+.RI ( root
+only) and normal users can only read letf-over scan results. By
+default, the way scanning is done (the scope of the scan) will be
+impacted by the current setting of the driver. Also, this command is
+supposed to take extra arguments to control the scanning behaviour,
+but this is currently not implemented.
 .TP
 .BR rate / bit [rate]
 List the bit-rates supported by the device.

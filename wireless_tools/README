@@ -15,6 +15,7 @@ web page
 INSTALL
 -------
 	This file contains installation instruction and requirements.
+	A *must* read.
 
 PCMCIA.txt
 ----------
@@ -26,7 +27,7 @@ man pages (iwconfig.8, iwlist.8, iwpriv.8, iwspy.8)
 	VERY IMPORTANT : I try to keep the man page up to date, so
 you'd better read them before asking questions.
 	ALSO IMPORTANT : Those man pages describe the capacity of the
-tools, no device implement the full range (and driver usually
+tools, no device implement the full range (and drivers usually
 implement even less).
 
 	As far as I know, the man pages are the most complete, up to
@@ -64,23 +65,33 @@ iwgetid.c
 	Output the ESSID or NWID of the specified device.
 	Can also output it in a form that can be used as a Pcmcia Scheme.
 
+iwevent.c
+---------
+	Display Wireless Events. This is new, so there is not much support
+in drivers for it yet...
+
 Changelog, contributions
 ------------------------
-	See iwcommon.h
+	See CHANGELOG.h
 
 wireless.h
 ----------
 	Definition of the Wireless Extensions. You may drop this file
 in your kernel headers to update the Wireless Extensions.
+	Just for your enjoyement, there is various release of it. If
+your kernel/drivers are old, you may want to try the older releases...
 
 Other tools :
 -----------
-	My web page above list many other tools using Wireless
+	My web page list many other tools using Wireless
 Extensions that you may find useful...
+	http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Tools.html#links
 
+Other questions :
+---------------
+	You have the source, and it is documented. In 99% of the case,
+you will find your answer there.
 
-	The list of changes, credits and errata notes are in
-iwcommon.h. Compilation might be tricky, see iwcommon.h for header
-problems...
+	Good luck...
 
 	Jean <jt@hpl.hp.com>

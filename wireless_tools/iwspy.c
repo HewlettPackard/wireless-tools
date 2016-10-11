@@ -18,9 +18,11 @@
 /*
  * Display the spy list of addresses and the associated stats
  */
-static void
+static int
 print_spy_info(int	skfd,
-	       char *	ifname)
+	       char *	ifname,
+	       char *	args[],
+	       int	count)
 {
   struct iwreq		wrq;
   char		buffer[(sizeof(struct iw_quality) +
@@ -33,6 +35,9 @@ print_spy_info(int	skfd,
   int		n;
   int		i;
 
+  /* Avoid "Unused parameter" warning */
+  args = args; count = count;
+
   /* Collect stats */
   wrq.u.data.pointer = (caddr_t) buffer;
   wrq.u.data.length = IW_MAX_SPY;
@@ -40,7 +45,7 @@ print_spy_info(int	skfd,
   if(iw_get_ext(skfd, ifname, SIOCGIWSPY, &wrq) < 0)
     {
       fprintf(stderr, "%-8.8s  Interface doesn't support wireless statistic collection\n\n", ifname);
-      return;
+      return(-1);
     }
 
   /* Number of addresses */
@@ -50,7 +55,7 @@ print_spy_info(int	skfd,
   if(iw_check_mac_addr_type(skfd, ifname) < 0)
     {
       fprintf(stderr, "%-8.8s  Interface doesn't support MAC addresses\n\n", ifname);
-      return;
+      return(-2);
     }
 
   /* Get range info if we can */
@@ -84,33 +89,7 @@ print_spy_info(int	skfd,
 #endif /* WIRELESS_EXT > 11 */
 
   printf("\n");
-}
-
-/*------------------------------------------------------------------*/
-/*
- * Get info on all devices and print it on the screen
- */
-static void
-print_spy_devices(int		skfd)
-{
-  char		buff[1024];
-  struct ifconf ifc;
-  struct ifreq *ifr;
-  int i;
-
-  /* Get list of active devices */
-  ifc.ifc_len = sizeof(buff);
-  ifc.ifc_buf = buff;
-  if(ioctl(skfd, SIOCGIFCONF, &ifc) < 0)
-    {
-      fprintf(stderr, "SIOCGIFCONF: %s\n", strerror(errno));
-      return;
-    }
-  ifr = ifc.ifc_req;
-
-  /* Print them */
-  for(i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; ifr++)
-    print_spy_info(skfd, ifr->ifr_name);
+  return(0);
 }
 
 /************************* SETTING ROUTINES **************************/
@@ -132,62 +111,64 @@ set_spy_info(int		skfd,		/* The socket */
 
   /* Read command line */
   i = 0;	/* first arg to read */
-  nbr = 0;	/* Number of args readen so far */
+  nbr = 0;	/* Number of args read so far */
 
   /* "off" : disable functionality (set 0 addresses) */
   if(!strcmp(args[0], "off"))
-    i = count;	/* hack */
-
-  /* "+" : add all addresses already in the driver */
-  if(!strcmp(args[0], "+"))
+    i = 1;	/* skip the "off" */
+  else
     {
-      char	buffer[(sizeof(struct iw_quality) +
+      /* "+" : add all addresses already in the driver */
+      if(!strcmp(args[0], "+"))
+	{
+	  char	buffer[(sizeof(struct iw_quality) +
 			sizeof(struct sockaddr)) * IW_MAX_SPY];
 
-      /* Check if we have valid mac address type */
-      if(iw_check_mac_addr_type(skfd, ifname) < 0)
-	{
-	  fprintf(stderr, "%-8.8s  Interface doesn't support MAC addresses\n", ifname);
-	  return(-1);
+	  /* Check if we have valid mac address type */
+	  if(iw_check_mac_addr_type(skfd, ifname) < 0)
+	    {
+	      fprintf(stderr, "%-8.8s  Interface doesn't support MAC addresses\n", ifname);
+	      return(-1);
+	    }
+
+	  wrq.u.data.pointer = (caddr_t) buffer;
+	  wrq.u.data.length = 0;
+	  wrq.u.data.flags = 0;
+	  if(iw_get_ext(skfd, ifname, SIOCGIWSPY, &wrq) < 0)
+	    {
+	      fprintf(stderr, "Interface doesn't accept reading addresses...\n");
+	      fprintf(stderr, "SIOCGIWSPY: %s\n", strerror(errno));
+	      return(-1);
+	    }
+
+	  /* Copy old addresses */
+	  nbr = wrq.u.data.length;
+	  memcpy(hw_address, buffer, nbr * sizeof(struct sockaddr));
+
+	  i = 1;	/* skip the "+" */
 	}
 
-      wrq.u.data.pointer = (caddr_t) buffer;
-      wrq.u.data.length = 0;
-      wrq.u.data.flags = 0;
-      if(iw_get_ext(skfd, ifname, SIOCGIWSPY, &wrq) < 0)
+      /* Read other args on command line */
+      while((i < count) && (nbr < IW_MAX_SPY))
 	{
-	  fprintf(stderr, "Interface doesn't accept reading addresses...\n");
-	  fprintf(stderr, "SIOCGIWSPY: %s\n", strerror(errno));
-	  return(-1);
+	  /* Get the address and check if the interface supports it */
+	  if(iw_in_addr(skfd, ifname, args[i++], &(hw_address[nbr])) < 0)
+	    continue;
+	  nbr++;
 	}
 
-      /* Copy old addresses */
-      nbr = wrq.u.data.length;
-      memcpy(hw_address, buffer, nbr * sizeof(struct sockaddr));
-
-      i = 1;	/* skip the "+" */
-    }
-
-  /* Read other args on command line */
-  while((i < count) && (nbr < IW_MAX_SPY))
-    {
-      /* Get the address and check if the interface supports it */
-      if(iw_in_addr(skfd, ifname, args[i++], &(hw_address[nbr])) < 0)
-	continue;
-      nbr++;
-    }
-
-  /* Check the number of addresses */
-  if((nbr == 0) && strcmp(args[0], "off"))
-    {
-      fprintf(stderr, "No valid addresses found : exiting...\n");
-      return(-1);
+      /* Check the number of addresses */
+      if(nbr == 0)
+	{
+	  fprintf(stderr, "No valid addresses found : exiting...\n");
+	  return(-1);
+	}
     }
 
   /* Check if there is some remaining arguments */
   if(i < count)
     {
-      fprintf(stderr, "Got only the first %d addresses, remaining discarded\n", IW_MAX_SPY);
+      fprintf(stderr, "Got only the first %d arguments, remaining discarded\n", i);
     }
 
   /* Time to do send addresses to the driver */
@@ -214,7 +195,7 @@ int
 main(int	argc,
      char **	argv)
 {
-  int skfd = -1;		/* generic raw socket desc.	*/
+  int skfd;			/* generic raw socket desc.	*/
   int goterr = 0;
 
   /* Create a channel to the NET kernel. */
@@ -226,33 +207,21 @@ main(int	argc,
 
   /* No argument : show the list of all device + info */
   if(argc == 1)
-    {
-      print_spy_devices(skfd);
-      close(skfd);
-      return(0);
-    }
-
-  /* Special cases take one... */
-  /* Help */
-  if((!strncmp(argv[1], "-h", 9)) ||
-     (!strcmp(argv[1], "--help")))
-    {
+    iw_enum_devices(skfd, &print_spy_info, NULL, 0);
+  else
+    /* Special cases take one... */
+    /* Help */
+    if((!strncmp(argv[1], "-h", 9)) ||
+       (!strcmp(argv[1], "--help")))
       fprintf(stderr, "Usage: iwspy interface [+] [MAC address] [IP address]\n");
-      close(skfd);
-      return(0);
-    }
-
-  /* The device name must be the first argument */
-  /* Name only : show spy list for that device only */
-  if(argc == 2)
-    {
-      print_spy_info(skfd, argv[1]);
-      close(skfd);
-      return(0);
-    }
-
-  /* Otherwise, it's a list of address to set in the spy list */
-  goterr = set_spy_info(skfd, argv + 2, argc - 2, argv[1]);
+    else
+      /* The device name must be the first argument */
+      /* Name only : show spy list for that device only */
+      if(argc == 2)
+	print_spy_info(skfd, argv[1], NULL, 0);
+      else
+	/* Otherwise, it's a list of address to set in the spy list */
+	goterr = set_spy_info(skfd, argv + 2, argc - 2, argv[1]);
 
   /* Close the socket. */
   close(skfd);

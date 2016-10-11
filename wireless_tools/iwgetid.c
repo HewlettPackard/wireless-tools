@@ -11,8 +11,12 @@
 
 #include "iwlib.h"		/* Header */
 
+#include <getopt.h>
+
 #define FORMAT_DEFAULT	0	/* Nice looking display for the user */
 #define FORMAT_SCHEME	1	/* To be used as a Pcmcia Scheme */
+#define WTYPE_ESSID	0	/* Display ESSID or NWID */
+#define WTYPE_AP	1	/* Display AP/Cell Address */
 
 /*
  * Note on Pcmcia Schemes :
@@ -61,6 +65,63 @@
  * Jean II - 29/3/01
  */
 
+/*************************** SUBROUTINES ***************************/
+/*
+ * Just for the heck of it, let's try to not link with iwlib.
+ * This will keep the binary small and tiny...
+ */
+
+/*------------------------------------------------------------------*/
+/*
+ * Open a socket.
+ * Depending on the protocol present, open the right socket. The socket
+ * will allow us to talk to the driver.
+ */
+int
+iw_sockets_open(void)
+{
+        int ipx_sock = -1;              /* IPX socket                   */
+        int ax25_sock = -1;             /* AX.25 socket                 */
+        int inet_sock = -1;             /* INET socket                  */
+        int ddp_sock = -1;              /* Appletalk DDP socket         */
+
+        /*
+         * Now pick any (exisiting) useful socket family for generic queries
+	 * Note : don't open all the socket, only returns when one matches,
+	 * all protocols might not be valid.
+	 * Workaround by Jim Kaba <jkaba@sarnoff.com>
+	 * Note : in 99% of the case, we will just open the inet_sock.
+	 * The remaining 1% case are not fully correct...
+         */
+        inet_sock=socket(AF_INET, SOCK_DGRAM, 0);
+        if(inet_sock!=-1)
+                return inet_sock;
+        ipx_sock=socket(AF_IPX, SOCK_DGRAM, 0);
+        if(ipx_sock!=-1)
+                return ipx_sock;
+        ax25_sock=socket(AF_AX25, SOCK_DGRAM, 0);
+        if(ax25_sock!=-1)
+                return ax25_sock;
+        ddp_sock=socket(AF_APPLETALK, SOCK_DGRAM, 0);
+        /*
+         * If this is -1 we have no known network layers and its time to jump.
+         */
+        return ddp_sock;
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Display an Ethernet address in readable format.
+ */
+void
+iw_ether_ntop(const struct ether_addr* eth, char* buf)
+{
+  sprintf(buf, "%02X:%02X:%02X:%02X:%02X:%02X",
+	  eth->ether_addr_octet[0], eth->ether_addr_octet[1],
+	  eth->ether_addr_octet[2], eth->ether_addr_octet[3],
+	  eth->ether_addr_octet[4], eth->ether_addr_octet[5]);
+}
+
 /************************ DISPLAY ESSID/NWID ************************/
 
 /*------------------------------------------------------------------*/
@@ -68,15 +129,15 @@
  * Display the ESSID if possible
  */
 static int
-print_essid(int		skfd,
-	    char *	ifname,
-	    int		format)
+print_essid(int			skfd,
+	    const char *	ifname,
+	    int			format)
 {
   struct iwreq		wrq;
   char			essid[IW_ESSID_MAX_SIZE + 1];	/* ESSID */
   char			pessid[IW_ESSID_MAX_SIZE + 1];	/* Pcmcia format */
-  int		i;
-  int		j;
+  unsigned int		i;
+  unsigned int		j;
 
   /* Get ESSID */
   strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
@@ -89,7 +150,7 @@ print_essid(int		skfd,
   switch(format)
     {
     case FORMAT_SCHEME:
-      /* Stip all white space and stuff */
+      /* Strip all white space and stuff */
       j = 0;
       for(i = 0; i < strlen(essid); i++)
 	if(isalnum(essid[i]))
@@ -98,7 +159,6 @@ print_essid(int		skfd,
       if((j == 0) || (j > 32))
 	return(-2);
       printf("%s\n", pessid);
-      fflush(stdout);
       break;
     default:
       printf("%-8.8s  ESSID:\"%s\"\n", ifname, essid);
@@ -114,7 +174,7 @@ print_essid(int		skfd,
  */
 static int
 print_nwid(int		skfd,
-	   char *	ifname,
+	   const char *	ifname,
 	   int		format)
 {
   struct iwreq		wrq;
@@ -129,7 +189,6 @@ print_nwid(int		skfd,
     case FORMAT_SCHEME:
       /* Prefix with nwid to avoid name space collisions */
       printf("nwid%X\n", wrq.u.nwid.value);
-      fflush(stdout);
       break;
     default:
       printf("%-8.8s  NWID:%X\n", ifname, wrq.u.nwid.value);
@@ -139,26 +198,96 @@ print_nwid(int		skfd,
   return(0);
 }
 
+/**************************** AP ADDRESS ****************************/
+
+/*------------------------------------------------------------------*/
+/*
+ * Display the AP Address if possible
+ */
+static int
+print_ap(int		skfd,
+	 const char *	ifname,
+	 int		format)
+{
+  struct iwreq		wrq;
+  char			buffer[64];
+
+  /* Get AP Address */
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+  if(ioctl(skfd, SIOCGIWAP, &wrq) < 0)
+    return(-1);
+
+  /* Print */
+  iw_ether_ntop((const struct ether_addr *) wrq.u.ap_addr.sa_data, buffer);
+  switch(format)
+    {
+    case FORMAT_SCHEME:
+      /* I think ':' are not problematic, because Pcmcia scripts
+       * seem to handle them properly... */
+      printf("%s\n", buffer);
+      break;
+    default:
+      printf("%-8.8s  Access Point: %s\n", ifname, buffer);
+      break;
+    }
+
+  return(0);
+}
+
+/******************************* MAIN ********************************/
+
+/*------------------------------------------------------------------*/
+/*
+ * Check options and call the proper handler
+ */
+static int
+print_one_device(int		skfd,
+		 int		format,
+		 int		wtype,
+		 const char*	ifname)
+{
+  int ret;
+
+  /* Check wtype */
+  if(wtype == WTYPE_AP)
+    {
+      /* Try to print an AP */
+      ret = print_ap(skfd, ifname, format);
+      return(ret);
+    }
+
+  /* Try to print an ESSID */
+  ret = print_essid(skfd, ifname, format);
+
+  if(ret < 0)
+    {
+      /* Try to print a nwid */
+      ret = print_nwid(skfd, ifname, format);
+    }
+
+  return(ret);
+}
+
 /*------------------------------------------------------------------*/
 /*
  * Try the various devices until one return something we can use
  */
 static int
 scan_devices(int		skfd,
-	     int		format)
+	     int		format,
+	     int		wtype)
 {
   char		buff[1024];
   struct ifconf ifc;
   struct ifreq *ifr;
   int		i;
-  int		ret;
 
   /* Get list of active devices */
   ifc.ifc_len = sizeof(buff);
   ifc.ifc_buf = buff;
   if(ioctl(skfd, SIOCGIFCONF, &ifc) < 0)
     {
-      fprintf(stderr, "SIOCGIFCONF: %s\n", strerror(errno));
+      perror("SIOCGIFCONF");
       return(-1);
     }
   ifr = ifc.ifc_req;
@@ -166,132 +295,34 @@ scan_devices(int		skfd,
   /* Print the first match */
   for(i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; ifr++)
     {
-      /* Try to print an ESSID */
-      ret = print_essid(skfd, ifr->ifr_name, format);
-      if(ret == 0)
-	return(0);	/* Success */
-
-      /* Try to print a nwid */
-      ret = print_nwid(skfd, ifr->ifr_name, format);
-      if(ret == 0)
-	return(0);	/* Success */
+      if(print_one_device(skfd, format, wtype, ifr->ifr_name) >= 0)
+	return 0;
     }
   return(-1);
 }
 
-/*************************** SUBROUTINES ***************************/
-
 /*------------------------------------------------------------------*/
 /*
- * Display an Ethernet address in readable format.
+ * helper
  */
-char *
-pr_ether(char *		buffer,
-	 unsigned char *ptr)
+static void
+iw_usage(int status)
 {
-  sprintf(buffer, "%02X:%02X:%02X:%02X:%02X:%02X",
-	  (ptr[0] & 0xFF), (ptr[1] & 0xFF), (ptr[2] & 0xFF),
-	  (ptr[3] & 0xFF), (ptr[4] & 0xFF), (ptr[5] & 0xFF)
-  );
-  return(buffer);
+  fputs("Usage iwgetid [OPTIONS] [ifname]\n"
+	"  Options are:\n"
+	"    -a,--ap      Print the access point address\n"
+	"    -h,--help    Print this message\n"
+	"    -s,--scheme  Format the output as a PCMCIA scheme identifier\n",
+	status ? stderr : stdout);
+  exit(status);
 }
 
-/*------------------------------------------------------------------*/
-/*
- * Open a socket.
- * Depending on the protocol present, open the right socket. The socket
- * will allow us to talk to the driver.
- */
-int
-sockets_open(void)
-{
-	int ipx_sock = -1;		/* IPX socket			*/
-	int ax25_sock = -1;		/* AX.25 socket			*/
-	int inet_sock = -1;		/* INET socket			*/
-	int ddp_sock = -1;		/* Appletalk DDP socket		*/
-
-	inet_sock=socket(AF_INET, SOCK_DGRAM, 0);
-	ipx_sock=socket(AF_IPX, SOCK_DGRAM, 0);
-	ax25_sock=socket(AF_AX25, SOCK_DGRAM, 0);
-	ddp_sock=socket(AF_APPLETALK, SOCK_DGRAM, 0);
-	/*
-	 * Now pick any (exisiting) useful socket family for generic queries
-	 */
-	if(inet_sock!=-1)
-		return inet_sock;
-	if(ipx_sock!=-1)
-		return ipx_sock;
-	if(ax25_sock!=-1)
-		return ax25_sock;
-	/*
-	 * If this is -1 we have no known network layers and its time to jump.
-	 */
-	 
-	return ddp_sock;
-}
-
-/**************************** AP ADDRESS ****************************/
-
-/*------------------------------------------------------------------*/
-/*
- * Display the NWID if possible
- */
-static int
-print_ap(int		skfd,
-	 char *		ifname,
-	 int		format)
-{
-  struct iwreq		wrq;
-  char			buffer[64];
-
-  /* Get network ID */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWAP, &wrq) < 0)
-    return(-1);
-
-  /* Print */
-  printf("%-8.8s  Access Point: %s\n", ifname,
-	 pr_ether(buffer, wrq.u.ap_addr.sa_data));
-
-  return(0);
-}
-
-/*------------------------------------------------------------------*/
-/*
- * Try the various devices until one return something we can use
- */
-static inline int
-scan_ap(int		skfd,
-	int		format)
-{
-  char		buff[1024];
-  struct ifconf ifc;
-  struct ifreq *ifr;
-  int		i;
-  int		ret;
-
-  /* Get list of active devices */
-  ifc.ifc_len = sizeof(buff);
-  ifc.ifc_buf = buff;
-  if(ioctl(skfd, SIOCGIFCONF, &ifc) < 0)
-    {
-      fprintf(stderr, "SIOCGIFCONF: %s\n", strerror(errno));
-      return(-1);
-    }
-  ifr = ifc.ifc_req;
-
-  /* Print the first match */
-  for(i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; ifr++)
-    {
-      /* Try to print an ESSID */
-      ret = print_ap(skfd, ifr->ifr_name, format);
-      if(ret == 0)
-	return(0);	/* Success */
-    }
-  return(-1);
-}
-
-/******************************* MAIN ********************************/
+static const struct option long_opts[] = {
+  { "ap", no_argument, NULL, 'a' },
+  { "help", no_argument, NULL, 'h' },
+  { "scheme", no_argument, NULL, 's' },
+  { NULL, 0, NULL, 0 }
+};
 
 /*------------------------------------------------------------------*/
 /*
@@ -301,85 +332,61 @@ int
 main(int	argc,
      char **	argv)
 {
-  int	skfd = -1;		/* generic raw socket desc.	*/
+  int	skfd;			/* generic raw socket desc.	*/
   int	format = FORMAT_DEFAULT;
+  int	wtype = WTYPE_ESSID;
+  int	opt;
   int	ret = -1;
 
+  /* Check command line arguments */
+  while((opt = getopt_long(argc, argv, "ahs", long_opts, NULL)) > 0)
+    {
+      switch(opt)
+	{
+	case 'a':
+	  /* User wants AP/Cell Address */
+	  wtype = WTYPE_AP;
+	  break;
+
+	case 'h':
+	  iw_usage(0);
+	  break;
+
+	case 's':
+	  /* User wants a Scheme format */
+	  format = FORMAT_SCHEME;
+	  break;
+
+	default:
+	  iw_usage(1);
+	  break;
+	}
+    }
+  if(optind + 1 < argc) {
+    fputs("Too many arguments.\n", stderr);
+    iw_usage(1);
+  }
+
   /* Create a channel to the NET kernel. */
-  if((skfd = sockets_open()) < 0)
+  if((skfd = iw_sockets_open()) < 0)
     {
       perror("socket");
       return(-1);
     }
 
-  /* No argument */
-  if(argc == 1)
+  /* Check if first argument is a device name */
+  if(optind < argc)
     {
-      /* Look on all devices */
-      ret = scan_devices(skfd, format);
-      close(skfd);
-      return(ret);
+      /* Yes : query only this device */
+      ret = print_one_device(skfd, format, wtype, argv[optind]);
+    }
+  else
+    {
+      /* No : query all devices and print first found */
+      ret = scan_devices(skfd, format, wtype);
     }
 
-  /* Only ask for first AP address */
-  if((!strcmp(argv[1], "--ap")) || (!strcmp(argv[1], "-a")))
-    {
-      /* Look on all devices */
-      ret = scan_ap(skfd, format);
-      close(skfd);
-      return(ret);
-    }
-
-  /* Only the format, no interface name */
-  if((!strncmp(argv[1], "--scheme", 4)) || (!strcmp(argv[1], "-s")))
-    {
-      /* Look on all devices */
-      format = FORMAT_SCHEME;
-      ret = scan_devices(skfd, format);
-      close(skfd);
-      return(ret);
-    }
-
-  /* Help */
-  if((argc > 3) ||
-     (!strncmp(argv[1], "-h", 9)) || (!strcmp(argv[1], "--help")))
-    {
-      fprintf(stderr, "Usage: iwgetid [interface]\n");
-      fprintf(stderr, "               [interface] --scheme\n");
-      return(-1);
-    }
-
-  /* If at least a device name */
-  if(argc > 1)
-    {
-      /* Check extra format argument */
-      if(argc > 2)
-	{
-	  /* Only ask for first AP address */
-	  if((!strcmp(argv[2], "--ap")) || (!strcmp(argv[2], "-a")))
-	    {
-	      ret = print_ap(skfd, argv[1], format);
-	      close(skfd);
-	      return(ret);
-	    }
-
-	  /* Want scheme format */
-	  if((!strncmp(argv[2], "--scheme", 4)) || (!strcmp(argv[2], "-s")))
-	    format = FORMAT_SCHEME;
-	}
-
-      /* Try to print an ESSID */
-      ret = print_essid(skfd, argv[1], format);
-
-      if(ret == -1)
-	{
-	  /* Try to print a nwid */
-	  ret = print_nwid(skfd, argv[1], format);
-	}
-    }
-
-  /* Close the socket. */
+  fflush(stdout);
   close(skfd);
-
   return(ret);
 }

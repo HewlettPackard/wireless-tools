@@ -13,7 +13,7 @@
 
 /**************************** VARIABLES ****************************/
 
-const char *	iw_operation_mode[] = { "Auto",
+const char * const iw_operation_mode[] = { "Auto",
 					"Ad-Hoc",
 					"Managed",
 					"Master",
@@ -31,33 +31,132 @@ const char *	iw_operation_mode[] = { "Auto",
 int
 iw_sockets_open(void)
 {
-        int ipx_sock = -1;              /* IPX socket                   */
-        int ax25_sock = -1;             /* AX.25 socket                 */
-        int inet_sock = -1;             /* INET socket                  */
-        int ddp_sock = -1;              /* Appletalk DDP socket         */
+  static const int families[] = {
+    AF_INET, AF_IPX, AF_AX25, AF_APPLETALK
+  };
+  unsigned int	i;
+  int		sock;
 
-        /*
-         * Now pick any (exisiting) useful socket family for generic queries
-	 * Note : don't open all the socket, only returns when one matches,
-	 * all protocols might not be valid.
-	 * Workaround by Jim Kaba <jkaba@sarnoff.com>
-	 * Note : in 99% of the case, we will just open the inet_sock.
-	 * The remaining 1% case are not fully correct...
-         */
-        inet_sock=socket(AF_INET, SOCK_DGRAM, 0);
-        if(inet_sock!=-1)
-                return inet_sock;
-        ipx_sock=socket(AF_IPX, SOCK_DGRAM, 0);
-        if(ipx_sock!=-1)
-                return ipx_sock;
-        ax25_sock=socket(AF_AX25, SOCK_DGRAM, 0);
-        if(ax25_sock!=-1)
-                return ax25_sock;
-        ddp_sock=socket(AF_APPLETALK, SOCK_DGRAM, 0);
-        /*
-         * If this is -1 we have no known network layers and its time to jump.
-         */
-        return ddp_sock;
+  /*
+   * Now pick any (exisiting) useful socket family for generic queries
+   * Note : don't open all the socket, only returns when one matches,
+   * all protocols might not be valid.
+   * Workaround by Jim Kaba <jkaba@sarnoff.com>
+   * Note : in 99% of the case, we will just open the inet_sock.
+   * The remaining 1% case are not fully correct...
+   */
+
+  /* Try all families we support */
+  for(i = 0; i < sizeof(families)/sizeof(int); ++i)
+    {
+      /* Try to open the socket, if success returns it */
+      sock = socket(families[i], SOCK_DGRAM, 0);
+      if(sock >= 0)
+	return sock;
+  }
+
+  return -1;
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Extract the interface name out of /proc/net/wireless
+ * Important note : this procedure will work only with /proc/net/wireless
+ * and not /proc/net/dev, because it doesn't guarantee a ' ' after the ':'.
+ */
+static inline char *
+iw_get_ifname(char *	name,	/* Where to store the name */
+	      int	nsize,	/* Size of name buffer */
+	      char *	buf)	/* Current position in buffer */
+{
+  char *	end;
+
+  /* Skip leading spaces */
+  while(isspace(*buf))
+    buf++;
+
+  /* Get name up to ": "
+   * Note : we compare to ": " to make sure to process aliased interfaces
+   * properly. */
+  end = strstr(buf, ": ");
+
+  /* Not found ??? To big ??? */
+  if((end == NULL) || (((end - buf) + 1) > nsize))
+    return(NULL);
+
+  /* Copy */
+  memcpy(name, buf, (end - buf));
+  name[end - buf] = '\0';
+
+  return(end + 2);
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Enumerate devices and call specified routine
+ * The new way just use /proc/net/wireless, so get all wireless interfaces,
+ * whether configured or not. This is the default if available.
+ * The old way use SIOCGIFCONF, so get only configured interfaces (wireless
+ * or not).
+ */
+void
+iw_enum_devices(int		skfd,
+		iw_enum_handler fn,
+		char *		args[],
+		int		count)
+{
+  char		buff[1024];
+  FILE *	fh;
+  struct ifconf ifc;
+  struct ifreq *ifr;
+  int		i;
+
+  /* Check if /proc/net/wireless is available */
+  fh = fopen(PROC_NET_WIRELESS, "r");
+
+  if(fh != NULL)
+    {
+      /* Success : use data from /proc/net/wireless */
+
+      /* Eat 2 lines of header */
+      fgets(buff, sizeof(buff), fh);
+      fgets(buff, sizeof(buff), fh);
+
+      /* Read each device line */
+      while(fgets(buff, sizeof(buff), fh))
+	{
+	  char	name[IFNAMSIZ + 1];
+	  char *s;
+
+	  /* Extract interface name */
+	  s = iw_get_ifname(name, sizeof(name), buff);
+
+	  if(!s)
+	    /* Failed to parse, complain and continue */
+	    fprintf(stderr, "Cannot parse " PROC_NET_WIRELESS "\n");
+	  else
+	    /* Got it, print info about this interface */
+	    (*fn)(skfd, name, args, count);
+	}
+
+      fclose(fh);
+    }
+  else
+    {
+      /* Get list of configured devices using "traditional" way */
+      ifc.ifc_len = sizeof(buff);
+      ifc.ifc_buf = buff;
+      if(ioctl(skfd, SIOCGIFCONF, &ifc) < 0)
+	{
+	  fprintf(stderr, "SIOCGIFCONF: %s\n", strerror(errno));
+	  return;
+	}
+      ifr = ifc.ifc_req;
+
+      /* Print them */
+      for(i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; ifr++)
+	(*fn)(skfd, ifr->ifr_name, args, count);
+    }
 }
 
 /*********************** WIRELESS SUBROUTINES ************************/
@@ -75,10 +174,10 @@ iw_get_range_info(int		skfd,
   char			buffer[sizeof(iwrange) * 2];	/* Large enough */
 
   /* Cleanup */
-  memset(buffer, 0, sizeof(iwrange) * 2);
+  memset(buffer, 0, sizeof(buffer));
 
   wrq.u.data.pointer = (caddr_t) buffer;
-  wrq.u.data.length = sizeof(iwrange) * 2;
+  wrq.u.data.length = sizeof(buffer);
   wrq.u.data.flags = 0;
   if(iw_get_ext(skfd, ifname, SIOCGIWRANGE, &wrq) < 0)
     return(-1);
@@ -86,7 +185,7 @@ iw_get_range_info(int		skfd,
   /* Copy stuff at the right place, ignore extra */
   memcpy((char *) range, buffer, sizeof(iwrange));
 
-  /* Lot's of people have driver and tools out of sync as far as Wireless
+  /* Lots of people have driver and tools out of sync as far as Wireless
    * Extensions are concerned. It's because /usr/include/linux/wireless.h
    * and /usr/src/linux/include/linux/wireless.h are different.
    * We try to catch this stuff here... */
@@ -207,9 +306,9 @@ iw_get_basic_config(int			skfd,
   /* Get operation mode */
   if(iw_get_ext(skfd, ifname, SIOCGIWMODE, &wrq) >= 0)
     {
-      if((wrq.u.mode < 6) && (wrq.u.mode >= 0))
-	info->has_mode = 1;
       info->mode = wrq.u.mode;
+      if((info->mode < 6) && (info->mode >= 0))
+	info->has_mode = 1;
     }
 
   return(0);
@@ -363,6 +462,51 @@ iw_freq2float(iwfreq *	in)
   return ((double) in->m) * pow(10,in->e);
 }
 
+/*------------------------------------------------------------------*/
+/*
+ * Output a frequency with proper scaling
+ */
+void
+iw_print_freq(char *	buffer,
+	      float	freq)
+{
+  if(freq < KILO)
+    sprintf(buffer, "Channel:%g", freq);
+  else
+    {
+      if(freq >= GIGA)
+	sprintf(buffer, "Frequency:%gGHz", freq / GIGA);
+      else
+	{
+	  if(freq >= MEGA)
+	    sprintf(buffer, "Frequency:%gMHz", freq / MEGA);
+	  else
+	    sprintf(buffer, "Frequency:%gkHz", freq / KILO);
+	}
+    }
+}
+
+/*********************** BITRATE SUBROUTINES ***********************/
+
+/*------------------------------------------------------------------*/
+/*
+ * Output a bitrate with proper scaling
+ */
+void
+iw_print_bitrate(char *	buffer,
+		 int	bitrate)
+{
+  double	rate = bitrate;
+
+  if(rate >= GIGA)
+    sprintf(buffer, "%gGb/s", rate / GIGA);
+  else
+    if(rate >= MEGA)
+      sprintf(buffer, "%gMb/s", rate / MEGA);
+    else
+      sprintf(buffer, "%gkb/s", rate / KILO);
+}
+
 /************************ POWER SUBROUTINES *************************/
 
 /*------------------------------------------------------------------*/
@@ -407,7 +551,7 @@ iw_get_stats(int	skfd,
 
   return(0);
 #else /* WIRELESS_EXT > 11 */
-  FILE *	f=fopen("/proc/net/wireless","r");
+  FILE *	f = fopen(PROC_NET_WIRELESS, "r");
   char		buf[256];
   char *	bp;
   int		t;
@@ -523,15 +667,20 @@ iw_print_key(char *		buffer,
   /* Is the key present ??? */
   if(key_flags & IW_ENCODE_NOKEY)
     {
-      /* Nope : print dummy */
-      strcpy(buffer, "**");
-      buffer +=2;
-      for(i = 1; i < key_size; i++)
+      /* Nope : print on or dummy */
+      if(key_size <= 0)
+	strcpy(buffer, "on");
+      else
 	{
-	  if((i & 0x1) == 0)
-	    strcpy(buffer++, "-");
 	  strcpy(buffer, "**");
 	  buffer +=2;
+	  for(i = 1; i < key_size; i++)
+	    {
+	      if((i & 0x1) == 0)
+		strcpy(buffer++, "-");
+	      strcpy(buffer, "**");
+	      buffer +=2;
+	    }
 	}
     }
   else
@@ -549,6 +698,58 @@ iw_print_key(char *		buffer,
     }
 }
 
+/*------------------------------------------------------------------*/
+/*
+ * Parse a key from the command line.
+ * Return size of the key, or 0 (no key) or -1 (error)
+ */
+int
+iw_in_key(char *		input,
+	  unsigned char *	key)
+{
+  int		keylen = 0;
+  char *	buff;
+  char *	p;
+  int		temp;
+
+  /* Check the type of key */
+  if(!strncmp(input, "s:", 2))
+    {
+      /* First case : as an ASCII string */
+      keylen = strlen(input + 2);		/* skip "s:" */
+      if(keylen > IW_ENCODING_TOKEN_MAX)
+	keylen = IW_ENCODING_TOKEN_MAX;
+      strncpy(key, input + 2, keylen);
+    }
+  else
+    {
+      /* Second case : as hexadecimal digits */
+      buff = malloc(strlen(input) + 1);
+      if(buff == NULL)
+	{
+	  fprintf(stderr, "Malloc failed (string too long ?)\n");
+	  return(-1);
+	}
+      /* Preserve original buffer */
+      strcpy(buff, input);
+
+      /* Parse */
+      p = strtok(buff, "-:;.,");
+      while((p != (char *) NULL) && (keylen < IW_ENCODING_TOKEN_MAX))
+	{
+	  if(sscanf(p, "%2X", &temp) != 1)
+	    return(-1);		/* Error */
+	  key[keylen++] = (unsigned char) (temp & 0xFF);
+	  if(strlen(p) > 2)	/* Token not finished yet */
+	    p += 2;
+	  else
+	    p = strtok((char *) NULL, "-:;.,");
+	}
+      free(buff);
+    }
+
+  return(keylen);
+}
 
 /******************* POWER MANAGEMENT SUBROUTINES *******************/
 
@@ -587,17 +788,17 @@ iw_print_pm_value(char *	buffer,
 
   /* Display value without units */
   if(flags & IW_POWER_RELATIVE)
-    sprintf(buffer, "%g  ", ((double) value) / MEGA);
+    sprintf(buffer, "%g", ((double) value) / MEGA);
   else
     {
       /* Display value with units */
       if(value >= (int) MEGA)
-	sprintf(buffer, "%gs  ", ((double) value) / MEGA);
+	sprintf(buffer, "%gs", ((double) value) / MEGA);
       else
 	if(value >= (int) KILO)
-	  sprintf(buffer, "%gms  ", ((double) value) / KILO);
+	  sprintf(buffer, "%gms", ((double) value) / KILO);
 	else
-	  sprintf(buffer, "%dus  ", value);
+	  sprintf(buffer, "%dus", value);
     }
 }
 
@@ -613,19 +814,19 @@ iw_print_pm_mode(char *	buffer,
   switch(flags & IW_POWER_MODE)
     {
     case IW_POWER_UNICAST_R:
-      strcpy(buffer, " mode:Unicast only received");
+      strcpy(buffer, "mode:Unicast only received");
       break;
     case IW_POWER_MULTICAST_R:
-      strcpy(buffer, " mode:Multicast only received");
+      strcpy(buffer, "mode:Multicast only received");
       break;
     case IW_POWER_ALL_R:
-      strcpy(buffer, " mode:All packets received");
+      strcpy(buffer, "mode:All packets received");
       break;
     case IW_POWER_FORCE_S:
-      strcpy(buffer, " mode:Force sending");
+      strcpy(buffer, "mode:Force sending");
       break;
     case IW_POWER_REPEATER:
-      strcpy(buffer, " mode:Repeat multicasts");
+      strcpy(buffer, "mode:Repeat multicasts");
       break;
     default:
     }
@@ -681,6 +882,25 @@ iw_print_retry_value(char *	buffer,
 }
 #endif	/* WIRELESS_EXT > 10 */
 
+/************************* TIME SUBROUTINES *************************/
+
+/*------------------------------------------------------------------*/
+/*
+ * Print timestamps
+ * Inspired from irdadump...
+ */
+void
+iw_print_timeval(char *			buffer,
+		 const struct timeval *	time)
+{
+        int s;
+
+	s = (time->tv_sec) % 86400;
+	sprintf(buffer, "%02d:%02d:%02d.%06u ", 
+		s / 3600, (s % 3600) / 60, 
+		s % 60, (u_int32_t) time->tv_usec);
+}
+
 /*********************** ADDRESS SUBROUTINES ************************/
 /*
  * This section is mostly a cut & past from net-tools-1.2.0
@@ -710,7 +930,7 @@ iw_check_mac_addr_type(int		skfd,
 
 #ifdef DEBUG
   printf("Hardware : %d - %s\n", ifr.ifr_hwaddr.sa_family,
-	 pr_ether(ifr.ifr_hwaddr.sa_data));
+	 iw_ether_ntoa((struct ether_addr *) ifr.ifr_hwaddr.sa_data));
 #endif
 
   return(0);
@@ -770,15 +990,26 @@ iw_check_addr_type(int		skfd,
 /*
  * Display an Ethernet address in readable format.
  */
-char *
-iw_pr_ether(char *		buffer,
-	    unsigned char *	ptr)
+void
+iw_ether_ntop(const struct ether_addr* eth, char* buf)
 {
-  sprintf(buffer, "%02X:%02X:%02X:%02X:%02X:%02X",
-	  (ptr[0] & 0xFF), (ptr[1] & 0xFF), (ptr[2] & 0xFF),
-	  (ptr[3] & 0xFF), (ptr[4] & 0xFF), (ptr[5] & 0xFF)
-  );
-  return(buffer);
+  sprintf(buf, "%02X:%02X:%02X:%02X:%02X:%02X",
+	  eth->ether_addr_octet[0], eth->ether_addr_octet[1],
+	  eth->ether_addr_octet[2], eth->ether_addr_octet[3],
+	  eth->ether_addr_octet[4], eth->ether_addr_octet[5]);
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Display an Ethernet address in readable format.
+ * Same with a static buffer
+ */
+char *
+iw_ether_ntoa(const struct ether_addr* eth)
+{
+  static char buf[20];
+  iw_ether_ntop(eth, buf);
+  return buf;
 }
 
 /*------------------------------------------------------------------*/
@@ -786,84 +1017,64 @@ iw_pr_ether(char *		buffer,
  * Input an Ethernet address and convert to binary.
  */
 int
-iw_in_ether(char *bufp, struct sockaddr *sap)
+iw_ether_aton(const char *orig, struct ether_addr *eth)
 {
-  unsigned char *ptr;
-  char c, *orig;
-  int i, val;
-
-  sap->sa_family = ARPHRD_ETHER;
-  ptr = sap->sa_data;
+  const char *bufp;
+  int i;
 
   i = 0;
-  orig = bufp;
-  while((*bufp != '\0') && (i < ETH_ALEN)) {
-	val = 0;
-	c = *bufp++;
+  for(bufp = orig; *bufp != '\0'; ++bufp) {
+	unsigned int val;
+	unsigned char c = *bufp++;
 	if (isdigit(c)) val = c - '0';
-	  else if (c >= 'a' && c <= 'f') val = c - 'a' + 10;
-	  else if (c >= 'A' && c <= 'F') val = c - 'A' + 10;
-	  else {
-#ifdef DEBUG
-		fprintf(stderr, "in_ether(%s): invalid ether address!\n", orig);
-#endif
-		errno = EINVAL;
-		return(-1);
-	}
+	else if (c >= 'a' && c <= 'f') val = c - 'a' + 10;
+	else if (c >= 'A' && c <= 'F') val = c - 'A' + 10;
+	else break;
+
 	val <<= 4;
 	c = *bufp++;
 	if (isdigit(c)) val |= c - '0';
-	  else if (c >= 'a' && c <= 'f') val |= c - 'a' + 10;
-	  else if (c >= 'A' && c <= 'F') val |= c - 'A' + 10;
-	  else {
-#ifdef DEBUG
-		fprintf(stderr, "in_ether(%s): invalid ether address!\n", orig);
-#endif
-		errno = EINVAL;
-		return(-1);
-	}
-	*ptr++ = (unsigned char) (val & 0377);
-	i++;
+	else if (c >= 'a' && c <= 'f') val |= c - 'a' + 10;
+	else if (c >= 'A' && c <= 'F') val |= c - 'A' + 10;
+	else break;
 
-	/* We might get a semicolon here - not required. */
-	if (*bufp == ':') {
-		if (i == ETH_ALEN) {
+	eth->ether_addr_octet[i] = (unsigned char) (val & 0377);
+	if(++i == ETH_ALEN) {
+		/* That's it.  Any trailing junk? */
+		if (*bufp != '\0') {
 #ifdef DEBUG
-			fprintf(stderr, "in_ether(%s): trailing : ignored!\n",
-				orig)
+			fprintf(stderr, "iw_ether_aton(%s): trailing junk!\n", orig);
+			errno = EINVAL;
+			return(0);
 #endif
-						; /* nothing */
 		}
-		bufp++;
+#ifdef DEBUG
+		fprintf(stderr, "iw_ether_aton(%s): %s\n",
+			orig, ether_ntoa(eth));
+#endif
+		return(1);
 	}
-  }
-
-  /* That's it.  Any trailing junk? */
-  if ((i == ETH_ALEN) && (*bufp != '\0')) {
-#ifdef DEBUG
-	fprintf(stderr, "in_ether(%s): trailing junk!\n", orig);
-	errno = EINVAL;
-	return(-1);
-#endif
+	if (*bufp != ':')
+		break;
   }
 
 #ifdef DEBUG
-  fprintf(stderr, "in_ether(%s): %s\n", orig, pr_ether(sap->sa_data));
+  fprintf(stderr, "iw_ether_aton(%s): invalid ether address!\n", orig);
 #endif
-
+  errno = EINVAL;
   return(0);
 }
+
 
 /*------------------------------------------------------------------*/
 /*
  * Input an Internet address and convert to binary.
  */
 int
-iw_in_inet(char *bufp, struct sockaddr *sap)
+iw_in_inet(char *name, struct sockaddr *sap)
 {
   struct hostent *hp;
   struct netent *np;
-  char *name = bufp;
   struct sockaddr_in *sin = (struct sockaddr_in *) sap;
 
   /* Grmpf. -FvK */
@@ -946,7 +1157,7 @@ iw_in_addr(int		skfd,
 
 #ifdef DEBUG
       printf("IP Address %s => Hw Address = %s\n",
-	     bufp, pr_ether(sap->sa_data));
+	     bufp, iw_ether_ntoa((struct ether_addr *) sap->sa_data));
 #endif
     }
   else	/* If it's an hardware address */
@@ -967,7 +1178,7 @@ iw_in_addr(int		skfd,
     }
 
 #ifdef DEBUG
-  printf("Hw Address = %s\n", pr_ether(sap->sa_data));
+  printf("Hw Address = %s\n", iw_ether_ntoa((struct ether_addr *) sap->sa_data));
 #endif
 
   return(0);
@@ -977,6 +1188,7 @@ iw_in_addr(int		skfd,
 
 /*------------------------------------------------------------------*/
 /*
+ * Max size in bytes of an private argument.
  */
 int
 iw_byte_size(int	args)
@@ -993,3 +1205,217 @@ iw_byte_size(int	args)
   return ret;
 }
 
+/************************ EVENT SUBROUTINES ************************/
+/*
+ * The Wireless Extension API 14 and greater define Wireless Events,
+ * that are used for various events and scanning.
+ * Those functions help the decoding of events, so are needed only in
+ * this case.
+ */
+#if WIRELESS_EXT > 13
+
+/* Type of headers we know about (basically union iwreq_data) */
+#define IW_HEADER_TYPE_NULL	0	/* Not available */
+#define IW_HEADER_TYPE_CHAR	2	/* char [IFNAMSIZ] */
+#define IW_HEADER_TYPE_UINT	4	/* __u32 */
+#define IW_HEADER_TYPE_FREQ	5	/* struct iw_freq */
+#define IW_HEADER_TYPE_POINT	6	/* struct iw_point */
+#define IW_HEADER_TYPE_PARAM	7	/* struct iw_param */
+#define IW_HEADER_TYPE_ADDR	8	/* struct sockaddr */
+#define IW_HEADER_TYPE_QUAL	9	/* struct iw_quality */
+
+/* Headers for the various requests */
+static const char standard_ioctl_hdr[] = {
+	IW_HEADER_TYPE_NULL,	/* SIOCSIWCOMMIT */
+	IW_HEADER_TYPE_CHAR,	/* SIOCGIWNAME */
+	IW_HEADER_TYPE_PARAM,	/* SIOCSIWNWID */
+	IW_HEADER_TYPE_PARAM,	/* SIOCGIWNWID */
+	IW_HEADER_TYPE_FREQ,	/* SIOCSIWFREQ */
+	IW_HEADER_TYPE_FREQ,	/* SIOCGIWFREQ */
+	IW_HEADER_TYPE_UINT,	/* SIOCSIWMODE */
+	IW_HEADER_TYPE_UINT,	/* SIOCGIWMODE */
+	IW_HEADER_TYPE_PARAM,	/* SIOCSIWSENS */
+	IW_HEADER_TYPE_PARAM,	/* SIOCGIWSENS */
+	IW_HEADER_TYPE_NULL,	/* SIOCSIWRANGE */
+	IW_HEADER_TYPE_POINT,	/* SIOCGIWRANGE */
+	IW_HEADER_TYPE_NULL,	/* SIOCSIWPRIV */
+	IW_HEADER_TYPE_POINT,	/* SIOCGIWPRIV */
+	IW_HEADER_TYPE_NULL,	/* SIOCSIWSTATS */
+	IW_HEADER_TYPE_POINT,	/* SIOCGIWSTATS */
+	IW_HEADER_TYPE_POINT,	/* SIOCSIWSPY */
+	IW_HEADER_TYPE_POINT,	/* SIOCGIWSPY */
+	IW_HEADER_TYPE_NULL,	/* -- hole -- */
+	IW_HEADER_TYPE_NULL,	/* -- hole -- */
+	IW_HEADER_TYPE_ADDR,	/* SIOCSIWAP */
+	IW_HEADER_TYPE_ADDR,	/* SIOCGIWAP */
+	IW_HEADER_TYPE_NULL,	/* -- hole -- */
+	IW_HEADER_TYPE_POINT,	/* SIOCGIWAPLIST */
+	IW_HEADER_TYPE_PARAM,	/* SIOCSIWSCAN */
+	IW_HEADER_TYPE_POINT,	/* SIOCGIWSCAN */
+	IW_HEADER_TYPE_POINT,	/* SIOCSIWESSID */
+	IW_HEADER_TYPE_POINT,	/* SIOCGIWESSID */
+	IW_HEADER_TYPE_POINT,	/* SIOCSIWNICKN */
+	IW_HEADER_TYPE_POINT,	/* SIOCGIWNICKN */
+	IW_HEADER_TYPE_NULL,	/* -- hole -- */
+	IW_HEADER_TYPE_NULL,	/* -- hole -- */
+	IW_HEADER_TYPE_PARAM,	/* SIOCSIWRATE */
+	IW_HEADER_TYPE_PARAM,	/* SIOCGIWRATE */
+	IW_HEADER_TYPE_PARAM,	/* SIOCSIWRTS */
+	IW_HEADER_TYPE_PARAM,	/* SIOCGIWRTS */
+	IW_HEADER_TYPE_PARAM,	/* SIOCSIWFRAG */
+	IW_HEADER_TYPE_PARAM,	/* SIOCGIWFRAG */
+	IW_HEADER_TYPE_PARAM,	/* SIOCSIWTXPOW */
+	IW_HEADER_TYPE_PARAM,	/* SIOCGIWTXPOW */
+	IW_HEADER_TYPE_PARAM,	/* SIOCSIWRETRY */
+	IW_HEADER_TYPE_PARAM,	/* SIOCGIWRETRY */
+	IW_HEADER_TYPE_POINT,	/* SIOCSIWENCODE */
+	IW_HEADER_TYPE_POINT,	/* SIOCGIWENCODE */
+	IW_HEADER_TYPE_PARAM,	/* SIOCSIWPOWER */
+	IW_HEADER_TYPE_PARAM,	/* SIOCGIWPOWER */
+};
+static const unsigned int standard_ioctl_num = sizeof(standard_ioctl_hdr);
+
+/*
+ * Meta-data about all the additional standard Wireless Extension events
+ * we know about.
+ */
+static const char	standard_event_hdr[] = {
+	IW_HEADER_TYPE_ADDR,	/* IWEVTXDROP */
+	IW_HEADER_TYPE_QUAL,	/* IWEVQUAL */
+};
+static const unsigned int standard_event_num = sizeof(standard_event_hdr);
+
+/* Size (in bytes) of various events */
+static const int event_type_size[] = {
+	IW_EV_LCP_LEN,
+	0,
+	IW_EV_CHAR_LEN,
+	0,
+	IW_EV_UINT_LEN,
+	IW_EV_FREQ_LEN,
+	IW_EV_POINT_LEN,		/* Without variable payload */
+	IW_EV_PARAM_LEN,
+	IW_EV_ADDR_LEN,
+	IW_EV_QUAL_LEN,
+};
+
+/*------------------------------------------------------------------*/
+/*
+ * Initialise the struct stream_descr so that we can extract
+ * individual events from the event stream.
+ */
+void
+iw_init_event_stream(struct stream_descr *	stream,	/* Stream of events */
+		     char *			data,
+		     int			len)
+{
+  /* Cleanup */
+  memset((char *) stream, '\0', sizeof(struct stream_descr));
+
+  /* Set things up */
+  stream->current = data;
+  stream->end = data + len;
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Extract the next event from the event stream.
+ */
+int
+iw_extract_event_stream(struct stream_descr *	stream,	/* Stream of events */
+			struct iw_event *	iwe)	/* Extracted event */
+{
+  int		event_type = 0;
+  int		event_len = 1;		/* Invalid */
+  char *	pointer;
+  /* Don't "optimise" the following variable, it will crash */
+  unsigned	cmd_index;		/* *MUST* be unsigned */
+
+  /* Check for end of stream */
+  if((stream->current + IW_EV_LCP_LEN) > stream->end)
+    return(0);
+
+#if 0
+  printf("DBG - stream->current = %p, stream->value = %p, stream->end = %p\n",
+	 stream->current, stream->value, stream->end);
+#endif
+
+  /* Extract the event header (to get the event id).
+   * Note : the event may be unaligned, therefore copy... */
+  memcpy((char *) iwe, stream->current, IW_EV_LCP_LEN);
+
+#if 0
+  printf("DBG - iwe->cmd = 0x%X, iwe->len = %d\n",
+	 iwe->cmd, iwe->len);
+#endif
+
+   /* Get the type and length of that event */
+  if(iwe->cmd <= SIOCIWLAST)
+    {
+      cmd_index = iwe->cmd - SIOCIWFIRST;
+      if(cmd_index < standard_ioctl_num)
+	event_type = standard_ioctl_hdr[cmd_index];
+    }
+  else
+    {
+      cmd_index = iwe->cmd - IWEVFIRST;
+      if(cmd_index < standard_event_num)
+	event_type = standard_event_hdr[cmd_index];
+    }
+  event_len = event_type_size[event_type];
+
+  /* Check if we know about this event */
+  if((event_len == 0) || (iwe->len == 0))
+    return(-1);
+  event_len -= IW_EV_LCP_LEN;
+
+  /* Set pointer on data */
+  if(stream->value != NULL)
+    pointer = stream->value;			/* Next value in event */
+  else
+    pointer = stream->current + IW_EV_LCP_LEN;	/* First value in event */
+
+#if 0
+  printf("DBG - event_type = %d, event_len = %d, pointer = %p\n",
+	 event_type, event_len, pointer);
+#endif
+
+  /* Copy the rest of the event (at least, fixed part) */
+  if((pointer + event_len) > stream->end)
+    return(-2);
+  memcpy((char *) iwe + IW_EV_LCP_LEN, pointer, event_len);
+
+  /* Skip event in the stream */
+  pointer += event_len;
+
+  /* Special processing for iw_point events */
+  if(event_type == IW_HEADER_TYPE_POINT)
+    {
+      /* Check the length of the payload */
+      if((iwe->len - (event_len + IW_EV_LCP_LEN)) > 0)
+	/* Set pointer on variable part (warning : non aligned) */
+	iwe->u.data.pointer = pointer;
+      else
+	/* No data */
+	iwe->u.data.pointer = NULL;
+
+       /* Go to next event */
+      stream->current += iwe->len;
+    }
+  else
+    {
+      /* Is there more value in the event ? */
+      if((pointer + event_len) <= (stream->current + iwe->len))
+	/* Go to next value */
+	stream->value = pointer;
+      else
+	{
+	  /* Go to next event */
+	  stream->value = NULL;
+	  stream->current += iwe->len;
+	}
+    }
+  return(1);
+}
+
+#endif /* WIRELESS_EXT > 13 */

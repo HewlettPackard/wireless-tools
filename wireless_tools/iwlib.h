@@ -28,6 +28,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <netdb.h>		/* gethostbyname, getnetbyname */
+#include <net/ethernet.h>	/* struct ether_addr */
+#include <sys/time.h>		/* struct timeval */
+#include <unistd.h>
 
 /* This is our header selection. Try to hide the mess and the misery :-(
  * Don't look, you would go blind ;-) */
@@ -36,12 +39,14 @@
 #include <linux/version.h>
 #endif
 
-/* Kernel headers 2.4.X + Glibc 2.2 - Mandrake 8.0, Debian 2.3, RH 7.1 */
+/* Kernel headers 2.4.X + Glibc 2.2 - Mandrake 8.0, Debian 2.3, RH 7.1
+ * Kernel headers 2.2.X + Glibc 2.2 - Slackware 8.0 */
 #if defined(__GLIBC__) \
     && __GLIBC__ == 2 \
     && __GLIBC_MINOR__ >= 2 \
-    && LINUX_VERSION_CODE >= KERNEL_VERSION(2,4,0)
-#define GLIBC22_HEADERS
+    && LINUX_VERSION_CODE >= KERNEL_VERSION(2,2,0)
+//#define GLIBC22_HEADERS
+#define GENERIC_HEADERS
 
 /* Kernel headers 2.4.X + Glibc 2.1 - Debian 2.2 upgraded, RH 7.0
  * Kernel headers 2.2.X + Glibc 2.1 - Debian 2.2, RH 6.1 */
@@ -49,7 +54,8 @@
       && __GLIBC__ == 2 \
       && __GLIBC_MINOR__ == 1 \
       && LINUX_VERSION_CODE >= KERNEL_VERSION(2,2,0)
-#define GLIBC_HEADERS
+//#define GLIBC_HEADERS
+#define GENERIC_HEADERS
 
 /* Kernel headers 2.2.X + Glibc 2.0 - Debian 2.1 */
 #elif defined(__GLIBC__) \
@@ -84,6 +90,15 @@
 #error "Your kernel/libc combination is not supported"
 #endif
 
+#ifdef GENERIC_HEADERS 
+/* Proposed by Dr. Michael Rietz <rietz@mail.amps.de>, 27.3.2 */
+/* If this works for all, it might be more stable on the long term - Jean II */
+#include <net/if_arp.h>		/* For ARPHRD_ETHER */
+#include <sys/socket.h>		/* For AF_INET & struct sockaddr */
+#include <netinet/in.h>         /* For struct sockaddr_in */
+#include <netinet/if_ether.h>
+#endif /* GENERIC_HEADERS */    
+
 #ifdef GLIBC22_HEADERS 
 /* Added by Ross G. Miller <Ross_Miller@baylor.edu>, 3/28/01 */
 #include <linux/if_arp.h> 	/* For ARPHRD_ETHER */
@@ -116,18 +131,22 @@
 #endif	/* PRIVATE_WE_HEADER */
 
 #if WIRELESS_EXT < 9
-#error "Wireless Extension v9 or newer required :-(\
+#error "Wireless Extension v9 or newer required :-( - \
 Use Wireless Tools v19 or update your kernel headers"
 #endif
-#if WIRELESS_EXT < 12
-#warning "Wireless Extension v12 recommended...\
-You may update your kernel and/or system headers to get the new features..."
+#if WIRELESS_EXT < 14
+#warning "Wireless Extension v14 recommended (but not mandatory)... - \
+You may update your kernel and/or system headers to get the new features, \
+or you may just ignore this message"
 #endif
 
 /****************************** DEBUG ******************************/
 
 
 /************************ CONSTANTS & MACROS ************************/
+
+/* Paths */
+#define PROC_NET_WIRELESS	"/proc/net/wireless"
 
 /* Some usefull constants */
 #define KILO	1e3
@@ -229,6 +248,20 @@ typedef struct wireless_config
   int		mode;			/* Operation mode */
 } wireless_config;
 
+typedef struct stream_descr
+{
+  char *	end;		/* End of the stream */
+  char *	current;	/* Current event in stream of events */
+  char *	value;		/* Current value in event */
+} stream_descr;
+
+/* Prototype for handling display of each single interface on the
+ * system - see iw_enum_devices() */
+typedef int (*iw_enum_handler)(int	skfd,
+			       char *	ifname,
+			       char *	args[],
+			       int	count);
+
 /**************************** PROTOTYPES ****************************/
 /*
  * All the functions in iwcommon.c
@@ -236,6 +269,11 @@ typedef struct wireless_config
 /* ---------------------- SOCKET SUBROUTINES -----------------------*/
 int
 	iw_sockets_open(void);
+void
+	iw_enum_devices(int		skfd,
+			iw_enum_handler fn,
+			char *		args[],
+			int		count);
 /* --------------------- WIRELESS SUBROUTINES ----------------------*/
 int
 	iw_get_range_info(int		skfd,
@@ -259,6 +297,12 @@ void
 		   iwfreq *	out);
 double
 	iw_freq2float(iwfreq *	in);
+void
+	iw_print_freq(char *	buffer,
+		      float	freq);
+void
+	iw_print_bitrate(char *	buffer,
+			 int	bitrate);
 /* ---------------------- POWER SUBROUTINES ----------------------- */
 int
 	iw_dbm2mwatt(int	in);
@@ -280,6 +324,9 @@ void
 		     unsigned char *	key,
 		     int		key_size,
 		     int		key_flags);
+int
+	iw_in_key(char *		input,
+		  unsigned char *	key);
 /* ----------------- POWER MANAGEMENT SUBROUTINES ----------------- */
 void
 	iw_print_pm_value(char *	buffer,
@@ -295,6 +342,10 @@ void
 			     int	value,
 			     int	flags);
 #endif
+/* ----------------------- TIME SUBROUTINES ----------------------- */
+void
+	iw_print_timeval(char *			buffer,
+			 const struct timeval *	time);
 /* --------------------- ADDRESS SUBROUTINES ---------------------- */
 int
 	iw_check_mac_addr_type(int	skfd,
@@ -304,13 +355,15 @@ int
 			      char *	ifname);
 #if 0
 int
-	iw_check_addr_type(int	skfd,
-			char *	ifname);
+	iw_check_addr_type(int		skfd,
+			   char *	ifname);
 #endif
-char *
-	iw_pr_ether(char *buffer, unsigned char *ptr);
+void
+	iw_ether_ntop(const struct ether_addr* eth, char* buf);
+char*
+	iw_ether_ntoa(const struct ether_addr* eth);
 int
-	iw_in_ether(char *bufp, struct sockaddr *sap);
+	iw_ether_aton(const char* bufp, struct ether_addr* eth);
 int
 	iw_in_inet(char *bufp, struct sockaddr *sap);
 int
@@ -322,14 +375,25 @@ int
 int
 	iw_byte_size(int		args);
 
+#if WIRELESS_EXT > 13
+/* ---------------------- EVENT SUBROUTINES ---------------------- */
+void
+	iw_init_event_stream(struct stream_descr *	stream,
+			     char *			data,
+			     int			len);
+int
+	iw_extract_event_stream(struct stream_descr *	stream,
+				struct iw_event *	iwe);
+#endif /* WIRELESS_EXT > 13 */
+
 /**************************** VARIABLES ****************************/
 
-extern const char *	iw_operation_mode[];
+extern const char * const	iw_operation_mode[];
 #define IW_NUM_OPER_MODE	6
 
 /************************* INLINE FUNTIONS *************************/
 /*
- * Function that are so simple that it's more efficient inlining them
+ * Functions that are so simple that it's more efficient inlining them
  */
 
 /*
@@ -367,6 +431,46 @@ iw_get_ext(int			skfd,		/* Socket to the kernel */
   strncpy(pwrq->ifr_name, ifname, IFNAMSIZ);
   /* Do the request */
   return(ioctl(skfd, request, pwrq));
+}
+
+/*------------------------------------------------------------------*/
+/* Backwards compatability
+ * Actually, those form are much easier to use when dealing with
+ * struct sockaddr... */
+static inline char*
+iw_pr_ether(char* bufp, const unsigned char* addr)
+{
+  iw_ether_ntop((const struct ether_addr *) addr, bufp);
+  return bufp;
+}
+/* Backwards compatability */
+static inline int
+iw_in_ether(const char *bufp, struct sockaddr *sap)
+{
+  sap->sa_family = ARPHRD_ETHER;
+  return iw_ether_aton(bufp, (struct ether_addr *) sap->sa_data) ? 0 : -1;
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Create an Ethernet broadcast address
+ */
+static inline void
+iw_broad_ether(struct sockaddr *sap)
+{
+  sap->sa_family = ARPHRD_ETHER;
+  memset((char *) sap->sa_data, 0xFF, ETH_ALEN);
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Create an Ethernet NULL address
+ */
+static inline void
+iw_null_ether(struct sockaddr *sap)
+{
+  sap->sa_family = ARPHRD_ETHER;
+  memset((char *) sap->sa_data, 0x00, ETH_ALEN);
 }
 
 #endif	/* IWLIB_H */

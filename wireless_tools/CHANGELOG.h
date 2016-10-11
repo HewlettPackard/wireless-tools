@@ -173,6 +173,61 @@
  *	o Add "commit" to force parameters on the card [iwconfig]
  *	o Wrap ioctl() in iw_set/get_ext() wrappers [all]
  *	o Beautify set request error messages [iwconfig]
+ *
+ * wireless 24 :
+ * -----------
+ *	o Added common function to display frequency [iwlib]
+ *	o Added handler to parse Wireless Events [iwlib]
+ *	o Added tool to display Wireless Events [iwevent]
+ *	o Pass command line to subroutines [iwlist]
+ *	o Scanning support through SIOCSIWSCAN [iwlist]
+ *	---
+ *	o Added common function to display bitrate [iwlib]
+ *	o Add bitrate/encoding scanning support [iwlist]
+ *	o Allow to read scan results for non-root users [iwlist]
+ *	o Set 5s timeout on waiting for scan results [iwlist]
+ *	o Cleanup iwgetid & support ap+scheme display [iwgetid]
+ *	o iwevent man page [iwevent]
+ *		(From Guus Sliepen <guus@warande3094.warande.uu.nl>)
+ *	o iwgetid man page [iwgetid]
+ *	---
+ *	o Add "#define WIRELESS_EXT > 13" around event code [iwlib]
+ *	o Move iw_enum_devices() from iwlist.c to iwlib.c [iwlib]
+ *	o Use iw_enum_devices() everywhere [iwconfig/iwspy/iwpriv]
+ *		(From Pavel Roskin <proski@gnu.org>, rewrite by me)
+ *	o Return proper error message on non existent interfaces [iwconfig]
+ *	o Read interface list in /proc/net/wireless and not SIOCGIFCONF [iwlib]
+ *	---
+ *		(From Pavel Roskin <proski@gnu.org> - again !!!)
+ *	o Don't loose flags when setting encryption key [iwconfig]
+ *	o Add <time.h> [iwevent]
+ *	---
+ *		(From Casey Carter <Casey@Carter.net>)
+ *	o Improved compilations directives, stricter warnings [Makefile]
+ *	o Fix strict warnings (static func, unused args...) [various]
+ *	o New routines to display/input Ethernet MAC addresses [iwlib]
+ *	o Correct my english & spelling [various]
+ *	o Get macaddr to compile [macaddr]
+ *	o Fix range checking in max number of args [iwlist]
+ *	---
+ *	o Display time when we receive event [iwevent]
+ *	---
+ *	o Display time before event, easier to read [iwevent]
+ *		(From "Dr. Michael Rietz" <rietz@mail.amps.de>)
+ *	o Use a generic set of header, may end header mess [iwlib]
+ *		(From Casey Carter <Casey@Carter.net>)
+ *	o Zillions cleanups, small fixes and code reorg [all over]
+ *	o Proper usage/help printout [iwevent, iwgetid, ...]
+ *	---
+ *	o Send broadcast address for iwconfig ethX ap auto/any [iwconfig]
+ *	---
+ *	o Send NULL address for iwconfig ethX ap off [iwconfig]
+ *	o Add iw_in_key() helper (and use it) [iwlib]
+ *	o Create symbolink link libiw.so to libiw.so.XX [Makefile]
+ *		(From Javier Achirica <achirica@ttd.net>)
+ *	o Always send TxPower flags to the driver [iwconfig]
+ *		(From John M. Choi <johnchoi@its.caltech.edu>)
+ *	o Header definition for Slackware (kernel 2.2/glibc 2.2) [iwlib]
  */
 
 /* ----------------------------- TODO ----------------------------- */
@@ -190,7 +245,16 @@
  *
  * iwspy :
  * -----
- *	-
+ *	Add an "auto" flag to have the driver cache the last n results
+ *
+ * iwlist :
+ * ------
+ *	Add scanning command line modifiers
+ *	More scan types support
+ *
+ * iwevent :
+ * -------
+ *	Make it non root-only
  *
  * Doc & man pages :
  * ---------------

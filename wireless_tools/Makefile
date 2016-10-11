@@ -4,19 +4,25 @@
 
 # Targets to build
 STATIC=libiw.a
-DYNAMIC=libiw.so.23
-PROGS= iwconfig iwlist iwpriv iwspy iwgetid
-MANPAGES=iwconfig.8 iwlist.8 iwpriv.8 iwspy.8
+DYNAMIC=libiw.so.24
+PROGS= iwconfig iwlist iwpriv iwspy iwgetid iwevent
+MANPAGES=iwconfig.8 iwlist.8 iwpriv.8 iwspy.8 iwgetid.8 iwevent.8
 
 # Composition of the library :
 OBJS = iwlib.o
 
 # Define if tools should be built using static or dynamic version of the lib
-IWLIBS=$(OBJS)
-#IWLIBS=-liw
+IWLIB=$(STATIC)
+#IWLIB=$(DYNAMIC)
+
+# Standard name for dynamic library so that the dynamic linker can pick it.
+# We will just create a symbolic link to the real thing.
+DYNAMIC_LINK= libiw.so
 
 # Installation directory. By default, go in local.
 # Distributions should probably use /usr/sbin, but they probably know better...
+# Don't forget trailing slash to avoid issues
+
 INSTALL_DIR= /usr/local/sbin/
 INSTALL_LIB= /usr/local/lib/
 INSTALL_INC= /usr/local/include/
@@ -36,35 +42,41 @@ WE_HEADER=
 CC = gcc
 RM = rm -f
 
-RM_CMD = $(RM) *.BAK *.bak *.o ,* *~ *.a
+RM_CMD = $(RM) *.BAK *.bak *.o *.so ,* *~ *.a *.orig *.rej
 
-CFLAGS=-O2 -Wall $(HEADERS) $(WE_HEADER)
+#CFLAGS=-O2 -W -Wall -Wstrict-prototypes -Wmissing-prototypes -Werror
+CFLAGS=-O2 -W -Wall -Wstrict-prototypes
+XCFLAGS=$(CFLAGS) $(WARN) $(HEADERS) $(WE_HEADER)
+PICFLAG=-fPIC
 
-LIBS=$(IWLIBS) -lm
+LIBS= -lm
 
 all:: $(STATIC) $(DYNAMIC) $(PROGS)
 
-.c.o:
-	$(CC) $(CFLAGS) -c $<
+%: %.o
+	$(CC) $(XCFLAGS) -o $@ $^ $(LIBS)
+%.o: %.c
+	$(CC) $(XCFLAGS) -c $<
+%.so: %.c
+	$(CC) $(XCFLAGS) $(PICFLAG) -c -o $@ $<
 
-iwconfig: iwconfig.o $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $< $(LIBS)
+iwconfig: iwconfig.o $(IWLIB)
 
-iwlist: iwlist.o $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $< $(LIBS)
+iwlist: iwlist.o $(IWLIB)
 
-iwpriv: iwpriv.o $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $< $(LIBS)
+iwpriv: iwpriv.o $(IWLIB)
 
-iwspy: iwspy.o $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $< $(LIBS)
+iwspy: iwspy.o $(IWLIB)
 
 iwgetid: iwgetid.o
-	$(CC) $(CFLAGS) -o $@ $^
+
+iwevent: iwevent.o $(IWLIB)
+
+macaddr: macaddr.o $(IWLIB)
 
 # Compilation of the dynamic library
-$(DYNAMIC): $(OBJS)
-	$(CC) -O2 -shared -o $@ -Wl,-soname,$@ -lm -lc $^
+$(DYNAMIC): $(OBJS:.o=.so)
+	$(CC) -shared -o $@ -Wl,-soname,$@ -lm -lc $^
 
 # Compilation of the static library
 $(STATIC): $(OBJS)
@@ -78,7 +90,8 @@ install::
 	install -m 755 $(PROGS) $(INSTALL_DIR)
 	install -m 644 $(STATIC) $(INSTALL_LIB)
 	install -m 755 $(DYNAMIC) $(INSTALL_LIB)
-	echo "Don't forget to fix your /etc/ld.so.conf and run ldconfig."
+	ln -s $(INSTALL_LIB)/$(DYNAMIC) $(INSTALL_LIB)/$(DYNAMIC_LINK)
+	echo "Don't forget to add $(INSTALL_LIB) to /etc/ld.so.conf, and run ldconfig."
 	install -m 644 iwlib.h $(INSTALL_INC)
 	install -m 644 $(MANPAGES) $(INSTALL_MAN)/man8/
 
@@ -87,7 +100,7 @@ clean::
 
 realclean::
 	$(RM_CMD) 
-	$(RM) $(STATIC) $(DYNAMIC) $(PROGS)
+	$(RM) $(STATIC) $(DYNAMIC) $(PROGS) macaddr
 
 depend::
 	makedepend -s "# DO NOT DELETE" -- $(INCLUDES) -- $(SRCS)

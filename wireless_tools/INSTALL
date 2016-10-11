@@ -73,6 +73,7 @@ the tools from compiling.
 	The trick is to copy the file .../include/linux/wireless.h
 from the kernel to the /usr/include headers.
 	A similar procedure may be used to update Wireless Extensions
-in an older kernel...
+in an older kernel, but you may want to be careful because from time
+to time changes are required in the kernel as well...
 
 	Jean <jt@hpl.hp.com>

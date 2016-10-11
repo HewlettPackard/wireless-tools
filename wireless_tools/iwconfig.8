@@ -135,13 +135,27 @@ topology. The mode can be
 .I "	iwconfig eth0 mode Managed"
 .TP
 .B ap
-Register to the Access Point given by the address, if it is
-possible. When the quality of the connection goes too low, the driver
-may revert back to automatic mode.
+Force the card to register to the Access Point given by the address,
+if it is possible. When the quality of the connection goes too low,
+the driver may revert back to automatic mode (the card finds the best
+Access Point in range).
+.br
+You may also use
+.I off
+to re-enable automatic mode without changing the current Access Point,
+or you may use
+.I any
+or
+.I auto
+to force the card to reassociate with the current best Access Point.
 .br
 .B Example :
 .br
 .I "	iwconfig eth0 ap 00:60:1D:01:23:45"
+.br
+.I "	iwconfig eth0 ap any"
+.br
+.I "	iwconfig eth0 ap off"
 .TP
 .BR nick [name]
 Set the nickname, or the station name. Most 802.11 products do define
@@ -175,6 +189,8 @@ the driver will use all bit lower and equal than this value.
 .I "	iwconfig eth0 rate 11M"
 .br
 .I "	iwconfig eth0 rate auto"
+.br
+.I "	iwconfig eth0 rate 5.5M auto"
 .TP
 .BR rts [_threshold]
 RTS/CTS adds a handshake before each packet transmission to make sure
@@ -330,8 +346,8 @@ is the short retry limit (non RTS/CTS packets).
 .BR commit
 Some cards may not apply changes done through Wireless Extensions
 immediately (they may wait to agregate the changes or apply it only
-when the card is brought up). This command (when available) force
-the card to apply all pending changes.
+when the card is brought up via ifconfig). This command (when
+available) force the card to apply all pending changes.
 .br
 This is normally not needed, because the card will eventually apply
 the changes, but can be usefull for debugging.

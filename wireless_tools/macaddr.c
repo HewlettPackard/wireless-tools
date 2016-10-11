@@ -11,43 +11,43 @@
  *	This is released unther the GPL license.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <linux/in.h>
-#include <linux/socket.h>
-#include <linux/if.h>
 
-int main(int argc, char** argv) {
+#include "iwlib.h"
+
+int main(int argc, char** argv)
+{
 
 	int devsock;
 	struct ifreq ifbuffer;
-	int i;
 
-	if (argc != 2) {
+	if ((argc != 2) || (argv[1][0] == '-')) {
 		printf("Usage: macaddr interface\n");
 		exit(1);
 	}
 
-	devsock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	devsock = socket(AF_INET, SOCK_STREAM, 0);
 
 	if (devsock == -1) {
-		printf("Failed opening socket\n");
+		perror("Failed opening socket");
 		exit (1);
 	}
 
 	memset(&ifbuffer, 0, sizeof(ifbuffer));
-	strcpy(ifbuffer.ifr_name, argv[1]);
+	strncpy(ifbuffer.ifr_name, argv[1], sizeof(ifbuffer.ifr_name));
 	if (ioctl(devsock, SIOCGIFHWADDR, &ifbuffer) == -1) {
-		printf("There is no MACADDR for %s\n", argv[1]);
+		fprintf(stderr, "There is no MACADDR for %s\n", argv[1]);
 		exit(1);
 	}
-	close (devsock);
+	close(devsock);
 
-	for (i = 0; i < IFHWADDRLEN; i++)
-		printf("%02X", (unsigned char) ifbuffer.ifr_ifru.ifru_hwaddr.sa_data[i]);
-	printf("\n");
+	puts(iw_ether_ntoa((struct ether_addr *) ifbuffer.ifr_ifru.ifru_hwaddr.sa_data));
 
 	exit(0);
-
 }

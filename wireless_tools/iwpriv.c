@@ -13,6 +13,11 @@
 
 #include "iwlib.h"		/* Header */
 
+/**************************** CONSTANTS ****************************/
+
+static const char *	argtype[] = {
+  "    ", "byte", "char", "", "int ", "float" };
+
 /************************* MISC SUBROUTINES **************************/
 
 /*------------------------------------------------------------------*/
@@ -34,14 +39,18 @@ iw_usage(void)
  * Print on the screen in a neat fashion all the info we have collected
  * on a device.
  */
-static void
+static int
 print_priv_info(int		skfd,
-		char *		ifname)
+		char *		ifname,
+		char *		args[],
+		int		count)
 {
   int		k;
   iwprivargs	priv[32];
   int		n;
-  char *	argtype[] = { "    ", "byte", "char", "", "int ", "float" };
+
+  /* Avoid "Unused parameter" warning */
+  args = args; count = count;
 
   /* Read the private ioctls */
   n = iw_get_priv_info(skfd, ifname, priv);
@@ -56,7 +65,7 @@ print_priv_info(int		skfd,
   else
     {
       printf("%-8.8s  Available private ioctl :\n", ifname);
-      /* Print the all */
+      /* Print them all */
       for(k = 0; k < n; k++)
 	printf("          %s (%X) : set %3d %s & get %3d %s\n",
 	       priv[k].name, priv[k].cmd,
@@ -66,33 +75,7 @@ print_priv_info(int		skfd,
 	       argtype[(priv[k].get_args & IW_PRIV_TYPE_MASK) >> 12]);
       printf("\n");
     }
-}
-
-/*------------------------------------------------------------------*/
-/*
- * Get info on all devices and print it on the screen
- */
-static void
-print_priv_devices(int		skfd)
-{
-  char		buff[1024];
-  struct ifconf ifc;
-  struct ifreq *ifr;
-  int i;
-
-  /* Get list of active devices */
-  ifc.ifc_len = sizeof(buff);
-  ifc.ifc_buf = buff;
-  if(ioctl(skfd, SIOCGIFCONF, &ifc) < 0)
-    {
-      fprintf(stderr, "SIOCGIFCONF: %s\n", strerror(errno));
-      return;
-    }
-  ifr = ifc.ifc_req;
-
-  /* Print them */
-  for(i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; ifr++)
-    print_priv_info(skfd, ifr->ifr_name);
+  return(0);
 }
 
 /************************* SETTING ROUTINES **************************/
@@ -487,7 +470,7 @@ int
 main(int	argc,
      char **	argv)
 {
-  int skfd = -1;		/* generic raw socket desc.	*/
+  int skfd;		/* generic raw socket desc.	*/
   int goterr = 0;
 
   /* Create a channel to the NET kernel. */
@@ -499,50 +482,30 @@ main(int	argc,
 
   /* No argument : show the list of all device + info */
   if(argc == 1)
-    {
-      print_priv_devices(skfd);
-      close(skfd);
-      return(0);
-    }
-
-  /* Special cases take one... */
-  /* Help */
-  if((!strncmp(argv[1], "-h", 9)) ||
-     (!strcmp(argv[1], "--help")))
-    {
+    iw_enum_devices(skfd, &print_priv_info, NULL, 0);
+  else
+    /* Special cases take one... */
+    /* Help */
+    if((!strncmp(argv[1], "-h", 9)) ||
+       (!strcmp(argv[1], "--help")))
       iw_usage();
-      close(skfd);
-      return(0);
-    }
-
-  /* The device name must be the first argument */
-  /* Name only : show for that device only */
-  if(argc == 2)
-    {
-      print_priv_info(skfd, argv[1]);
-      close(skfd);
-      return(0);
-    }
-
-  /* Special cases take two... */
-  /* Roaming */
-  if(!strncmp(argv[2], "roam", 4))
-    {
-      goterr = set_roaming(skfd, argv + 3, argc - 3, argv[1]);
-      close(skfd);
-      return(goterr);
-    }
-
-  /* Port type */
-  if(!strncmp(argv[2], "port", 4))
-    {
-      goterr = port_type(skfd, argv + 3, argc - 3, argv[1]);
-      close(skfd);
-      return(goterr);
-    }
-
-  /* Otherwise, it's a private ioctl */
-  goterr = set_private(skfd, argv + 2, argc - 2, argv[1]);
+    else
+      /* The device name must be the first argument */
+      /* Name only : show for that device only */
+      if(argc == 2)
+	print_priv_info(skfd, argv[1], NULL, 0);
+      else
+	/* Special cases take two... */
+	/* Roaming */
+	if(!strncmp(argv[2], "roam", 4))
+	  goterr = set_roaming(skfd, argv + 3, argc - 3, argv[1]);
+	else
+	  /* Port type */
+	  if(!strncmp(argv[2], "port", 4))
+	    goterr = port_type(skfd, argv + 3, argc - 3, argv[1]);
+	  else
+	    /* Otherwise, it's a private ioctl */
+	    goterr = set_private(skfd, argv + 2, argc - 2, argv[1]);
 
   /* Close the socket. */
   close(skfd);
