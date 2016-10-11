@@ -21,7 +21,7 @@ iw_usage(void)
 {
   fprintf(stderr, "Usage: iwpriv interface [private-command [private-arguments]]\n");
   fprintf(stderr, "              interface [roam {on|off}]\n");
-  fprintf(stderr, "              interface [port [n]]\n");
+  fprintf(stderr, "              interface [port {ad-hoc|managed|N}]\n");
   exit(1);
 }
 
@@ -386,6 +386,7 @@ port_type(int		skfd,		/* Socket */
   iwprivargs	priv[16];
   int		number;
   char		ptype = 0;
+  char *	modes[] = { "invalid", "managed (BSS)", "reserved", "ad-hoc" };
 
   /* Read the private ioctls */
   number = get_priv_info(skfd, ifname, priv);
@@ -403,7 +404,8 @@ port_type(int		skfd,		/* Socket */
     {
       /* So, we just want to see the current value... */
       k = -1;
-      while((++k < number) && strcmp(priv[k].name, "gport_type"));
+      while((++k < number) && strcmp(priv[k].name, "gport_type") &&
+	     strcmp(priv[k].name, "get_port"));
       if(k == number)
 	{
 	  fprintf(stderr, "This device doesn't support getting port type\n");
@@ -420,7 +422,8 @@ port_type(int		skfd,		/* Socket */
       ptype = *wrq.u.name;
 
       /* Display it */
-      printf("%-8.8s  Port type is %d.\n\n", ifname, ptype);
+      printf("%-8.8s  Current port mode is %s <port type is %d>.\n\n",
+	     ifname, modes[(int) ptype], ptype);
 
       return(0);
     }
@@ -429,11 +432,20 @@ port_type(int		skfd,		/* Socket */
     iw_usage();
 
   /* Read it */
-  if(sscanf(args[i], "%d", (int *) &ptype) != 1)
-    iw_usage();
+  /* As a string... */
+  k = 0;
+  while((k < 4) && strncasecmp(args[i], modes[k], 2))
+    k++;
+  if(k < 4)
+    ptype = k;
+  else
+    /* ...or as an integer */
+    if(sscanf(args[i], "%d", (int *) &ptype) != 1)
+      iw_usage();
   
   k = -1;
-  while((++k < number) && strcmp(priv[k].name, "sport_type"));
+  while((++k < number) && strcmp(priv[k].name, "sport_type") &&
+	strcmp(priv[k].name, "set_port"));
   if(k == number)
     {
       fprintf(stderr, "This device doesn't support setting port type\n");
@@ -445,7 +457,7 @@ port_type(int		skfd,		/* Socket */
 
   if(ioctl(skfd, priv[k].cmd, &wrq) < 0)
     {
-      fprintf(stderr, "Invalid port type\n");
+      fprintf(stderr, "Invalid port type (or setting not allowed)\n");
       exit(0);
     }
 

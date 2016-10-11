@@ -3,29 +3,47 @@ the Wireless Extensions. The Wireless Extension is an interface
 allowing you to set Wireless LAN specific parameters and get the
 specific stats.
 
+INSTALL
+-------
+	Installation instruction and requirements.
+
+man pages (iwconfig.8, iwpriv.8, iwspy.8)
+---------
+	As far as I know, the man pages are the most complete, up to
+date and accurate documentation of the wireless tools, and you really
+should read them.
+	They can either be copied in a location where the command
+"man" will find them, or can be read with the command :
+		nroff -man xxx.8 | more
+
+web page
+--------
+	You'll find a lot of useful info on :
+		http://web.hpl.hp.com/personal/Jean_Tourrilhes/Linux/
+
 iwconfig.c
 ----------
-	The main wireless tool. Used for device configuration.
-	You need of course to compile it.
-	This also includes the functionality previously contained in iwpriv.c.
-	It allows you to access device specific extensions.
+	The main wireless tool. Used for device configuration and to see
+	the most common parameters.
 
 iwspy.c
 -------
 	Mobile IP support test and allow get get stats per MAC address
-	(instead of globally).
+	(instead of globally). Also display available bit rates and
+	frequencies.
 
 iwpriv.c
 --------
-	Manipulate driver private ioctls.
+	Manipulate driver private ioctls (all that is not available in
+	iwconfig). These are device specific parameters.
 
 xwireless.c
 -----------
 	Graphical tool for the Netwave created by Dag Brattli <dagb@cs.uit.no>
 
 
-	The man page should describe adequately the behaviour of the tools.
 	The list of changes, credits and errata notes are in
-iwcommon.h. Compilation might be tricky.
+iwcommon.h. Compilation might be tricky, see iwcommon.h for header
+problems...
 
 	Jean <jt@hpl.hp.com>

@@ -1,35 +1,66 @@
+Very important note :
+-------------------
+	This release of the Wireless Tools is not compatible with Wireless
+	Extensions earlier than 9.
+	Kernels that support this version of the Wireless Tools are listed
+	below. For all kernels before that, please use the version v19 of
+	the Wireless Tools.
+	If your kernel has the relevant Wireless Extensions but the tools
+	refuse to compile, then your kernel headers in /usr/include are
+	pointing to the wrong place (very common with Debian).
+
 You need :
 --------
-	o A kernel supporting wireless extensions
-		-> from 2.1.17 onward
-		-> from 2.0.30 onward
-		-> patch available for 1.2.13
+	o Compiler and development environment
+	o A kernel supporting wireless extensions version 9 or higher
+		-> from 2.2.14 onward
+		-> from 2.3.24 onward
 		Note : CONFIG_NET_RADIO must be enabled
-	o Driver supporting wireless extensions
-		-> Wavelan isa from kernel 2.1.17 onward
-		-> Wavelan pcmcia from pcmcia 2.9.2 onward
-		-> Netwave pcmcia from pcmcia 2.9.12 onward
+	o A driver supporting wireless extensions
+		-> Wavelan isa from kernels above
+		-> Wavelan pcmcia from pcmcia 3.1.2 onward
+		-> Netwave pcmcia from pcmcia 3.1.2 onward
 		-> Wavelan IEEE pcmcia drivers
 		-> Proxim RangeLan2/Symphony driver
 		-> Patch your favourite driver
 	Note : more recent kernels and drivers are likely to support
 		more wireless extension features...
 
+Recommended versions :
+--------------------
+	This are the latest updates of the Wireless Extensions :
+	o Kernel (wireless extension definition) :
+		-> Kernel 2.2.14 onward
+		-> Kernel 2.3.24 onward
+	o Drivers with wireless extension support :
+		-> Wavelan isa from kernels above
+		-> Wavelan pcmcia from pcmcia 3.1.1 onward
+		-> Netwave pcmcia from pcmcia 3.1.2 onward
+		-> Wavelan IEEE pcmcia GPL driver (wvlan) 1.0.1 onward
+		-> Wavelan IEEE pcmcia binary driver (wavelan2) v4.00 onward
+		-> Proxim RangeLan2/Symphony driver 1.4.3 onward
+
 Compile wireless tools :
 ----------------------
-	In theory, a make should suffice.
-	In practice, there is big troubles with the headers. Depending
-on which version of the kernel headers (might be different from
-kernel) and library headers you have, you need to play with the
-options buried in iwcommon.h.
+	In theory, a "make" should suffice.
+	In practice, there is big troubles with the headers. If you
+have glibc and kernel 2.2.X headers, that should be all
+right. Depending on which version of the kernel headers (might be
+different from kernel) and library headers you have, you need to play
+with the options buried in iwcommon.h.
+	Note : as some internal data structures change from kernel to
+kernel, you are advised to not use the precompiled version but to
+recompile your own.
+	"xwireless" is not currently in a compilable state.
+
+Installation :
+------------
+	I advise to copy the executable (iwconfig, iwspy and iwpriv)
+in /usr/local/bin or /usr/local/sbin. The man pages (iwconfig.8,
+iwspy.8 and iwpriv.8) should be copied in /usr/local/man/man8 or
+/usr/man/man8.
 
 
-This package was originally created by:
+List of contributors and changelog is in iwcommon.h.
 
-	Jean <jt@hpl.hp.com>
-
-And is now being maintained by:
-	Justin Seger <jseger@media.mit.edu>
-
-It seem that I've been taking over !
 	Jean <jt@hpl.hp.com>

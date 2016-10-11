@@ -68,6 +68,27 @@
  *	o I think I now got set/get char strings right in [iwpriv]
  *		(From Thomas Ekstrom <tomeck@thelogic.com>)
  *	o Fix a very obscure bug in [iwspy]
+ *
+ * wireless 20 :
+ * -----------
+ *		(From Jean Tourrilhes)
+ *	o Remove all #ifdef WIRELESS ugliness, but add a #error :
+ *		we require Wireless Extensions 9 or nothing !  [all]
+ *	o Switch to new 'nwid' definition (specific -> iw_param) [iwconfig]
+ *	o Rewriten totally the encryption support [iwconfig]
+ *		- Multiple keys, through key index
+ *		- Flexible/multiple key size, and remove 64bits upper limit
+ *		- Open/Restricted modes
+ *		- Enter keys as ASCII strings
+ *	o List key sizes supported and all keys in [iwspy]
+ *	o Mode of operation support (ad-hoc, managed...) [iwconfig]
+ *	o Use '=' to indicate fixed instead of ugly '(f)' [iwconfig]
+ *	o Ability to disable RTS & frag (off), now the right way [iwconfig]
+ *	o Auto as an input modifier for bitrate [iwconfig]
+ *	o Power Management support [iwconfig]
+ *		- set timeout or period and its value
+ *		- Reception mode (unicast/multicast/all)
+ *	o Updated man pages with all that ;-)
  */
 
 /* ----------------------------- TODO ----------------------------- */
@@ -76,11 +97,14 @@
  *
  * iwconfig :
  * --------
- *	Use new 802.11 parameters (rate, rts, frag)...
+ *	Make disable a per encryption key modifier if some hardware
+ *	requires it.
+ *	Should not mention "Access Point" but something different when
+ *	in ad-hoc mode.
  *
  * iwpriv :
  * ------
- *	?
+ *	Remove 'port' and 'roam' cruft now that we have mode in iwconfig
  *
  * iwspy :
  * -----
@@ -88,7 +112,11 @@
  *
  * Doc & man pages :
  * ---------------
- *	?
+ *	Update main doc.
+ *
+ * Other :
+ * -----
+ *	What about some graphical tools ?
  */
 
 /***************************** INCLUDES *****************************/
@@ -109,53 +137,39 @@
 /* This is our header selection. Try to hide the mess and the misery :-(
  * Please choose only one of the define...
  */
-#define KER2_2_HEADERS		/* Kernel 2.2.X + Glibc - ok for most people */
-#undef LINUX_HEADERS		/* Kernel 2.0.X + Glibc - Debian 2.0, RH5 */
-#undef LIBC5_HEADERS		/* Kernel 2.0.X + libc5 - old systems */
-#undef PRIVATE_HEADERS		/* Ugly last resort case */
+/* Kernel headers 2.0.X + Glibc 2.0 - Debian 2.0, RH5
+ * Kernel headers 2.2.X + Glibc 2.1 - Debian 2.2, RH6.1 */
+#define GLIBC_HEADERS
 
-#ifdef KER2_2_HEADERS
+/* Kernel headers 2.2.X + Glibc 2.0 - Debian 2.1 */
+#undef KLUDGE_HEADERS
+
+/* Kernel headers 2.0.X + libc5 - old systems */
+#undef LIBC5_HEADERS
+
+#ifdef KLUDGE_HEADERS
 #include <socketbits.h>
+#endif	/* KLUDGE_HEADERS */
+
+#if defined(KLUDGE_HEADERS) || defined(GLIBC_HEADERS)
 #include <linux/if_arp.h>	/* For ARPHRD_ETHER */
 #include <linux/socket.h>	/* For AF_INET & struct sockaddr */
 #include <linux/in.h>		/* For struct sockaddr_in */
-
-/* Wireless extensions */
-#include <linux/wireless.h>
-
-#endif	/* KER2_2_HEADERS */
-
-#ifdef LINUX_HEADERS
-#include <linux/if_arp.h>	/* For ARPHRD_ETHER */
-#include <linux/socket.h>	/* For AF_INET & struct sockaddr */
-#include <linux/in.h>		/* For struct sockaddr_in */
-
-/* Wireless extensions */
-#include <linux/wireless.h>
-
-#endif	/* LINUX_HEADERS */
+#endif	/* KLUDGE_HEADERS || GLIBC_HEADERS */
 
 #ifdef LIBC5_HEADERS
 #include <sys/socket.h>		/* For AF_INET & struct sockaddr & socket() */
 #include <linux/if_arp.h>	/* For ARPHRD_ETHER */
 #include <linux/in.h>		/* For struct sockaddr_in */
+#endif	/* LIBC5_HEADERS */
 
 /* Wireless extensions */
 #include <linux/wireless.h>
 
-#endif	/* LIBC5_HEADERS */
-
-#ifdef PRIVATE_HEADERS
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <socketbits.h>
-#include "compat.h"		/* Don't ask ! */
-
-/* Wireless extensions */
-#include "wireless.h"
-
-#endif	/* PRIVATE_HEADERS */
-
+#if WIRELESS_EXT < 8
+#error "Wireless Extension v9 or newer required :-(\n\
+Use Wireless Tools v19 or update your kernel headers"
+#endif
 
 /****************************** DEBUG ******************************/
 
@@ -167,19 +181,12 @@
 #define MEGA	1e6
 #define GIGA	1e9
 
-/* Some hack */
-#ifndef IW_ESSID_MAX_SIZE
-#define IW_ESSID_MAX_SIZE	32	/* Should be in wireless.h */
-#endif
-#ifndef IW_MAX_AP
-#define IW_MAX_AP		8	/* Should be in wireless.h */
-#endif
-
 /****************************** TYPES ******************************/
 
 /* Shortcuts */
 typedef struct iw_statistics	iwstats;
 typedef struct iw_range		iwrange;
+typedef struct iw_param		iwparam;
 typedef struct iw_freq		iwfreq;
 typedef struct iw_priv_args	iwprivargs;
 typedef struct sockaddr		sockaddr;
@@ -189,15 +196,15 @@ typedef struct wireless_info
 {
   char		name[IFNAMSIZ];		/* Wireless/protocol name */
   int		has_nwid;
-  int		nwid_on;
-  u_long	nwid;			/* Network ID */
+  iwparam	nwid;			/* Network ID */
   int		has_freq;
   float		freq;			/* Frequency/channel */
   int		has_sens;
-  int		sens;			/* sensitivity */
-  int		has_enc;
-  int		enc_method;		/* encoding method or off */
-  long long	enc_key;		/* key used */
+  iwparam	sens;			/* sensitivity */
+  int		has_key;
+  unsigned char	key[IW_ENCODING_TOKEN_MAX];	/* Encoding key used */
+  int		key_size;		/* Number of bytes */
+  int		key_flags;		/* Various flags */
   int		has_essid;
   int		essid_on;
   char		essid[IW_ESSID_MAX_SIZE + 1];	/* ESSID (extended network) */
@@ -206,14 +213,15 @@ typedef struct wireless_info
   int		has_ap_addr;
   sockaddr	ap_addr;		/* Access point address */
   int		has_bitrate;
-  long		bitrate;		/* Bit rate in bps */
-  int		bitrate_fixed;		/* Fixed or auto */
+  iwparam	bitrate;		/* Bit rate in bps */
   int		has_rts;
-  long		rts;			/* RTS threshold in bytes */
-  int		rts_fixed;		/* Fixed or auto */
+  iwparam	rts;			/* RTS threshold in bytes */
   int		has_frag;
-  long		frag;			/* Fragmentation threshold in bytes */
-  int		frag_fixed;		/* Fixed or auto */
+  iwparam	frag;			/* Fragmentation threshold in bytes */
+  int		has_mode;
+  int		mode;			/* Operation mode */
+  int		has_power;
+  iwparam	power;			/* Power management parameters */
 
   /* Stats */
   iwstats	stats;

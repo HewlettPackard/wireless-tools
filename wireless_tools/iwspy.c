@@ -150,11 +150,7 @@ print_freq_info(int		skfd,
 	  /* Print them all */
 	  for(k = 0; k < range.num_frequency; k++)
 	    {
-#if WIRELESS_EXT > 7
-		printf("\t  Channel %.2d : ", range.freq[k].i);
-#else
-		printf("\t  ");
-#endif
+	      printf("\t  Channel %.2d : ", range.freq[k].i);
 	      freq = freq2float(&(range.freq[k]));
 	      if(freq >= GIGA)
 		printf("%g GHz\n", freq / GIGA);
@@ -199,7 +195,6 @@ print_freq_devices(int		skfd)
     print_freq_info(skfd, ifr->ifr_name);
 }
 
-#if WIRELESS_EXT > 5
 /*------------------------------------------------------------------*/
 /*
  * Display the list of ap addresses and the associated stats
@@ -310,9 +305,7 @@ print_ap_devices(int		skfd)
   for(i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; ifr++)
     print_ap_info(skfd, ifr->ifr_name);
 }
-#endif	/* WIRELESS_EXT > 5 */
 
-#if WIRELESS_EXT > 7
 /*------------------------------------------------------------------*/
 /*
  * Print the number of available bitrates for the device
@@ -385,7 +378,103 @@ print_bitrate_devices(int		skfd)
   for(i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; ifr++)
     print_bitrate_info(skfd, ifr->ifr_name);
 }
-#endif	/* WIRELESS_EXT > 7 */
+
+/*------------------------------------------------------------------*/
+/*
+ * Print the number of available bitrates for the device
+ */
+static void
+print_keys_info(int		skfd,
+		char *		ifname)
+{
+  struct iwreq		wrq;
+  struct iw_range	range;
+  unsigned char		key[IW_ENCODING_TOKEN_MAX];
+  int			k;
+
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+  wrq.u.data.pointer = (caddr_t) &range;
+  wrq.u.data.length = 0;
+  wrq.u.data.flags = 0;
+  if(ioctl(skfd, SIOCGIWRANGE, &wrq) < 0)
+      fprintf(stderr, "%-8.8s  no encryption keys information.\n\n",
+		      ifname);
+  else
+    {
+      printf("%-8.8s  ", ifname);
+      if((range.num_encoding_sizes > 0) &&
+	 (range.num_encoding_sizes < IW_MAX_ENCODING_SIZES))
+	{
+	  printf("%d key sizes : %d", range.num_encoding_sizes,
+		 range.encoding_size[0] * 8);
+	  /* Print them all */
+	  for(k = 1; k < range.num_encoding_sizes; k++)
+	    printf(", %d", range.encoding_size[k] * 8);
+	  printf("bits\n          ");
+	}
+      printf("%d keys available :\n", range.max_encoding_tokens);
+      for(k = 1; k <= range.max_encoding_tokens; k++)
+	{
+	  strcpy(wrq.ifr_name, ifname);
+	  wrq.u.data.pointer = (caddr_t) key;
+	  wrq.u.data.length = 0;
+	  wrq.u.data.flags = k;
+	  if(ioctl(skfd, SIOCGIWENCODE, &wrq) < 0)
+	    {
+	      fprintf(stderr, "SIOCGIWENCODE: %s\n", strerror(errno));
+	      break;
+	    }
+	  if((wrq.u.data.flags & IW_ENCODE_DISABLED) ||
+	     (wrq.u.data.length == 0))
+	    printf("\t\t[%d]: off\n", k);
+	  else
+	    {
+	      int	i;
+
+	      printf("\t\t[%d]: %.2X", k, key[0]);
+	      for(i = 1; i < wrq.u.data.length; i++)
+		{
+		  if((i & 0x1) == 0)
+		    printf("-");
+		  printf("%.2X", key[i]);
+		}
+
+	      /* Other info... */
+	      printf(" (%d bits)", wrq.u.data.length * 8);
+	      printf("\n");
+	    }
+	}
+
+      printf("\n\n");
+    }
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Get bit-rate info on all devices and print it on the screen
+ */
+static void
+print_keys_devices(int		skfd)
+{
+  char		buff[1024];
+  struct ifconf ifc;
+  struct ifreq *ifr;
+  int i;
+
+  /* Get list of active devices */
+  ifc.ifc_len = sizeof(buff);
+  ifc.ifc_buf = buff;
+  if(ioctl(skfd, SIOCGIFCONF, &ifc) < 0)
+    {
+      fprintf(stderr, "SIOCGIFCONF: %s\n", strerror(errno));
+      return;
+    }
+  ifr = ifc.ifc_req;
+
+  /* Print them */
+  for(i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; ifr++)
+    print_keys_info(skfd, ifr->ifr_name);
+}
 
 /************************* SETTING ROUTINES **************************/
 
@@ -528,7 +617,6 @@ main(int	argc,
       exit(0);
     }
 
-#if WIRELESS_EXT > 5
   /* Access Point list */
   if(!strcasecmp(argv[1], "ap"))
     {
@@ -536,9 +624,7 @@ main(int	argc,
       close(skfd);
       exit(0);
     }
-#endif	/* WIRELESS_EXT > 5 */
 
-#if WIRELESS_EXT > 7
   /* Bit-rate list */
   if((!strncmp(argv[1], "bit", 3)) ||
      (!strcmp(argv[1], "rate")))
@@ -547,7 +633,15 @@ main(int	argc,
       close(skfd);
       exit(0);
     }
-#endif	/* WIRELESS_EXT > 7 */
+
+  /* Encryption key list */
+  if((!strncmp(argv[1], "enc", 3)) ||
+     (!strncmp(argv[1], "key", 3)))
+    {
+      print_keys_devices(skfd);
+      close(skfd);
+      exit(0);
+    }
 
   /* The device name must be the first argument */
   /* Name only : show spy list for that device only */
@@ -568,7 +662,6 @@ main(int	argc,
       exit(0);
     }
 
-#if WIRELESS_EXT > 5
   /* Access Point  list */
   if(!strcasecmp(argv[2], "ap"))
     {
@@ -576,9 +669,7 @@ main(int	argc,
       close(skfd);
       exit(0);
     }
-#endif	/* WIRELESS_EXT > 5 */
 
-#if WIRELESS_EXT > 7
   /* Access Point  list */
   if((!strncmp(argv[2], "bit", 3)) ||
      (!strcmp(argv[2], "rate")))
@@ -587,7 +678,15 @@ main(int	argc,
       close(skfd);
       exit(0);
     }
-#endif	/* WIRELESS_EXT > 7 */
+
+  /* Access Point  list */
+  if((!strncmp(argv[2], "enc", 3)) ||
+     (!strncmp(argv[2], "key", 3)))
+    {
+      print_keys_info(skfd, argv[1]);
+      close(skfd);
+      exit(0);
+    }
 
   /* Otherwise, it's a list of address to set in the spy list */
   goterr = set_spy_info(skfd, argv + 2, argc - 2, argv[1]);

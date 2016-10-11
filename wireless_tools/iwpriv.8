@@ -18,7 +18,7 @@ network interface
 .br
 .BI "iwpriv " interface " roam " {on,off}
 .br
-.BI "iwpriv " interface " port " [ N ]
+.BI "iwpriv " interface " port " {ad-hoc,managed,N}
 .\"
 .\" DESCRIPTION part
 .\"
@@ -55,8 +55,8 @@ driver.
 .TP
 .B port
 Read or configure the port type. Call the private commands
-.IR gport_type " and " sport_type .
-Found in the
+.IR gport_type ", " sport_type ", " get_port " or " set_port
+found in the
 .IR wavelan2_cs " and " wvlan_cs " drivers."
 .TP
 .I private-command

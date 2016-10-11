@@ -15,9 +15,11 @@ iwconfig \- configure a wireless network interface
 .br
 .BI "iwconfig " interface " [essid " X "] [nwid " N "] [freq " F "] [channel " C ]
 .br
-.BI "                   [sens " S "] [enc " E "] [ap " A "] [nick " NN ]
+.BI "                   [sens " S "] [mode " M "] [ap " A "] [nick " NN ]
 .br
 .BI "                   [rate " R "] [rts " RT "] [frag " FT ]
+.br
+.BI "                   [enc " E "] [key " K "] [power " P ]
 .\"
 .\" DESCRIPTION part
 .\"
@@ -51,8 +53,14 @@ As opposed to the NWID which defines a single cell, the ESSID defines
 a group of cell connected via repeaters or infrastructure, where the
 user may roam.  With some card, you may disable the ESSID checking
 (ESSID promiscuous) with
-.IR off " (and " on
+.IR off " or " any " (and " on
 to reenable it).
+.br
+.B Examples :
+.br
+.I "	iwconfig eth0 essid any"
+.br
+.I "	iwconfig eth0 essid ""My Network""
 .TP
 .BR nwid / domain
 Set the Network ID (in some products it is also called Domain ID). As
@@ -62,11 +70,17 @@ identify nodes belonguing to the same cell. With some card, you may
 disable the Network ID checking (NWID promiscuous) with
 .IR off " (and " on
 to reenable it).
+.br
+.B Examples :
+.br
+.I "	iwconfig eth0 nwid AB34
+.br
+.I "	iwconfig eth0 nwid off"
 .TP
 .BR freq / channel
 Set the operating frequency or channel in the device. Value below 1000
 are the channel number, value over this is the frequency in Hz. You
-must prepend the suffix k, M or G to the value (for example, "2.46G"
+must append the suffix k, M or G to the value (for example, "2.46G"
 for 2.46 GHz frequency), or add enough '0'.
 .br
 Channels are usually numbered starting at 1,
@@ -75,6 +89,12 @@ and you may use
 to get the total number of channels and list the available
 frequencies. Depending on regulations, some frequencies/channels may
 not be available.
+.br
+.B Examples :
+.br
+.I "	iwconfig eth0 freq 2.422G"
+.br
+.I "	iwconfig eth0 channel 3"
 .TP
 .B sens
 Set the sensitivity threshold. This is the lowest signal level for
@@ -88,40 +108,73 @@ With some hardware, this parameter also control the defer threshold
 (lowest signal level for which we consider the channel busy) and the
 handover threshold (lowest signal level where we stay associated with
 the current access point).
+.br
+.B Example :
+.br
+.I "	iwconfig eth0 sens -80"
 .TP
-.B enc
-Set the encryption or scrambing key (the syntax is
-.IR XXXX-XXXX-XXXX-XXXX " or " XXXXXXXX ).
-Used also to control the encryption feature
-.RI ( on / off ).
+.B mode
+Set the operating mode of the device, which depends on the network
+topology. The mode can be
+.I Ad-hoc
+(network composed of only one cell and without Access Point),
+.I Managed
+(network composed of many cells, with roaming or with an Access Point),
+.I Master
+(the node is the synchronisation master or act as an Access Point),
+.I Repeater
+(the node forward packets on the air),
+.I Secondary
+(the node act as a backup master/repeater) or
+.IR Auto .
+.br
+.B Example :
+.br
+.I "	iwconfig eth0 mode Managed"
 .TP
 .B ap
 Register to the Access Point given by the address, if it is
 possible. When the quality of the connection goes too low, the driver
 may revert back to automatic mode.
+.br
+.B Example :
+.br
+.I "	iwconfig eth0 ap 00:60:1D:01:23:45"
 .TP
-.BR nick [ name ]
+.BR nick [name]
 Set the nickname, or the station name. Most 802.11 products do define
 it, but this is not used as far as the protocols (MAC, IP, TCP) are
 concerned and completely accessory as far as configuration goes. In
 fact only some diagnostic tools may use it.
+.br
+.B Example :
+.br
+.I "	iwconfig eth0 nickname ""My Linux Node""
 .TP
-.BR rate / bit [ rate ]
+.BR rate / bit [rate]
 For cards supporting multiple bit rates, set the bit-rate in b/s. The
 bit-rate is the speed at which bits are transmitted over the medium,
 the user speed of the link is lower due to medium sharing and
 overhead.
 .br
-You must prepend the suffix k, M or G to the value (decimal multiplier
+You must append the suffix k, M or G to the value (decimal multiplier
 : 10^3, 10^6 and 10^9 b/s), or add enough '0'. Values below 1000 are
 card specific, usually an index in the bit-rate list. Use
 .I auto
 to select the automatic bit-rate mode (fallback to lower rate on noisy
 channels), which is the default for most cards, and
 .I fixed
-to revert back to fixed setting.
+to revert back to fixed setting. If you specify a bit-rate value and append
+.IR auto ,
+the driver will use all bit lower and equal than this value.
+.br
+.B Examples :
+.br
+.I "	iwconfig eth0 rate 11M"
+.br
+.I "	iwconfig eth0 rate auto"
 .TP
-.BR rts [ _threshold ]
+.BR rts [_threshold]
 RTS/CTS adds a handshake before each packet transmission to make sure
 that the channel is clear. This adds overhead, but increase
 performance in case of hidden nodes or large number of active
@@ -129,14 +182,89 @@ nodes. This parameters set the size of the smallest packet for which
 the node sends RTS, a value equal to the maximum packet size disable
 the scheme. You may also set this parameter to
 .IR auto ", " fixed " or " off .
+.br
+.B Examples :
+.br
+.I "	iwconfig eth0 rts 250"
+.br
+.I "	iwconfig eth0 rts off"
 .TP
-.BR frag [ mentation_threshold ]
+.BR frag [mentation_threshold]
 Fragmentation allow to split a IP packet in a burst of smaller
 fragments transmitted on the medium. In most cases this adds overhead,
 but in very noisy environment this reduce the error penalty. This
 parameter set the maximum fragment size, a value equal to the maximum
 packet size disable the scheme. You may also set this parameter to
 .IR auto ", " fixed " or " off .
+.br
+.B Examples :
+.br
+.I "	iwconfig eth0 frag 512"
+.br
+.I "	iwconfig eth0 frag off"
+.TP
+.BR key / enc [ryption]
+Used to manipulate encryption or scrambling keys and encryption mode.
+.br
+To set the current encryption key, just enter the key in hex digits as
+.IR XXXX-XXXX-XXXX-XXXX " or " XXXXXXXX .
+To set a key other than the current key, append
+.I [index]
+to the key itself. You can also enter the key as an ASCII string by
+using the
+.I s:
+prefix.
+.br
+To change which key is the current active key, just enter
+.I [index]
+(without entering any key value).
+.br
+.IR off " and " on
+disable and reenable encryption,
+.I open
+set the system in open mode (accept non-encrypted packets) and
+.I restricted
+discard non-encrypted packets.
+.br
+.B Examples :
+.br
+.I "	iwconfig eth0 key 0123-4567-89"
+.br
+.I "	iwconfig eth0 key s:password [2]"
+.br
+.I "	iwconfig eth0 key [2] open"
+.br
+.I "	iwconfig eth0 key off"
+.TP
+.BR power
+Used to manipulate power management scheme parameters and mode.
+.br
+To set the period between wake up, enter
+.IR "period `value'" .
+To set the timeout before going back to sleep, enter
+.IR "timeout `value'" .
+By defaults, those values are in seconds, append the suffix m or u to
+specify values un milliseconds or microseconds.
+.br
+.IR off " and " on
+disable and reenable power management. Finally, you may set the power
+management mode to
+.I all
+(receive all packets),
+.I unicast
+(receive unicast packets only, discard multicast and broadcast) and
+.I multicast
+(receive multicast and broadcast only, discard unicast packets).
+.br
+.B Examples :
+.br
+.I "	iwconfig eth0 power period 2"
+.br
+.I "	iwconfig eth0 power 500m unicast"
+.br
+.I "	iwconfig eth0 power timeout 300u all"
+.br
+.I "	iwconfig eth0 power off"
 .\"
 .\" DISPLAY part
 .\"
@@ -154,16 +282,27 @@ the
 (or channel), the
 .BR sensitivity ,
 the
+.B mode
+of operation, the
 .B Access Point
 address, the
 .B bit-rate
-(with
-.B (f)
-if fixed), the
+the
 .BR "RTS threshold" ", the " "fragmentation threshold" ,
-and the
+the
 .B encryption key
-(depending on availability). See above for explanations.
+and the
+.B power management
+settings (depending on availability).
+.br
+See above for explanations of what these parameters mean.
+.br
+If the label for bitrate is followed by
+.RB ` = ',
+it means that the parameter is fixed and forced to that value, if it
+is followed by
+.RB ` : '
+it is only the current value (device in normal auto mode).
 .PP
 If
 .I /proc/net/wireless
@@ -172,7 +311,8 @@ exists,
 will also display its content :
 .TP
 .B Link quality
-Quality of the link or the modulation (how good the received signal is).
+Quality of the link or the modulation (what is the level of contention
+or interference, or how good the received signal is).
 .TP
 .B Signal level
 Received signal strength (how strong the received signal is).
@@ -193,7 +333,7 @@ Other packets lost in relation with specific wireless operations.
 .\" AUTHOR part
 .\"
 .SH AUTHOR
-Jean Tourrilhes \- jt@hplb.hpl.hp.com
+Jean Tourrilhes \- jt@hpl.hp.com
 .\"
 .\" FILES part
 .\"

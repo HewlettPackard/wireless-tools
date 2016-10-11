@@ -22,6 +22,8 @@ iwspy \- Get wireless statistics from specific nodes
 .BI "iwspy " interface " ap"
 .br
 .BI "iwspy " interface " rate"
+.br
+.BI "iwspy " interface " keys"
 .\"
 .\" DESCRIPTION part
 .\"
@@ -82,8 +84,12 @@ displayed and channel numbers.
 Give the list of Access Points in range, and optionally the quality of
 link to them.
 .TP
-.BR rate / bit [ rate ]
+.BR rate / bit [rate]
 List the bit-rates supported by the device.
+.TP
+.BR keys / enc [ryption]
+List the encryption key sizes supported and display all the encryption
+keys availables in the device.
 .\"
 .\" FILES part
 .\"

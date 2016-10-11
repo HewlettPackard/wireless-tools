@@ -10,6 +10,14 @@
 
 #include "iwcommon.h"		/* Header */
 
+/**************************** VARIABLES ****************************/
+char *	operation_mode[] = { "Auto",
+			     "Ad-Hoc",
+			     "Managed",
+			     "Master",
+			     "Repeater",
+			     "Secondary" };
+
 /************************* MISC SUBROUTINES **************************/
 
 /*------------------------------------------------------------------*/
@@ -43,40 +51,59 @@ static int
 iw_getstats(char *	ifname,
 	    iwstats *	stats)
 {
-  FILE *f=fopen("/proc/net/wireless","r");
-  char buf[256];
-  char *bp;
+  FILE *	f=fopen("/proc/net/wireless","r");
+  char		buf[256];
+  char *	bp;
+  int		t;
   if(f==NULL)
-  	return -1;
+    return -1;
+  /* Loop on all devices */
   while(fgets(buf,255,f))
-  {
-  	bp=buf;
-  	while(*bp&&isspace(*bp))
-  		bp++;
-  	if(strncmp(bp,ifname,strlen(ifname))==0 && bp[strlen(ifname)]==':')
+    {
+      bp=buf;
+      while(*bp&&isspace(*bp))
+	bp++;
+      /* Is it the good device ? */
+      if(strncmp(bp,ifname,strlen(ifname))==0 && bp[strlen(ifname)]==':')
   	{
- 		bp=strchr(bp,':');
- 		bp++;
-		bp = strtok(bp, " .");
- 		sscanf(bp, "%X", (unsigned int *)&stats->status);
-		bp = strtok(NULL, " .");
- 		sscanf(bp, "%d", (unsigned int *)&stats->qual.qual);
-		bp = strtok(NULL, " .");
-		sscanf(bp, "%d", (unsigned int *)&stats->qual.level);
-		bp = strtok(NULL, " .");
-		sscanf(bp, "%d", (unsigned int *)&stats->qual.noise);
-		bp = strtok(NULL, " .");
-		sscanf(bp, "%d", &stats->discard.nwid);
-		bp = strtok(NULL, " .");
-		sscanf(bp, "%d", &stats->discard.code);
-		bp = strtok(NULL, " .");
-		sscanf(bp, "%d", &stats->discard.misc);
- 		fclose(f);
- 		return 0;
+	  /* Skip ethX: */
+	  bp=strchr(bp,':');
+	  bp++;
+	  /* -- status -- */
+	  bp = strtok(bp, " ");
+	  sscanf(bp, "%X", &t);
+	  stats->status = (unsigned short) t;
+	  /* -- link quality -- */
+	  bp = strtok(NULL, " ");
+	  if(strchr(bp,'.') != NULL)
+	    stats->qual.updated |= 1;
+	  sscanf(bp, "%d", &t);
+	  stats->qual.qual = (unsigned char) t;
+	  /* -- signal level -- */
+	  bp = strtok(NULL, " ");
+	  if(strchr(bp,'.') != NULL)
+	    stats->qual.updated |= 2;
+	  sscanf(bp, "%d", &t);
+	  stats->qual.level = (unsigned char) t;
+	  /* -- noise level -- */
+	  bp = strtok(NULL, " ");
+	  if(strchr(bp,'.') != NULL)
+	    stats->qual.updated += 4;
+	  sscanf(bp, "%d", &t);
+	  stats->qual.noise = (unsigned char) t;
+	  /* -- discarded packets -- */
+	  bp = strtok(NULL, " ");
+	  sscanf(bp, "%d", &stats->discard.nwid);
+	  bp = strtok(NULL, " ");
+	  sscanf(bp, "%d", &stats->discard.code);
+	  bp = strtok(NULL, " ");
+	  sscanf(bp, "%d", &stats->discard.misc);
+	  fclose(f);
+	  return 0;
   	}
-  }
+    }
   fclose(f);
-  return 0;
+  return -1;
 }
 
 /*------------------------------------------------------------------*/
@@ -107,8 +134,7 @@ get_info(int			skfd,
   if(ioctl(skfd, SIOCGIWNWID, &wrq) >= 0)
     {
       info->has_nwid = 1;
-      info->nwid_on = wrq.u.nwid.on;
-      info->nwid = wrq.u.nwid.nwid;
+      memcpy(&(info->nwid), &(wrq.u.nwid), sizeof(iwparam));
     }
 
   /* Get frequency / channel */
@@ -124,24 +150,26 @@ get_info(int			skfd,
   if(ioctl(skfd, SIOCGIWSENS, &wrq) >= 0)
     {
       info->has_sens = 1;
-      info->sens = wrq.u.sensitivity;
+      memcpy(&(info->sens), &(wrq.u.sens), sizeof(iwparam));
     }
 
-   /* Get encryption information */
-   strcpy(wrq.ifr_name, ifname);
-   if(ioctl(skfd, SIOCGIWENCODE, &wrq) >= 0)
-     {
-       info->has_enc = 1;
-       info->enc_method = wrq.u.encoding.method;
-       info->enc_key = wrq.u.encoding.code;
-     }
-
-#if WIRELESS_EXT > 5
-  /* Get ESSID */
+  /* Get encryption information */
   strcpy(wrq.ifr_name, ifname);
-  wrq.u.data.pointer = (caddr_t) info->essid;
+  wrq.u.data.pointer = (caddr_t) info->key;
   wrq.u.data.length = 0;
   wrq.u.data.flags = 0;
+  if(ioctl(skfd, SIOCGIWENCODE, &wrq) >= 0)
+    {
+      info->has_key = 1;
+      info->key_size = wrq.u.data.length;
+      info->key_flags = wrq.u.data.flags;
+    }
+
+  /* Get ESSID */
+  strcpy(wrq.ifr_name, ifname);
+  wrq.u.essid.pointer = (caddr_t) info->essid;
+  wrq.u.essid.length = 0;
+  wrq.u.essid.flags = 0;
   if(ioctl(skfd, SIOCGIWESSID, &wrq) >= 0)
     {
       info->has_essid = 1;
@@ -155,14 +183,12 @@ get_info(int			skfd,
       info->has_ap_addr = 1;
       memcpy(&(info->ap_addr), &(wrq.u.ap_addr), sizeof (sockaddr));
     }
-#endif	/* WIRELESS_EXT > 5 */
 
-#if WIRELESS_EXT > 7
   /* Get NickName */
   strcpy(wrq.ifr_name, ifname);
-  wrq.u.data.pointer = (caddr_t) info->nickname;
-  wrq.u.data.length = 0;
-  wrq.u.data.flags = 0;
+  wrq.u.essid.pointer = (caddr_t) info->nickname;
+  wrq.u.essid.length = 0;
+  wrq.u.essid.flags = 0;
   if(ioctl(skfd, SIOCGIWNICKN, &wrq) >= 0)
     if(wrq.u.data.length > 1)
       info->has_nickname = 1;
@@ -172,8 +198,7 @@ get_info(int			skfd,
   if(ioctl(skfd, SIOCGIWRATE, &wrq) >= 0)
     {
       info->has_bitrate = 1;
-      info->bitrate_fixed = wrq.u.bitrate.fixed;
-      info->bitrate = wrq.u.bitrate.value;
+      memcpy(&(info->bitrate), &(wrq.u.bitrate), sizeof(iwparam));
     }
 
   /* Get RTS threshold */
@@ -181,22 +206,36 @@ get_info(int			skfd,
   if(ioctl(skfd, SIOCGIWRTS, &wrq) >= 0)
     {
       info->has_rts = 1;
-      info->rts_fixed = wrq.u.rts.fixed;
-      info->rts = wrq.u.rts.value;
+      memcpy(&(info->rts), &(wrq.u.rts), sizeof(iwparam));
     }
 
-  /* Get fragmentation thershold */
+  /* Get fragmentation threshold */
   strcpy(wrq.ifr_name, ifname);
   if(ioctl(skfd, SIOCGIWFRAG, &wrq) >= 0)
     {
       info->has_frag = 1;
-      info->frag_fixed = wrq.u.frag.fixed;
-      info->frag = wrq.u.frag.value;
+      memcpy(&(info->frag), &(wrq.u.frag), sizeof(iwparam));
     }
-#endif	/* WIRELESS_EXT > 7 */
+
+  /* Get operation mode */
+  strcpy(wrq.ifr_name, ifname);
+  if(ioctl(skfd, SIOCGIWMODE, &wrq) >= 0)
+    {
+      if((wrq.u.mode < 6) && (wrq.u.mode >= 0))
+	info->has_mode = 1;
+      info->mode = wrq.u.mode;
+    }
+
+  /* Get Power Management settings */
+  strcpy(wrq.ifr_name, ifname);
+  if(ioctl(skfd, SIOCGIWPOWER, &wrq) >= 0)
+    {
+      info->has_power = 1;
+      memcpy(&(info->power), &(wrq.u.power), sizeof(iwparam));
+    }
 
   /* Get stats */
-  if(iw_getstats(ifname, &(info->stats)) == 0)
+  if(iw_getstats(ifname, &(info->stats)) >= 0)
     {
       info->has_stats = 1;
     }
@@ -242,10 +281,10 @@ display_info(struct wireless_info *	info,
     {
       /* Note : should display right number of digit according to info
        * in range structure */
-      if(info->nwid_on)
-	printf("NWID:%lX  ", info->nwid);
-      else
+      if(info->nwid.disabled)
 	printf("NWID:off/any  ");
+      else
+	printf("NWID:%X  ", info->nwid.value);
     }
 
   /* Display frequency / channel */
@@ -270,14 +309,31 @@ display_info(struct wireless_info *	info,
   /* Display sensitivity */
   if(info->has_sens)
     {
+      /* Fixed ? */
+      if(info->sens.fixed)
+	printf("Sensitivity=");
+      else
+	printf("Sensitivity:");
+
       if(info->has_range)
 	/* Display in dBm ? */
-	if(info->sens < 0)
-	  printf("Sensitivity:%d dBm  ", info->sens);
+	if(info->sens.value < 0)
+	  printf("%d dBm  ", info->sens.value);
 	else
-	  printf("Sensitivity:%d/%d  ", info->sens, info->range.sensitivity);
+	  printf("%d/%d  ", info->sens.value, info->range.sensitivity);
       else
-	printf("Sensitivity:%d  ", info->sens);
+	printf("%d  ", info->sens.value);
+    }
+
+  /* Display the current mode of operation */
+  if(info->has_mode)
+    {
+      /* A bit of clever formatting */
+      if((info->has_nwid + 2*info->has_freq + 2*info->has_sens
+	  + !info->has_essid) > 4)
+	printf("\n          ");
+
+      printf("Mode:%s  ", operation_mode[info->mode]);
     }
 
   /* Display the address of the current Access Point */
@@ -285,7 +341,7 @@ display_info(struct wireless_info *	info,
     {
       /* A bit of clever formatting */
       if((info->has_nwid + 2*info->has_freq + 2*info->has_sens
-	  + !info->has_essid) > 3)
+	  + info->has_mode + !info->has_essid) > 3)
 	printf("\n          ");
 
       printf("Access Point: %s", pr_ether(info->ap_addr.sa_data));
@@ -296,78 +352,148 @@ display_info(struct wireless_info *	info,
   /* Display the currently used/set bit-rate */
   if(info->has_bitrate)
     {
-      printf("Bit Rate:");
-      if(info->bitrate >= GIGA)
-	printf("%g Gb/s", info->bitrate / GIGA);
-      else
-	if(info->bitrate >= MEGA)
-	  printf("%g Mb/s", info->bitrate / MEGA);
-	else
-	  printf("%g kb/s", info->bitrate / KILO);
-
       /* Fixed ? */
-      if(info->bitrate_fixed)
-	printf(" (f)   ");
+      if(info->bitrate.fixed)
+	printf("Bit Rate=");
       else
-	printf("   ");
+	printf("Bit Rate:");
+
+      if(info->bitrate.value >= GIGA)
+	printf("%gGb/s", info->bitrate.value / GIGA);
+      else
+	if(info->bitrate.value >= MEGA)
+	  printf("%gMb/s", info->bitrate.value / MEGA);
+	else
+	  printf("%gkb/s", info->bitrate.value / KILO);
+      printf("   ");
     }
 
   /* Display the RTS threshold */
   if(info->has_rts)
     {
-      printf("RTS thr:%ld B", info->rts);
-
-      /* Fixed ? */
-      if(info->rts_fixed)
-	printf(" (f)   ");
+      /* Disabled ? */
+      if(info->rts.disabled)
+	printf("RTS thr:off   ");
       else
-	printf("   ");
+	{
+	  /* Fixed ? */
+	  if(info->rts.fixed)
+	    printf("RTS thr=");
+	  else
+	    printf("RTS thr:");
+
+	  printf("%d B   ", info->rts.value);
+	}
     }
 
   /* Display the fragmentation threshold */
-  if(info->has_bitrate)
+  if(info->has_frag)
     {
-      printf("Frag thr:%ld B", info->frag);
-
-      /* Fixed ? */
-      if(info->frag_fixed)
-	printf(" (f)   ");
+      /* Disabled ? */
+      if(info->frag.disabled)
+	printf("Fragment thr:off   ");
       else
-	printf("   ");
+	{
+	  /* Fixed ? */
+	  if(info->frag.fixed)
+	    printf("Fragment thr=");
+	  else
+	    printf("Fragment thr:");
+
+	  printf("%d B   ", info->frag.value);
+	}
     }
 
   /* Formating */
   if((info->has_bitrate) || (info->has_rts) || (info->has_bitrate))
     printf("\n          ");
 
-  if(info->has_enc)
+  /* Display encryption information */
+  /* Note : we display only the "current" key, use iwspy to list all keys */
+  if(info->has_key)
     {
       printf("Encryption key:");
-      if(info->enc_method)
+      if((info->key_flags & IW_ENCODE_DISABLED) || (info->key_size == 0))
+	printf("off\n          ");
+      else
 	{
-	  int		i = 0;
-	  u_short	parts[4];
-	  long long	key = info->enc_key;
+	  int	i;
 
-	  for(i = 3; i >= 0; i--)
+	  printf("%.2X", info->key[0]);
+	  for(i = 1; i < info->key_size; i++)
 	    {
-	      parts[i] = key & 0xFFFF;
-	      key >>= 16;
+	      if((i & 0x1) == 0)
+		printf("-");
+	      printf("%.2X", info->key[i]);
 	    }
 
-	  i = 0;
-	  while((parts[i] == 0) && (i < 3))
-	    i++;
-	  for(; i < 3; i++)
-	    printf("%.4X-", parts[i]);
-	  printf("%.4X", parts[3]);
-
-	  if(info->enc_method > 1)
-	    printf(" (%d)", info->enc_method);
+	  /* Other info... */
+	  if((info->key_flags & IW_ENCODE_INDEX) > 1)
+	    printf(" [%d]", info->key_flags & IW_ENCODE_INDEX);
+	  if(info->key_flags & IW_ENCODE_RESTRICTED)
+	    printf("   Encryption mode:restricted");
+	  if(info->key_flags & IW_ENCODE_OPEN)
+	    printf("   Encryption mode:open");
 	  printf("\n          ");
  	}
+    }
+
+  /* Display Power Management information */
+  /* Note : we display only one parameter, period or timeout. If a device
+   * (such as HiperLan) has both, we would need to be a bit more clever... */
+  if(info->has_power)	/* I hope the device has power ;-) */
+    { 
+      printf("Power Management");
+      /* Disabled ? */
+      if(info->power.disabled)
+	printf(":off\n          ");
       else
-	printf("off\n          ");
+	{
+	  /* Let's check the value and its type */
+	  if(info->power.flags & IW_POWER_TYPE)
+	    {
+	      /* Type */
+	      if(info->power.flags & IW_POWER_TIMEOUT)
+		printf(" timeout:");
+	      else
+		printf(" period:");
+
+	      /* Display value with units */
+	      if(info->power.value >= (int) MEGA)
+		printf("%gs  ", ((double) info->power.value) / MEGA);
+	      else
+		if(info->power.value  >= (int) KILO)
+		  printf("%gms  ", ((double) info->power.value) / KILO);
+		else
+		  printf("%dus  ", info->power.value);
+	    }
+
+	  /* Let's check the mode */
+	  switch(info->power.flags & IW_POWER_MODE)
+	    {
+	    case IW_POWER_UNICAST_R:
+	      printf(" mode:Unicast received");
+	      break;
+	    case IW_POWER_MULTICAST_R:
+	      printf(" mode:Multicast received");
+	      break;
+	    case IW_POWER_ALL_R:
+	      printf(" mode:All packets received");
+	      break;
+	    case IW_POWER_FORCE_S:
+	      printf(" mode:Force sending");
+	      break;
+	    case IW_POWER_REPEATER:
+	      printf(" mode:Repeat multicasts");
+	      break;
+	    default:
+	    }
+
+	  /* Let's check if nothing (simply on) */
+	  if(info->power.flags == IW_POWER_ON)
+	    printf(":on");
+	  printf("\n          ");
+ 	}
     }
 
   if(info->has_stats)
@@ -487,7 +613,7 @@ set_info(int		skfd,		/* The socket */
 	    iw_usage();
 	  if((!strcasecmp(args[i], "off")) ||
 	     (!strcasecmp(args[i], "any")))
-	    wrq.u.nwid.on = 0;
+	    wrq.u.nwid.disabled = 1;
 	  else
 	    if(!strcasecmp(args[i], "on"))
 	      {
@@ -498,14 +624,15 @@ set_info(int		skfd,		/* The socket */
 		    return(-1);
 		  }
 		strcpy(wrq.ifr_name, ifname);
-		wrq.u.nwid.on = 1;
+		wrq.u.nwid.disabled = 0;
 	      }
 	    else
-	      if(sscanf(args[i], "%lX", (unsigned long *) &(wrq.u.nwid.nwid))
+	      if(sscanf(args[i], "%lX", (unsigned long *) &(wrq.u.nwid.value))
 		 != 1)
 		iw_usage();
 	      else
-		wrq.u.nwid.on = 1;
+		wrq.u.nwid.disabled = 0;
+	  wrq.u.nwid.fixed = 1;
 
 	  if(ioctl(skfd, SIOCSIWNWID, &wrq) < 0)
 	    {
@@ -544,7 +671,7 @@ set_info(int		skfd,		/* The socket */
 	{
 	  if(++i >= count)
 	    iw_usage();
-	  if(sscanf(args[i], "%d", &(wrq.u.sensitivity)) != 1)
+	  if(sscanf(args[i], "%d", &(wrq.u.sens.value)) != 1)
 	    iw_usage();
 
 	  if(ioctl(skfd, SIOCSIWSENS, &wrq) < 0)
@@ -556,51 +683,111 @@ set_info(int		skfd,		/* The socket */
 	}
 
       /* ---------- Set encryption stuff ---------- */
-      if(!strncmp(args[i], "enc", 3 ))
+      if((!strncmp(args[i], "enc", 3)) ||
+	 (!strcmp(args[i], "key")))
 	{
-	  unsigned long long	key = 0;
+	  unsigned char	key[IW_ENCODING_TOKEN_MAX];
 
 	  if(++i >= count)
 	    iw_usage();
 
-	  if(!strcasecmp(args[i], "off"))
-	    wrq.u.encoding.method = 0;
+	  if(!strcasecmp(args[i], "on"))
+	    {
+	      /* Get old encryption information */
+	      wrq.u.data.pointer = (caddr_t) key;
+	      wrq.u.data.length = 0;
+	      wrq.u.data.flags = 0;
+	      if(ioctl(skfd, SIOCGIWENCODE, &wrq) < 0)
+		{
+		  fprintf(stderr, "SIOCGIWENCODE: %s\n", strerror(errno));
+		  return(-1);
+		}
+	      strcpy(wrq.ifr_name, ifname);
+	      wrq.u.data.flags &= ~IW_ENCODE_DISABLED;	/* Enable */
+	    }
 	  else
 	    {
-	      if(!strcasecmp(args[i], "on"))
+	      char *	buff;
+	      char *	p;
+	      int		temp;
+	      int		k = 0;
+	      int		gotone = 1;
+
+	      wrq.u.data.pointer = (caddr_t) NULL;
+	      wrq.u.data.flags = 0;
+	      wrq.u.data.length = 0;
+
+	      /* -- Check for the key -- */
+	      if(!strncmp(args[i], "s:", 2))
 		{
-		  /* Get old encryption information */
-		  if(ioctl(skfd, SIOCGIWENCODE, &wrq) < 0)
-		    {
-		      fprintf(stderr, "SIOCGIWENCODE: %s\n", strerror(errno));
-		      return(-1);
-		    }
-		  strcpy(wrq.ifr_name, ifname);
+		  /* First case : as an ASCII string */
+		  wrq.u.data.length = strlen(args[i] + 2);
+		  if(wrq.u.data.length > IW_ENCODING_TOKEN_MAX)
+		    wrq.u.data.length = IW_ENCODING_TOKEN_MAX;
+		  strncpy(key, args[i] + 2, wrq.u.data.length);
+		  wrq.u.data.pointer = (caddr_t) key;
+		  ++i;
+		  gotone = 1;
 		}
 	      else
 		{
-		  char *	buff;
-		  char *	p;
-		  u_long	temp;
-
-		  p = buff = malloc(strlen(args[i] + 1));
+		  /* Second case : has hexadecimal digits */
+		  p = buff = malloc(strlen(args[i]) + 1);
 		  strcpy(buff, args[i]);
 
-		  p = strtok(buff, "-:;.,*#");
+		  p = strtok(buff, "-:;.,");
 		  while(p != (char *) NULL)
 		    {
-		      key = key << 16;
-		      if(sscanf(p, "%lX", &temp) != 1)
-			iw_usage();
-		      key += temp;
-		      p = strtok((char *) NULL, "-:;.,*#");
+		      if(sscanf(p, "%2X", &temp) != 1)
+			{
+			  gotone = 0;
+			  break;
+			}
+		      key[k++] = (unsigned char) (temp & 0xFF);
+		      if(strlen(p) > 2)	/* Token not finished yet */
+			p += 2;
+		      else
+			p = strtok((char *) NULL, "-:;.,");
 		    }
-
 		  free(buff);
-		  wrq.u.encoding.code = key;
+
+		  if(gotone)
+		    {
+		      ++i;
+		      wrq.u.data.length = k;
+		      wrq.u.data.pointer = (caddr_t) key;
+		    }
 		}
-	      /* TODO : check for "(method)" in args list */
-	      wrq.u.encoding.method = 1;
+
+	      /* -- Check for token index -- */
+	      if((i < count) &&
+		 (sscanf(args[i], "[%d]", &temp) == 1) &&
+		 (temp > 0) && (temp < IW_ENCODE_INDEX))
+		{
+		  wrq.u.encoding.flags |= temp;
+		  ++i;
+		  gotone = 1;
+		}
+
+	      /* -- Check the various flags -- */
+	      if(i < count)
+		{
+		  if(!strcasecmp(args[i], "off"))
+		    wrq.u.data.flags |= IW_ENCODE_DISABLED;
+		  if(!strcasecmp(args[i], "open"))
+		    wrq.u.data.flags |= IW_ENCODE_OPEN;
+		  if(!strncasecmp(args[i], "restricted", 5))
+		    wrq.u.data.flags |= IW_ENCODE_RESTRICTED;
+		  if(wrq.u.data.flags & IW_ENCODE_FLAGS)
+		    {
+		      ++i;
+		      gotone = 1;
+		    }
+		}
+
+	      if(!gotone)
+		iw_usage();
+	      --i;
 	    }
 
 	  if(ioctl(skfd, SIOCSIWENCODE, &wrq) < 0)
@@ -612,7 +799,6 @@ set_info(int		skfd,		/* The socket */
 	  continue;
   	}
 
-#if WIRELESS_EXT > 5
       /* ---------- Set ESSID ---------- */
       if(!strcasecmp(args[i], "essid"))
 	{
@@ -624,23 +810,23 @@ set_info(int		skfd,		/* The socket */
 	  if((!strcasecmp(args[i], "off")) ||
 	     (!strcasecmp(args[i], "any")))
 	    {
-	      wrq.u.data.flags = 0;
+	      wrq.u.essid.flags = 0;
 	      essid[0] = '\0';
 	    }
 	  else
 	    if(!strcasecmp(args[i], "on"))
 	      {
 		/* Get old essid */
-		wrq.u.data.pointer = (caddr_t) essid;
-		wrq.u.data.length = 0;
-		wrq.u.data.flags = 0;
+		wrq.u.essid.pointer = (caddr_t) essid;
+		wrq.u.essid.length = 0;
+		wrq.u.essid.flags = 0;
 		if(ioctl(skfd, SIOCGIWESSID, &wrq) < 0)
 		  {
 		    fprintf(stderr, "SIOCGIWESSID: %s\n", strerror(errno));
 		    return(-1);
 		  }
 		strcpy(wrq.ifr_name, ifname);
-		wrq.u.data.flags = 1;
+		wrq.u.essid.flags = 1;
 	      }
 	    else
 	      if(strlen(args[i]) > IW_ESSID_MAX_SIZE)
@@ -651,12 +837,12 @@ set_info(int		skfd,		/* The socket */
 		}
 	      else
 		{
-		  wrq.u.data.flags = 1;
+		  wrq.u.essid.flags = 1;
 		  strcpy(essid, args[i]);
 		}
 
-	  wrq.u.data.pointer = (caddr_t) essid;
-	  wrq.u.data.length = strlen(essid) + 1;
+	  wrq.u.essid.pointer = (caddr_t) essid;
+	  wrq.u.essid.length = strlen(essid) + 1;
 	  if(ioctl(skfd, SIOCSIWESSID, &wrq) < 0)
 	    {
 	      fprintf(stderr, "SIOCSIWESSID: %s\n", strerror(errno));
@@ -689,9 +875,7 @@ set_info(int		skfd,		/* The socket */
 	    }
 	  continue;
 	}
-#endif	/* WIRELESS_EXT > 5 */
 
-#if WIRELESS_EXT > 7
       /* ---------- Set NickName ---------- */
       if(!strncmp(args[i], "nick", 4))
 	{
@@ -705,8 +889,8 @@ set_info(int		skfd,		/* The socket */
 	      iw_usage();
 	    }
 
-	  wrq.u.data.pointer = (caddr_t) args[i];
-	  wrq.u.data.length = strlen(args[i]) + 1;
+	  wrq.u.essid.pointer = (caddr_t) args[i];
+	  wrq.u.essid.length = strlen(args[i]) + 1;
 	  if(ioctl(skfd, SIOCSIWNICKN, &wrq) < 0)
 	    {
 	      fprintf(stderr, "SIOCSIWNICKN: %s\n", strerror(errno));
@@ -719,8 +903,7 @@ set_info(int		skfd,		/* The socket */
       if((!strncmp(args[i], "bit", 3)) ||
 	 (!strcmp(args[i], "rate")))
 	{
-	  i++;
-	  if(i >= count)
+	  if(++i >= count)
 	    iw_usage();
 	  if(!strcasecmp(args[i], "auto"))
 	    {
@@ -738,6 +921,7 @@ set_info(int		skfd,		/* The socket */
 		      return(-1);
 		    }
 		  strcpy(wrq.ifr_name, ifname);
+		  wrq.u.bitrate.fixed = 1;
 		}
 	      else			/* Should be a numeric value */
 		{
@@ -749,8 +933,16 @@ set_info(int		skfd,		/* The socket */
 		  if(index(args[i], 'M')) brate *= MEGA;
 		  if(index(args[i], 'k')) brate *= KILO;
 		  wrq.u.bitrate.value = (long) brate;
+		  wrq.u.bitrate.fixed = 1;
+
+		  /* Check for an additional argument */
+		  if(((i+1) < count) &&
+		     (!strcasecmp(args[i+1], "auto")))
+		    {
+		      wrq.u.bitrate.fixed = 0;
+		      ++i;
+		    }
 		}
-	      wrq.u.bitrate.fixed = 1;
 	    }
 
 	  if(ioctl(skfd, SIOCSIWRATE, &wrq) < 0)
@@ -762,37 +954,36 @@ set_info(int		skfd,		/* The socket */
 	}
 
       /* ---------- Set RTS threshold ---------- */
-      if(!strncmp(args[i], "rts", 3))
+      if(!strncasecmp(args[i], "rts", 3))
 	{
 	  i++;
 	  if(i >= count)
 	    iw_usage();
-	  if(!strcasecmp(args[i], "auto"))
-	    {
-	      wrq.u.rts.value = -1;
-	      wrq.u.rts.fixed = 0;
-	    }
+	  wrq.u.rts.value = -1;
+	  wrq.u.rts.fixed = 1;
+	  wrq.u.rts.disabled = 0;
+	  if(!strcasecmp(args[i], "off"))
+	    wrq.u.rts.disabled = 1;	/* i.e. max size */
 	  else
-	    {
-	      if(!strcasecmp(args[i], "fixed"))
-		{
-		  /* Get old RTS threshold */
-		  if(ioctl(skfd, SIOCGIWRTS, &wrq) < 0)
-		    {
-		      fprintf(stderr, "SIOCGIWRTS: %s\n", strerror(errno));
-		      return(-1);
-		    }
-		  strcpy(wrq.ifr_name, ifname);
-		}
-	      else
-		if(!strcasecmp(args[i], "off"))
-		  wrq.u.rts.value = -1;	/* i.e. max size */
+	    if(!strcasecmp(args[i], "auto"))
+	      wrq.u.rts.fixed = 0;
+	    else
+	      {
+		if(!strcasecmp(args[i], "fixed"))
+		  {
+		    /* Get old RTS threshold */
+		    if(ioctl(skfd, SIOCGIWRTS, &wrq) < 0)
+		      {
+			fprintf(stderr, "SIOCGIWRTS: %s\n", strerror(errno));
+			return(-1);
+		      }
+		    strcpy(wrq.ifr_name, ifname);
+		    wrq.u.rts.fixed = 1;
+		  }
 		else			/* Should be a numeric value */
 		  if(sscanf(args[i], "%ld", (unsigned long *) &(wrq.u.rts.value))
 		     != 1)
 		    iw_usage();
-
-	      wrq.u.rts.fixed = 1;
 	    }
 
 	  if(ioctl(skfd, SIOCSIWRTS, &wrq) < 0)
@@ -809,32 +1000,31 @@ set_info(int		skfd,		/* The socket */
 	  i++;
 	  if(i >= count)
 	    iw_usage();
-	  if(!strcasecmp(args[i], "auto"))
-	    {
-	      wrq.u.frag.value = -1;
-	      wrq.u.frag.fixed = 0;
-	    }
+	  wrq.u.frag.value = -1;
+	  wrq.u.frag.fixed = 1;
+	  wrq.u.frag.disabled = 0;
+	  if(!strcasecmp(args[i], "off"))
+	    wrq.u.frag.disabled = 1;	/* i.e. max size */
 	  else
-	    {
-	      if(!strcasecmp(args[i], "fixed"))
-		{
-		  /* Get old fragmentation threshold */
-		  if(ioctl(skfd, SIOCGIWFRAG, &wrq) < 0)
-		    {
-		      fprintf(stderr, "SIOCGIWFRAG: %s\n", strerror(errno));
-		      return(-1);
-		    }
-		  strcpy(wrq.ifr_name, ifname);
-		}
-	      else
-		if(!strcasecmp(args[i], "off"))
-		  wrq.u.frag.value = -1;	/* i.e. max size */
+	    if(!strcasecmp(args[i], "auto"))
+	      wrq.u.frag.fixed = 0;
+	    else
+	      {
+		if(!strcasecmp(args[i], "fixed"))
+		  {
+		    /* Get old fragmentation threshold */
+		    if(ioctl(skfd, SIOCGIWFRAG, &wrq) < 0)
+		      {
+			fprintf(stderr, "SIOCGIWFRAG: %s\n", strerror(errno));
+			return(-1);
+		      }
+		    strcpy(wrq.ifr_name, ifname);
+		    wrq.u.frag.fixed = 1;
+		  }
 		else			/* Should be a numeric value */
 		  if(sscanf(args[i], "%ld", (unsigned long *) &(wrq.u.frag.value))
 		     != 1)
 		    iw_usage();
-
-	      wrq.u.frag.fixed = 1;
 	    }
 
 	  if(ioctl(skfd, SIOCSIWFRAG, &wrq) < 0)
@@ -844,8 +1034,124 @@ set_info(int		skfd,		/* The socket */
 	    }
 	  continue;
 	}
-#endif	/* WIRELESS_EXT > 7 */
 
+      /* ---------- Set operation mode ---------- */
+      if(!strcmp(args[i], "mode"))
+	{
+	  int	k;
+
+	  i++;
+	  if(i >= count)
+	    iw_usage();
+
+	  if(sscanf(args[i], "%d", &k) != 1)
+	    {
+	      k = 0;
+	      while(k < 6 && strncasecmp(args[i], operation_mode[k], 3))
+		k++;
+	    }
+	  if((k > 5) || (k < 0))
+	    iw_usage();
+
+	  wrq.u.mode = k;
+	  if(ioctl(skfd, SIOCSIWMODE, &wrq) < 0)
+	    {
+	      fprintf(stderr, "SIOCSIWMODE: %s\n", strerror(errno));
+	      return(-1);
+	    }
+	  continue;
+	}
+
+      /* ---------- Set Power Management ---------- */
+      if(!strncmp(args[i], "power", 3))
+	{
+	  if(++i >= count)
+	    iw_usage();
+
+	  if(!strcasecmp(args[i], "off"))
+	    wrq.u.power.disabled = 1;	/* i.e. max size */
+	  else
+	    if(!strcasecmp(args[i], "on"))
+	      {
+		/* Get old Power info */
+		if(ioctl(skfd, SIOCGIWPOWER, &wrq) < 0)
+		  {
+		    fprintf(stderr, "SIOCGIWFRAG: %s\n", strerror(errno));
+		    return(-1);
+		  }
+		strcpy(wrq.ifr_name, ifname);
+		wrq.u.power.disabled = 0;
+	      }
+	    else
+	      {
+		double		temp;
+		int		gotone = 0;
+		/* Default - nope */
+		wrq.u.power.flags = IW_POWER_ON;
+		wrq.u.power.disabled = 0;
+
+		/* Check value modifier */
+		if(!strcasecmp(args[i], "period"))
+		  {
+		    wrq.u.power.flags = IW_POWER_PERIOD;
+		    if(++i >= count)
+		      iw_usage();
+		  }
+		else
+		  if(!strcasecmp(args[i], "timeout"))
+		    {
+		      wrq.u.power.flags = IW_POWER_TIMEOUT;
+		      if(++i >= count)
+			iw_usage();
+		    }
+
+		/* Is there any value to grab ? */
+		if(sscanf(args[i], "%lg", &(temp)) == 1)
+		  {
+		    temp *= MEGA;	/* default = s */
+		    if(index(args[i], 'u')) temp /= MEGA;
+		    if(index(args[i], 'm')) temp /= KILO;
+		    wrq.u.power.value = (long) temp;
+		    if(wrq.u.power.flags == IW_POWER_ON)
+		      wrq.u.power.flags = IW_POWER_PERIOD;
+		    ++i;
+		    gotone = 1;
+		  }
+
+		/* Now, check the mode */
+		if(i < count)
+		  {
+		    if(!strcasecmp(args[i], "all"))
+		      wrq.u.power.flags |= IW_POWER_ALL_R;
+		    if(!strncasecmp(args[i], "unicast", 4))
+		      wrq.u.power.flags |= IW_POWER_UNICAST_R;
+		    if(!strncasecmp(args[i], "multicast", 5))
+		      wrq.u.power.flags |= IW_POWER_MULTICAST_R;
+		    if(!strncasecmp(args[i], "force", 5))
+		      wrq.u.power.flags |= IW_POWER_FORCE_S;
+		    if(!strcasecmp(args[i], "repeat"))
+		      wrq.u.power.flags |= IW_POWER_REPEATER;
+		    if(wrq.u.power.flags & IW_POWER_MODE)
+		      {
+			++i;
+			gotone = 1;
+		      }
+		  }
+		if(!gotone)
+		  iw_usage();
+		--i;
+	      }
+
+	  if(ioctl(skfd, SIOCSIWPOWER, &wrq) < 0)
+	    {
+	      fprintf(stderr, "SIOCSIWPOWER(%d): %s\n",
+		      errno, strerror(errno));
+	      return(-1);
+	    }
+	  continue;
+  	}
+
+      /* ---------- Other ---------- */
       /* Here we have an unrecognised arg... */
       fprintf(stderr, "Invalid argument : %s\n", args[i]);
       iw_usage();
