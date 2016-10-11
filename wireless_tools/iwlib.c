@@ -1,14 +1,23 @@
 /*
  *	Wireless Tools
  *
- *		Jean II - HPLB 97->99 - HPL 99->00
+ *		Jean II - HPLB 97->99 - HPL 99->01
  *
  * Common subroutines to all the wireless tools...
  *
  * This file is released under the GPL license.
  */
 
-#include "iwcommon.h"		/* Header */
+#include "iwlib.h"		/* Header */
+
+/**************************** VARIABLES ****************************/
+
+const char *	iw_operation_mode[] = { "Auto",
+					"Ad-Hoc",
+					"Managed",
+					"Master",
+					"Repeater",
+					"Secondary" };
 
 /************************ SOCKET SUBROUTINES *************************/
 
@@ -19,31 +28,35 @@
  * will allow us to talk to the driver.
  */
 int
-sockets_open(void)
+iw_sockets_open(void)
 {
-	int ipx_sock = -1;		/* IPX socket			*/
-	int ax25_sock = -1;		/* AX.25 socket			*/
-	int inet_sock = -1;		/* INET socket			*/
-	int ddp_sock = -1;		/* Appletalk DDP socket		*/
+        int ipx_sock = -1;              /* IPX socket                   */
+        int ax25_sock = -1;             /* AX.25 socket                 */
+        int inet_sock = -1;             /* INET socket                  */
+        int ddp_sock = -1;              /* Appletalk DDP socket         */
 
-	inet_sock=socket(AF_INET, SOCK_DGRAM, 0);
-	ipx_sock=socket(AF_IPX, SOCK_DGRAM, 0);
-	ax25_sock=socket(AF_AX25, SOCK_DGRAM, 0);
-	ddp_sock=socket(AF_APPLETALK, SOCK_DGRAM, 0);
-	/*
-	 * Now pick any (exisiting) useful socket family for generic queries
-	 */
-	if(inet_sock!=-1)
-		return inet_sock;
-	if(ipx_sock!=-1)
-		return ipx_sock;
-	if(ax25_sock!=-1)
-		return ax25_sock;
-	/*
-	 * If this is -1 we have no known network layers and its time to jump.
-	 */
-	 
-	return ddp_sock;
+        /*
+         * Now pick any (exisiting) useful socket family for generic queries
+	 * Note : don't open all the socket, only returns when one matches,
+	 * all protocols might not be valid.
+	 * Workaround by Jim Kaba <jkaba@sarnoff.com>
+	 * Note : in 99% of the case, we will just open the inet_sock.
+	 * The remaining 1% case are not fully correct...
+         */
+        inet_sock=socket(AF_INET, SOCK_DGRAM, 0);
+        if(inet_sock!=-1)
+                return inet_sock;
+        ipx_sock=socket(AF_IPX, SOCK_DGRAM, 0);
+        if(ipx_sock!=-1)
+                return ipx_sock;
+        ax25_sock=socket(AF_AX25, SOCK_DGRAM, 0);
+        if(ax25_sock!=-1)
+                return ax25_sock;
+        ddp_sock=socket(AF_APPLETALK, SOCK_DGRAM, 0);
+        /*
+         * If this is -1 we have no known network layers and its time to jump.
+         */
+        return ddp_sock;
 }
 
 /*********************** WIRELESS SUBROUTINES ************************/
@@ -53,9 +66,9 @@ sockets_open(void)
  * Get the range information out of the driver
  */
 int
-get_range_info(int		skfd,
-	       char *		ifname,
-	       iwrange *	range)
+iw_get_range_info(int		skfd,
+		  char *	ifname,
+		  iwrange *	range)
 {
   struct iwreq		wrq;
   char			buffer[sizeof(iwrange) * 2];	/* Large enough */
@@ -63,7 +76,7 @@ get_range_info(int		skfd,
   /* Cleanup */
   memset(buffer, 0, sizeof(range));
 
-  strcpy(wrq.ifr_name, ifname);
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   wrq.u.data.pointer = (caddr_t) buffer;
   wrq.u.data.length = 0;
   wrq.u.data.flags = 0;
@@ -115,14 +128,14 @@ get_range_info(int		skfd,
  * Get information about what private ioctls are supported by the driver
  */
 int
-get_priv_info(int		skfd,
-	      char *		ifname,
-	      iwprivargs *	priv)
+iw_get_priv_info(int		skfd,
+		 char *		ifname,
+		 iwprivargs *	priv)
 {
   struct iwreq		wrq;
 
   /* Ask the driver */
-  strcpy(wrq.ifr_name, ifname);
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   wrq.u.data.pointer = (caddr_t) priv;
   wrq.u.data.length = 0;
   wrq.u.data.flags = 0;
@@ -131,6 +144,200 @@ get_priv_info(int		skfd,
 
   /* Return the number of ioctls */
   return(wrq.u.data.length);
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Get essential wireless config from the device driver
+ * We will call all the classical wireless ioctl on the driver through
+ * the socket to know what is supported and to get the settings...
+ * Note : compare to the version in iwconfig, we extract only
+ * what's *really* needed to configure a device...
+ */
+int
+iw_get_basic_config(int			skfd,
+		    char *		ifname,
+		    wireless_config *	info)
+{
+  struct iwreq		wrq;
+
+  memset((char *) info, 0, sizeof(struct wireless_config));
+
+  /* Get wireless name */
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+  if(ioctl(skfd, SIOCGIWNAME, &wrq) < 0)
+    /* If no wireless name : no wireless extensions */
+    return(-1);
+  else
+    strcpy(info->name, wrq.u.name);
+
+  /* Get network ID */
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+  if(ioctl(skfd, SIOCGIWNWID, &wrq) >= 0)
+    {
+      info->has_nwid = 1;
+      memcpy(&(info->nwid), &(wrq.u.nwid), sizeof(iwparam));
+    }
+
+  /* Get frequency / channel */
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+  if(ioctl(skfd, SIOCGIWFREQ, &wrq) >= 0)
+    {
+      info->has_freq = 1;
+      info->freq = iw_freq2float(&(wrq.u.freq));
+    }
+
+  /* Get encryption information */
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+  wrq.u.data.pointer = (caddr_t) info->key;
+  wrq.u.data.length = 0;
+  wrq.u.data.flags = 0;
+  if(ioctl(skfd, SIOCGIWENCODE, &wrq) >= 0)
+    {
+      info->has_key = 1;
+      info->key_size = wrq.u.data.length;
+      info->key_flags = wrq.u.data.flags;
+    }
+
+  /* Get ESSID */
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+  wrq.u.essid.pointer = (caddr_t) info->essid;
+  wrq.u.essid.length = 0;
+  wrq.u.essid.flags = 0;
+  if(ioctl(skfd, SIOCGIWESSID, &wrq) >= 0)
+    {
+      info->has_essid = 1;
+      info->essid_on = wrq.u.data.flags;
+    }
+
+  /* Get operation mode */
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+  if(ioctl(skfd, SIOCGIWMODE, &wrq) >= 0)
+    {
+      if((wrq.u.mode < 6) && (wrq.u.mode >= 0))
+	info->has_mode = 1;
+      info->mode = wrq.u.mode;
+    }
+
+  return(0);
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Set essential wireless config in the device driver
+ * We will call all the classical wireless ioctl on the driver through
+ * the socket to know what is supported and to set the settings...
+ * We support only the restricted set as above...
+ */
+int
+iw_set_basic_config(int			skfd,
+		    char *		ifname,
+		    wireless_config *	info)
+{
+  struct iwreq		wrq;
+  int			ret = 0;
+
+  /* Get wireless name (check if interface is valid) */
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+  if(ioctl(skfd, SIOCGIWNAME, &wrq) < 0)
+    /* If no wireless name : no wireless extensions */
+    return(-2);
+
+  /* Set Network ID, if available (this is for non-802.11 cards) */
+  if(info->has_nwid)
+    {
+      strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+      memcpy(&(wrq.u.nwid), &(info->nwid), sizeof(iwparam));
+      wrq.u.nwid.fixed = 1;	/* Hum... When in Rome... */
+
+      if(ioctl(skfd, SIOCSIWNWID, &wrq) < 0)
+	{
+	  fprintf(stderr, "SIOCSIWNWID: %s\n", strerror(errno));
+	  ret = -1;
+	}
+    }
+
+  /* Set frequency / channel */
+  if(info->has_freq)
+    {
+      strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+      iw_float2freq(info->freq, &(wrq.u.freq));
+
+      if(ioctl(skfd, SIOCSIWFREQ, &wrq) < 0)
+	{
+	  fprintf(stderr, "SIOCSIWFREQ: %s\n", strerror(errno));
+	  ret = -1;
+	}
+    }
+
+  /* Set encryption information */
+  if(info->has_key)
+    {
+      int		flags = info->key_flags;
+
+      /* Check if there is a key index */
+      if((flags & IW_ENCODE_INDEX) > 0)
+	{
+	  /* Set the index */
+	  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+	  wrq.u.data.pointer = (caddr_t) NULL;
+	  wrq.u.data.flags = flags & (IW_ENCODE_INDEX);
+	  wrq.u.data.length = 0;
+
+	  if(ioctl(skfd, SIOCSIWENCODE, &wrq) < 0)
+	    {
+	      fprintf(stderr, "SIOCSIWENCODE(%d): %s\n",
+		      errno, strerror(errno));
+	      ret = -1;
+	    }
+	}
+
+      /* Mask out index to minimise probability of reject when setting key */
+      flags = flags & (~IW_ENCODE_INDEX);
+
+      /* Set the key itself (set current key in this case) */
+      strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+      wrq.u.data.pointer = (caddr_t) info->key;
+      wrq.u.data.length = info->key_size;
+      wrq.u.data.flags = flags;
+
+      if(ioctl(skfd, SIOCSIWENCODE, &wrq) < 0)
+	{
+	  fprintf(stderr, "SIOCSIWENCODE(%d): %s\n",
+		  errno, strerror(errno));
+	  ret = -1;
+	}
+    }
+
+  /* Set ESSID (extended network), if available */
+  if(info->has_essid)
+    {
+      strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+      wrq.u.essid.pointer = (caddr_t) info->essid;
+      wrq.u.essid.length = strlen(info->essid) + 1;
+      wrq.u.data.flags = info->essid_on;
+
+      if(ioctl(skfd, SIOCSIWESSID, &wrq) < 0)
+	{
+	  fprintf(stderr, "SIOCSIWESSID: %s\n", strerror(errno));
+	  ret = -1;
+	}
+    }
+
+  /* Set the current mode of operation */
+  if(info->has_mode)
+    {
+      strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+      wrq.u.mode = info->mode;
+
+      if(ioctl(skfd, SIOCSIWMODE, &wrq) < 0)
+	{
+	  fprintf(stderr, "SIOCSIWMODE: %s\n", strerror(errno));
+	  ret = -1;
+	}
+    }
+
+  return(ret);
 }
 
 /********************** FREQUENCY SUBROUTINES ***********************/
@@ -143,8 +350,8 @@ get_priv_info(int		skfd,
  * this custom format instead.
  */
 void
-float2freq(double	in,
-	   iwfreq *	out)
+iw_float2freq(double	in,
+	      iwfreq *	out)
 {
   out->e = (short) (floor(log10(in)));
   if(out->e > 8)
@@ -164,7 +371,7 @@ float2freq(double	in,
  * Convert our internal representation of frequencies to a floating point.
  */
 double
-freq2float(iwfreq *	in)
+iw_freq2float(iwfreq *	in)
 {
   return ((double) in->m) * pow(10,in->e);
 }
@@ -176,7 +383,7 @@ freq2float(iwfreq *	in)
  * Convert a value in dBm to a value in milliWatt.
  */
 int
-dbm2mwatt(int	in)
+iw_dbm2mwatt(int	in)
 {
   return((int) (floor(pow(10.0, (((double) in) / 10.0)))));
 }
@@ -186,7 +393,7 @@ dbm2mwatt(int	in)
  * Convert a value in milliWatt to a value in dBm.
  */
 int
-mwatt2dbm(int	in)
+iw_mwatt2dbm(int	in)
 {
   return((int) (ceil(10.0 * log10((double) in))));
 }
@@ -195,13 +402,89 @@ mwatt2dbm(int	in)
 
 /*------------------------------------------------------------------*/
 /*
+ * Read /proc/net/wireless to get the latest statistics
+ */
+int
+iw_get_stats(int	skfd,
+	     char *	ifname,
+	     iwstats *	stats)
+{
+#if WIRELESS_EXT > 11
+  struct iwreq		wrq;
+  wrq.u.data.pointer = (caddr_t) stats;
+  wrq.u.data.length = 0;
+  wrq.u.data.flags = 1;		/* Clear updated flag */
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+  if(ioctl(skfd, SIOCGIWSTATS, &wrq) < 0)
+    return(-1);
+
+  return(0);
+#else /* WIRELESS_EXT > 11 */
+  FILE *	f=fopen("/proc/net/wireless","r");
+  char		buf[256];
+  char *	bp;
+  int		t;
+  if(f==NULL)
+    return -1;
+  /* Loop on all devices */
+  while(fgets(buf,255,f))
+    {
+      bp=buf;
+      while(*bp&&isspace(*bp))
+	bp++;
+      /* Is it the good device ? */
+      if(strncmp(bp,ifname,strlen(ifname))==0 && bp[strlen(ifname)]==':')
+  	{
+	  /* Skip ethX: */
+	  bp=strchr(bp,':');
+	  bp++;
+	  /* -- status -- */
+	  bp = strtok(bp, " ");
+	  sscanf(bp, "%X", &t);
+	  stats->status = (unsigned short) t;
+	  /* -- link quality -- */
+	  bp = strtok(NULL, " ");
+	  if(strchr(bp,'.') != NULL)
+	    stats->qual.updated |= 1;
+	  sscanf(bp, "%d", &t);
+	  stats->qual.qual = (unsigned char) t;
+	  /* -- signal level -- */
+	  bp = strtok(NULL, " ");
+	  if(strchr(bp,'.') != NULL)
+	    stats->qual.updated |= 2;
+	  sscanf(bp, "%d", &t);
+	  stats->qual.level = (unsigned char) t;
+	  /* -- noise level -- */
+	  bp = strtok(NULL, " ");
+	  if(strchr(bp,'.') != NULL)
+	    stats->qual.updated += 4;
+	  sscanf(bp, "%d", &t);
+	  stats->qual.noise = (unsigned char) t;
+	  /* -- discarded packets -- */
+	  bp = strtok(NULL, " ");
+	  sscanf(bp, "%d", &stats->discard.nwid);
+	  bp = strtok(NULL, " ");
+	  sscanf(bp, "%d", &stats->discard.code);
+	  bp = strtok(NULL, " ");
+	  sscanf(bp, "%d", &stats->discard.misc);
+	  fclose(f);
+	  return 0;
+  	}
+    }
+  fclose(f);
+  return -1;
+#endif /* WIRELESS_EXT > 11 */
+}
+
+/*------------------------------------------------------------------*/
+/*
  * Output the link statistics, taking care of formating
  */
 void
-print_stats(FILE *	stream,
-	    iwqual *	qual,
-	    iwrange *	range,
-	    int		has_range)
+iw_print_stats(char *		buffer,
+	       iwqual *		qual,
+	       iwrange *	range,
+	       int		has_range)
 {
   /* Just do it */
   if(has_range && (qual->level != 0))
@@ -210,8 +493,8 @@ print_stats(FILE *	stream,
       if(qual->level > range->max_qual.level)
 	{
 	  /* Statistics are in dBm (absolute power measurement) */
-	  fprintf(stream,
-		  "Quality:%d/%d  Signal level:%d dBm  Noise level:%d dBm%s\n",
+	  sprintf(buffer,
+		  "Quality:%d/%d  Signal level:%d dBm  Noise level:%d dBm%s",
 		  qual->qual, range->max_qual.qual,
 		  qual->level - 0x100, qual->noise - 0x100,
 		  (qual->updated & 0x7) ? " (updated)" : "");
@@ -219,8 +502,8 @@ print_stats(FILE *	stream,
       else
 	{
 	  /* Statistics are relative values (0 -> max) */
-	  fprintf(stream,
-		  "Quality:%d/%d  Signal level:%d/%d  Noise level:%d/%d%s\n",
+	  sprintf(buffer,
+		  "Quality:%d/%d  Signal level:%d/%d  Noise level:%d/%d%s",
 		  qual->qual, range->max_qual.qual,
 		  qual->level, range->max_qual.level,
 		  qual->noise, range->max_qual.noise,
@@ -230,7 +513,7 @@ print_stats(FILE *	stream,
   else
     {
       /* We can't read the range, so we don't know... */
-      fprintf(stream, "Quality:%d  Signal level:%d  Noise level:%d%s\n",
+      sprintf(buffer, "Quality:%d  Signal level:%d  Noise level:%d%s",
 	      qual->qual, qual->level, qual->noise,
 	      (qual->updated & 0x7) ? " (updated)" : "");
     }
@@ -243,10 +526,10 @@ print_stats(FILE *	stream,
  * Output the encoding key, with a nice formating
  */
 void
-print_key(FILE *		stream,
-	  unsigned char	*	key,
-	  int			key_size,
-	  int			key_flags)
+iw_print_key(char *		buffer,
+	     unsigned char *	key,
+	     int		key_size,
+	     int		key_flags)
 {
   int	i;
 
@@ -254,23 +537,27 @@ print_key(FILE *		stream,
   if(key_flags & IW_ENCODE_NOKEY)
     {
       /* Nope : print dummy */
-      printf("**");
+      strcpy(buffer, "**");
+      buffer +=2;
       for(i = 1; i < key_size; i++)
 	{
 	  if((i & 0x1) == 0)
-	    printf("-");
-	  printf("**");
+	    strcpy(buffer++, "-");
+	  strcpy(buffer, "**");
+	  buffer +=2;
 	}
     }
   else
     {
       /* Yes : print the key */
-      printf("%.2X", key[0]);
+      sprintf(buffer, "%.2X", key[0]);
+      buffer +=2;
       for(i = 1; i < key_size; i++)
 	{
 	  if((i & 0x1) == 0)
-	    printf("-");
-	  printf("%.2X", key[i]);
+	    strcpy(buffer++, "-");
+	  sprintf(buffer, "%.2X", key[i]);
+	  buffer +=2;
 	}
     }
 }
@@ -283,35 +570,47 @@ print_key(FILE *		stream,
  * Output a power management value with all attributes...
  */
 void
-print_pm_value(FILE *	stream,
-	       int	value,
-	       int	flags)
+iw_print_pm_value(char *	buffer,
+		  int		value,
+		  int		flags)
 {
   /* Modifiers */
   if(flags & IW_POWER_MIN)
-    fprintf(stream, " min");
+    {
+      strcpy(buffer, " min");
+      buffer += 4;
+    }
   if(flags & IW_POWER_MAX)
-    fprintf(stream, " max");
+    {
+      strcpy(buffer, " max");
+      buffer += 4;
+    }
 
   /* Type */
   if(flags & IW_POWER_TIMEOUT)
-    fprintf(stream, " timeout:");
+    {
+      strcpy(buffer, " timeout:");
+      buffer += 9;
+    }
   else
-    fprintf(stream, " period:");
+    {
+      strcpy(buffer, " period:");
+      buffer += 8;
+    }
 
   /* Display value without units */
   if(flags & IW_POWER_RELATIVE)
-    fprintf(stream, "%g  ", ((double) value) / MEGA);
+    sprintf(buffer, "%g  ", ((double) value) / MEGA);
   else
     {
       /* Display value with units */
       if(value >= (int) MEGA)
-	fprintf(stream, "%gs  ", ((double) value) / MEGA);
+	sprintf(buffer, "%gs  ", ((double) value) / MEGA);
       else
 	if(value >= (int) KILO)
-	  fprintf(stream, "%gms  ", ((double) value) / KILO);
+	  sprintf(buffer, "%gms  ", ((double) value) / KILO);
 	else
-	  fprintf(stream, "%dus  ", value);
+	  sprintf(buffer, "%dus  ", value);
     }
 }
 
@@ -320,26 +619,26 @@ print_pm_value(FILE *	stream,
  * Output a power management mode
  */
 void
-print_pm_mode(FILE *	stream,
-	      int	flags)
+iw_print_pm_mode(char *	buffer,
+		 int	flags)
 {
   /* Print the proper mode... */
   switch(flags & IW_POWER_MODE)
     {
     case IW_POWER_UNICAST_R:
-      fprintf(stream, " mode:Unicast only received");
+      strcpy(buffer, " mode:Unicast only received");
       break;
     case IW_POWER_MULTICAST_R:
-      fprintf(stream, " mode:Multicast only received");
+      strcpy(buffer, " mode:Multicast only received");
       break;
     case IW_POWER_ALL_R:
-      fprintf(stream, " mode:All packets received");
+      strcpy(buffer, " mode:All packets received");
       break;
     case IW_POWER_FORCE_S:
-      fprintf(stream, " mode:Force sending");
+      strcpy(buffer, " mode:Force sending");
       break;
     case IW_POWER_REPEATER:
-      fprintf(stream, " mode:Repeat multicasts");
+      strcpy(buffer, " mode:Repeat multicasts");
       break;
     default:
     }
@@ -353,38 +652,45 @@ print_pm_mode(FILE *	stream,
  * Output a retry value with all attributes...
  */
 void
-print_retry_value(FILE *	stream,
-		  int		value,
-		  int		flags)
+iw_print_retry_value(char *	buffer,
+		     int	value,
+		     int	flags)
 {
   /* Modifiers */
   if(flags & IW_RETRY_MIN)
-    fprintf(stream, " min");
+    {
+      strcpy(buffer, " min");
+      buffer += 4;
+    }
   if(flags & IW_RETRY_MAX)
-    fprintf(stream, " max");
+    {
+      strcpy(buffer, " max");
+      buffer += 4;
+    }
 
   /* Type lifetime of limit */
   if(flags & IW_RETRY_LIFETIME)
     {
-      fprintf(stream, " lifetime:");
+      strcpy(buffer, " lifetime:");
+      buffer += 10;
 
       /* Display value without units */
       if(flags & IW_POWER_RELATIVE)
-	fprintf(stream, "%g", ((double) value) / MEGA);
+	sprintf(buffer, "%g", ((double) value) / MEGA);
       else
 	{
 	  /* Display value with units */
 	  if(value >= (int) MEGA)
-	    fprintf(stream, "%gs", ((double) value) / MEGA);
+	    sprintf(buffer, "%gs", ((double) value) / MEGA);
 	  else
 	    if(value >= (int) KILO)
-	      fprintf(stream, "%gms", ((double) value) / KILO);
+	      sprintf(buffer, "%gms", ((double) value) / KILO);
 	    else
-	      fprintf(stream, "%dus", value);
+	      sprintf(buffer, "%dus", value);
 	}
     }
   else
-    fprintf(stream, " limit:%d", value);
+    sprintf(buffer, " limit:%d", value);
 }
 #endif	/* WIRELESS_EXT > 10 */
 
@@ -399,13 +705,13 @@ print_retry_value(FILE *	stream,
  * Check if interface support the right address types...
  */
 int
-check_addr_type(int	skfd,
-		char *	ifname)
+iw_check_addr_type(int		skfd,
+		   char *	ifname)
 {
   struct ifreq		ifr;
 
   /* Get the type of interface address */
-  strcpy(ifr.ifr_name, ifname);
+  strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
   if((ioctl(skfd, SIOCGIFADDR, &ifr) < 0) ||
      (ifr.ifr_addr.sa_family !=  AF_INET))
     {
@@ -420,7 +726,7 @@ check_addr_type(int	skfd,
 #endif
 
   /* Get the type of hardware address */
-  strcpy(ifr.ifr_name, ifname);
+  strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
   if((ioctl(skfd, SIOCGIFHWADDR, &ifr) < 0) ||
      (ifr.ifr_hwaddr.sa_family != ARPHRD_ETHER))
     {
@@ -444,15 +750,14 @@ check_addr_type(int	skfd,
  * Display an Ethernet address in readable format.
  */
 char *
-pr_ether(unsigned char *ptr)
+iw_pr_ether(char *		buffer,
+	    unsigned char *	ptr)
 {
-  static char buff[64];
-
-  sprintf(buff, "%02X:%02X:%02X:%02X:%02X:%02X",
-	(ptr[0] & 0xFF), (ptr[1] & 0xFF), (ptr[2] & 0xFF),
-	(ptr[3] & 0xFF), (ptr[4] & 0xFF), (ptr[5] & 0xFF)
+  sprintf(buffer, "%02X:%02X:%02X:%02X:%02X:%02X",
+	  (ptr[0] & 0xFF), (ptr[1] & 0xFF), (ptr[2] & 0xFF),
+	  (ptr[3] & 0xFF), (ptr[4] & 0xFF), (ptr[5] & 0xFF)
   );
-  return(buff);
+  return(buffer);
 }
 
 /*------------------------------------------------------------------*/
@@ -460,7 +765,7 @@ pr_ether(unsigned char *ptr)
  * Input an Ethernet address and convert to binary.
  */
 int
-in_ether(char *bufp, struct sockaddr *sap)
+iw_in_ether(char *bufp, struct sockaddr *sap)
 {
   unsigned char *ptr;
   char c, *orig;
@@ -533,7 +838,7 @@ in_ether(char *bufp, struct sockaddr *sap)
  * Input an Internet address and convert to binary.
  */
 int
-in_inet(char *bufp, struct sockaddr *sap)
+iw_in_inet(char *bufp, struct sockaddr *sap)
 {
   struct hostent *hp;
   struct netent *np;
@@ -571,10 +876,10 @@ in_inet(char *bufp, struct sockaddr *sap)
  * Input an address and convert to binary.
  */
 int
-in_addr(int		skfd,
-	char *		ifname,
-	char *		bufp,
-	struct sockaddr *sap)
+iw_in_addr(int		skfd,
+	   char *	ifname,
+	   char *	bufp,
+	   struct sockaddr *sap)
 {
   /* Check if it is a hardware or IP address */
   if(index(bufp, ':') == NULL)
@@ -583,7 +888,7 @@ in_addr(int		skfd,
       struct arpreq	arp_query;
 
       /* Read interface address */
-      if(in_inet(bufp, &if_address) < 0)
+      if(iw_in_inet(bufp, &if_address) < 0)
 	{
 	  fprintf(stderr, "Invalid interface address %s\n", bufp);
 	  return(-1);
@@ -597,7 +902,7 @@ in_addr(int		skfd,
       arp_query.arp_flags = 0;
       /* The following restrict the search to the interface only */
       /* For old kernels which complain, just comment it... */
-      strcpy(arp_query.arp_dev, ifname);
+      strncpy(arp_query.arp_dev, ifname, IFNAMSIZ);
       if((ioctl(skfd, SIOCGARP, &arp_query) < 0) ||
 	 !(arp_query.arp_flags & ATF_COM))
 	{
@@ -618,7 +923,7 @@ in_addr(int		skfd,
     }
   else	/* If it's an hardware address */
     /* Get the hardware address */
-    if(in_ether(bufp, sap) < 0)
+    if(iw_in_ether(bufp, sap) < 0)
       {
 	fprintf(stderr, "Invalid hardware address %s\n", bufp);
 	return(-1);
@@ -637,7 +942,7 @@ in_addr(int		skfd,
 /*
  */
 int
-byte_size(int	args)
+iw_byte_size(int	args)
 {
   int	ret = args & IW_PRIV_SIZE_MASK;
 

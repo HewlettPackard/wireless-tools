@@ -9,7 +9,7 @@
  * This file is released under the GPL license.
  */
 
-#include "iwcommon.h"		/* Header */
+#include "iwlib.h"		/* Header */
 
 /************************* DISPLAY ROUTINES **************************/
 
@@ -24,6 +24,7 @@ print_spy_info(int	skfd,
   struct iwreq		wrq;
   char		buffer[(sizeof(struct iw_quality) +
 			sizeof(struct sockaddr)) * IW_MAX_SPY];
+  char		temp[128];
   struct sockaddr 	hwa[IW_MAX_SPY];
   struct iw_quality 	qual[IW_MAX_SPY];
   iwrange	range;
@@ -48,14 +49,14 @@ print_spy_info(int	skfd,
 
 
   /* Check if we have valid address types */
-  if(check_addr_type(skfd, ifname) < 0)
+  if(iw_check_addr_type(skfd, ifname) < 0)
     {
       fprintf(stderr, "%-8.8s  Interface doesn't support MAC & IP addresses\n\n", ifname);
       return;
     }
 
   /* Get range info if we can */
-  if(get_range_info(skfd, ifname, &(range)) >= 0)
+  if(iw_get_range_info(skfd, ifname, &(range)) >= 0)
     has_range = 1;
 
   /* Display it */
@@ -72,9 +73,18 @@ print_spy_info(int	skfd,
   for(i = 0; i < n; i++)
     {
       /* Print stats for each address */
-      printf("    %s : ", pr_ether(hwa[i].sa_data));
-      print_stats(stdout, &qual[i], &range, has_range);
+      printf("    %s : ", iw_pr_ether(temp, hwa[i].sa_data));
+      iw_print_stats(temp, &qual[i], &range, has_range);
+      printf("%s\n", temp);
     }
+#if WIRELESS_EXT > 11
+  if((n > 0) && (has_range))
+    {
+      iw_print_stats(temp, &range.avg_qual, &range, has_range);
+      printf("    typical/average   : %s\n", temp);
+    }
+#endif /* WIRELESS_EXT > 11 */
+
   printf("\n");
 }
 
@@ -127,7 +137,7 @@ set_spy_info(int		skfd,		/* The socket */
   nbr = 0;	/* Number of args readen so far */
 
   /* Check if we have valid address types */
-  if(check_addr_type(skfd, ifname) < 0)
+  if(iw_check_addr_type(skfd, ifname) < 0)
     {
       fprintf(stderr, "%-8.8s  Interface doesn't support MAC & IP addresses\n", ifname);
       return(-1);
@@ -164,7 +174,7 @@ set_spy_info(int		skfd,		/* The socket */
   /* Read other args on command line */
   while((i < count) && (nbr < IW_MAX_SPY))
     {
-      if(in_addr(skfd, ifname, args[i++], &(hw_address[nbr])) < 0)
+      if(iw_in_addr(skfd, ifname, args[i++], &(hw_address[nbr])) < 0)
 	continue;
       nbr++;
     }
@@ -173,7 +183,7 @@ set_spy_info(int		skfd,		/* The socket */
   if((nbr == 0) && strcmp(args[0], "off"))
     {
       fprintf(stderr, "No valid addresses found : exiting...\n");
-      exit(0);
+      return(-1);
     }
 
   /* Check if there is some remaining arguments */
@@ -211,10 +221,10 @@ main(int	argc,
   int goterr = 0;
 
   /* Create a channel to the NET kernel. */
-  if((skfd = sockets_open()) < 0)
+  if((skfd = iw_sockets_open()) < 0)
     {
       perror("socket");
-      exit(-1);
+      return(-1);
     }
 
   /* No argument : show the list of all device + info */
@@ -222,7 +232,7 @@ main(int	argc,
     {
       print_spy_devices(skfd);
       close(skfd);
-      exit(0);
+      return(0);
     }
 
   /* Special cases take one... */
@@ -231,10 +241,8 @@ main(int	argc,
      (!strcmp(argv[1], "--help")))
     {
       fprintf(stderr, "Usage: iwspy interface [+] [MAC address] [IP address]\n");
-      fprintf(stderr, "             interface [freq]\n");
-      fprintf(stderr, "             interface [ap]\n");
       close(skfd);
-      exit(0);
+      return(0);
     }
 
   /* The device name must be the first argument */
@@ -243,7 +251,7 @@ main(int	argc,
     {
       print_spy_info(skfd, argv[1]);
       close(skfd);
-      exit(0);
+      return(0);
     }
 
   /* Otherwise, it's a list of address to set in the spy list */
@@ -252,5 +260,5 @@ main(int	argc,
   /* Close the socket. */
   close(skfd);
 
-  return(1);
+  return(goterr);
 }

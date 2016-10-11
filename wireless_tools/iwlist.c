@@ -10,7 +10,7 @@
  * This file is released under the GPL license.
  */
 
-#include "iwcommon.h"		/* Header */
+#include "iwlib.h"		/* Header */
 
 /*********************** FREQUENCIES/CHANNELS ***********************/
 
@@ -26,7 +26,7 @@ print_freq_info(int		skfd,
   struct iw_range	range;
   int			k;
 
-  if(get_range_info(skfd, ifname, &range) < 0)
+  if(iw_get_range_info(skfd, ifname, &range) < 0)
       fprintf(stderr, "%-8.8s  no frequency information.\n\n",
 		      ifname);
   else
@@ -39,7 +39,7 @@ print_freq_info(int		skfd,
 	  for(k = 0; k < range.num_frequency; k++)
 	    {
 	      printf("\t  Channel %.2d : ", range.freq[k].i);
-	      freq = freq2float(&(range.freq[k]));
+	      freq = iw_freq2float(&(range.freq[k]));
 	      if(freq >= GIGA)
 		printf("%g GHz\n", freq / GIGA);
 	      else
@@ -56,33 +56,6 @@ print_freq_info(int		skfd,
     }
 }
 
-/*------------------------------------------------------------------*/
-/*
- * Get frequency info on all devices and print it on the screen
- */
-static void
-print_freq_devices(int		skfd)
-{
-  char		buff[1024];
-  struct ifconf ifc;
-  struct ifreq *ifr;
-  int i;
-
-  /* Get list of active devices */
-  ifc.ifc_len = sizeof(buff);
-  ifc.ifc_buf = buff;
-  if(ioctl(skfd, SIOCGIFCONF, &ifc) < 0)
-    {
-      fprintf(stderr, "SIOCGIFCONF: %s\n", strerror(errno));
-      return;
-    }
-  ifr = ifc.ifc_req;
-
-  /* Print them */
-  for(i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; ifr++)
-    print_freq_info(skfd, ifr->ifr_name);
-}
-
 /************************ ACCESS POINT LIST ************************/
 
 /*------------------------------------------------------------------*/
@@ -92,11 +65,12 @@ print_freq_devices(int		skfd)
  */
 static void
 print_ap_info(int	skfd,
-	       char *	ifname)
+	      char *	ifname)
 {
   struct iwreq		wrq;
   char		buffer[(sizeof(struct iw_quality) +
 			sizeof(struct sockaddr)) * IW_MAX_AP];
+  char		temp[128];
   struct sockaddr *	hwa;
   struct iw_quality *	qual;
   iwrange	range;
@@ -125,14 +99,14 @@ print_ap_info(int	skfd,
   qual = (struct iw_quality *) (buffer + (sizeof(struct sockaddr) * n));
 
   /* Check if we have valid address types */
-  if(check_addr_type(skfd, ifname) < 0)
+  if(iw_check_addr_type(skfd, ifname) < 0)
     {
       fprintf(stderr, "%-8.8s  Interface doesn't support MAC & IP addresses\n\n", ifname);
       return;
     }
 
   /* Get range info if we can */
-  if(get_range_info(skfd, ifname, &(range)) >= 0)
+  if(iw_get_range_info(skfd, ifname, &(range)) >= 0)
     has_range = 1;
 
   /* Display it */
@@ -145,41 +119,15 @@ print_ap_info(int	skfd,
       if(has_qual)
 	{
 	  /* Print stats for this address */
-	  printf("    %s : ", pr_ether(hwa[i].sa_data));
-	  print_stats(stdout, &qual[i], &range, has_range);
+	  printf("    %s : ", iw_pr_ether(temp, hwa[i].sa_data));
+	  iw_print_stats(temp, &qual[i], &range, has_range);
+	  printf("%s\n", temp);
 	}
       else
 	/* Only print the address */
-	printf("    %s\n", pr_ether(hwa[i].sa_data));
+	printf("    %s\n", iw_pr_ether(temp, hwa[i].sa_data));
     }
   printf("\n");
-}
-
-/*------------------------------------------------------------------*/
-/*
- * Get list of AP on all devices and print it on the screen
- */
-static void
-print_ap_devices(int		skfd)
-{
-  char		buff[1024];
-  struct ifconf ifc;
-  struct ifreq *ifr;
-  int i;
-
-  /* Get list of active devices */
-  ifc.ifc_len = sizeof(buff);
-  ifc.ifc_buf = buff;
-  if(ioctl(skfd, SIOCGIFCONF, &ifc) < 0)
-    {
-      fprintf(stderr, "SIOCGIFCONF: %s\n", strerror(errno));
-      return;
-    }
-  ifr = ifc.ifc_req;
-
-  /* Print them */
-  for(i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; ifr++)
-    print_ap_info(skfd, ifr->ifr_name);
 }
 
 /***************************** BITRATES *****************************/
@@ -197,7 +145,7 @@ print_bitrate_info(int		skfd,
   int			k;
 
   /* Extract range info */
-  if(get_range_info(skfd, ifname, &range) < 0)
+  if(iw_get_range_info(skfd, ifname, &range) < 0)
       fprintf(stderr, "%-8.8s  no bit-rate information.\n\n",
 		      ifname);
   else
@@ -226,33 +174,6 @@ print_bitrate_info(int		skfd,
     }
 }
 
-/*------------------------------------------------------------------*/
-/*
- * Get bit-rate info on all devices and print it on the screen
- */
-static void
-print_bitrate_devices(int		skfd)
-{
-  char		buff[1024];
-  struct ifconf ifc;
-  struct ifreq *ifr;
-  int i;
-
-  /* Get list of active devices */
-  ifc.ifc_len = sizeof(buff);
-  ifc.ifc_buf = buff;
-  if(ioctl(skfd, SIOCGIFCONF, &ifc) < 0)
-    {
-      fprintf(stderr, "SIOCGIFCONF: %s\n", strerror(errno));
-      return;
-    }
-  ifr = ifc.ifc_req;
-
-  /* Print them */
-  for(i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; ifr++)
-    print_bitrate_info(skfd, ifr->ifr_name);
-}
-
 /************************* ENCRYPTION KEYS *************************/
 
 /*------------------------------------------------------------------*/
@@ -267,9 +188,10 @@ print_keys_info(int		skfd,
   struct iw_range	range;
   unsigned char		key[IW_ENCODING_TOKEN_MAX];
   int			k;
+  char			buffer[128];
 
   /* Extract range info */
-  if(get_range_info(skfd, ifname, &range) < 0)
+  if(iw_get_range_info(skfd, ifname, &range) < 0)
       fprintf(stderr, "%-8.8s  no encryption keys information.\n\n",
 		      ifname);
   else
@@ -290,7 +212,7 @@ print_keys_info(int		skfd,
       printf("%d keys available :\n", range.max_encoding_tokens);
       for(k = 1; k <= range.max_encoding_tokens; k++)
 	{
-	  strcpy(wrq.ifr_name, ifname);
+	  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
 	  wrq.u.data.pointer = (caddr_t) key;
 	  wrq.u.data.length = 0;
 	  wrq.u.data.flags = k;
@@ -305,8 +227,8 @@ print_keys_info(int		skfd,
 	  else
 	    {
 	      /* Display the key */
-	      printf("\t\t[%d]: ", k);
-	      print_key(stdout, key, wrq.u.data.length, wrq.u.data.flags);
+	      iw_print_key(buffer, key, wrq.u.data.length, wrq.u.data.flags);
+	      printf("\t\t[%d]: %s", k, buffer);
 
 	      /* Other info... */
 	      printf(" (%d bits)", wrq.u.data.length * 8);
@@ -314,7 +236,7 @@ print_keys_info(int		skfd,
 	    }
 	}
       /* Print current key and mode */
-      strcpy(wrq.ifr_name, ifname);
+      strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
       wrq.u.data.pointer = (caddr_t) key;
       wrq.u.data.length = 0;
       wrq.u.data.flags = 0;	/* Set index to zero to get current */
@@ -334,33 +256,6 @@ print_keys_info(int		skfd,
     }
 }
 
-/*------------------------------------------------------------------*/
-/*
- * Get encryption info on all devices and print it on the screen
- */
-static void
-print_keys_devices(int		skfd)
-{
-  char		buff[1024];
-  struct ifconf ifc;
-  struct ifreq *ifr;
-  int i;
-
-  /* Get list of active devices */
-  ifc.ifc_len = sizeof(buff);
-  ifc.ifc_buf = buff;
-  if(ioctl(skfd, SIOCGIFCONF, &ifc) < 0)
-    {
-      fprintf(stderr, "SIOCGIFCONF: %s\n", strerror(errno));
-      return;
-    }
-  ifr = ifc.ifc_req;
-
-  /* Print them */
-  for(i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; ifr++)
-    print_keys_info(skfd, ifr->ifr_name);
-}
-
 /************************* POWER MANAGEMENT *************************/
 
 /*------------------------------------------------------------------*/
@@ -371,18 +266,19 @@ static inline int
 get_pm_value(int		skfd,
 	     char *		ifname,
 	     struct iwreq *	pwrq,
-	     int		flags)
+	     int		flags,
+	     char *		buffer)
 {
   /* Get Another Power Management value */
-  strcpy(pwrq->ifr_name, ifname);
+  strncpy(pwrq->ifr_name, ifname, IFNAMSIZ);
   pwrq->u.power.flags = flags;
   if(ioctl(skfd, SIOCGIWPOWER, pwrq) >= 0)
     {
       /* Let's check the value and its type */
       if(pwrq->u.power.flags & IW_POWER_TYPE)
 	{
-	  printf("\n                 ");
-	  print_pm_value(stdout, pwrq->u.power.value, pwrq->u.power.flags);
+	  iw_print_pm_value(buffer, pwrq->u.power.value, pwrq->u.power.flags);
+	  printf("\n                 %s", buffer);
 	}
     }
   return(pwrq->u.power.flags);
@@ -398,9 +294,10 @@ print_pm_info(int		skfd,
 {
   struct iwreq		wrq;
   struct iw_range	range;
+  char			buffer[128];
 
   /* Extract range info */
-  if(get_range_info(skfd, ifname, &range) < 0)
+  if(iw_get_range_info(skfd, ifname, &range) < 0)
       fprintf(stderr, "%-8.8s  no power management information.\n\n",
 		      ifname);
   else
@@ -432,10 +329,10 @@ print_pm_info(int		skfd,
 	  else
 	    printf("Fixed period  ; ");
 	  /* Print the range */
-	  print_pm_value(stdout, range.min_pmp, flags | IW_POWER_MIN);
-	  printf("\n                          ");
-	  print_pm_value(stdout, range.max_pmp, flags | IW_POWER_MAX);
-	  printf("\n          ");
+	  iw_print_pm_value(buffer, range.min_pmp, flags | IW_POWER_MIN);
+	  printf("%s\n                          ", buffer);
+	  iw_print_pm_value(buffer, range.max_pmp, flags | IW_POWER_MAX);
+	  printf("%s\n          ", buffer);
 	  
 	}
       /* Display min/max timeout availables */
@@ -448,16 +345,16 @@ print_pm_info(int		skfd,
 	  else
 	    printf("Fixed timeout ; ");
 	  /* Print the range */
-	  print_pm_value(stdout, range.min_pmt, flags | IW_POWER_MIN);
-	  printf("\n                          ");
-	  print_pm_value(stdout, range.max_pmt, flags | IW_POWER_MAX);
-	  printf("\n          ");
+	  iw_print_pm_value(buffer, range.min_pmt, flags | IW_POWER_MIN);
+	  printf("%s\n                          ", buffer);
+	  iw_print_pm_value(buffer, range.max_pmt, flags | IW_POWER_MAX);
+	  printf("%s\n          ", buffer);
 	  
 	}
 #endif /* WIRELESS_EXT > 9 */
 
       /* Get current Power Management settings */
-      strcpy(wrq.ifr_name, ifname);
+      strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
       wrq.u.power.flags = 0;
       if(ioctl(skfd, SIOCGIWPOWER, &wrq) >= 0)
 	{
@@ -471,8 +368,8 @@ print_pm_info(int		skfd,
 	      int	pm_mask = 0;
 
 	      /* Let's check the mode */
-	      printf("Current");
-	      print_pm_mode(stdout, flags);
+	      iw_print_pm_mode(buffer, flags);
+	      printf("Current%s", buffer);
 
 	      /* Let's check if nothing (simply on) */
 	      if((flags & IW_POWER_MODE) == IW_POWER_ON)
@@ -481,7 +378,11 @@ print_pm_info(int		skfd,
 
 	      /* Let's check the value and its type */
 	      if(wrq.u.power.flags & IW_POWER_TYPE)
-		print_pm_value(stdout, wrq.u.power.value, wrq.u.power.flags);
+		{
+		  iw_print_pm_value(buffer,
+				    wrq.u.power.value, wrq.u.power.flags);
+		  printf("%s", buffer);
+		}
 
 	      /* If we have been returned a MIN value, ask for the MAX */
 	      if(flags & IW_POWER_MIN)
@@ -491,7 +392,7 @@ print_pm_info(int		skfd,
 		pm_mask = IW_POWER_MIN;
 	      /* If we have something to ask for... */
 	      if(pm_mask)
-		get_pm_value(skfd, ifname, &wrq, pm_mask);
+		get_pm_value(skfd, ifname, &wrq, pm_mask, buffer);
 
 #if WIRELESS_EXT > 9
 	      /* And if we have both a period and a timeout, ask the other */
@@ -500,7 +401,7 @@ print_pm_info(int		skfd,
 	      if(pm_mask)
 		{
 		  int	base_mask = pm_mask;
-		  flags = get_pm_value(skfd, ifname, &wrq, pm_mask);
+		  flags = get_pm_value(skfd, ifname, &wrq, pm_mask, buffer);
 		  pm_mask = 0;
 
 		  /* If we have been returned a MIN value, ask for the MAX */
@@ -511,40 +412,13 @@ print_pm_info(int		skfd,
 		    pm_mask = IW_POWER_MIN | base_mask;
 		  /* If we have something to ask for... */
 		  if(pm_mask)
-		    get_pm_value(skfd, ifname, &wrq, pm_mask);
+		    get_pm_value(skfd, ifname, &wrq, pm_mask, buffer);
 		}
 #endif /* WIRELESS_EXT > 9 */
 	    }
 	}
       printf("\n");
     }
-}
-
-/*------------------------------------------------------------------*/
-/*
- * Get Power Management info on all devices and print it on the screen
- */
-static void
-print_pm_devices(int		skfd)
-{
-  char		buff[1024];
-  struct ifconf ifc;
-  struct ifreq *ifr;
-  int i;
-
-  /* Get list of active devices */
-  ifc.ifc_len = sizeof(buff);
-  ifc.ifc_buf = buff;
-  if(ioctl(skfd, SIOCGIFCONF, &ifc) < 0)
-    {
-      fprintf(stderr, "SIOCGIFCONF: %s\n", strerror(errno));
-      return;
-    }
-  ifr = ifc.ifc_req;
-
-  /* Print them */
-  for(i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; ifr++)
-    print_pm_info(skfd, ifr->ifr_name);
 }
 
 /************************** TRANSMIT POWER **************************/
@@ -564,7 +438,7 @@ print_txpower_info(int		skfd,
 
 #if WIRELESS_EXT > 9
   /* Extract range info */
-  if(get_range_info(skfd, ifname, &range) < 0)
+  if(iw_get_range_info(skfd, ifname, &range) < 0)
       fprintf(stderr, "%-8.8s  no transmit-power information.\n\n",
 		      ifname);
   else
@@ -578,13 +452,13 @@ print_txpower_info(int		skfd,
 	    {
 	      if(range.txpower_capa & IW_TXPOW_MWATT)
 		{
-		  dbm = mwatt2dbm(range.txpower[k]);
+		  dbm = iw_mwatt2dbm(range.txpower[k]);
 		  mwatt = range.txpower[k];
 		}
 	      else
 		{
 		  dbm = range.txpower[k];
-		  mwatt = dbm2mwatt(range.txpower[k]);
+		  mwatt = iw_dbm2mwatt(range.txpower[k]);
 		}
 	      printf("\t  %d dBm  \t(%d mW)\n", dbm, mwatt);
 	    }
@@ -594,33 +468,6 @@ print_txpower_info(int		skfd,
 	printf("%-8.8s  No transmit-powers ? Please update driver...\n\n", ifname);
     }
 #endif /* WIRELESS_EXT > 9 */
-}
-
-/*------------------------------------------------------------------*/
-/*
- * Get tx-power info on all devices and print it on the screen
- */
-static void
-print_txpower_devices(int		skfd)
-{
-  char		buff[1024];
-  struct ifconf ifc;
-  struct ifreq *ifr;
-  int i;
-
-  /* Get list of active devices */
-  ifc.ifc_len = sizeof(buff);
-  ifc.ifc_buf = buff;
-  if(ioctl(skfd, SIOCGIFCONF, &ifc) < 0)
-    {
-      fprintf(stderr, "SIOCGIFCONF: %s\n", strerror(errno));
-      return;
-    }
-  ifr = ifc.ifc_req;
-
-  /* Print them */
-  for(i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; ifr++)
-    print_txpower_info(skfd, ifr->ifr_name);
 }
 
 /*********************** RETRY LIMIT/LIFETIME ***********************/
@@ -634,18 +481,20 @@ static inline int
 get_retry_value(int		skfd,
 		char *		ifname,
 		struct iwreq *	pwrq,
-		int		flags)
+		int		flags,
+		char *		buffer)
 {
   /* Get Another retry value */
-  strcpy(pwrq->ifr_name, ifname);
+  strncpy(pwrq->ifr_name, ifname, IFNAMSIZ);
   pwrq->u.retry.flags = flags;
   if(ioctl(skfd, SIOCGIWRETRY, pwrq) >= 0)
     {
       /* Let's check the value and its type */
       if(pwrq->u.retry.flags & IW_RETRY_TYPE)
 	{
-	  printf("\n                 ");
-	  print_retry_value(stdout, pwrq->u.retry.value, pwrq->u.retry.flags);
+	  iw_print_retry_value(buffer,
+			       pwrq->u.retry.value, pwrq->u.retry.flags);
+	  printf("%s\n                 ", buffer);
 	}
     }
   return(pwrq->u.retry.flags);
@@ -657,13 +506,14 @@ get_retry_value(int		skfd,
  */
 static void
 print_retry_info(int		skfd,
-	      char *		ifname)
+	         char *		ifname)
 {
   struct iwreq		wrq;
   struct iw_range	range;
+  char			buffer[128];
 
   /* Extract range info */
-  if(get_range_info(skfd, ifname, &range) < 0)
+  if(iw_get_range_info(skfd, ifname, &range) < 0)
       fprintf(stderr, "%-8.8s  no retry limit/lifetime information.\n\n",
 	      ifname);
   else
@@ -680,10 +530,10 @@ print_retry_info(int		skfd,
 	  else
 	    printf("Fixed limit    ; ");
 	  /* Print the range */
-	  print_retry_value(stdout, range.min_retry, flags | IW_RETRY_MIN);
-	  printf("\n                           ");
-	  print_retry_value(stdout, range.max_retry, flags | IW_RETRY_MAX);
-	  printf("\n          ");
+	  iw_print_retry_value(buffer, range.min_retry, flags | IW_RETRY_MIN);
+	  printf("%s\n                           ", buffer);
+	  iw_print_retry_value(buffer, range.max_retry, flags | IW_RETRY_MAX);
+	  printf("%s\n          ", buffer);
 	  
 	}
       /* Display min/max lifetime availables */
@@ -696,15 +546,15 @@ print_retry_info(int		skfd,
 	  else
 	    printf("Fixed lifetime ; ");
 	  /* Print the range */
-	  print_retry_value(stdout, range.min_r_time, flags | IW_RETRY_MIN);
-	  printf("\n                           ");
-	  print_retry_value(stdout, range.max_r_time, flags | IW_RETRY_MAX);
-	  printf("\n          ");
+	  iw_print_retry_value(buffer, range.min_r_time, flags | IW_RETRY_MIN);
+	  printf("%s\n                           ", buffer);
+	  iw_print_retry_value(buffer, range.max_r_time, flags | IW_RETRY_MAX);
+	  printf("%s\n          ", buffer);
 	  
 	}
 
       /* Get current retry settings */
-      strcpy(wrq.ifr_name, ifname);
+      strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
       wrq.u.retry.flags = 0;
       if(ioctl(skfd, SIOCGIWRETRY, &wrq) >= 0)
 	{
@@ -722,7 +572,11 @@ print_retry_info(int		skfd,
 
 	      /* Let's check the value and its type */
 	      if(wrq.u.retry.flags & IW_RETRY_TYPE)
-		print_retry_value(stdout, wrq.u.retry.value, wrq.u.retry.flags);
+		{
+		  iw_print_retry_value(buffer,
+				       wrq.u.retry.value, wrq.u.retry.flags);
+		  printf("%s", buffer);
+		}
 
 	      /* If we have been returned a MIN value, ask for the MAX */
 	      if(flags & IW_RETRY_MIN)
@@ -732,7 +586,7 @@ print_retry_info(int		skfd,
 		retry_mask = IW_RETRY_MIN;
 	      /* If we have something to ask for... */
 	      if(retry_mask)
-		get_retry_value(skfd, ifname, &wrq, retry_mask);
+		get_retry_value(skfd, ifname, &wrq, retry_mask, buffer);
 
 	      /* And if we have both a period and a timeout, ask the other */
 	      retry_mask = (range.retry_capa & (~(wrq.u.retry.flags) &
@@ -740,7 +594,8 @@ print_retry_info(int		skfd,
 	      if(retry_mask)
 		{
 		  int	base_mask = retry_mask;
-		  flags = get_retry_value(skfd, ifname, &wrq, retry_mask);
+		  flags = get_retry_value(skfd, ifname, &wrq, retry_mask,
+					  buffer);
 		  retry_mask = 0;
 
 		  /* If we have been returned a MIN value, ask for the MAX */
@@ -751,7 +606,7 @@ print_retry_info(int		skfd,
 		    retry_mask = IW_RETRY_MIN | base_mask;
 		  /* If we have something to ask for... */
 		  if(retry_mask)
-		    get_retry_value(skfd, ifname, &wrq, retry_mask);
+		    get_retry_value(skfd, ifname, &wrq, retry_mask, buffer);
 		}
 	    }
 	}
@@ -759,12 +614,19 @@ print_retry_info(int		skfd,
     }
 }
 
+#endif	/* WIRELESS_EXT > 10 */
+
+/************************* COMMON UTILITIES *************************/
+/*
+ * This section was written by Michael Tokarev <mjt@tls.msk.ru>
+ */
+
 /*------------------------------------------------------------------*/
 /*
- * Get retry info on all devices and print it on the screen
+ * Enumerate devices and call specified routine
  */
 static void
-print_retry_devices(int		skfd)
+enum_devices(int skfd, void (*fn)(int skfd, char *ifname))
 {
   char		buff[1024];
   struct ifconf ifc;
@@ -783,9 +645,42 @@ print_retry_devices(int		skfd)
 
   /* Print them */
   for(i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; ifr++)
-    print_retry_info(skfd, ifr->ifr_name);
+    (*fn)(skfd, ifr->ifr_name);
 }
-#endif	/* WIRELESS_EXT > 10 */
+
+/* command list */
+typedef struct iwlist_entry {
+  const char *cmd;
+  void (*fn)(int skfd, char *ifname);
+} iwlist_cmd;
+
+static const struct iwlist_entry iwlist_cmds[] = {
+  { "frequency",    print_freq_info },
+  { "channel",      print_freq_info },
+  { "ap",           print_ap_info },
+  { "accesspoints", print_ap_info },
+  { "bitrate",      print_bitrate_info },
+  { "rate",         print_bitrate_info },
+  { "encription",   print_keys_info },
+  { "key",          print_keys_info },
+  { "power",        print_pm_info },
+  { "txpower",      print_txpower_info },
+#if WIRELESS_EXT > 10
+  { "retry",        print_retry_info },
+#endif
+  { NULL, 0 },
+};
+
+/* Display help */
+static void usage(FILE *f)
+{
+  int i;
+  for(i = 0; iwlist_cmds[i].cmd != NULL; ++i)
+    fprintf(f, "%s [interface] %s\n",
+            i ? "             " :
+                "Usage: iwlist",
+            iwlist_cmds[i].cmd);
+}
 
 /******************************* MAIN ********************************/
 
@@ -798,154 +693,78 @@ main(int	argc,
      char **	argv)
 {
   int skfd = -1;		/* generic raw socket desc.	*/
+  char *dev;			/* device name			*/
+  char *cmd;			/* command			*/
+  int i;
+
+  if(argc == 1 || argc > 3)
+    {
+      usage(stderr);
+      return 1;
+    }
+  if (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))
+    {
+      usage(stdout);
+      return 0;
+    }
+  if (argc == 2)
+    {
+      cmd = argv[1];
+      dev = NULL;
+    }
+  else
+    {
+      cmd = argv[2];
+      dev = argv[1];
+    }
+
+  /* find a command */
+  {
+    int found = -1, ambig = 0;
+    int len = strlen(cmd);
+    for(i = 0; iwlist_cmds[i].cmd != NULL; ++i)
+      {
+	if (strncasecmp(iwlist_cmds[i].cmd, cmd, len) != 0)
+	  continue;
+	if (len == strlen(iwlist_cmds[i].cmd))	/* exact match */
+	  {
+	    found = i;
+	    ambig = 0;
+	    break;
+	  }
+	if (found < 0)
+	  found = i;
+	else if (iwlist_cmds[i].fn != iwlist_cmds[found].fn)
+	  ambig = 1;
+      }
+    if (found < 0)
+      {
+	fprintf(stderr, "iwlist: unknown command `%s'\n", cmd);
+	return 1;
+      }
+    if (ambig)
+      {
+	fprintf(stderr, "iwlist: command `%s' is ambiguous\n", cmd);
+	return 1;
+      }
+    i = found;
+  }
 
   /* Create a channel to the NET kernel. */
-  if((skfd = sockets_open()) < 0)
+  if((skfd = iw_sockets_open()) < 0)
     {
       perror("socket");
-      exit(-1);
+      return -1;
     }
 
-  /* Help */
-  if((argc == 1) || (argc > 3) ||
-     (!strncmp(argv[1], "-h", 9)) || (!strcmp(argv[1], "--help")))
-    {
-      fprintf(stderr, "Usage: iwlist [interface] freq\n");
-      fprintf(stderr, "              [interface] ap\n");
-      fprintf(stderr, "              [interface] bitrate\n");
-      fprintf(stderr, "              [interface] keys\n");
-      fprintf(stderr, "              [interface] power\n");
-      fprintf(stderr, "              [interface] txpower\n");
-      fprintf(stderr, "              [interface] retries\n");
-      close(skfd);
-      exit(0);
-    }
-
-  /* Frequency list */
-  if((!strncmp(argv[1], "freq", 4)) ||
-     (!strncmp(argv[1], "channel", 7)))
-    {
-      print_freq_devices(skfd);
-      close(skfd);
-      exit(0);
-    }
-
-  /* Access Point list */
-  if(!strcasecmp(argv[1], "ap"))
-    {
-      print_ap_devices(skfd);
-      close(skfd);
-      exit(0);
-    }
-
-  /* Bit-rate list */
-  if((!strncmp(argv[1], "bit", 3)) ||
-     (!strcmp(argv[1], "rate")))
-    {
-      print_bitrate_devices(skfd);
-      close(skfd);
-      exit(0);
-    }
-
-  /* Encryption key list */
-  if((!strncmp(argv[1], "enc", 3)) ||
-     (!strncmp(argv[1], "key", 3)))
-    {
-      print_keys_devices(skfd);
-      close(skfd);
-      exit(0);
-    }
-
-  /* Power Management list */
-  if(!strncmp(argv[1], "power", 3))
-    {
-      print_pm_devices(skfd);
-      close(skfd);
-      exit(0);
-    }
-
-  /* Transmit Power list */
-  if(!strncmp(argv[1], "txpower", 3))
-    {
-      print_txpower_devices(skfd);
-      close(skfd);
-      exit(0);
-    }
-
-#if WIRELESS_EXT > 10
-  /* Retry limit/lifetime */
-  if(!strncmp(argv[1], "retry", 4))
-    {
-      print_retry_devices(skfd);
-      close(skfd);
-      exit(0);
-    }
-#endif
-
-  /* Special cases take two... */
-  /* Frequency list */
-  if((!strncmp(argv[2], "freq", 4)) ||
-     (!strncmp(argv[2], "channel", 7)))
-    {
-      print_freq_info(skfd, argv[1]);
-      close(skfd);
-      exit(0);
-    }
-
-  /* Access Point  list */
-  if(!strcasecmp(argv[2], "ap"))
-    {
-      print_ap_info(skfd, argv[1]);
-      close(skfd);
-      exit(0);
-    }
-
-  /* Bit-rate list */
-  if((!strncmp(argv[2], "bit", 3)) ||
-     (!strcmp(argv[2], "rate")))
-    {
-      print_bitrate_info(skfd, argv[1]);
-      close(skfd);
-      exit(0);
-    }
-
-  /* Encryption key list */
-  if((!strncmp(argv[2], "enc", 3)) ||
-     (!strncmp(argv[2], "key", 3)))
-    {
-      print_keys_info(skfd, argv[1]);
-      close(skfd);
-      exit(0);
-    }
-
-  /* Power Management list */
-  if(!strncmp(argv[2], "power", 3))
-    {
-      print_pm_info(skfd, argv[1]);
-      close(skfd);
-      exit(0);
-    }
-
-  /* Transmit Power list */
-  if(!strncmp(argv[2], "txpower", 3))
-    {
-      print_txpower_info(skfd, argv[1]);
-      close(skfd);
-      exit(0);
-    }
-
-#if WIRELESS_EXT > 10
-  /* Retry limit/lifetime */
-  if(!strncmp(argv[2], "retry", 4))
-    {
-      print_retry_info(skfd, argv[1]);
-      close(skfd);
-      exit(0);
-    }
-#endif
+  /* do the actual work */
+  if (dev)
+    (*iwlist_cmds[i].fn)(skfd, dev);
+  else
+    enum_devices(skfd, iwlist_cmds[i].fn);
 
   /* Close the socket. */
   close(skfd);
 
-  return(1);
+  return 0;
 }

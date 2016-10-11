@@ -10,15 +10,7 @@
  * This file is released under the GPL license.
  */
 
-#include "iwcommon.h"		/* Header */
-
-/**************************** VARIABLES ****************************/
-char *	operation_mode[] = { "Auto",
-			     "Ad-Hoc",
-			     "Managed",
-			     "Master",
-			     "Repeater",
-			     "Secondary" };
+#include "iwlib.h"		/* Header */
 
 /************************* MISC SUBROUTINES **************************/
 
@@ -49,69 +41,6 @@ iw_usage(void)
 
 /*------------------------------------------------------------------*/
 /*
- * Read /proc/net/wireless to get the latest statistics
- */
-static int
-iw_getstats(char *	ifname,
-	    iwstats *	stats)
-{
-  FILE *	f=fopen("/proc/net/wireless","r");
-  char		buf[256];
-  char *	bp;
-  int		t;
-  if(f==NULL)
-    return -1;
-  /* Loop on all devices */
-  while(fgets(buf,255,f))
-    {
-      bp=buf;
-      while(*bp&&isspace(*bp))
-	bp++;
-      /* Is it the good device ? */
-      if(strncmp(bp,ifname,strlen(ifname))==0 && bp[strlen(ifname)]==':')
-  	{
-	  /* Skip ethX: */
-	  bp=strchr(bp,':');
-	  bp++;
-	  /* -- status -- */
-	  bp = strtok(bp, " ");
-	  sscanf(bp, "%X", &t);
-	  stats->status = (unsigned short) t;
-	  /* -- link quality -- */
-	  bp = strtok(NULL, " ");
-	  if(strchr(bp,'.') != NULL)
-	    stats->qual.updated |= 1;
-	  sscanf(bp, "%d", &t);
-	  stats->qual.qual = (unsigned char) t;
-	  /* -- signal level -- */
-	  bp = strtok(NULL, " ");
-	  if(strchr(bp,'.') != NULL)
-	    stats->qual.updated |= 2;
-	  sscanf(bp, "%d", &t);
-	  stats->qual.level = (unsigned char) t;
-	  /* -- noise level -- */
-	  bp = strtok(NULL, " ");
-	  if(strchr(bp,'.') != NULL)
-	    stats->qual.updated += 4;
-	  sscanf(bp, "%d", &t);
-	  stats->qual.noise = (unsigned char) t;
-	  /* -- discarded packets -- */
-	  bp = strtok(NULL, " ");
-	  sscanf(bp, "%d", &stats->discard.nwid);
-	  bp = strtok(NULL, " ");
-	  sscanf(bp, "%d", &stats->discard.code);
-	  bp = strtok(NULL, " ");
-	  sscanf(bp, "%d", &stats->discard.misc);
-	  fclose(f);
-	  return 0;
-  	}
-    }
-  fclose(f);
-  return -1;
-}
-
-/*------------------------------------------------------------------*/
-/*
  * Get wireless informations & config from the device driver
  * We will call all the classical wireless ioctl on the driver through
  * the socket to know what is supported and to get the settings...
@@ -126,7 +55,7 @@ get_info(int			skfd,
   memset((char *) info, 0, sizeof(struct wireless_info));
 
   /* Get wireless name */
-  strcpy(wrq.ifr_name, ifname);
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   if(ioctl(skfd, SIOCGIWNAME, &wrq) < 0)
     /* If no wireless name : no wireless extensions */
     return(-1);
@@ -134,11 +63,11 @@ get_info(int			skfd,
     strcpy(info->name, wrq.u.name);
 
   /* Get ranges */
-  if(get_range_info(skfd, ifname, &(info->range)) >= 0)
+  if(iw_get_range_info(skfd, ifname, &(info->range)) >= 0)
     info->has_range = 1;
 
   /* Get network ID */
-  strcpy(wrq.ifr_name, ifname);
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   if(ioctl(skfd, SIOCGIWNWID, &wrq) >= 0)
     {
       info->has_nwid = 1;
@@ -146,15 +75,15 @@ get_info(int			skfd,
     }
 
   /* Get frequency / channel */
-  strcpy(wrq.ifr_name, ifname);
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   if(ioctl(skfd, SIOCGIWFREQ, &wrq) >= 0)
     {
       info->has_freq = 1;
-      info->freq = freq2float(&(wrq.u.freq));
+      info->freq = iw_freq2float(&(wrq.u.freq));
     }
 
   /* Get sensitivity */
-  strcpy(wrq.ifr_name, ifname);
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   if(ioctl(skfd, SIOCGIWSENS, &wrq) >= 0)
     {
       info->has_sens = 1;
@@ -162,7 +91,7 @@ get_info(int			skfd,
     }
 
   /* Get encryption information */
-  strcpy(wrq.ifr_name, ifname);
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   wrq.u.data.pointer = (caddr_t) info->key;
   wrq.u.data.length = 0;
   wrq.u.data.flags = 0;
@@ -174,7 +103,7 @@ get_info(int			skfd,
     }
 
   /* Get ESSID */
-  strcpy(wrq.ifr_name, ifname);
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   wrq.u.essid.pointer = (caddr_t) info->essid;
   wrq.u.essid.length = 0;
   wrq.u.essid.flags = 0;
@@ -185,7 +114,7 @@ get_info(int			skfd,
     }
 
   /* Get AP address */
-  strcpy(wrq.ifr_name, ifname);
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   if(ioctl(skfd, SIOCGIWAP, &wrq) >= 0)
     {
       info->has_ap_addr = 1;
@@ -193,7 +122,7 @@ get_info(int			skfd,
     }
 
   /* Get NickName */
-  strcpy(wrq.ifr_name, ifname);
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   wrq.u.essid.pointer = (caddr_t) info->nickname;
   wrq.u.essid.length = 0;
   wrq.u.essid.flags = 0;
@@ -202,7 +131,7 @@ get_info(int			skfd,
       info->has_nickname = 1;
 
   /* Get bit rate */
-  strcpy(wrq.ifr_name, ifname);
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   if(ioctl(skfd, SIOCGIWRATE, &wrq) >= 0)
     {
       info->has_bitrate = 1;
@@ -210,7 +139,7 @@ get_info(int			skfd,
     }
 
   /* Get RTS threshold */
-  strcpy(wrq.ifr_name, ifname);
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   if(ioctl(skfd, SIOCGIWRTS, &wrq) >= 0)
     {
       info->has_rts = 1;
@@ -218,7 +147,7 @@ get_info(int			skfd,
     }
 
   /* Get fragmentation threshold */
-  strcpy(wrq.ifr_name, ifname);
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   if(ioctl(skfd, SIOCGIWFRAG, &wrq) >= 0)
     {
       info->has_frag = 1;
@@ -226,16 +155,16 @@ get_info(int			skfd,
     }
 
   /* Get operation mode */
-  strcpy(wrq.ifr_name, ifname);
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   if(ioctl(skfd, SIOCGIWMODE, &wrq) >= 0)
     {
-      if((wrq.u.mode < 6) && (wrq.u.mode >= 0))
+      if((wrq.u.mode < IW_NUM_OPER_MODE) && (wrq.u.mode >= 0))
 	info->has_mode = 1;
       info->mode = wrq.u.mode;
     }
 
   /* Get Power Management settings */
-  strcpy(wrq.ifr_name, ifname);
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   wrq.u.power.flags = 0;
   if(ioctl(skfd, SIOCGIWPOWER, &wrq) >= 0)
     {
@@ -245,7 +174,7 @@ get_info(int			skfd,
 
 #if WIRELESS_EXT > 9
   /* Get Transmit Power */
-  strcpy(wrq.ifr_name, ifname);
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   if(ioctl(skfd, SIOCGIWTXPOW, &wrq) >= 0)
     {
       info->has_txpower = 1;
@@ -255,7 +184,7 @@ get_info(int			skfd,
 
 #if WIRELESS_EXT > 10
   /* Get retry limit/lifetime */
-  strcpy(wrq.ifr_name, ifname);
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   if(ioctl(skfd, SIOCGIWRETRY, &wrq) >= 0)
     {
       info->has_retry = 1;
@@ -264,7 +193,7 @@ get_info(int			skfd,
 #endif	/* WIRELESS_EXT > 10 */
 
   /* Get stats */
-  if(iw_getstats(ifname, &(info->stats)) >= 0)
+  if(iw_get_stats(skfd, ifname, &(info->stats)) >= 0)
     {
       info->has_stats = 1;
     }
@@ -281,6 +210,8 @@ static void
 display_info(struct wireless_info *	info,
 	     char *			ifname)
 {
+  char		buffer[128];	/* Temporary buffer */
+
   /* One token is more of less 5 character, 14 tokens per line */
   int	tokens = 3;	/* For name */
 
@@ -300,7 +231,7 @@ display_info(struct wireless_info *	info,
 	    printf("ESSID:\"%s\"  ", info->essid);
 	}
       else
-	printf("ESSID:off  ");
+	printf("ESSID:off/any  ");
     }
 
   /* Display NickName (station name), if any */
@@ -317,7 +248,7 @@ display_info(struct wireless_info *	info,
   /* Display Network ID */
   if(info->has_nwid)
     {
-      /* Note : should display right number of digit according to info
+      /* Note : should display proper number of digit according to info
        * in range structure */
       if(info->nwid.disabled)
 	printf("NWID:off/any  ");
@@ -329,7 +260,7 @@ display_info(struct wireless_info *	info,
   /* Display the current mode of operation */
   if(info->has_mode)
     {
-      printf("Mode:%s  ", operation_mode[info->mode]);
+      printf("Mode:%s  ", iw_operation_mode[info->mode]);
       tokens +=3;
     }
 
@@ -369,7 +300,7 @@ display_info(struct wireless_info *	info,
 	printf("Cell:");
       else
 	printf("Access Point:");
-      printf(" %s", pr_ether(info->ap_addr.sa_data));
+      printf(" %s", iw_pr_ether(buffer, info->ap_addr.sa_data));
     }
 
   /* Display the currently used/set bit-rate */
@@ -426,7 +357,7 @@ display_info(struct wireless_info *	info,
 
 	  /* Convert everything to dBm */
 	  if(info->txpower.flags & IW_TXPOW_MWATT)
-	    dbm = mwatt2dbm(info->txpower.value);
+	    dbm = iw_mwatt2dbm(info->txpower.value);
 	  else
 	    dbm = info->txpower.value;
 
@@ -478,7 +409,11 @@ display_info(struct wireless_info *	info,
 	{
 	  /* Let's check the value and its type */
 	  if(info->retry.flags & IW_RETRY_TYPE)
-	    print_retry_value(stdout, info->retry.value, info->retry.flags);
+	    {
+	      iw_print_retry_value(buffer,
+				   info->retry.value, info->retry.flags);
+	      printf("%s", buffer);
+	    }
 
 	  /* Let's check if nothing (simply on) */
 	  if(info->retry.flags == IW_RETRY_ON)
@@ -548,7 +483,8 @@ display_info(struct wireless_info *	info,
       else
 	{
 	  /* Display the key */
-	  print_key(stdout, info->key, info->key_size, info->key_flags);
+	  iw_print_key(buffer, info->key, info->key_size, info->key_flags);
+	  printf("%s", buffer);
 
 	  /* Other info... */
 	  if((info->key_flags & IW_ENCODE_INDEX) > 1)
@@ -574,10 +510,14 @@ display_info(struct wireless_info *	info,
 	{
 	  /* Let's check the value and its type */
 	  if(info->power.flags & IW_POWER_TYPE)
-	    print_pm_value(stdout, info->power.value, info->power.flags);
+	    {
+	      iw_print_pm_value(buffer, info->power.value, info->power.flags);
+	      printf("%s", buffer);
+	    }
 
 	  /* Let's check the mode */
-	  print_pm_mode(stdout, info->power.flags);
+	  iw_print_pm_mode(buffer, info->power.flags);
+	  printf("%s", buffer);
 
 	  /* Let's check if nothing (simply on) */
 	  if(info->power.flags == IW_POWER_ON)
@@ -590,13 +530,23 @@ display_info(struct wireless_info *	info,
   if(info->has_stats)
     {
       info->stats.qual.updated = 0x0;	/* Not that reliable, disable */
-      printf("Link ");
-      print_stats(stdout, &info->stats.qual, &info->range, info->has_range);
+      iw_print_stats(buffer, &info->stats.qual, &info->range, info->has_range);
+      printf("Link %s\n", buffer);
 
+#if WIRELESS_EXT > 11
+      printf("          Rx invalid nwid:%d  Rx invalid crypt:%d  Rx invalid frag:%d\n          Tx excessive retries:%d  Invalid misc:%d   Missed beacon:%d\n",
+	     info->stats.discard.nwid,
+	     info->stats.discard.code,
+	     info->stats.discard.fragment,
+	     info->stats.discard.retries,
+	     info->stats.discard.misc,
+	     info->stats.miss.beacon);
+#else /* WIRELESS_EXT > 11 */
       printf("          Rx invalid nwid:%d  invalid crypt:%d  invalid misc:%d\n",
 	     info->stats.discard.nwid,
 	     info->stats.discard.code,
 	     info->stats.discard.misc);
+#endif /* WIRELESS_EXT > 11 */
     }
 
   printf("\n");
@@ -698,7 +648,7 @@ set_info(int		skfd,		/* The socket */
 		    fprintf(stderr, "SIOCGIWNWID: %s\n", strerror(errno));
 		    return(-1);
 		  }
-		strcpy(wrq.ifr_name, ifname);
+		strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
 		wrq.u.nwid.disabled = 0;
 	      }
 	    else
@@ -731,7 +681,7 @@ set_info(int		skfd,		/* The socket */
 	  if(index(args[i], 'M')) freq *= MEGA;
 	  if(index(args[i], 'k')) freq *= KILO;
 
-	  float2freq(freq, &(wrq.u.freq));
+	  iw_float2freq(freq, &(wrq.u.freq));
 
 	  if(ioctl(skfd, SIOCSIWFREQ, &wrq) < 0)
 	    {
@@ -777,7 +727,7 @@ set_info(int		skfd,		/* The socket */
 		  fprintf(stderr, "SIOCGIWENCODE: %s\n", strerror(errno));
 		  return(-1);
 		}
-	      strcpy(wrq.ifr_name, ifname);
+	      strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
 	      wrq.u.data.flags &= ~IW_ENCODE_DISABLED;	/* Enable */
 	    }
 	  else
@@ -806,12 +756,17 @@ set_info(int		skfd,		/* The socket */
 		}
 	      else
 		{
-		  /* Second case : has hexadecimal digits */
-		  p = buff = malloc(strlen(args[i]) + 1);
+		  /* Second case : as hexadecimal digits */
+		  buff = malloc(strlen(args[i]) + 1);
+		  if(buff == NULL)
+		    {
+		      fprintf(stderr, "Setting key : Malloc failed (string too long ?)\n");
+		      return(-1);
+		    }
 		  strcpy(buff, args[i]);
 
 		  p = strtok(buff, "-:;.,");
-		  while(p != (char *) NULL)
+		  while((p != (char *) NULL) && (k < IW_ENCODING_TOKEN_MAX))
 		    {
 		      if(sscanf(p, "%2X", &temp) != 1)
 			{
@@ -900,10 +855,12 @@ set_info(int		skfd,		/* The socket */
 		    fprintf(stderr, "SIOCGIWESSID: %s\n", strerror(errno));
 		    return(-1);
 		  }
-		strcpy(wrq.ifr_name, ifname);
+		strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
 		wrq.u.essid.flags = 1;
 	      }
 	    else
+	      /* Check the size of what the user passed us to avoid
+	       * buffer overflows */
 	      if(strlen(args[i]) > IW_ESSID_MAX_SIZE)
 		{
 		  fprintf(stderr, "ESSID too long (max %d): ``%s''\n",
@@ -915,7 +872,7 @@ set_info(int		skfd,		/* The socket */
 		  int		temp;
 
 		  wrq.u.essid.flags = 1;
-		  strcpy(essid, args[i]);
+		  strcpy(essid, args[i]);	/* Size checked, all clear */
 
 		  /* Check for ESSID index */
 		  if(((i+1) < count) &&
@@ -944,14 +901,14 @@ set_info(int		skfd,		/* The socket */
 	    iw_usage();
 
 	  /* Check if we have valid address types */
-	  if(check_addr_type(skfd, ifname) < 0)
+	  if(iw_check_addr_type(skfd, ifname) < 0)
 	    {
 	      fprintf(stderr, "%-8.8s  Interface doesn't support MAC & IP addresses\n", ifname);
 	      return(-1);
 	    }
 
 	  /* Get the address */
-	  if(in_addr(skfd, ifname, args[i++], &(wrq.u.ap_addr)) < 0)
+	  if(iw_in_addr(skfd, ifname, args[i++], &(wrq.u.ap_addr)) < 0)
 	    iw_usage();
 
 	  if(ioctl(skfd, SIOCSIWAP, &wrq) < 0)
@@ -1006,7 +963,7 @@ set_info(int		skfd,		/* The socket */
 		      fprintf(stderr, "SIOCGIWRATE: %s\n", strerror(errno));
 		      return(-1);
 		    }
-		  strcpy(wrq.ifr_name, ifname);
+		  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
 		  wrq.u.bitrate.fixed = 1;
 		}
 	      else			/* Should be a numeric value */
@@ -1069,7 +1026,7 @@ set_info(int		skfd,		/* The socket */
 			fprintf(stderr, "SIOCGIWRTS: %s\n", strerror(errno));
 			return(-1);
 		      }
-		    strcpy(wrq.ifr_name, ifname);
+		    strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
 		    wrq.u.rts.fixed = 1;
 		  }
 		else			/* Should be a numeric value */
@@ -1110,7 +1067,7 @@ set_info(int		skfd,		/* The socket */
 			fprintf(stderr, "SIOCGIWFRAG: %s\n", strerror(errno));
 			return(-1);
 		      }
-		    strcpy(wrq.ifr_name, ifname);
+		    strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
 		    wrq.u.frag.fixed = 1;
 		  }
 		else			/* Should be a numeric value */
@@ -1139,10 +1096,11 @@ set_info(int		skfd,		/* The socket */
 	  if(sscanf(args[i], "%d", &k) != 1)
 	    {
 	      k = 0;
-	      while(k < 6 && strncasecmp(args[i], operation_mode[k], 3))
+	      while((k < IW_NUM_OPER_MODE) &&
+		    strncasecmp(args[i], iw_operation_mode[k], 3))
 		k++;
 	    }
-	  if((k > 5) || (k < 0))
+	  if((k >= IW_NUM_OPER_MODE) || (k < 0))
 	    iw_usage();
 
 	  wrq.u.mode = k;
@@ -1171,7 +1129,7 @@ set_info(int		skfd,		/* The socket */
 		    fprintf(stderr, "SIOCGIWPOWER: %s\n", strerror(errno));
 		    return(-1);
 		  }
-		strcpy(wrq.ifr_name, ifname);
+		strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
 		wrq.u.power.disabled = 0;
 	      }
 	    else
@@ -1268,7 +1226,7 @@ set_info(int		skfd,		/* The socket */
 	    iw_usage();
 
 	  /* Extract range info */
-	  if(get_range_info(skfd, ifname, &range) < 0)
+	  if(iw_get_range_info(skfd, ifname, &range) < 0)
 	    memset(&range, 0, sizeof(range));
 
 	  /* Prepare the request */
@@ -1292,7 +1250,7 @@ set_info(int		skfd,		/* The socket */
 			fprintf(stderr, "SIOCGIWTXPOW: %s\n", strerror(errno));
 			return(-1);
 		      }
-		    strcpy(wrq.ifr_name, ifname);
+		    strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
 		    wrq.u.txpower.fixed = 1;
 		  }
 		else			/* Should be a numeric value */
@@ -1311,11 +1269,11 @@ set_info(int		skfd,		/* The socket */
 		    /* Convert */
 		    if(!ismwatt && (range.txpower_capa & IW_TXPOW_MWATT))
 		      {
-			power = dbm2mwatt(power);
+			power = iw_dbm2mwatt(power);
 			wrq.u.data.flags = IW_TXPOW_MWATT;
 		      }
 		    if(ismwatt && !(range.txpower_capa & IW_TXPOW_MWATT))
-		      power = mwatt2dbm(power);
+		      power = iw_mwatt2dbm(power);
 		    wrq.u.bitrate.value = power;
 
 		    /* Check for an additional argument */
@@ -1441,7 +1399,7 @@ main(int	argc,
   int goterr = 0;
 
   /* Create a channel to the NET kernel. */
-  if((skfd = sockets_open()) < 0)
+  if((skfd = iw_sockets_open()) < 0)
     {
       perror("socket");
       exit(-1);

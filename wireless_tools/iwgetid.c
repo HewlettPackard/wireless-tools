@@ -8,7 +8,7 @@
  * This file is released under the GPL license.
  */
 
-#include "iwcommon.h"		/* Header */
+#include "iwlib.h"		/* Header */
 
 #define FORMAT_DEFAULT	0	/* Nice looking display for the user */
 #define FORMAT_SCHEME	1	/* To be used as a Pcmcia Scheme */
@@ -78,7 +78,7 @@ print_essid(int		skfd,
   int		j;
 
   /* Get ESSID */
-  strcpy(wrq.ifr_name, ifname);
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   wrq.u.essid.pointer = (caddr_t) essid;
   wrq.u.essid.length = 0;
   wrq.u.essid.flags = 0;
@@ -119,7 +119,7 @@ print_nwid(int		skfd,
   struct iwreq		wrq;
 
   /* Get network ID */
-  strcpy(wrq.ifr_name, ifname);
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   if(ioctl(skfd, SIOCGIWNWID, &wrq) < 0)
     return(-1);
 
@@ -185,15 +185,14 @@ scan_devices(int		skfd,
  * Display an Ethernet address in readable format.
  */
 char *
-pr_ether(unsigned char *ptr)
+pr_ether(char *		buffer,
+	 unsigned char *ptr)
 {
-  static char buff[64];
-
-  sprintf(buff, "%02X:%02X:%02X:%02X:%02X:%02X",
-	(ptr[0] & 0xFF), (ptr[1] & 0xFF), (ptr[2] & 0xFF),
-	(ptr[3] & 0xFF), (ptr[4] & 0xFF), (ptr[5] & 0xFF)
+  sprintf(buffer, "%02X:%02X:%02X:%02X:%02X:%02X",
+	  (ptr[0] & 0xFF), (ptr[1] & 0xFF), (ptr[2] & 0xFF),
+	  (ptr[3] & 0xFF), (ptr[4] & 0xFF), (ptr[5] & 0xFF)
   );
-  return(buff);
+  return(buffer);
 }
 
 /*------------------------------------------------------------------*/
@@ -242,15 +241,16 @@ print_ap(int		skfd,
 	 int		format)
 {
   struct iwreq		wrq;
+  char			buffer[64];
 
   /* Get network ID */
-  strcpy(wrq.ifr_name, ifname);
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   if(ioctl(skfd, SIOCGIWAP, &wrq) < 0)
     return(-1);
 
   /* Print */
   printf("%-8.8s  Access Point: %s\n", ifname,
-	 pr_ether(wrq.u.ap_addr.sa_data));
+	 pr_ether(buffer, wrq.u.ap_addr.sa_data));
 
   return(0);
 }

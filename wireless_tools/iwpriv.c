@@ -10,7 +10,7 @@
  * This file is released under the GPL license.
  */
 
-#include "iwcommon.h"		/* Header */
+#include "iwlib.h"		/* Header */
 
 /************************* MISC SUBROUTINES **************************/
 
@@ -24,7 +24,6 @@ iw_usage(void)
   fprintf(stderr, "Usage: iwpriv interface [private-command [private-arguments]]\n");
   fprintf(stderr, "              interface [roam {on|off}]\n");
   fprintf(stderr, "              interface [port {ad-hoc|managed|N}]\n");
-  exit(1);
 }
 
 /************************ GENERIC FUNCTIONS *************************/
@@ -41,10 +40,10 @@ print_priv_info(int		skfd,
   int		k;
   iwprivargs	priv[16];
   int		n;
-  char *	argtype[] = { "    ", "byte", "char", "", "int", "float" };
+  char *	argtype[] = { "    ", "byte", "char", "", "int ", "float" };
 
   /* Read the private ioctls */
-  n = get_priv_info(skfd, ifname, priv);
+  n = iw_get_priv_info(skfd, ifname, priv);
 
   /* Is there any ? */
   if(n <= 0)
@@ -115,7 +114,7 @@ set_private(int		skfd,		/* Socket */
   int		number;
 
   /* Read the private ioctls */
-  number = get_priv_info(skfd, ifname, priv);
+  number = iw_get_priv_info(skfd, ifname, priv);
 
   /* Is there any ? */
   if(number <= 0)
@@ -209,7 +208,7 @@ set_private(int		skfd,		/* Socket */
   strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
 
   if((priv[k].set_args & IW_PRIV_SIZE_FIXED) &&
-     (byte_size(priv[k].set_args) < IFNAMSIZ))
+     (iw_byte_size(priv[k].set_args) < IFNAMSIZ))
     memcpy(wrq.u.name, buffer, IFNAMSIZ);
   else
     {
@@ -235,7 +234,7 @@ set_private(int		skfd,		/* Socket */
       printf("%-8.8s  %s:", ifname, priv[k].name);
 
       if((priv[k].get_args & IW_PRIV_SIZE_FIXED) &&
-	 (byte_size(priv[k].get_args) < IFNAMSIZ))
+	 (iw_byte_size(priv[k].get_args) < IFNAMSIZ))
 	{
 	  memcpy(buffer, wrq.u.name, IFNAMSIZ);
 	  n = priv[k].get_args & IW_PRIV_SIZE_MASK;
@@ -301,7 +300,7 @@ set_roaming(int		skfd,		/* Socket */
 					   change roam states */
 
   /* Read the private ioctls */
-  number = get_priv_info(skfd, ifname, priv);
+  number = iw_get_priv_info(skfd, ifname, priv);
 
   /* Is there any ? */
   if(number <= 0)
@@ -313,7 +312,10 @@ set_roaming(int		skfd,		/* Socket */
     }
 
   if(count != 1)
-    iw_usage();
+    {
+      iw_usage();
+      return(-1);
+    }
 
   if(!strcasecmp(args[i], "on"))
     {
@@ -363,12 +365,11 @@ set_roaming(int		skfd,		/* Socket */
       if(ioctl(skfd, priv[k].cmd, &wrq) < 0)
 	{
 	  fprintf(stderr, "Roaming support is broken.\n");
-	  exit(0);
+	  return(-1);
 	}
     }
-  i++;
 
-  return(i);
+  return(0);
 }
 
 /*------------------------------------------------------------------*/
@@ -391,7 +392,7 @@ port_type(int		skfd,		/* Socket */
   char *	modes[] = { "invalid", "managed (BSS)", "reserved", "ad-hoc" };
 
   /* Read the private ioctls */
-  number = get_priv_info(skfd, ifname, priv);
+  number = iw_get_priv_info(skfd, ifname, priv);
 
   /* Is there any ? */
   if(number <= 0)
@@ -431,7 +432,10 @@ port_type(int		skfd,		/* Socket */
     }
 
   if(count != 1)
-    iw_usage();
+    {
+      iw_usage();
+      return(-1);
+    }
 
   /* Read it */
   /* As a string... */
@@ -443,7 +447,10 @@ port_type(int		skfd,		/* Socket */
   else
     /* ...or as an integer */
     if(sscanf(args[i], "%d", (int *) &ptype) != 1)
-      iw_usage();
+      {
+	iw_usage();
+	return(-1);
+      }
   
   k = -1;
   while((++k < number) && strcmp(priv[k].name, "sport_type") &&
@@ -460,11 +467,10 @@ port_type(int		skfd,		/* Socket */
   if(ioctl(skfd, priv[k].cmd, &wrq) < 0)
     {
       fprintf(stderr, "Invalid port type (or setting not allowed)\n");
-      exit(0);
+      return(-1);
     }
 
-  i++;
-  return(i);
+  return(0);
 }
 
 /******************************* MAIN ********************************/
@@ -481,10 +487,10 @@ main(int	argc,
   int goterr = 0;
 
   /* Create a channel to the NET kernel. */
-  if((skfd = sockets_open()) < 0)
+  if((skfd = iw_sockets_open()) < 0)
     {
       perror("socket");
-      exit(-1);
+      return(-1);
     }
 
   /* No argument : show the list of all device + info */
@@ -492,7 +498,7 @@ main(int	argc,
     {
       print_priv_devices(skfd);
       close(skfd);
-      exit(0);
+      return(0);
     }
 
   /* Special cases take one... */
@@ -502,7 +508,7 @@ main(int	argc,
     {
       iw_usage();
       close(skfd);
-      exit(0);
+      return(0);
     }
 
   /* The device name must be the first argument */
@@ -511,7 +517,7 @@ main(int	argc,
     {
       print_priv_info(skfd, argv[1]);
       close(skfd);
-      exit(0);
+      return(0);
     }
 
   /* Special cases take two... */
@@ -520,7 +526,7 @@ main(int	argc,
     {
       goterr = set_roaming(skfd, argv + 3, argc - 3, argv[1]);
       close(skfd);
-      exit(0);
+      return(goterr);
     }
 
   /* Port type */
@@ -528,7 +534,7 @@ main(int	argc,
     {
       goterr = port_type(skfd, argv + 3, argc - 3, argv[1]);
       close(skfd);
-      exit(0);
+      return(goterr);
     }
 
   /* Otherwise, it's a private ioctl */
@@ -537,5 +543,5 @@ main(int	argc,
   /* Close the socket. */
   close(skfd);
 
-  return(1);
+  return(goterr);
 }
