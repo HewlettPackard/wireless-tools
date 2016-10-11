@@ -230,7 +230,7 @@ packet size disable the scheme. You may also set this parameter to
 .I "	iwconfig eth0 frag off"
 .TP
 .BR key / enc [ryption]
-Used to manipulate encryption or scrambling keys and encryption mode.
+Used to manipulate encryption or scrambling keys and security mode.
 .br
 To set the current encryption key, just enter the key in hex digits as
 .IR XXXX-XXXX-XXXX-XXXX " or " XXXXXXXX .
@@ -246,11 +246,19 @@ To change which key is the current active key, just enter
 (without entering any key value).
 .br
 .IR off " and " on
-disable and reenable encryption,
+disable and reenable encryption.
+.br
+The security mode may be
 .I open
-set the system in open mode (accept non-encrypted packets) and
+or
+.IR restricted ,
+and its meaning depend on the card used. With most card, in
+.I open
+mode no authentication is used and the card may also accept
+non-encrypted sessions, whereas in
 .I restricted
-discard non-encrypted packets.
+mode only encrypted sessions are accepted and the card will use
+authentication if available.
 .br
 If you need to set multiple keys, or set a key and change the active
 key, you need to use multiple
@@ -401,7 +409,7 @@ settings (depending on availability).
 .br
 See above for explanations of what these parameters mean.
 .br
-If the label for bitrate is followed by
+If the label for some values (such as bitrate) is followed by
 .RB ` = ',
 it means that the parameter is fixed and forced to that value, if it
 is followed by
@@ -412,27 +420,57 @@ If
 .I /proc/net/wireless
 exists,
 .I iwconfig
-will also display its content :
+will also display its content. Note that those values will depend on
+the driver and the hardware specifics, so you need to refer to your
+driver documentation for proper interpretation of those values.
 .TP
 .B Link quality
-Quality of the link or the modulation (what is the level of contention
-or interference, or how good the received signal is).
+Overall quality of the link. May be based on the level of contention
+or interference, the bit or frame error rate, how good the received
+signal is, some timing synchronisation, or other hardware metric. This
+is an aggregate value, and depend totally on the driver and hardware.
 .TP
 .B Signal level
-Received signal strength (how strong the received signal is).
+Received signal strength (RSSI - how strong the received signal
+is). May be arbitrary units or dBm,
+.I iwconfig
+uses driver meta information to interpret the raw value given by
+.I /proc/net/wireless
+and display the proper unit or maximum value (using 8 bit arithmetic). In
+.I Ad-Hoc
+mode, this may be undefined and you should use
+.IR iwspy .
 .TP
 .B Noise level
-Background noise level (when no packet is transmited).
+Background noise level (when no packet is transmited). Similar
+comments as for
+.BR "Signal level" .
 .TP
-.B invalid nwid
-Number of packets received with a different NWID. Used to detect
-configuration problems or adjacent network existence.
+.B Rx invalid nwid
+Number of packets received with a different NWID or ESSID. Used to
+detect configuration problems or adjacent network existence (on the
+same frequency).
 .TP
-.B invalid crypt
-Number of packets that the hardware was unable to decrypt.
+.B Rx invalid crypt
+Number of packets that the hardware was unable to decrypt. This can be
+used to detect invalid encryption settings.
 .TP
-.B invalid misc
+.B Rx invalid frag
+Number of packets for which the hardware was not able to properly
+re-assemble the link layer fragments (most likely one was missing).
+.TP
+.B Tx excessive retries
+Number of packets that the hardware failed to deliver. Most MAC
+protocol will retry the packet a number of time before giving up.
+.TP
+.B Invalid misc
 Other packets lost in relation with specific wireless operations.
+.TP
+.B Missed beacon
+Number of periodic beacons from the Cell or the Access Point we have
+missed. Beacons are sent at regular interval to maintain the cell
+coordination, failure to receive them usually indicate that we are out
+of range.
 .\"
 .\" AUTHOR part
 .\"
@@ -450,8 +488,6 @@ Jean Tourrilhes \- jt@hpl.hp.com
 .BR ifconfig (8),
 .BR iwspy (8),
 .BR iwlist (8),
+.BR iwevent (8),
 .BR iwpriv (8),
-.BR wavelan (4),
-.BR wavelan_cs (4),
-.BR wvlan_cs (4),
-.BR netwave_cs (4).
+.BR wireless (7).

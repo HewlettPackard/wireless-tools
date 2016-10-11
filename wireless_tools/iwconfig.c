@@ -467,9 +467,9 @@ display_info(struct wireless_info *	info,
 	  if((info->key_flags & IW_ENCODE_INDEX) > 1)
 	    printf(" [%d]", info->key_flags & IW_ENCODE_INDEX);
 	  if(info->key_flags & IW_ENCODE_RESTRICTED)
-	    printf("   Encryption mode:restricted");
+	    printf("   Security mode:restricted");
 	  if(info->key_flags & IW_ENCODE_OPEN)
-	    printf("   Encryption mode:open");
+	    printf("   Security mode:open");
 	  printf("\n          ");
  	}
     }
@@ -608,7 +608,7 @@ print_info(int		skfd,
 	do { \
 	if(iw_set_ext(skfd, ifname, request, wrq) < 0) { \
 		ERR_SET_EXT(rname, request); \
-		fprintf(stderr, "    SET failed on device %-1.8s ; %s.\n", \
+		fprintf(stderr, "    SET failed on device %-1.16s ; %s.\n", \
 			ifname, strerror(errno)); \
 		return(-5); \
 	} } while(0)
@@ -622,7 +622,7 @@ print_info(int		skfd,
 	do { \
 	if(iw_get_ext(skfd, ifname, request, wrq) < 0) { \
 		ERR_SET_EXT(rname, request); \
-		fprintf(stderr, "    GET failed on device %-1.8s ; %s.\n", \
+		fprintf(stderr, "    GET failed on device %-1.16s ; %s.\n", \
 			ifname, strerror(errno)); \
 		return(-6); \
 	} } while(0)
@@ -720,7 +720,7 @@ set_info(int		skfd,		/* The socket */
 	{
 	  if(++i >= count)
 	    ABORT_ARG_NUM("Set Sensitivity", SIOCSIWSENS);
-	  if(sscanf(args[i], "%d", &(wrq.u.sens.value)) != 1)
+	  if(sscanf(args[i], "%i", &(wrq.u.sens.value)) != 1)
 	    ABORT_ARG_TYPE("Set Sensitivity", SIOCSIWSENS, args[i]);
 
 	  IW_SET_EXT_ERR(skfd, ifname, SIOCSIWSENS, &wrq,
@@ -741,7 +741,7 @@ set_info(int		skfd,		/* The socket */
 	    {
 	      /* Get old encryption information */
 	      wrq.u.data.pointer = (caddr_t) key;
-	      wrq.u.data.length = 0;
+	      wrq.u.data.length = IW_ENCODING_TOKEN_MAX;
 	      wrq.u.data.flags = 0;
 	      IW_GET_EXT_ERR(skfd, ifname, SIOCGIWENCODE, &wrq,
 			     "Set Encode");
@@ -766,7 +766,8 @@ set_info(int		skfd,		/* The socket */
 		  /* -- Check for the key -- */
 		  if(i < count)
 		    {
-		      keylen = iw_in_key(args[i], key);
+		      keylen = iw_in_key_full(skfd, ifname,
+					      args[i], key, &wrq.u.data.flags);
 		      if(keylen > 0)
 			{
 			  wrq.u.data.length = keylen;
@@ -778,7 +779,7 @@ set_info(int		skfd,		/* The socket */
 
 		  /* -- Check for token index -- */
 		  if((i < count) &&
-		     (sscanf(args[i], "[%d]", &temp) == 1) &&
+		     (sscanf(args[i], "[%i]", &temp) == 1) &&
 		     (temp > 0) && (temp < IW_ENCODE_INDEX))
 		    {
 		      wrq.u.encoding.flags |= temp;
@@ -805,6 +806,14 @@ set_info(int		skfd,		/* The socket */
 		      ++i;
 		      gotone++;
 		    }
+#if WIRELESS_EXT > 15
+		  if((i < count) && (!strncasecmp(args[i], "temporary", 4)))
+		    {
+		      wrq.u.data.flags |= IW_ENCODE_TEMP;
+		      ++i;
+		      gotone++;
+		    }
+#endif
 		}
 	      while(gotone != oldone);
 
@@ -843,33 +852,45 @@ set_info(int		skfd,		/* The socket */
 	      {
 		/* Get old essid */
 		wrq.u.essid.pointer = (caddr_t) essid;
-		wrq.u.essid.length = 0;
+		wrq.u.essid.length = IW_ESSID_MAX_SIZE + 1;
 		wrq.u.essid.flags = 0;
 		IW_GET_EXT_ERR(skfd, ifname, SIOCGIWESSID, &wrq,
 			       "Set ESSID");
 		wrq.u.essid.flags = 1;
 	      }
 	    else
-	      /* Check the size of what the user passed us to avoid
-	       * buffer overflows */
-	      if(strlen(args[i]) > IW_ESSID_MAX_SIZE)
-		ABORT_ARG_SIZE("Set ESSID", SIOCSIWESSID, IW_ESSID_MAX_SIZE);
-	      else
-		{
-		  int		temp;
+	      {
+		/* '-' allow to escape the ESSID string, allowing
+		 * to set it to the string "any" or "off".
+		 * This is a big ugly, but it will do for now */
+		if(!strcmp(args[i], "-"))
+		  {
+		    i++;
+		    if(i >= count)
+		      ABORT_ARG_NUM("Set ESSID", SIOCSIWESSID);
+		  }
 
-		  wrq.u.essid.flags = 1;
-		  strcpy(essid, args[i]);	/* Size checked, all clear */
+		/* Check the size of what the user passed us to avoid
+		 * buffer overflows */
+		if(strlen(args[i]) > IW_ESSID_MAX_SIZE)
+		  ABORT_ARG_SIZE("Set ESSID", SIOCSIWESSID, IW_ESSID_MAX_SIZE);
+		else
+		  {
+		    int		temp;
 
-		  /* Check for ESSID index */
-		  if(((i+1) < count) &&
-		     (sscanf(args[i+1], "[%d]", &temp) == 1) &&
-		     (temp > 0) && (temp < IW_ENCODE_INDEX))
-		    {
-		      wrq.u.essid.flags = temp;
-		      ++i;
-		    }
-		}
+		    wrq.u.essid.flags = 1;
+		    strcpy(essid, args[i]);	/* Size checked, all clear */
+
+		    /* Check for ESSID index */
+		    if(((i+1) < count) &&
+		       (sscanf(args[i+1], "[%i]", &temp) == 1) &&
+		       (temp > 0) && (temp < IW_ENCODE_INDEX))
+		      {
+			wrq.u.essid.flags = temp;
+			++i;
+		      }
+		  }
+	      }
 
 	  wrq.u.essid.pointer = (caddr_t) essid;
 	  wrq.u.essid.length = strlen(essid) + 1;
@@ -1003,7 +1024,7 @@ set_info(int		skfd,		/* The socket */
 		    wrq.u.rts.fixed = 1;
 		  }
 		else			/* Should be a numeric value */
-		  if(sscanf(args[i], "%ld", (unsigned long *) &(wrq.u.rts.value))
+		  if(sscanf(args[i], "%li", (unsigned long *) &(wrq.u.rts.value))
 		     != 1)
 		    ABORT_ARG_TYPE("Set RTS Threshold", SIOCSIWRTS, args[i]);
 	    }
@@ -1037,7 +1058,7 @@ set_info(int		skfd,		/* The socket */
 		    wrq.u.frag.fixed = 1;
 		  }
 		else			/* Should be a numeric value */
-		  if(sscanf(args[i], "%ld",
+		  if(sscanf(args[i], "%li",
 			    (unsigned long *) &(wrq.u.frag.value))
 		     != 1)
 		    ABORT_ARG_TYPE("Set Fragmentation Threshold", SIOCSIWFRAG,
@@ -1058,7 +1079,7 @@ set_info(int		skfd,		/* The socket */
 	  if(i >= count)
 	    ABORT_ARG_NUM("Set Mode", SIOCSIWMODE);
 
-	  if(sscanf(args[i], "%d", &k) != 1)
+	  if(sscanf(args[i], "%i", &k) != 1)
 	    {
 	      k = 0;
 	      while((k < IW_NUM_OPER_MODE) &&
@@ -1209,8 +1230,7 @@ set_info(int		skfd,		/* The socket */
 		    int		ismwatt = 0;
 
 		    /* Get the value */
-		    if(sscanf(args[i], "%ld",
-			      (unsigned long *) &(power)) != 1)
+		    if(sscanf(args[i], "%i", &(power)) != 1)
 		      ABORT_ARG_TYPE("Set Tx Power", SIOCSIWTXPOW, args[i]);
 
 		    /* Check if milliwatt */
@@ -1229,7 +1249,7 @@ set_info(int		skfd,		/* The socket */
 			  power = iw_mwatt2dbm(power);
 			wrq.u.data.flags = IW_TXPOW_DBM;
 		      }
-		    wrq.u.bitrate.value = power;
+		    wrq.u.txpower.value = power;
 
 		    /* Check for an additional argument */
 		    if(((i+1) < count) &&
@@ -1292,6 +1312,7 @@ set_info(int		skfd,		/* The socket */
 	  else
 	    if(!strncasecmp(args[i], "lifetime", 4))
 	      {
+		wrq.u.retry.flags &= ~IW_RETRY_LIMIT;
 		wrq.u.retry.flags |= IW_RETRY_LIFETIME;
 		if(++i >= count)
 		  ABORT_ARG_NUM("Set Retry Limit", SIOCSIWRETRY);

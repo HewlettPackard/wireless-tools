@@ -17,16 +17,19 @@ INSTALL
 	This file contains installation instruction and requirements.
 	A *must* read.
 
+DISTRIBUTION.txt
+----------------
+	This file will document how to configure wireless cards at
+boot time with various Linux distributions (using Wireless
+Extensions). Please read it carefully before asking questions.
+	In this file, I try to collect all the specifics of Wireless
+Extensions integration in the most common Linux distributions. I need
+your help to complete this file.
+
 PCMCIA.txt
 ----------
 	This file describes how to use Pcmcia init script to configure
 Wireless Extensions and how to use Pcmcia schemes.
-
-DISTRIBUTION
-------------
-	This file will document the specifics of Wireless Extensions
-with a few different distributions. I need your help to complete this
-file.
 
 man pages (iwconfig.8, iwlist.8, iwpriv.8, iwspy.8)
 ---------

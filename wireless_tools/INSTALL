@@ -62,4 +62,35 @@ the tools from compiling.
 	The trick is to copy the file .../include/linux/wireless.h
 from the kernel to the /usr/include headers.
 
+Multi-kernel installation (expert only) :
+---------------------------------------
+	People who run different kernel on the same system may have
+problems due to the fact that those kernel have different version of
+Wireless Extensions and the Wireless Tools need to match the version
+of Wireless Extension used.
+
+	It is now possible to install multiple versions of the
+Wireless Tools on a system and get the proper version used based on
+the kernel running, using a redirector. However, this support is still
+experimental and for expert users only.
+	The redirector will work properly only with kernel using
+Wireless Extensions version 16 and higher. Earlier version of Wireless
+Extensions will be detected as either v15 (v12, v13, v14 and v15) or
+as v11 (v11 and earlier).
+
+	The installation looks typically like :
+------------------------------------
+make clean
+make FORCE_WEXT_VERSION=11
+make vinstall FORCE_WEXT_VERSION=11
+make clean
+make FORCE_WEXT_VERSION=15
+make vinstall FORCE_WEXT_VERSION=15
+make clean
+make FORCE_WEXT_VERSION=16
+make vinstall FORCE_WEXT_VERSION=16
+[...]
+------------------------------------
+
+
 	Jean <jt@hpl.hp.com>

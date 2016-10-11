@@ -12,11 +12,6 @@
 
 #include "iwlib.h"		/* Header */
 
-/* Backward compatibility */
-#ifndef IW_MAX_GET_SPY
-#define IW_MAX_GET_SPY	64
-#endif	/* IW_MAX_GET_SPY */
-
 /************************* DISPLAY ROUTINES **************************/
 
 /*------------------------------------------------------------------*/
@@ -31,7 +26,7 @@ print_spy_info(int	skfd,
 {
   struct iwreq		wrq;
   char		buffer[(sizeof(struct iw_quality) +
-			sizeof(struct sockaddr)) * IW_MAX_GET_SPY];
+			sizeof(struct sockaddr)) * IW_MAX_SPY];
   char		temp[128];
   struct sockaddr *	hwa;
   struct iw_quality *	qual;
@@ -45,7 +40,7 @@ print_spy_info(int	skfd,
 
   /* Collect stats */
   wrq.u.data.pointer = (caddr_t) buffer;
-  wrq.u.data.length = IW_MAX_GET_SPY;
+  wrq.u.data.length = IW_MAX_SPY;
   wrq.u.data.flags = 0;
   if(iw_get_ext(skfd, ifname, SIOCGIWSPY, &wrq) < 0)
     {
@@ -87,13 +82,94 @@ print_spy_info(int	skfd,
 #if WIRELESS_EXT > 11
   if((n > 0) && (has_range))
     {
-      iw_print_stats(temp, &range.avg_qual, &range, has_range);
-      printf("    typical/average   : %s\n", temp);
+      iwstats	stats;
+
+      /* Get /proc/net/wireless */
+      if(iw_get_stats(skfd, ifname, &stats) >= 0)
+	{
+	  iw_print_stats(buffer, &stats.qual, &range, has_range);
+	  printf("    Link/Cell/AP      : %s\n", buffer);
+	  /* Display the static data */
+	  iw_print_stats(temp, &range.avg_qual, &range, has_range);
+	  printf("    Typical/Reference : %s\n", temp);
+	}
     }
 #endif /* WIRELESS_EXT > 11 */
 
   printf("\n");
   return(0);
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Get spy thresholds from the driver and display
+ */
+static int
+get_spy_threshold(int		skfd,		/* The socket */
+		  char *	ifname,		/* Dev name */
+		  char *	args[],		/* Command line args */
+		  int		count)		/* Args count */
+{
+#if WIRELESS_EXT > 15
+  struct iwreq		wrq;
+  struct iw_thrspy	threshold;
+  iwrange	range;
+  int			has_range = 0;
+
+  /* Avoid "Unused parameter" warning */
+  args = args; count = count;
+
+  /* Time to send thresholds to the driver */
+  wrq.u.data.pointer = (caddr_t) &threshold;
+  wrq.u.data.length = 1;
+  wrq.u.data.flags = 0;
+  if(iw_set_ext(skfd, ifname, SIOCGIWTHRSPY, &wrq) < 0)
+    {
+      fprintf(stderr, "Interface doesn't support thresholds...\n");
+      fprintf(stderr, "SIOCGIWTHRSPY: %s\n", strerror(errno));
+      return(-1);
+    }
+
+  /* Get range info if we can */
+  if(iw_get_range_info(skfd, ifname, &(range)) >= 0)
+    has_range = 1;
+
+  /* Display thresholds */
+  if((has_range) && (threshold.low.level))
+    {
+      /* If the statistics are in dBm */
+      if(threshold.low.level > range.max_qual.level)
+	{
+	  /* Statistics are in dBm (absolute power measurement) */
+	  printf("%-8.8s  Low threshold:%d dBm  High threshold:%d dBm\n\n",
+		 ifname,
+		 threshold.low.level - 0x100, threshold.high.level - 0x100);
+	}
+      else
+	{
+	  /* Statistics are relative values (0 -> max) */
+	  printf("%-8.8s  Low threshold:%d/%d  High threshold:%d/%d\n\n",
+		 ifname,
+		 threshold.low.level, range.max_qual.level,
+		 threshold.high.level, range.max_qual.level);
+	}
+    }
+  else
+    {
+      /* We can't read the range, so we don't know... */
+      printf("%-8.8s  Low threshold:%d  High threshold:%d\n\n",
+	     ifname,
+	     threshold.low.level, threshold.high.level);
+    }
+
+  return(0);
+#else /* WIRELESS_EXT > 15 */
+  /* Avoid "Unused parameter" warning */
+  skfd = skfd; ifname = ifname; args = args; count = count;
+
+  fprintf(stderr, "Feature not available...\n");
+  return(-1);
+#endif /* WIRELESS_EXT > 15 */
 }
 
 /************************* SETTING ROUTINES **************************/
@@ -104,9 +180,9 @@ print_spy_info(int	skfd,
  */
 static int
 set_spy_info(int		skfd,		/* The socket */
+	     char *		ifname,		/* Dev name */
 	     char *		args[],		/* Command line args */
-	     int		count,		/* Args count */
-	     char *		ifname)		/* Dev name */
+	     int		count)		/* Args count */
 {
   struct iwreq		wrq;
   int			i;
@@ -189,6 +265,78 @@ set_spy_info(int		skfd,		/* The socket */
   return(0);
 }
 
+/*------------------------------------------------------------------*/
+/*
+ * Set spy thresholds in the driver from command line
+ */
+static int
+set_spy_threshold(int		skfd,		/* The socket */
+		  char *	ifname,		/* Dev name */
+		  char *	args[],		/* Command line args */
+		  int		count)		/* Args count */
+{
+#if WIRELESS_EXT > 15
+  struct iwreq		wrq;
+  struct iw_thrspy	threshold;
+  int			low_thr;
+  int			high_thr;
+
+  /* Init */
+  memset(&threshold, '\0', sizeof(threshold));
+
+  /* "off" : disable functionality (set 0 addresses) */
+  if(!strcmp(args[0], "off"))
+    {
+      /* Just send null threshold, will disable it */
+    }
+  else
+    {
+      /* Try to get our threshold */
+      if(count < 2)
+	{
+	  fprintf(stderr, "%-8.8s  Need two threshold values\n", ifname);
+	  return(-1);
+	}
+      if((sscanf(args[0], "%i", &low_thr) != 1) ||
+	 (sscanf(args[1], "%i", &high_thr) != 1))
+	{
+	  fprintf(stderr, "%-8.8s  Invalid threshold values\n", ifname);
+	  return(-1);
+	}
+      /* Basic sanity check */
+      if(high_thr < low_thr)
+	{
+	  fprintf(stderr, "%-8.8s  Inverted threshold range\n", ifname);
+	  return(-1);
+	}
+      /* Copy thresholds */
+      threshold.low.level = low_thr;
+      threshold.low.updated = 0x2;
+      threshold.high.level = high_thr;
+      threshold.high.updated = 0x2;
+    }
+
+  /* Time to send thresholds to the driver */
+  wrq.u.data.pointer = (caddr_t) &threshold;
+  wrq.u.data.length = 1;
+  wrq.u.data.flags = 0;
+  if(iw_set_ext(skfd, ifname, SIOCSIWTHRSPY, &wrq) < 0)
+    {
+      fprintf(stderr, "Interface doesn't accept thresholds...\n");
+      fprintf(stderr, "SIOCSIWTHRSPY: %s\n", strerror(errno));
+      return(-1);
+    }
+
+  return(0);
+#else /* WIRELESS_EXT > 15 */
+  /* Avoid "Unused parameter" warning */
+  skfd = skfd; ifname = ifname; args = args; count = count;
+
+  fprintf(stderr, "Feature not available...\n");
+  return(-1);
+#endif /* WIRELESS_EXT > 15 */
+}
+
 /******************************* MAIN ********************************/
 
 /*------------------------------------------------------------------*/
@@ -227,8 +375,15 @@ main(int	argc,
 	if(argc == 2)
 	  print_spy_info(skfd, argv[1], NULL, 0);
 	else
-	  /* Otherwise, it's a list of address to set in the spy list */
-	  goterr = set_spy_info(skfd, argv + 2, argc - 2, argv[1]);
+	  /* Special commands */
+	  if(!strcmp(argv[2], "setthr"))
+	    goterr = set_spy_threshold(skfd, argv[1], argv + 3, argc - 3);
+	  else
+	    if(!strcmp(argv[2], "getthr"))
+	      goterr = get_spy_threshold(skfd, argv[1], argv + 3, argc - 3);
+	    else
+	      /* Otherwise, it's a list of address to set in the spy list */
+	      goterr = set_spy_info(skfd, argv[1], argv + 2, argc - 2);
 
   /* Close the socket. */
   close(skfd);

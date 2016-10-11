@@ -1,12 +1,12 @@
 /*
  *	Wireless Tools
  *
- *		Jean II - HPLB 97->99 - HPL 99->01
+ *		Jean II - HPLB 97->99 - HPL 99->03
  *
  * Common subroutines to all the wireless tools...
  *
  * This file is released under the GPL license.
- *     Copyright (c) 1997-2002 Jean Tourrilhes <jt@hpl.hp.com>
+ *     Copyright (c) 1997-2003 Jean Tourrilhes <jt@hpl.hp.com>
  */
 
 /***************************** INCLUDES *****************************/
@@ -17,9 +17,9 @@
 
 /* Various versions information */
 /* Recommended Wireless Extension version */
-#define WE_VERSION	15
+#define WE_VERSION	16	/* ### don't forget #warning ### */
 /* Version of Wireless Tools */
-#define WT_VERSION	25
+#define WT_VERSION	26
 
 /*
  * Verify a few things about Wireless Extensions.
@@ -37,12 +37,12 @@
 #error "Use Wireless Tools v19 or update your kernel headers !"
 #endif
 #if WIRELESS_EXT < WE_VERSION && !defined(WEXT_HEADER)
-#warning "Wireless Extension earlier than v15 detected,"
+#warning "Wireless Extension earlier than v16 detected,"
 #warning "Not all tools features will be compiled in !"
 #warning "No worry, I'll try to make the best of it ;-)"
 #endif
 #if WIRELESS_EXT > WE_VERSION && !defined(WEXT_HEADER)
-#warning "Wireless Extension later than v15 detected,"
+#warning "Wireless Extension later than v16 detected,"
 #warning "Maybe you should get a more recent version"
 #warning "of the Wireless Tools package !"
 #endif
@@ -183,7 +183,11 @@ iw_enum_devices(int		skfd,
 
 	  if(!s)
 	    /* Failed to parse, complain and continue */
+#ifndef IW_RESTRIC_ENUM
+	    fprintf(stderr, "Cannot parse " PROC_NET_DEV "\n");
+#else
 	    fprintf(stderr, "Cannot parse " PROC_NET_WIRELESS "\n");
+#endif
 	  else
 	    /* Got it, print info about this interface */
 	    (*fn)(skfd, name, args, count);
@@ -303,6 +307,11 @@ print_iface_version_info(int	skfd,
   /* Avoid "Unused parameter" warning */
   args = args; count = count;
 
+  /* If no wireless name : no wireless extensions.
+   * This enable us to treat the SIOCGIWRANGE failure below properly. */
+  if(iw_get_ext(skfd, ifname, SIOCGIWNAME, &wrq) < 0)
+    return(-1);
+
   /* Cleanup */
   memset(buffer, 0, sizeof(buffer));
 
@@ -310,7 +319,11 @@ print_iface_version_info(int	skfd,
   wrq.u.data.length = sizeof(buffer);
   wrq.u.data.flags = 0;
   if(iw_get_ext(skfd, ifname, SIOCGIWRANGE, &wrq) < 0)
-    return(-1);
+    {
+      /* Interface support WE (see above), but not IWRANGE */
+      fprintf(stderr, "%-8.8s  Driver has no Wireless Extension version information.\n\n", ifname);
+      return(0);
+    }
 
   /* Copy stuff at the right place, ignore extra */
   range = (struct iw_range *) buffer;
@@ -329,7 +342,7 @@ print_iface_version_info(int	skfd,
   else
     {
 #if 0
-      fprintf(stderr, "%-8.8s  no Wireless Extension version information.\n\n",
+      fprintf(stderr, "%-8.8s  Wireless Extension version too old.\n\n",
 		      ifname);
 #endif
     }
@@ -345,7 +358,11 @@ print_iface_version_info(int	skfd,
 int
 iw_print_version_info(char *	toolname)
 {
-  int skfd;			/* generic raw socket desc.	*/
+  int		skfd;			/* generic raw socket desc.	*/
+  char		buff[1024];
+  FILE *	fh;
+  char *	p;
+  int		v;
 
   /* Create a channel to the NET kernel. */
   if((skfd = iw_sockets_open()) < 0)
@@ -361,6 +378,29 @@ iw_print_version_info(char *	toolname)
 	 WE_VERSION);
   printf("          Currently compiled with Wireless Extension v%d.\n\n",
 	 WIRELESS_EXT);
+
+  /* Check if /proc/net/wireless is available */
+  fh = fopen(PROC_NET_WIRELESS, "r");
+  if(fh != NULL)
+    {
+      /* Read the first line of buffer */
+      fgets(buff, sizeof(buff), fh);
+
+      /* Check if it's WE-16 or later */
+      if(strstr(buff, "| WE") != NULL)
+	{
+	  /* Read the second line of buffer */
+	  fgets(buff, sizeof(buff), fh);
+
+	  /* Get to the last separator, to get the version */
+	  p = strrchr(buff, '|');
+	  if((p != NULL) && (sscanf(p + 1, "%d", &v) == 1))
+	    /* That was it ! */
+	    printf("Kernel    Currently compiled with Wireless Extension v%d.\n\n", v);
+	}
+      /* Cleanup */
+      fclose(fh);
+    }
 
   /* Version for each device */
   iw_enum_devices(skfd, &print_iface_version_info, NULL, 0);
@@ -774,7 +814,23 @@ iw_print_bitrate(char *	buffer,
 int
 iw_dbm2mwatt(int	in)
 {
+#ifdef WE_NOLIBM
+  /* Version without libm : slower */
+  int		ip = in / 10;
+  int		fp = in % 10;
+  int		k;
+  double	res = 1.0;
+
+  /* Split integral and floating part to avoid accumulating rounding errors */
+  for(k = 0; k < ip; k++)
+    res *= 10;
+  for(k = 0; k < fp; k++)
+    res *= LOG10_MAGIC;
+  return((int) res);
+#else	/* WE_NOLIBM */
+  /* Version with libm : faster */
   return((int) (floor(pow(10.0, (((double) in) / 10.0)))));
+#endif	/* WE_NOLIBM */
 }
 
 /*------------------------------------------------------------------*/
@@ -784,7 +840,27 @@ iw_dbm2mwatt(int	in)
 int
 iw_mwatt2dbm(int	in)
 {
+#ifdef WE_NOLIBM
+  /* Version without libm : slower */
+  double	fin = (double) in;
+  int		res = 0;
+
+  /* Split integral and floating part to avoid accumulating rounding errors */
+  while(fin > 10.0)
+    {
+      res += 10;
+      fin /= 10.0;
+    }
+  while(fin > 1.000001)	/* Eliminate rounding errors, take ceil */
+    {
+      res += 1;
+      fin /= LOG10_MAGIC;
+    }
+  return(res);
+#else	/* WE_NOLIBM */
+  /* Version with libm : faster */
   return((int) (ceil(10.0 * log10((double) in))));
+#endif	/* WE_NOLIBM */
 }
 
 /********************** STATISTICS SUBROUTINES **********************/
@@ -813,6 +889,7 @@ iw_get_stats(int	skfd,
   char		buf[256];
   char *	bp;
   int		t;
+  skfd = skfd;	/* Avoid "Unused parameter" warning */
   if(f==NULL)
     return -1;
   /* Loop on all devices */
@@ -981,9 +1058,6 @@ iw_in_key(char *		input,
 	  unsigned char *	key)
 {
   int		keylen = 0;
-  char *	buff;
-  char *	p;
-  int		temp;
 
   /* Check the type of key */
   if(!strncmp(input, "s:", 2))
@@ -1002,30 +1076,116 @@ iw_in_key(char *		input,
       }
     else
       {
+	char *	buff;
+	char *	hex;
+	char *	out;
+	char *	p;
+
 	/* Third case : as hexadecimal digits */
-	buff = malloc(strlen(input) + 1);
+	buff = malloc(IW_ENCODING_TOKEN_MAX + strlen(input) + 1);
 	if(buff == NULL)
 	  {
 	    fprintf(stderr, "Malloc failed (string too long ?)\n");
 	    return(-1);
 	  }
-	/* Preserve original buffer */
-	strcpy(buff, input);
+	/* Preserve original buffers (both in & out) */
+	hex = buff + IW_ENCODING_TOKEN_MAX;
+	strcpy(hex, input);
+	out = buff;
 
 	/* Parse */
-	p = strtok(buff, "-:;.,");
+	p = strtok(hex, "-:;.,");
 	while((p != (char *) NULL) && (keylen < IW_ENCODING_TOKEN_MAX))
 	  {
-	    if(sscanf(p, "%2X", &temp) != 1)
-	      return(-1);		/* Error */
-	    key[keylen++] = (unsigned char) (temp & 0xFF);
-	    if(strlen(p) > 2)	/* Token not finished yet */
-	      p += 2;
+	    int	temph;
+	    int	templ;
+	    int	count;
+	    int	len;
+	    /* Get each char separatly (and not by two) so that we don't
+	     * get confused by 'enc' (=> '0E'+'0C') and similar */
+	    count = sscanf(p, "%1X%1X", &temph, &templ);
+	    if(count < 1)
+	      return(-1);		/* Error -> non-hex char */
+	    /* Fixup odd strings such as '123' is '01'+'23' and not '12'+'03'*/
+	    len = strlen(p);
+	    if(len % 2)
+	      count = 1;
+	    /* Put back two chars as one byte */
+	    if(count == 2)
+	      templ |= temph << 4;
+	    else
+	      templ = temph;
+	    out[keylen++] = (unsigned char) (templ & 0xFF);
+	    /* Check where to get next char from */
+	    if(len > count)	/* Token not finished yet */
+	      p += count;
 	    else
 	      p = strtok((char *) NULL, "-:;.,");
 	  }
+	memcpy(key, out, keylen);
 	free(buff);
       }
+
+  return(keylen);
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Parse a key from the command line.
+ * Return size of the key, or 0 (no key) or -1 (error)
+ */
+int
+iw_in_key_full(int		skfd,
+	       char *		ifname,
+	       char *		input,
+	       unsigned char *	key,
+	       __u16 *		flags)
+{
+  int		keylen = 0;
+  char *	p;
+
+  if(!strncmp(input, "l:", 2))
+    {
+#if WIRELESS_EXT > 15
+      struct iw_range	range;
+#endif
+
+      /* Extra case : as a login (user:passwd - Cisco LEAP) */
+      keylen = strlen(input + 2) + 1;		/* skip "l:", add '\0' */
+      /* Most user/password is 8 char, so 18 char total, < 32 */
+      if(keylen > IW_ENCODING_TOKEN_MAX)
+	keylen = IW_ENCODING_TOKEN_MAX;
+      memcpy(key, input + 2, keylen);
+
+      /* Separate the two strings */
+      p = strchr(key, ':');
+      if(p == NULL)
+	{
+	  fprintf(stderr, "Error: Invalid login format\n");
+	  return(-1);
+	}
+      *p = '\0';
+
+#if WIRELESS_EXT > 15
+      printf("flags = %X, index = %X\n", *flags, range.encoding_login_index);
+      if((*flags & IW_ENCODE_INDEX) == 0)
+	{
+	  /* Extract range info */
+	  if(iw_get_range_info(skfd, ifname, &range) < 0)
+	    memset(&range, 0, sizeof(range));
+	  printf("flags = %X, index = %X\n", *flags, range.encoding_login_index);
+	  /* Set the index the driver expects */
+	  *flags |= range.encoding_login_index & IW_ENCODE_INDEX;
+	}
+      printf("flags = %X, index = %X\n", *flags, range.encoding_login_index);
+#else
+      /* Avoid "Unused parameter" warning */
+      skfd = skfd; ifname = ifname; flags = flags;
+#endif
+    }
+  else
+    /* Simpler routine above */
+    keylen = iw_in_key(input, key);
 
   return(keylen);
 }
@@ -1108,6 +1268,8 @@ iw_print_pm_mode(char *	buffer,
       strcpy(buffer, "mode:Repeat multicasts");
       break;
     default:
+      strcpy(buffer, "");
+      break;
     }
 }
 
@@ -1530,8 +1692,8 @@ static const char standard_ioctl_hdr[] = {
 	IW_HEADER_TYPE_POINT,	/* SIOCGIWSTATS */
 	IW_HEADER_TYPE_POINT,	/* SIOCSIWSPY */
 	IW_HEADER_TYPE_POINT,	/* SIOCGIWSPY */
-	IW_HEADER_TYPE_NULL,	/* -- hole -- */
-	IW_HEADER_TYPE_NULL,	/* -- hole -- */
+	IW_HEADER_TYPE_POINT,	/* SIOCSIWTHRSPY */
+	IW_HEADER_TYPE_POINT,	/* SIOCGIWTHRSPY */
 	IW_HEADER_TYPE_ADDR,	/* SIOCSIWAP */
 	IW_HEADER_TYPE_ADDR,	/* SIOCGIWAP */
 	IW_HEADER_TYPE_NULL,	/* -- hole -- */

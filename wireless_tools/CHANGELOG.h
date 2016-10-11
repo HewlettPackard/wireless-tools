@@ -304,6 +304,69 @@
  *	o Complain about version mistmatch at runtime only once [iwlib]
  *	o Fix IWNAME null termination [iwconfig, iwlib]
  *	o "iwgetid -p" to display protocol name and check WE support [iwgetid]
+ *
+ * wireless 26 :
+ * -----------
+ *	o #define IFLA_WIRELESS if needed [iwlib]
+ *	o Update man page with SuSE intruction (see below) [wireless.7]
+ *		(From Alexander Pevzner <pzz@pzz.msk.ru>)
+ *	o Allow to display all 8 bit rates instead of 7 [iwlist]
+ *	o Fix retry lifetime to not set IW_RETRY_LIMIT flag [iwconfig]
+ *		(From Christian Zoz <zoz@suse.de>)
+ *	o Update SuSE configuration instructions [DISTRIBUTIONS]
+ *	---
+ *	o Update man page with regards to /proc/net/wireless [iwconfig.8]
+ *	o Add NOLIBM version of iw_dbm2mwatt()/iw_mwatt2dbm() [iwlib]
+ *	---
+ *	o Fix "iwconfig ethX enc on" on WE-15 : set buffer size [iwconfig]
+ *	o Display /proc/net/wireless before "typical data" [iwspy]
+ *		(From Pavel Roskin <proski@gnu.org>)
+ *	o Fix uninstall [Makefile]
+ *	o Change "Encryption mode" to "Security mode" [iwconfig/iwlist]
+ *	---
+ *	o Add kernel headers that will be removed from wireless.h [iwlib]
+ *	o Remove IW_MAX_GET_SPY, people should use AP-List [iwspy]
+ *	o Re-word List of "Access Points" to "Peers/Access-Points" [iwlist]
+ *	o Add support for SIOCGIWTHRSPY event [iwevent/iwlib]
+ *	o Add support for SIOCSIWTHRSPY/SIOCGIWTHRSPY ioctls [iwspy]
+ *	---
+ *	o Add SIOCGIWNAME/Protocol event display [iwlist scan/iwevent]
+ *	o Add temporary encoding flag setting [iwconfig]
+ *	o Add login encoding setting [iwlib/iwconfig]
+ *	---
+ *	o Fix corruption of encryption key setting when followed by another
+ *	  setting starting with a valid hex char ('essid' -> 'E') [iwlib]
+ *	o Fix iw_in_key() so that it parses every char and not bundle of
+ *	  two so that 'enc' is not the valid key '0E0C' [iwlib]
+ *	o Fix parsing of odd keys '123' is '0123' instead of '1203' [iwlib]
+ *	---
+ *	o Implement WE version tool redirector (need WE-16) [iwredir]
+ *	o Add "make vinstall" to use redirector [Makefile]
+ *	o Fix compilation warning in WE < 16 [iwlib, iwspy]
+ *	o Allow to specify PREFIX on make command line [Makefile]
+ *	---
+ *	o Update wireless.h (more frequencies) [wireless.h]
+ *	o Allow to escape ESSID="any" using "essid - any" [iwconfig]
+ *	o Updated Red-Hat 9 wireless config instructions [DISTRIBUTIONS]
+ *		(From Pavel Roskin <proski@gnu.org>)
+ *	o Replace all %d into %i so we can input hex/oct [iwlib, iwpriv]
+ *	---
+ *	o If >= WE-16, display kernel version in "iwconfig --version" [iwlib]
+ *		(From Antonio Vilei <francesco.sigona@unile.it>)
+ *	o Fix "wrq.u.bitrate.value = power;" => txpower [iwconfig]
+ *		(From Casey Carter <Casey@Carter.net>)
+ *	o Make iwlib.h header C++ friendly. [iwlib]
+ *	---
+ *		(From Pavel Roskin <proski@gnu.org>)
+ *	o Make sure that KERNEL_SRC point to a valid directory [Makefile]
+ *	o Print message if card support WE but has no version info [iwlib]
+ *		(From Simon Kelley <simon@thekelleys.org.uk>)
+ *	o If power has no mode, don't print garbage [iwlib]
+ *	---
+ *		(Bug reported by Guus Sliepen <guus@sliepen.eu.org>)
+ *	o Don't cast "int power" to unsigned long in sscanf [iwconfig]
+ *		(From Pavel Roskin <proski@gnu.org>)
+ *	o Add $(LDFLAGS) for final linking [Makefile]
  */
 
 /* ----------------------------- TODO ----------------------------- */

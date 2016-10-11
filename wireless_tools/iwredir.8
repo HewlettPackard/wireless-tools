@@ -1,0 +1,89 @@
+.\" Jean II - HPL - 03
+.\" iwredir.8
+.\"
+.TH IWREDIR 8 "31 October 1996" "net-tools" "Linux Programmer's Manual"
+.\"
+.\" NAME part
+.\"
+.SH NAME
+iwredir \- WE-version wireless tool redirectot
+.\"
+.\" SYNOPSIS part
+.\"
+.SH SYNOPSIS
+.BI "iw" XXX " [ " args " ]"
+.br
+.BI "iwredir -wev
+.\"
+.\" DESCRIPTION part
+.\"
+.SH DESCRIPTION
+.B Iwredir
+is used to enable the use multiple version of the Wireless Tools on
+the same system.
+.B Iwredir
+pick the proper version of the wireless tools based on the version of
+Wireless Extension of the current kernel.
+.PP
+A version of the Wireless Tools need to be compiled for each version
+of Wireless Extensions expected to be used (this require specific
+.I make
+instructions), and each tool name need to be suffixed by the WE
+version (ex.
+.I iwconfig16
+for the binary of iwconfig compiled for Wireless Extension 16).
+.br
+Then,
+.B iwredir
+need to be installed under the name of each of the tool that need
+redirection
+.RI "(" iwconfig ", " iwlist "...)."
+.br
+.B Iwredir
+just adds the version of WE from the current kernel to the name it was
+called and executed the resulting command name. If the user invoque
+.I iwlist
+(that is now replaced with
+.IR iwredir )
+and the current kernel has WE version
+.IR 17 ,
+the final command executed will be
+.IR iwlist17 .
+.br
+.B Iwredir
+will read the Wireless Extension version of the current kernel from
+.IR /proc/net/wireless .
+.PP
+.B Iwredir
+works only for Wireless Extension 16 and later, all previous version
+of WE are assumed to be version 15 or version 11.
+.B Iwredir
+is usually not installed by default and is expected to be used only by
+.I advanced
+users.
+.\"
+.\" PARAMETER part
+.\"
+.SH PARAMETERS
+.TP
+.BR -wev
+Give the Wireless Extension version that
+.B iwredir
+will use for redirection. This is mostly used in the Wireless Tools
+Makefile when doing a versioned installation of the tools.
+.\"
+.\" FILES part
+.\"
+.SH FILES
+.I /proc/net/wireless
+.\"
+.\" SEE ALSO part
+.\"
+.SH SEE ALSO
+.BR iwconfig (8),
+.BR iwlist (8),
+.BR iwspy (8),
+.BR iwevent (8),
+.BR iwpriv (8),
+.BR wireless (7).
+

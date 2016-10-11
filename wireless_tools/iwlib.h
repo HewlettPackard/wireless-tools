@@ -122,6 +122,11 @@
 #include <linux/in.h>		/* For struct sockaddr_in */
 #endif	/* LIBC5_HEADERS */
 
+/* Those 3 headers were previously included in wireless.h */
+#include <linux/types.h>		/* for "caddr_t" et al		*/
+#include <linux/socket.h>		/* for "struct sockaddr" et al	*/
+#include <linux/if.h>			/* for IFNAMSIZ and co... */
+
 #ifdef WEXT_HEADER
 /* Private copy of Wireless extensions */
 #include WEXT_HEADER
@@ -129,6 +134,10 @@
 /* System wide Wireless extensions */
 #include <linux/wireless.h>
 #endif	/* !WEXT_HEADER */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /****************************** DEBUG ******************************/
 
@@ -143,6 +152,8 @@
 #define KILO	1e3
 #define MEGA	1e6
 #define GIGA	1e9
+/* For doing log10/exp10 without libm */
+#define LOG10_MAGIC	1.25892541179
 
 /* Backward compatibility for Wireless Extension 9 */
 #ifndef IW_POWER_MODIFIER
@@ -156,6 +167,9 @@
 #define IW_ENCODE_NOKEY         0x0800  /* Key is write only, so not here */
 #define IW_ENCODE_MODE		0xF000	/* Modes defined below */
 #endif /* IW_ENCODE_NOKEY */
+#ifndef IW_ENCODE_TEMP
+#define IW_ENCODE_TEMP		0x0400  /* Temporary key */
+#endif /* IW_ENCODE_TEMP */
 
 /* More backward compatibility */
 #ifndef SIOCSIWCOMMIT
@@ -257,6 +271,7 @@ typedef int (*iw_enum_handler)(int	skfd,
 /*
  * All the functions in iwcommon.c
  */
+
 /* ---------------------- SOCKET SUBROUTINES -----------------------*/
 int
 	iw_sockets_open(void);
@@ -328,6 +343,12 @@ void
 int
 	iw_in_key(char *		input,
 		  unsigned char *	key);
+int
+	iw_in_key_full(int		skfd,
+		       char *		ifname,
+		       char *		input,
+		       unsigned char *	key,
+		       __u16 *		flags);
 /* ----------------- POWER MANAGEMENT SUBROUTINES ----------------- */
 void
 	iw_print_pm_value(char *	buffer,
@@ -473,5 +494,9 @@ iw_null_ether(struct sockaddr *sap)
   sap->sa_family = ARPHRD_ETHER;
   memset((char *) sap->sa_data, 0x00, ETH_ALEN);
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif	/* IWLIB_H */

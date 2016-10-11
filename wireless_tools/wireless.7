@@ -58,6 +58,32 @@ wireless_mode ad_hoc
 .br
 .I /usr/share/doc/wireless.##/README.Debian
 .\"
+.\" SuSE 8.0 part
+.\"
+.SH SuSE 8.0
+SuSE 8.0 (and later) has integrated wireless configuration in their
+network scripts.
+.TP
+.B Tool :
+.B Yast2
+.TP
+.B File :
+.I /etc/sysconfig/network/wireless
+.br
+.I /etc/sysconfig/network/ifcfg-*
+.TP
+.B Form :
+.RI WIRELESS_ "<function>" = "<value>"
+.br
+WIRELESS_ESSID="Home"
+.br
+WIRELESS_MODE=ad_hoc
+.TP
+.B See also :
+man ifup
+.br
+info scpm
+.\"
 .\" PCMCIA part
 .\"
 .SH ORIGINAL PCMCIA SCRIPTS

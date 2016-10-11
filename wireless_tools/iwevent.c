@@ -26,6 +26,11 @@
 #include <time.h>
 #include <sys/time.h>
 
+/* Ugly backward compatibility :-( */
+#ifndef IFLA_WIRELESS
+#define IFLA_WIRELESS	(IFLA_MASTER + 1)
+#endif /* IFLA_WIRELESS */
+
 /************************ RTNETLINK HELPERS ************************/
 /*
  * The following code is extracted from :
@@ -104,8 +109,9 @@ static inline int rtnl_open(struct rtnl_handle *rth, unsigned subscriptions)
  */
 static inline int
 print_event_token(struct iw_event *	event,	/* Extracted token */
+		  char *		ifname,
 		  struct iw_range *	iwrange,	/* Range info */
-		  int			has_range)
+		  int			has_iwrange)
 {
   char		buffer[128];	/* Temporary buffer */
 
@@ -172,9 +178,9 @@ print_event_token(struct iw_event *	event,	/* Extracted token */
 	    if((event->u.data.flags & IW_ENCODE_INDEX) > 1)
 	      printf(" [%d]", event->u.data.flags & IW_ENCODE_INDEX);
 	    if(event->u.data.flags & IW_ENCODE_RESTRICTED)
-	      printf("   Encryption mode:restricted");
+	      printf("   Security mode:restricted");
 	    if(event->u.data.flags & IW_ENCODE_OPEN)
-	      printf("   Encryption mode:open");
+	      printf("   Security mode:open");
 	    printf("\n");
 	  }
       }
@@ -211,16 +217,49 @@ print_event_token(struct iw_event *	event,	/* Extracted token */
 	     iw_pr_ether(buffer, event->u.addr.sa_data));
       break;
 #endif /* WIRELESS_EXT > 14 */
+#if WIRELESS_EXT > 15
+    case SIOCGIWTHRSPY:
+      {
+	struct iw_thrspy	threshold;
+	int			skfd;
+	struct iw_range		range;
+	int			has_range = 0;
+	if((event->u.data.pointer) && (event->u.data.length))
+	  {
+	    memcpy(&threshold, event->u.data.pointer,
+		   sizeof(struct iw_thrspy));
+	    if((skfd = iw_sockets_open()) >= 0)
+	      {
+		has_range = (iw_get_range_info(skfd, ifname, &range) >= 0);
+		close(skfd);
+	      }
+	    printf("Spy threshold crossed on address:%s\n",
+		   iw_pr_ether(buffer, threshold.addr.sa_data));
+	    threshold.qual.updated = 0x0;	/* Not that reliable, disable */
+	    iw_print_stats(buffer, &threshold.qual, &range, has_range);
+	    printf("                            Link %s\n", buffer);
+	  }
+	else
+	  printf("Invalid Spy Threshold event\n");
+      }
+      break;
+#else
+      /* Avoid "Unused parameter" warning */
+      ifname = ifname;
+#endif /* WIRELESS_EXT > 15 */
       /* ----- junk ----- */
       /* other junk not currently in use */
     case SIOCGIWRATE:
       iw_print_bitrate(buffer, event->u.bitrate.value);
       printf("Bit Rate:%s\n", buffer);
       break;
+    case SIOCGIWNAME:
+      printf("Protocol:%-1.16s\n", event->u.name);
+      break;
     case IWEVQUAL:
       {
 	event->u.qual.updated = 0x0;	/* Not that reliable, disable */
-	iw_print_stats(buffer, &event->u.qual, iwrange, has_range);
+	iw_print_stats(buffer, &event->u.qual, iwrange, has_iwrange);
 	printf("Link %s\n", buffer);
 	break;
       }
@@ -273,7 +312,7 @@ print_event_stream(char *	ifname,
 	  else
 	    printf("                           ");
 	  if(ret > 0)
-	    print_event_token(&iwe, NULL, 0);
+	    print_event_token(&iwe, ifname, NULL, 0);
 	  else
 	    printf("(Invalid event)\n");
 	}

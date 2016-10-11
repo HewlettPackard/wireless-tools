@@ -223,7 +223,7 @@ set_private_cmd(int		skfd,		/* Socket */
   /* Check if we have a token index.
    * Do it know so that sub-ioctl takes precendence, and so that we
    * don't have to bother with it later on... */
-  if((count > 1) && (sscanf(args[0], "[%d]", &temp) == 1))
+  if((count > 1) && (sscanf(args[0], "[%i]", &temp) == 1))
     {
       subcmd = temp;
       args++;
@@ -284,7 +284,7 @@ set_private_cmd(int		skfd,		/* Socket */
 
 	  /* Fetch args */
 	  for(; i < wrq.u.data.length; i++) {
-	    sscanf(args[i], "%d", &temp);
+	    sscanf(args[i], "%i", &temp);
 	    buffer[i] = (char) temp;
 	  }
 	  break;
@@ -297,7 +297,7 @@ set_private_cmd(int		skfd,		/* Socket */
 
 	  /* Fetch args */
 	  for(; i < wrq.u.data.length; i++) {
-	    sscanf(args[i], "%d", &temp);
+	    sscanf(args[i], "%i", &temp);
 	    ((__s32 *) buffer)[i] = (__s32) temp;
 	  }
 	  break;
@@ -339,7 +339,7 @@ set_private_cmd(int		skfd,		/* Socket */
 	    if(index(args[i], 'G')) freq *= GIGA;
 	    if(index(args[i], 'M')) freq *= MEGA;
 	    if(index(args[i], 'k')) freq *= KILO;
-	    sscanf(args[i], "%d", &temp);
+	    sscanf(args[i], "%i", &temp);
 	    iw_float2freq(freq, ((struct iw_freq *) buffer) + i);
 	  }
 	  break;
@@ -802,7 +802,7 @@ port_type(int		skfd,		/* Socket */
     ptype = k;
   else
     /* ...or as an integer */
-    if(sscanf(args[i], "%d", (int *) &ptype) != 1)
+    if(sscanf(args[i], "%i", (int *) &ptype) != 1)
       {
 	iw_usage();
 	return(-1);

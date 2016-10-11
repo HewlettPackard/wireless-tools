@@ -32,6 +32,31 @@ distribution, please use the PCMCIA method).
 absolutely no clue about how your distribution works. I'm just
 collecting random information here without beeing able to verify it.
 
+				-----
+
+WIRELESS DRIVERS
+----------------
+	Most Linux wireless drivers support Wireless Extensions, and
+therefore may be configure via Wireless Tools and the methods
+described in this file.
+
+	However, a few drivers have no support or limited support for
+Wireless Extensions (like read only). In those cases, these are your
+options :
+		o read the driver documentation.
+		o use the driver specific interface or tools to
+configure the card, and try to integrate that in your distribution.
+		o implement Wireless Extension support in the driver.
+	In some cases, there are easier workaround. Different version
+of the driver may add Wireless Extension (often alongside the
+proprietary method). In some other case, there may be another driver
+supporting the same card and with support for Wireless Extensions.
+
+	Some Linux wireless drivers don't export all wireless settings
+via Wireless Extensions, not even through iwpriv. Those setting may be
+available through the driver specific interface. Refer to previous
+section for workarounds.
+
 ---------------------------------------------------------------------
 
 PCMCIA METHOD
@@ -144,6 +169,48 @@ but you may need to write your own mapping script which uses a
 combination of MAC address and scheme info to return a stanza name to
 ifupdown.
 
+				-----
+
+	You may also want to check ifupdown-roaming :
+		http://panopticon.csustan.edu/thood/ifupdown-roaming.html
+
+---------------------------------------------------------------------
+
+SuSE 8.0 and later
+--------
+		(Contributed by Christian Zoz <zoz@suse.de>)
+	All network configuration is done in the directory
+/etc/sysconfig/network. It does not matter if it's a build in NIC or
+PCMCIA, USB, etc. The files network.opts and wireless.opts in
+/etc/pcmcia are not used any longer. There is /sbin/ifup to set up all
+kind of network interface.
+	There is a file /etc/sysconfig/network/wireless where you may
+set most of the options of iwconfig in seperate variables (they are
+named like the options). Additionally you may use
+WIRELESS_IWCONFIG_OPTIONS e.g. for setting key 2, 3 or 4 or
+unsupported iwconfig commands. This file is documented and its
+settings are used for any wlan NIC.
+	Configuration of wireless variable looks like :
+		WIRELESS_ESSID="<essid>"
+	Every variable from file wireless may be used in the interface
+configuration files /etc/sysconfig/network/ifcfg-* as well. As
+expectable this overwrites the global setting in wireless. For
+sophisticated use of the ifcfg-* files read 'man ifup'.
+
+	Hint for PCMCIA and USB users:
+	You need not to use the iterface name for the configuration as
+this may vary from one plugin to another. You may use a description of
+your hardware instead (ifcfg-<MACADDRESS> or ifcfg-pcmcia-1 for card
+in Slot 1)
+
+	Some of the variables can be set with YaST2 as well.
+
+	If you miss the 'schemes' functionality from the pcmcia-cs
+packages use the tool SCPM (System Configuration Profile Management)
+instead. This extends the pcmcia schemes to the whole system
+configuration. Read 'info scpm'. Since SuSE 8.1 there also is a YaST2
+modul for SCPM.
+
 ---------------------------------------------------------------------
 
 RED-HAT 7.2
@@ -216,6 +283,38 @@ friends. The above web page explain how to switch it to orinoco_cs.
 
 ---------------------------------------------------------------------
 
+RED-HAT 9.0 and later
+-----------
+		(Cut'n'pasted from Dax Kelson web page)
+	http://www.gurulabs.com/RedHatLinux9-review.html
+
+	A little known fact is that newer versions of RHL support
+multiple network profiles. This is useful for machines that commonly
+plug into different networks (think laptops). The easy way to create
+network profiles is to use the redhat-config-network command. The
+question then becomes, what happens when you type "ifup eth0"? The
+behavior wasn't defined in previous versions, however, now in RHL 9
+the following behavior is defined;
+
+	search path for:
+# ifup $DEV
+	is:
+/etc/sysconfig/networking/profiles/$CURRENT_PROFILE/ifcfg-$DEV
+/etc/sysconfig/networking/profiles/default/ifcfg-$DEV
+/etc/sysconfig/network-scripts/ifcfg-$DEV
+
+	A cool trick is to boot your RHL box directly into a profile
+from the GRUB boot screen. To do this, create a separate
+/etc/boot/grub.conf entry for each network profile, and in each entry
+add the kernel argument netprofile=profilename.
+
+				-----
+
+	I'm pretty certain the profile scheme above also apply to
+wireless settings, which is good news...
+
+---------------------------------------------------------------------
+
 MANDRAKE 8.2 and later
 ------------
 		(Grabbed from various source - Google is your friend)
@@ -246,33 +345,6 @@ check the details is :
 	Mandrake can also have wireless setting added to its
 Auto-Install procedure :
 	http://members.shaw.ca/mandrake/drakx/8.2/HTML/section4-13.html
-
----------------------------------------------------------------------
-
-SuSE 8.0 and later
---------
-		(Cut'n'pasted from Unofficial SuSE FAQ, by Keith Winston)
-	http://www.smaug42.com/susefaq/ethernetproblems.html#AEN768
-	The old PCMCIA network scripts used to read
-/etc/pcmcia/wireless.opts to get the wireless options like mode,
-ESSID, encryption key, etc. Well, the wireless.opts file is still
-there but it is NOT used. It would have been nice if there was some
-documentation about it. Instead, the new scripts read this info from
-another brand new file called /etc/sysconfig/network/wireless. You can
-edit this file to store your wireless options. If you don't use key 1,
-you may have to put the other key in the WIRELESS_IWCONFIG_OPTIONS
-variable.
-
-				-----
-
-		<Need confirmation :>
-	Configuration of wireless settings looks like :
-		WIRELESS_ESSID="<essid>"
-	It also seem that the same directives can be added to the file :
-		/etc/sysconfig/network/ifcfg-ethX
-	Note that there seems to be other problems with SuSE, such as
-the Pcmcia scripts binding the linux-wlan-ng driver to Orinoco cards
-(which of course won't work - see link in FAQ above).
 
 ---------------------------------------------------------------------
 

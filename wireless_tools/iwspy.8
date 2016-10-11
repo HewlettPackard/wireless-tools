@@ -16,6 +16,10 @@ iwspy \- Get wireless statistics from specific nodes
 .BI "iwspy " interface " [+] " DNSNAME " | " IPADDR " | " HWADDR " [...]"
 .br
 .BI "iwspy " interface " off"
+.br
+.BI "iwspy " interface " setthr " "low high"
+.br
+.BI "iwspy " interface " getthr"
 .\"
 .\" DESCRIPTION part
 .\"
@@ -63,7 +67,29 @@ should use this option to avoid conflicts.
 .TP
 .B off
 Remove the current list of addresses and disable the spy functionality
-.\"
+.TP
+.B setthr
+Set the
+.I low
+and
+.I high
+signal strength threshold for the iwspy event (for driver that support
+it).
+.br
+Every time the signal strengh for any of the address monitored
+with iwspy goes lower than the low threshold or goes higher than the
+high threshold, a Wireless Event will be generated.
+.br
+This can be used to monitor link outages without having to run iwspy
+periodically.
+.TP
+.B getthr
+Retrieve the current
+.I low
+and
+.I high
+signal strength threshold for the iwspy event.
+\"
 .\" FILES part
 .\"
 .SH FILES
@@ -73,7 +99,8 @@ Remove the current list of addresses and disable the spy functionality
 .\"
 .SH SEE ALSO
 .BR iwconfig (8),
-.BR ifconfig (8),
-.BR iwlist (8).
-.BR iwpriv (8).
+.BR iwlist (8),
+.BR iwevent (8),
+.BR iwpriv (8),
+.BR wireless (7).
 

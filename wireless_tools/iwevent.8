@@ -68,8 +68,10 @@ available (see
 .TP
 .B Tx packet dropped
 A packet directed at this address has been dropped because the
-interface believes this node doesn't answer anymore. An early
-indication that the node may have left the cell or gone out of range.
+interface believes this node doesn't answer anymore (usually maximum
+of MAC level retry exceeded). An early indication that the node may
+have left the cell or gone out of range, but may be due to fading or
+excessive contention.
 .TP
 .B Custom driver event
 Event specific to the driver. Please check the driver documentation.
@@ -83,6 +85,10 @@ Access Point (mode master).
 The registration of the client/peer on this interface has
 expired. Will be generated mostly when the interface act as an Access
 Point (mode master).
+.TP
+.B Spy threshold crossed
+The signal strength for one of the address in the spy list went under
+the low threshold or went above than the high threshold.
 .PP
 Only some of those events will be generated on some wireless
 interfaces by the wireless driver, and their support depend on the
@@ -98,6 +104,6 @@ Jean Tourrilhes \- jt@hpl.hp.com
 .\"
 .SH SEE ALSO
 .BR iwconfig (8),
-.BR ifconfig (8),
+.BR iwlist (8),
 .BR iwspy (8),
 .BR iwpriv (8).

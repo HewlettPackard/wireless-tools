@@ -50,11 +50,6 @@ total number of channels and only the frequencies available in the
 present locale, so there is no one to one mapping between frequencies
 displayed and channel numbers.
 .TP
-.BR ap / accesspoint
-Give the list of Access Points in range, and optionally the quality of
-link to them. This feature is obsolte and now deprecated in favor of
-scanning support (below), and it will disappear in the future.
-.TP
 .BR scan [ning]
 Give the list of Access Points and Ad-Hoc cells in range, and
 optionally a whole bunch of information about them (ESSID, Quality,
@@ -68,6 +63,15 @@ default, the way scanning is done (the scope of the scan) will be
 impacted by the current setting of the driver. Also, this command is
 supposed to take extra arguments to control the scanning behaviour,
 but this is currently not implemented.
+.TP
+.BR ap / accesspoint / peers
+Give the list of Access Points in range, and optionally the quality of
+link to them. This feature is obsolte and now deprecated in favor of
+scanning support (above), and most drivers don't support it.
+.br
+Some drivers may use this command to return a specific list of Peers
+or Access Points, such as the list of Peers associated/registered with
+the card. See your driver documentation for details.
 .TP
 .BR rate / bit [rate]
 List the bit-rates supported by the device.
@@ -99,7 +103,8 @@ wireless interfaces.
 .\"
 .SH SEE ALSO
 .BR iwconfig (8),
-.BR ifconfig (8),
 .BR iwspy (8).
-.BR iwpriv (8).
+.BR iwevent (8),
+.BR iwpriv (8),
+.BR wireless (7).
 

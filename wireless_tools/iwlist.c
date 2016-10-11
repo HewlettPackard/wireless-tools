@@ -117,7 +117,7 @@ print_ap_info(int	skfd,
   wrq.u.data.flags = 0;
   if(iw_get_ext(skfd, ifname, SIOCGIWAPLIST, &wrq) < 0)
     {
-      fprintf(stderr, "%-8.8s  Interface doesn't have a list of Access Points\n\n", ifname);
+      fprintf(stderr, "%-8.8s  Interface doesn't have a list of Peers/Access-Points\n\n", ifname);
       return(-1);
     }
 
@@ -142,9 +142,9 @@ print_ap_info(int	skfd,
 
   /* Display it */
   if(n == 0)
-    printf("%-8.8s  No Access Point in range\n", ifname);
+    printf("%-8.8s  No Peers/Access-Point in range\n", ifname);
   else
-    printf("%-8.8s  Access Points in range:\n", ifname);
+    printf("%-8.8s  Peers/Access-Points in range:\n", ifname);
   for(i = 0; i < n; i++)
     {
       if(has_qual)
@@ -188,7 +188,7 @@ print_bitrate_info(int		skfd,
 		      ifname);
   else
     {
-      if((range.num_bitrates > 0) && (range.num_bitrates < IW_MAX_BITRATES))
+      if((range.num_bitrates > 0) && (range.num_bitrates <= IW_MAX_BITRATES))
 	{
 	  printf("%-8.8s  %d available bit-rates :\n",
 		 ifname, range.num_bitrates);
@@ -291,9 +291,9 @@ print_keys_info(int		skfd,
       printf("          Current Transmit Key: [%d]\n",
 	     wrq.u.data.flags & IW_ENCODE_INDEX);
       if(wrq.u.data.flags & IW_ENCODE_RESTRICTED)
-	printf("          Encryption mode:restricted\n");
+	printf("          Security mode:restricted\n");
       if(wrq.u.data.flags & IW_ENCODE_OPEN)
-	printf("          Encryption mode:open\n");
+	printf("          Security mode:open\n");
 
       printf("\n\n");
     }
@@ -745,6 +745,9 @@ print_scanning_token(struct iw_event *	event,	/* Extracted token */
       printf("                    Mode:%s\n",
 	     iw_operation_mode[event->u.mode]);
       break;
+    case SIOCGIWNAME:
+      printf("                    Protocol:%-1.16s\n", event->u.name);
+      break;
     case SIOCGIWESSID:
       {
 	char essid[IW_ESSID_MAX_SIZE+1];
@@ -785,9 +788,9 @@ print_scanning_token(struct iw_event *	event,	/* Extracted token */
 	    if((event->u.data.flags & IW_ENCODE_INDEX) > 1)
 	      printf(" [%d]", event->u.data.flags & IW_ENCODE_INDEX);
 	    if(event->u.data.flags & IW_ENCODE_RESTRICTED)
-	      printf("   Encryption mode:restricted");
+	      printf("   Security mode:restricted");
 	    if(event->u.data.flags & IW_ENCODE_OPEN)
-	      printf("   Encryption mode:open");
+	      printf("   Security mode:open");
 	    printf("\n");
 	  }
       }
@@ -986,6 +989,7 @@ static const struct iwlist_entry iwlist_cmds[] = {
   { "channel",		print_freq_info,	0, 0 },
   { "ap",		print_ap_info,		0, 0 },
   { "accesspoints",	print_ap_info,		0, 0 },
+  { "peers",		print_ap_info,		0, 0 },
   { "bitrate",		print_bitrate_info,	0, 0 },
   { "rate",		print_bitrate_info,	0, 0 },
   { "encryption",	print_keys_info,	0, 0 },
