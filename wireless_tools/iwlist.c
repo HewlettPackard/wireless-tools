@@ -5,9 +5,10 @@
  *
  * This tool can access various piece of information on the card
  * not part of iwconfig...
- * You need to link this code against "iwcommon.c" and "-lm".
+ * You need to link this code against "iwlist.c" and "-lm".
  *
  * This file is released under the GPL license.
+ *     Copyright (c) 1997-2002 Jean Tourrilhes <jt@hpl.hp.com>
  */
 
 #include "iwlib.h"		/* Header */
@@ -80,11 +81,10 @@ print_ap_info(int	skfd,
   int		i;
 
   /* Collect stats */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   wrq.u.data.pointer = (caddr_t) buffer;
-  wrq.u.data.length = 0;
+  wrq.u.data.length = IW_MAX_AP;
   wrq.u.data.flags = 0;
-  if(ioctl(skfd, SIOCGIWAPLIST, &wrq) < 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWAPLIST, &wrq) < 0)
     {
       fprintf(stderr, "%-8.8s  Interface doesn't have a list of Access Points\n\n", ifname);
       return;
@@ -98,10 +98,10 @@ print_ap_info(int	skfd,
   hwa = (struct sockaddr *) buffer;
   qual = (struct iw_quality *) (buffer + (sizeof(struct sockaddr) * n));
 
-  /* Check if we have valid address types */
-  if(iw_check_addr_type(skfd, ifname) < 0)
+  /* Check if we have valid mac address type */
+  if(iw_check_mac_addr_type(skfd, ifname) < 0)
     {
-      fprintf(stderr, "%-8.8s  Interface doesn't support MAC & IP addresses\n\n", ifname);
+      fprintf(stderr, "%-8.8s  Interface doesn't support MAC addresses\n\n", ifname);
       return;
     }
 
@@ -212,11 +212,10 @@ print_keys_info(int		skfd,
       printf("%d keys available :\n", range.max_encoding_tokens);
       for(k = 1; k <= range.max_encoding_tokens; k++)
 	{
-	  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
 	  wrq.u.data.pointer = (caddr_t) key;
-	  wrq.u.data.length = 0;
+	  wrq.u.data.length = IW_ENCODING_TOKEN_MAX;
 	  wrq.u.data.flags = k;
-	  if(ioctl(skfd, SIOCGIWENCODE, &wrq) < 0)
+	  if(iw_get_ext(skfd, ifname, SIOCGIWENCODE, &wrq) < 0)
 	    {
 	      fprintf(stderr, "SIOCGIWENCODE: %s\n", strerror(errno));
 	      break;
@@ -236,11 +235,10 @@ print_keys_info(int		skfd,
 	    }
 	}
       /* Print current key and mode */
-      strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
       wrq.u.data.pointer = (caddr_t) key;
-      wrq.u.data.length = 0;
+      wrq.u.data.length = IW_ENCODING_TOKEN_MAX;
       wrq.u.data.flags = 0;	/* Set index to zero to get current */
-      if(ioctl(skfd, SIOCGIWENCODE, &wrq) < 0)
+      if(iw_get_ext(skfd, ifname, SIOCGIWENCODE, &wrq) < 0)
 	{
 	  fprintf(stderr, "SIOCGIWENCODE: %s\n", strerror(errno));
 	  return;
@@ -270,9 +268,8 @@ get_pm_value(int		skfd,
 	     char *		buffer)
 {
   /* Get Another Power Management value */
-  strncpy(pwrq->ifr_name, ifname, IFNAMSIZ);
   pwrq->u.power.flags = flags;
-  if(ioctl(skfd, SIOCGIWPOWER, pwrq) >= 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWPOWER, pwrq) >= 0)
     {
       /* Let's check the value and its type */
       if(pwrq->u.power.flags & IW_POWER_TYPE)
@@ -354,9 +351,8 @@ print_pm_info(int		skfd,
 #endif /* WIRELESS_EXT > 9 */
 
       /* Get current Power Management settings */
-      strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
       wrq.u.power.flags = 0;
-      if(ioctl(skfd, SIOCGIWPOWER, &wrq) >= 0)
+      if(iw_get_ext(skfd, ifname, SIOCGIWPOWER, &wrq) >= 0)
 	{
 	  int	flags = wrq.u.power.flags;
 
@@ -485,9 +481,8 @@ get_retry_value(int		skfd,
 		char *		buffer)
 {
   /* Get Another retry value */
-  strncpy(pwrq->ifr_name, ifname, IFNAMSIZ);
   pwrq->u.retry.flags = flags;
-  if(ioctl(skfd, SIOCGIWRETRY, pwrq) >= 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWRETRY, pwrq) >= 0)
     {
       /* Let's check the value and its type */
       if(pwrq->u.retry.flags & IW_RETRY_TYPE)
@@ -554,9 +549,8 @@ print_retry_info(int		skfd,
 	}
 
       /* Get current retry settings */
-      strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
       wrq.u.retry.flags = 0;
-      if(ioctl(skfd, SIOCGIWRETRY, &wrq) >= 0)
+      if(iw_get_ext(skfd, ifname, SIOCGIWRETRY, &wrq) >= 0)
 	{
 	  int	flags = wrq.u.retry.flags;
 
@@ -661,7 +655,7 @@ static const struct iwlist_entry iwlist_cmds[] = {
   { "accesspoints", print_ap_info },
   { "bitrate",      print_bitrate_info },
   { "rate",         print_bitrate_info },
-  { "encription",   print_keys_info },
+  { "encryption",   print_keys_info },
   { "key",          print_keys_info },
   { "power",        print_pm_info },
   { "txpower",      print_txpower_info },

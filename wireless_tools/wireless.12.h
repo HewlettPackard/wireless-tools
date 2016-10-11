@@ -1,10 +1,9 @@
 /*
  * This file define a set of standard wireless extensions
  *
- * Version :	13	6.12.01
+ * Version :	12	5.10.01
  *
  * Authors :	Jean Tourrilhes - HPL - <jt@hpl.hp.com>
- * Copyright (c) 1997-2001 Jean Tourrilhes, All Rights Reserved.
  */
 
 #ifndef _LINUX_WIRELESS_H
@@ -12,8 +11,6 @@
 
 /************************** DOCUMENTATION **************************/
 /*
- * Initial APIs (1996 -> onward) :
- * -----------------------------
  * Basically, the wireless extensions are for now a set of standard ioctl
  * call + /proc/net/wireless
  *
@@ -30,27 +27,16 @@
  * We have the list of command plus a structure descibing the
  * data exchanged...
  * Note that to add these ioctl, I was obliged to modify :
- *	# net/core/dev.c (two place + add include)
- *	# net/ipv4/af_inet.c (one place + add include)
+ *	net/core/dev.c (two place + add include)
+ *	net/ipv4/af_inet.c (one place + add include)
  *
  * /proc/net/wireless is a copy of /proc/net/dev.
  * We have a structure for data passed from the driver to /proc/net/wireless
  * Too add this, I've modified :
- *	# net/core/dev.c (two other places)
- *	# include/linux/netdevice.h (one place)
- *	# include/linux/proc_fs.h (one place)
+ *	net/core/dev.c (two other places)
+ *	include/linux/netdevice.h (one place)
+ *	include/linux/proc_fs.h (one place)
  *
- * New driver API (2001 -> onward) :
- * -------------------------------
- * This file is only concerned with the user space API and common definitions.
- * The new driver API is defined and documented in :
- *	# include/net/iw_handler.h
- *
- * Note as well that /proc/net/wireless implementation has now moved in :
- *	# include/linux/wireless.c
- *
- * Other comments :
- * --------------
  * Do not add here things that are redundant with other mechanisms
  * (drivers init, ifconfig, /proc/net/dev, ...) and with are not
  * wireless specific.
@@ -68,14 +54,16 @@
 #include <linux/socket.h>		/* for "struct sockaddr" et al	*/
 #include <linux/if.h>			/* for IFNAMSIZ and co... */
 
-/***************************** VERSION *****************************/
+/**************************** CONSTANTS ****************************/
+
+/* --------------------------- VERSION --------------------------- */
 /*
  * This constant is used to know the availability of the wireless
  * extensions and to know which version of wireless extensions it is
  * (there is some stuff that will be added in the future...)
  * I just plan to increment with each new version.
  */
-#define WIRELESS_EXT	13
+#define WIRELESS_EXT	12
 
 /*
  * Changes :
@@ -135,20 +123,12 @@
  *	- Add DEV PRIVATE IOCTL to avoid collisions in SIOCDEVPRIVATE space
  *	- Add new statistics (frag, retry, beacon)
  *	- Add average quality (for user space calibration)
- *
- * V12 to V13
- * ----------
- *	- Document creation of new driver API.
- *	- Extract union iwreq_data from struct iwreq (for new driver API).
- *	- Rename SIOCSIWNAME as SIOCSIWCOMMIT
  */
-
-/**************************** CONSTANTS ****************************/
 
 /* -------------------------- IOCTL LIST -------------------------- */
 
 /* Basic operations */
-#define SIOCSIWCOMMIT	0x8B00		/* Commit pending changes to driver */
+#define SIOCSIWNAME	0x8B00		/* Unused */
 #define SIOCGIWNAME	0x8B01		/* get name == wireless protocol */
 #define SIOCSIWNWID	0x8B02		/* set network id (the cell) */
 #define SIOCGIWNWID	0x8B03		/* get network id */
@@ -217,7 +197,7 @@
  */
 #define SIOCIWFIRSTPRIV	0x8BE0
 #define SIOCIWLASTPRIV	0x8BFF
-/* Previously, we were using SIOCDEVPRIVATE, but we now have our
+/* Previously, we were using SIOCDEVPRIVATE, but we know have our
  * separate range because of collisions with other tools such as
  * 'mii-tool'.
  * We now have 32 commands, so a bit more space ;-).
@@ -434,49 +414,13 @@ struct	iw_statistics
 
 /* ------------------------ IOCTL REQUEST ------------------------ */
 /*
- * This structure defines the payload of an ioctl, and is used 
- * below.
- *
- * Note that this structure should fit on the memory footprint
- * of iwreq (which is the same as ifreq), which mean a max size of
- * 16 octets = 128 bits. Warning, pointers might be 64 bits wide...
- * You should check this when increasing the structures defined
- * above in this file...
- */
-union	iwreq_data
-{
-	/* Config - generic */
-	char		name[IFNAMSIZ];
-	/* Name : used to verify the presence of  wireless extensions.
-	 * Name of the protocol/provider... */
-
-	struct iw_point	essid;		/* Extended network name */
-	struct iw_param	nwid;		/* network id (or domain - the cell) */
-	struct iw_freq	freq;		/* frequency or channel :
-					 * 0-1000 = channel
-					 * > 1000 = frequency in Hz */
-
-	struct iw_param	sens;		/* signal level threshold */
-	struct iw_param	bitrate;	/* default bit rate */
-	struct iw_param	txpower;	/* default transmit power */
-	struct iw_param	rts;		/* RTS threshold threshold */
-	struct iw_param	frag;		/* Fragmentation threshold */
-	__u32		mode;		/* Operation mode */
-	struct iw_param	retry;		/* Retry limits & lifetime */
-
-	struct iw_point	encoding;	/* Encoding stuff : tokens */
-	struct iw_param	power;		/* PM duration/timeout */
-
-	struct sockaddr	ap_addr;	/* Access point address */
-
-	struct iw_point	data;		/* Other large parameters */
-};
-
-/*
  * The structure to exchange data for ioctl.
  * This structure is the same as 'struct ifreq', but (re)defined for
  * convenience...
- * Do I need to remind you about structure size (32 octets) ?
+ *
+ * Note that it should fit on the same memory footprint !
+ * You should check this when increasing the above structures (16 octets)
+ * 16 octets = 128 bits. Warning, pointers might be 64 bits wide...
  */
 struct	iwreq 
 {
@@ -485,8 +429,35 @@ struct	iwreq
 		char	ifrn_name[IFNAMSIZ];	/* if name, e.g. "eth0" */
 	} ifr_ifrn;
 
-	/* Data part (defined just above) */
-	union	iwreq_data	u;
+	/* Data part */
+	union
+	{
+		/* Config - generic */
+		char		name[IFNAMSIZ];
+		/* Name : used to verify the presence of  wireless extensions.
+		 * Name of the protocol/provider... */
+
+		struct iw_point	essid;	/* Extended network name */
+		struct iw_param	nwid;	/* network id (or domain - the cell) */
+		struct iw_freq	freq;	/* frequency or channel :
+					 * 0-1000 = channel
+					 * > 1000 = frequency in Hz */
+
+		struct iw_param	sens;		/* signal level threshold */
+		struct iw_param	bitrate;	/* default bit rate */
+		struct iw_param	txpower;	/* default transmit power */
+		struct iw_param	rts;		/* RTS threshold threshold */
+		struct iw_param	frag;		/* Fragmentation threshold */
+		__u32		mode;		/* Operation mode */
+		struct iw_param	retry;		/* Retry limits & lifetime */
+
+		struct iw_point	encoding;	/* Encoding stuff : tokens */
+		struct iw_param	power;		/* PM duration/timeout */
+
+		struct sockaddr	ap_addr;	/* Access point address */
+
+		struct iw_point	data;		/* Other large parameters */
+	}	u;
 };
 
 /* -------------------------- IOCTL DATA -------------------------- */

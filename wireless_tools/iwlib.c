@@ -6,6 +6,7 @@
  * Common subroutines to all the wireless tools...
  *
  * This file is released under the GPL license.
+ *     Copyright (c) 1997-2002 Jean Tourrilhes <jt@hpl.hp.com>
  */
 
 #include "iwlib.h"		/* Header */
@@ -74,13 +75,12 @@ iw_get_range_info(int		skfd,
   char			buffer[sizeof(iwrange) * 2];	/* Large enough */
 
   /* Cleanup */
-  memset(buffer, 0, sizeof(range));
+  memset(buffer, 0, sizeof(iwrange) * 2);
 
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   wrq.u.data.pointer = (caddr_t) buffer;
-  wrq.u.data.length = 0;
+  wrq.u.data.length = sizeof(iwrange) * 2;
   wrq.u.data.flags = 0;
-  if(ioctl(skfd, SIOCGIWRANGE, &wrq) < 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWRANGE, &wrq) < 0)
     return(-1);
 
   /* Copy stuff at the right place, ignore extra */
@@ -135,11 +135,10 @@ iw_get_priv_info(int		skfd,
   struct iwreq		wrq;
 
   /* Ask the driver */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   wrq.u.data.pointer = (caddr_t) priv;
-  wrq.u.data.length = 0;
+  wrq.u.data.length = 32;
   wrq.u.data.flags = 0;
-  if(ioctl(skfd, SIOCGIWPRIV, &wrq) < 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWPRIV, &wrq) < 0)
     return(-1);
 
   /* Return the number of ioctls */
@@ -164,35 +163,31 @@ iw_get_basic_config(int			skfd,
   memset((char *) info, 0, sizeof(struct wireless_config));
 
   /* Get wireless name */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWNAME, &wrq) < 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWNAME, &wrq) < 0)
     /* If no wireless name : no wireless extensions */
     return(-1);
   else
     strcpy(info->name, wrq.u.name);
 
   /* Get network ID */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWNWID, &wrq) >= 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWNWID, &wrq) >= 0)
     {
       info->has_nwid = 1;
       memcpy(&(info->nwid), &(wrq.u.nwid), sizeof(iwparam));
     }
 
   /* Get frequency / channel */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWFREQ, &wrq) >= 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWFREQ, &wrq) >= 0)
     {
       info->has_freq = 1;
       info->freq = iw_freq2float(&(wrq.u.freq));
     }
 
   /* Get encryption information */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   wrq.u.data.pointer = (caddr_t) info->key;
-  wrq.u.data.length = 0;
+  wrq.u.data.length = IW_ENCODING_TOKEN_MAX;
   wrq.u.data.flags = 0;
-  if(ioctl(skfd, SIOCGIWENCODE, &wrq) >= 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWENCODE, &wrq) >= 0)
     {
       info->has_key = 1;
       info->key_size = wrq.u.data.length;
@@ -200,19 +195,17 @@ iw_get_basic_config(int			skfd,
     }
 
   /* Get ESSID */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   wrq.u.essid.pointer = (caddr_t) info->essid;
-  wrq.u.essid.length = 0;
+  wrq.u.essid.length = IW_ESSID_MAX_SIZE;
   wrq.u.essid.flags = 0;
-  if(ioctl(skfd, SIOCGIWESSID, &wrq) >= 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWESSID, &wrq) >= 0)
     {
       info->has_essid = 1;
       info->essid_on = wrq.u.data.flags;
     }
 
   /* Get operation mode */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWMODE, &wrq) >= 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWMODE, &wrq) >= 0)
     {
       if((wrq.u.mode < 6) && (wrq.u.mode >= 0))
 	info->has_mode = 1;
@@ -238,19 +231,17 @@ iw_set_basic_config(int			skfd,
   int			ret = 0;
 
   /* Get wireless name (check if interface is valid) */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWNAME, &wrq) < 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWNAME, &wrq) < 0)
     /* If no wireless name : no wireless extensions */
     return(-2);
 
   /* Set Network ID, if available (this is for non-802.11 cards) */
   if(info->has_nwid)
     {
-      strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
       memcpy(&(wrq.u.nwid), &(info->nwid), sizeof(iwparam));
       wrq.u.nwid.fixed = 1;	/* Hum... When in Rome... */
 
-      if(ioctl(skfd, SIOCSIWNWID, &wrq) < 0)
+      if(iw_set_ext(skfd, ifname, SIOCSIWNWID, &wrq) < 0)
 	{
 	  fprintf(stderr, "SIOCSIWNWID: %s\n", strerror(errno));
 	  ret = -1;
@@ -260,10 +251,9 @@ iw_set_basic_config(int			skfd,
   /* Set frequency / channel */
   if(info->has_freq)
     {
-      strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
       iw_float2freq(info->freq, &(wrq.u.freq));
 
-      if(ioctl(skfd, SIOCSIWFREQ, &wrq) < 0)
+      if(iw_set_ext(skfd, ifname, SIOCSIWFREQ, &wrq) < 0)
 	{
 	  fprintf(stderr, "SIOCSIWFREQ: %s\n", strerror(errno));
 	  ret = -1;
@@ -279,12 +269,11 @@ iw_set_basic_config(int			skfd,
       if((flags & IW_ENCODE_INDEX) > 0)
 	{
 	  /* Set the index */
-	  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
 	  wrq.u.data.pointer = (caddr_t) NULL;
-	  wrq.u.data.flags = flags & (IW_ENCODE_INDEX);
+	  wrq.u.data.flags = (flags & (IW_ENCODE_INDEX)) | IW_ENCODE_NOKEY;
 	  wrq.u.data.length = 0;
 
-	  if(ioctl(skfd, SIOCSIWENCODE, &wrq) < 0)
+	  if(iw_set_ext(skfd, ifname, SIOCSIWENCODE, &wrq) < 0)
 	    {
 	      fprintf(stderr, "SIOCSIWENCODE(%d): %s\n",
 		      errno, strerror(errno));
@@ -296,12 +285,11 @@ iw_set_basic_config(int			skfd,
       flags = flags & (~IW_ENCODE_INDEX);
 
       /* Set the key itself (set current key in this case) */
-      strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
       wrq.u.data.pointer = (caddr_t) info->key;
       wrq.u.data.length = info->key_size;
       wrq.u.data.flags = flags;
 
-      if(ioctl(skfd, SIOCSIWENCODE, &wrq) < 0)
+      if(iw_set_ext(skfd, ifname, SIOCSIWENCODE, &wrq) < 0)
 	{
 	  fprintf(stderr, "SIOCSIWENCODE(%d): %s\n",
 		  errno, strerror(errno));
@@ -312,12 +300,11 @@ iw_set_basic_config(int			skfd,
   /* Set ESSID (extended network), if available */
   if(info->has_essid)
     {
-      strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
       wrq.u.essid.pointer = (caddr_t) info->essid;
       wrq.u.essid.length = strlen(info->essid) + 1;
       wrq.u.data.flags = info->essid_on;
 
-      if(ioctl(skfd, SIOCSIWESSID, &wrq) < 0)
+      if(iw_set_ext(skfd, ifname, SIOCSIWESSID, &wrq) < 0)
 	{
 	  fprintf(stderr, "SIOCSIWESSID: %s\n", strerror(errno));
 	  ret = -1;
@@ -330,7 +317,7 @@ iw_set_basic_config(int			skfd,
       strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
       wrq.u.mode = info->mode;
 
-      if(ioctl(skfd, SIOCSIWMODE, &wrq) < 0)
+      if(iw_get_ext(skfd, ifname, SIOCSIWMODE, &wrq) < 0)
 	{
 	  fprintf(stderr, "SIOCSIWMODE: %s\n", strerror(errno));
 	  ret = -1;
@@ -415,7 +402,7 @@ iw_get_stats(int	skfd,
   wrq.u.data.length = 0;
   wrq.u.data.flags = 1;		/* Clear updated flag */
   strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWSTATS, &wrq) < 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWSTATS, &wrq) < 0)
     return(-1);
 
   return(0);
@@ -702,28 +689,13 @@ iw_print_retry_value(char *	buffer,
 
 /*------------------------------------------------------------------*/
 /*
- * Check if interface support the right address types...
+ * Check if interface support the right MAC address type...
  */
 int
-iw_check_addr_type(int		skfd,
-		   char *	ifname)
+iw_check_mac_addr_type(int		skfd,
+		       char *		ifname)
 {
   struct ifreq		ifr;
-
-  /* Get the type of interface address */
-  strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
-  if((ioctl(skfd, SIOCGIFADDR, &ifr) < 0) ||
-     (ifr.ifr_addr.sa_family !=  AF_INET))
-    {
-      /* Deep trouble... */
-      fprintf(stderr, "Interface %s doesn't support IP addresses\n", ifname);
-      return(-1);
-    }
-
-#ifdef DEBUG
-  printf("Interface : %d - 0x%lX\n", ifr.ifr_addr.sa_family,
-	 *((unsigned long *) ifr.ifr_addr.sa_data));
-#endif
 
   /* Get the type of hardware address */
   strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
@@ -744,6 +716,55 @@ iw_check_addr_type(int		skfd,
   return(0);
 }
 
+
+/*------------------------------------------------------------------*/
+/*
+ * Check if interface support the right interface address type...
+ */
+int
+iw_check_if_addr_type(int		skfd,
+		      char *		ifname)
+{
+  struct ifreq		ifr;
+
+  /* Get the type of interface address */
+  strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
+  if((ioctl(skfd, SIOCGIFADDR, &ifr) < 0) ||
+     (ifr.ifr_addr.sa_family !=  AF_INET))
+    {
+      /* Deep trouble... */
+      fprintf(stderr, "Interface %s doesn't support IP addresses\n", ifname);
+      return(-1);
+    }
+
+#ifdef DEBUG
+  printf("Interface : %d - 0x%lX\n", ifr.ifr_addr.sa_family,
+	 *((unsigned long *) ifr.ifr_addr.sa_data));
+#endif
+
+  return(0);
+}
+
+#if 0
+/*------------------------------------------------------------------*/
+/*
+ * Check if interface support the right address types...
+ */
+int
+iw_check_addr_type(int		skfd,
+		   char *	ifname)
+{
+  /* Check the interface address type */
+  if(iw_check_if_addr_type(skfd, ifname) < 0)
+    return(-1);
+
+  /* Check the interface address type */
+  if(iw_check_mac_addr_type(skfd, ifname) < 0)
+    return(-1);
+
+  return(0);
+}
+#endif
 
 /*------------------------------------------------------------------*/
 /*
@@ -887,6 +908,13 @@ iw_in_addr(int		skfd,
       struct sockaddr	if_address;
       struct arpreq	arp_query;
 
+      /* Check if we have valid interface address type */
+      if(iw_check_if_addr_type(skfd, ifname) < 0)
+	{
+	  fprintf(stderr, "%-8.8s  Interface doesn't support IP addresses\n", ifname);
+	  return(-1);
+	}
+
       /* Read interface address */
       if(iw_in_inet(bufp, &if_address) < 0)
 	{
@@ -922,12 +950,21 @@ iw_in_addr(int		skfd,
 #endif
     }
   else	/* If it's an hardware address */
-    /* Get the hardware address */
-    if(iw_in_ether(bufp, sap) < 0)
-      {
-	fprintf(stderr, "Invalid hardware address %s\n", bufp);
-	return(-1);
-      }
+    {
+      /* Check if we have valid mac address type */
+      if(iw_check_mac_addr_type(skfd, ifname) < 0)
+	{
+	  fprintf(stderr, "%-8.8s  Interface doesn't support MAC addresses\n", ifname);
+	  return(-1);
+	}
+
+      /* Get the hardware address */
+      if(iw_in_ether(bufp, sap) < 0)
+	{
+	  fprintf(stderr, "Invalid hardware address %s\n", bufp);
+	  return(-1);
+	}
+    }
 
 #ifdef DEBUG
   printf("Hw Address = %s\n", pr_ether(sap->sa_data));

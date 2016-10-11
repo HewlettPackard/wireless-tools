@@ -1,11 +1,12 @@
 /*
  *	Wireless Tools
  *
- *		Jean II - HPLB 97->99 - HPL 99->01
+ *		Jean II - HPLB 97->99 - HPL 99->02
  *
  * The changelog...
  *
- * This file is released under the GPL license.
+ * This files is released under the GPL license.
+ *     Copyright (c) 1997-2002 Jean Tourrilhes <jt@hpl.hp.com>
  */
 
 /* --------------------------- HISTORY --------------------------- */
@@ -148,6 +149,30 @@
  *	o Show typical/average quality in iwspy [iwspy]
  *	o Get Wireless Stats through ioctl instead of /proc [iwlib]
  *
+ * wireless 23 :
+ * -----------
+ *	o Split iw_check_addr_type() into two functions mac/if [iwlib]
+ *	o iw_in_addr() does appropriate iw_check_xxx itself  [iwlib]
+ *	o Allow iwspy on MAC address even if IP doesn't check [iwspy]
+ *	o Allow iwconfig ap on MAC address even if IP doesn't check [iwconfig]
+ *	---
+ *	o Fix iwlist man page about extra commands [iwlist]
+ *	---
+ *	o Fix Makefile rules for library compile (more generic) [Makefile]
+ *	---
+ *	o Set max length for all GET request with a iw_point [various]
+ *	o Fix set IW_PRIV_TYPE_BYTE to be endian/align clean [iwpriv]
+ *	---
+ *		(From Kernel Jake <kerneljake@hotmail.com>)
+ *	o Add '/' at the end of directories to create them [Makefile]
+ *		(From Pavel Roskin <proski@gnu.org>)
+ *	o Replace "cp" with "install" to get permissions proper [Makefile]
+ *	o Install Man-Pages at the proper location [Makefile]
+ *	o Add automatic header selection based on libc/kernel [iwlib.h]
+ *	---
+ *	o Add "commit" to force parameters on the card [iwconfig]
+ *	o Wrap ioctl() in iw_set/get_ext() wrappers [all]
+ *	o Beautify set request error messages [iwconfig]
  */
 
 /* ----------------------------- TODO ----------------------------- */

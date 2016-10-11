@@ -5,9 +5,10 @@
  *
  * Main code for "iwconfig". This is the generic tool for most
  * manipulations...
- * You need to link this code against "iwcommon.c" and "-lm".
+ * You need to link this code against "iwlib.c" and "-lm".
  *
  * This file is released under the GPL license.
+ *     Copyright (c) 1997-2002 Jean Tourrilhes <jt@hpl.hp.com>
  */
 
 #include "iwlib.h"		/* Header */
@@ -38,7 +39,7 @@ print_priv_info(int		skfd,
 		char *		ifname)
 {
   int		k;
-  iwprivargs	priv[16];
+  iwprivargs	priv[32];
   int		n;
   char *	argtype[] = { "    ", "byte", "char", "", "int ", "float" };
 
@@ -112,6 +113,7 @@ set_private(int		skfd,		/* Socket */
   int		k;
   iwprivargs	priv[16];
   int		number;
+  int		temp;
 
   /* Read the private ioctls */
   number = iw_get_priv_info(skfd, ifname, priv);
@@ -152,8 +154,10 @@ set_private(int		skfd,		/* Socket */
 	    wrq.u.data.length = priv[k].set_args & IW_PRIV_SIZE_MASK;
 
 	  /* Fetch args */
-	  for(; i < wrq.u.data.length + 1; i++)
-	    sscanf(args[i], "%d", (int *)(buffer + i - 1));
+	  for(; i < wrq.u.data.length + 1; i++) {
+	    sscanf(args[i], "%d", &temp);
+	    buffer[i - 1] = (char) temp;
+	  }
 	  break;
 
 	case IW_PRIV_TYPE_INT:

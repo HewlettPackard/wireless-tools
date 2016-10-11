@@ -6,6 +6,7 @@
  * Just print the ESSID or NWID...
  *
  * This file is released under the GPL license.
+ *     Copyright (c) 1997-2002 Jean Tourrilhes <jt@hpl.hp.com>
  */
 
 #include "iwlib.h"		/* Header */

@@ -16,14 +16,7 @@ You need :
 		Note : CONFIG_NET_RADIO must be enabled
 	o (Optional) A Pcmcia package supporting Wireless Extension
 	o A driver supporting wireless extensions
-		-> Wavelan isa
-		-> Wavelan pcmcia
-		-> Netwave pcmcia
-		-> Wavelan IEEE pcmcia drivers
-		-> Aironet MPL driver
-		-> Proxim RangeLan2/Symphony driver
-		-> Raylink/WegGear2.4 driver
-		-> Check my web page for latest list of drivers,
+		-> Check my web pages for latest list of drivers,
 			otherwise patch your favourite driver...
 	Note : more recent kernels and drivers are likely to support
 		more wireless extension features...
@@ -34,16 +27,12 @@ Recommended versions :
 	o Kernel (wireless extension definition) :
 		-> Kernel 2.2.14 onward
 		-> Kernel 2.3.24 onward
+		-> Kernel 2.4.0 onward
 	o Pcmcia package :
 		-> Pcmcia 3.1.15 onward
 	o Drivers with wireless extension support :
-		-> Wavelan isa from kernels above
-		-> Wavelan pcmcia from pcmcia 3.1.1 onward
-		-> Netwave pcmcia from pcmcia 3.1.2 onward
-		-> Wavelan IEEE pcmcia GPL driver (wvlan_cs) 1.0.5 onward
-		-> Aironet MPL driver (airo_cs.c) 1.4 onward
-		-> Proxim RangeLan2/Symphony driver 1.4.3 onward
-		-> Raylink/WegGear2.4 driver 1.70 (note : read only)
+		-> Check my web pages for latest list of drivers,
+			otherwise patch your favourite driver...
 
 Compile wireless tools :
 ----------------------
@@ -68,12 +57,13 @@ mandatory...
 Kernel headers (why it doesn't compile) :
 ---------------------------------------
 	Some changes in the kernel headers and glibc headers are
-making my life difficult.
-	If you have glibc and kernel 2.2.X headers (or greater), that
-should be all right. This is the default for most modern distributions.
-	In the other cases, depending on which version of the kernel
-headers (might be different from kernel) and library headers you have,
-you need to play with the options at the top of the Makefile.
+making my life difficult. We now have a mechanism to automatically
+select the proper header based on various bits of information (libc
+version & kernel version), but it may fail to do the right thing.
+	You may also see the message :
+		"Your kernel/libc combination is not supported"
+	If this happens to you, you will need to hack the rules at the
+top of iwlib.h and send me the patch.
 
 	The second issue is that some distributions install some
 independant kernel headers in /usr/include. If you upgrade your

@@ -4,9 +4,10 @@
  *		Jean II - HPLB '99
  *
  * This tool can manipulate the spy list : add addresses and display stat
- * You need to link this code against "iwcommon.c" and "-lm".
+ * You need to link this code against "iwlib.c" and "-lm".
  *
  * This file is released under the GPL license.
+ *     Copyright (c) 1997-2002 Jean Tourrilhes <jt@hpl.hp.com>
  */
 
 #include "iwlib.h"		/* Header */
@@ -33,11 +34,10 @@ print_spy_info(int	skfd,
   int		i;
 
   /* Collect stats */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   wrq.u.data.pointer = (caddr_t) buffer;
-  wrq.u.data.length = 0;
+  wrq.u.data.length = IW_MAX_SPY;
   wrq.u.data.flags = 0;
-  if(ioctl(skfd, SIOCGIWSPY, &wrq) < 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWSPY, &wrq) < 0)
     {
       fprintf(stderr, "%-8.8s  Interface doesn't support wireless statistic collection\n\n", ifname);
       return;
@@ -46,12 +46,10 @@ print_spy_info(int	skfd,
   /* Number of addresses */
   n = wrq.u.data.length;
 
-
-
-  /* Check if we have valid address types */
-  if(iw_check_addr_type(skfd, ifname) < 0)
+  /* Check if we have valid mac address type */
+  if(iw_check_mac_addr_type(skfd, ifname) < 0)
     {
-      fprintf(stderr, "%-8.8s  Interface doesn't support MAC & IP addresses\n\n", ifname);
+      fprintf(stderr, "%-8.8s  Interface doesn't support MAC addresses\n\n", ifname);
       return;
     }
 
@@ -136,13 +134,6 @@ set_spy_info(int		skfd,		/* The socket */
   i = 0;	/* first arg to read */
   nbr = 0;	/* Number of args readen so far */
 
-  /* Check if we have valid address types */
-  if(iw_check_addr_type(skfd, ifname) < 0)
-    {
-      fprintf(stderr, "%-8.8s  Interface doesn't support MAC & IP addresses\n", ifname);
-      return(-1);
-    }
-
   /* "off" : disable functionality (set 0 addresses) */
   if(!strcmp(args[0], "off"))
     i = count;	/* hack */
@@ -153,11 +144,17 @@ set_spy_info(int		skfd,		/* The socket */
       char	buffer[(sizeof(struct iw_quality) +
 			sizeof(struct sockaddr)) * IW_MAX_SPY];
 
-      strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+      /* Check if we have valid mac address type */
+      if(iw_check_mac_addr_type(skfd, ifname) < 0)
+	{
+	  fprintf(stderr, "%-8.8s  Interface doesn't support MAC addresses\n", ifname);
+	  return(-1);
+	}
+
       wrq.u.data.pointer = (caddr_t) buffer;
       wrq.u.data.length = 0;
       wrq.u.data.flags = 0;
-      if(ioctl(skfd, SIOCGIWSPY, &wrq) < 0)
+      if(iw_get_ext(skfd, ifname, SIOCGIWSPY, &wrq) < 0)
 	{
 	  fprintf(stderr, "Interface doesn't accept reading addresses...\n");
 	  fprintf(stderr, "SIOCGIWSPY: %s\n", strerror(errno));
@@ -174,6 +171,7 @@ set_spy_info(int		skfd,		/* The socket */
   /* Read other args on command line */
   while((i < count) && (nbr < IW_MAX_SPY))
     {
+      /* Get the address and check if the interface supports it */
       if(iw_in_addr(skfd, ifname, args[i++], &(hw_address[nbr])) < 0)
 	continue;
       nbr++;
@@ -193,11 +191,10 @@ set_spy_info(int		skfd,		/* The socket */
     }
 
   /* Time to do send addresses to the driver */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   wrq.u.data.pointer = (caddr_t) hw_address;
   wrq.u.data.length = nbr;
   wrq.u.data.flags = 0;
-  if(ioctl(skfd, SIOCSIWSPY, &wrq) < 0)
+  if(iw_set_ext(skfd, ifname, SIOCSIWSPY, &wrq) < 0)
     {
       fprintf(stderr, "Interface doesn't accept addresses...\n");
       fprintf(stderr, "SIOCSIWSPY: %s\n", strerror(errno));

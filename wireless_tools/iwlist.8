@@ -17,7 +17,7 @@ iwlist \- Get wireless statistics from specific nodes
 .br
 .BI "iwlist " interface " rate"
 .br
-.BI "iwlist " interface " keys"
+.BI "iwlist " interface " key"
 .br
 .BI "iwlist " interface " power"
 .br
@@ -37,21 +37,21 @@ list of parameters.
 .\"
 .SH PARAMETERS
 .TP
-.B freq
+.BR freq / channel
 Give the list of available frequencies in the device and the number of
 defined channels. Please note that usually the driver returns the
 total number of channels and only the frequencies available in the
 present locale, so there is no one to one mapping between frequencies
 displayed and channel numbers.
 .TP
-.B ap
+.BR ap / accesspoint
 Give the list of Access Points in range, and optionally the quality of
 link to them.
 .TP
 .BR rate / bit [rate]
 List the bit-rates supported by the device.
 .TP
-.BR keys / enc [ryption]
+.BR key / enc [ryption]
 List the encryption key sizes supported and display all the encryption
 keys availables in the device.
 .TP

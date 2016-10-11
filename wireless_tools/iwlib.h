@@ -1,11 +1,12 @@
 /*
  *	Wireless Tools
  *
- *		Jean II - HPLB 97->99 - HPL 99->01
+ *		Jean II - HPLB 97->99 - HPL 99->02
  *
  * Common header for the Wireless Extension library...
  *
  * This file is released under the GPL license.
+ *     Copyright (c) 1997-2002 Jean Tourrilhes <jt@hpl.hp.com>
  */
 
 #ifndef IWLIB_H
@@ -29,18 +30,59 @@
 #include <netdb.h>		/* gethostbyname, getnetbyname */
 
 /* This is our header selection. Try to hide the mess and the misery :-(
- * The selection has been moved in the Makefile, here we have only
- * the ugly part. Don't look, you would go blind ;-) */
+ * Don't look, you would go blind ;-) */
 
-#ifdef KLUDGE_HEADERS
-#include <socketbits.h>
-#endif	/* KLUDGE_HEADERS */
+#ifndef LINUX_VERSION_CODE
+#include <linux/version.h>
+#endif
 
-#if defined(KLUDGE_HEADERS) || defined(GLIBC_HEADERS)
-#include <linux/if_arp.h>	/* For ARPHRD_ETHER */
-#include <linux/socket.h>	/* For AF_INET & struct sockaddr */
-#include <linux/in.h>		/* For struct sockaddr_in */
-#endif	/* KLUDGE_HEADERS || GLIBC_HEADERS */
+/* Kernel headers 2.4.X + Glibc 2.2 - Mandrake 8.0, Debian 2.3, RH 7.1 */
+#if defined(__GLIBC__) \
+    && __GLIBC__ == 2 \
+    && __GLIBC_MINOR__ >= 2 \
+    && LINUX_VERSION_CODE >= KERNEL_VERSION(2,4,0)
+#define GLIBC22_HEADERS
+
+/* Kernel headers 2.4.X + Glibc 2.1 - Debian 2.2 upgraded, RH 7.0
+ * Kernel headers 2.2.X + Glibc 2.1 - Debian 2.2, RH 6.1 */
+#elif defined(__GLIBC__) \
+      && __GLIBC__ == 2 \
+      && __GLIBC_MINOR__ == 1 \
+      && LINUX_VERSION_CODE >= KERNEL_VERSION(2,2,0)
+#define GLIBC_HEADERS
+
+/* Kernel headers 2.2.X + Glibc 2.0 - Debian 2.1 */
+#elif defined(__GLIBC__) \
+      && __GLIBC__ == 2 \
+      && __GLIBC_MINOR__ == 0 \
+      && LINUX_VERSION_CODE >= KERNEL_VERSION(2,0,0) \
+      && LINUX_VERSION_CODE < KERNEL_VERSION(2,1,0)
+#define GLIBC_HEADERS
+#define KLUDGE_HEADERS
+
+/* Note : is it really worth supporting kernel 2.0.X, knowing that
+ * we require WE v9, which is only available in 2.2.X and higher ?
+ * I guess one could use 2.0.x with an upgraded wireless.h... */
+
+/* Kernel headers 2.0.X + Glibc 2.0 - Debian 2.0, RH 5 */
+#elif defined(__GLIBC__) \
+      && __GLIBC__ == 2 \
+      && __GLIBC_MINOR__ == 0 \
+      && LINUX_VERSION_CODE < KERNEL_VERSION(2,1,0) \
+      && LINUX_VERSION_CODE >= KERNEL_VERSION(2,0,0)
+#define GLIBC_HEADERS
+
+/* Kernel headers 2.0.X + libc5 - old systems */
+#elif defined(_LINUX_C_LIB_VERSION_MAJOR) \
+      && _LINUX_C_LIB_VERSION_MAJOR == 5 \
+      && LINUX_VERSION_CODE >= KERNEL_VERSION(2,0,0) \
+      && LINUX_VERSION_CODE < KERNEL_VERSION(2,1,0)
+#define LIBC5_HEADERS
+
+/* Unsupported combination */
+#else
+#error "Your kernel/libc combination is not supported"
+#endif
 
 #ifdef GLIBC22_HEADERS 
 /* Added by Ross G. Miller <Ross_Miller@baylor.edu>, 3/28/01 */
@@ -48,6 +90,16 @@
 #include <linux/socket.h>	/* For AF_INET & struct sockaddr */
 #include <sys/socket.h>
 #endif /* GLIBC22_HEADERS */    
+
+#ifdef KLUDGE_HEADERS
+#include <socketbits.h>
+#endif	/* KLUDGE_HEADERS */
+
+#ifdef GLIBC_HEADERS
+#include <linux/if_arp.h>	/* For ARPHRD_ETHER */
+#include <linux/socket.h>	/* For AF_INET & struct sockaddr */
+#include <linux/in.h>		/* For struct sockaddr_in */
+#endif	/* KLUDGE_HEADERS || GLIBC_HEADERS */
 
 #ifdef LIBC5_HEADERS
 #include <sys/socket.h>		/* For AF_INET & struct sockaddr & socket() */
@@ -67,8 +119,8 @@
 #error "Wireless Extension v9 or newer required :-(\
 Use Wireless Tools v19 or update your kernel headers"
 #endif
-#if WIRELESS_EXT < 11
-#warning "Wireless Extension v11 recommended...\
+#if WIRELESS_EXT < 12
+#warning "Wireless Extension v12 recommended...\
 You may update your kernel and/or system headers to get the new features..."
 #endif
 
@@ -88,12 +140,17 @@ You may update your kernel and/or system headers to get the new features..."
 #define IW_POWER_MIN		0x0001	/* Value is a minimum  */
 #define IW_POWER_MAX		0x0002	/* Value is a maximum */
 #define IW_POWER_RELATIVE	0x0004	/* Value is not in seconds/ms/us */
-#endif IW_POWER_MODIFIER
+#endif /* IW_POWER_MODIFIER */
 
 #ifndef IW_ENCODE_NOKEY
 #define IW_ENCODE_NOKEY         0x0800  /* Key is write only, so not here */
 #define IW_ENCODE_MODE		0xF000	/* Modes defined below */
-#endif IW_ENCODE_NOKEY
+#endif /* IW_ENCODE_NOKEY */
+
+/* More backward compatibility */
+#ifndef SIOCSIWCOMMIT
+#define SIOCSIWCOMMIT	SIOCSIWNAME
+#endif /* SIOCSIWCOMMIT */
 
 /****************************** TYPES ******************************/
 
@@ -240,8 +297,16 @@ void
 #endif
 /* --------------------- ADDRESS SUBROUTINES ---------------------- */
 int
+	iw_check_mac_addr_type(int	skfd,
+			       char *	ifname);
+int
+	iw_check_if_addr_type(int	skfd,
+			      char *	ifname);
+#if 0
+int
 	iw_check_addr_type(int	skfd,
 			char *	ifname);
+#endif
 char *
 	iw_pr_ether(char *buffer, unsigned char *ptr);
 int
@@ -261,5 +326,47 @@ int
 
 extern const char *	iw_operation_mode[];
 #define IW_NUM_OPER_MODE	6
+
+/************************* INLINE FUNTIONS *************************/
+/*
+ * Function that are so simple that it's more efficient inlining them
+ */
+
+/*
+ * Note : I've defined wrapper for the ioctl request so that
+ * it will be easier to migrate to other kernel API if needed
+ */
+
+/*------------------------------------------------------------------*/
+/*
+ * Wrapper to push some Wireless Parameter in the driver
+ */
+static inline int
+iw_set_ext(int			skfd,		/* Socket to the kernel */
+	   char *		ifname,		/* Device name */
+	   int			request,	/* WE ID */
+	   struct iwreq *	pwrq)		/* Fixed part of the request */
+{
+  /* Set device name */
+  strncpy(pwrq->ifr_name, ifname, IFNAMSIZ);
+  /* Do the request */
+  return(ioctl(skfd, request, pwrq));
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Wrapper to extract some Wireless Parameter out of the driver
+ */
+static inline int
+iw_get_ext(int			skfd,		/* Socket to the kernel */
+	   char *		ifname,		/* Device name */
+	   int			request,	/* WE ID */
+	   struct iwreq *	pwrq)		/* Fixed part of the request */
+{
+  /* Set device name */
+  strncpy(pwrq->ifr_name, ifname, IFNAMSIZ);
+  /* Do the request */
+  return(ioctl(skfd, request, pwrq));
+}
 
 #endif	/* IWLIB_H */

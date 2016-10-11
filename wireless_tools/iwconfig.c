@@ -5,9 +5,10 @@
  *
  * Main code for "iwconfig". This is the generic tool for most
  * manipulations...
- * You need to link this code against "iwcommon.c" and "-lm".
+ * You need to link this code against "iwlib.c" and "-lm".
  *
  * This file is released under the GPL license.
+ *     Copyright (c) 1997-2002 Jean Tourrilhes <jt@hpl.hp.com>
  */
 
 #include "iwlib.h"		/* Header */
@@ -33,7 +34,7 @@ iw_usage(void)
   fprintf(stderr, "                          [enc NNNN-NNNN]\n");
   fprintf(stderr, "                          [power { period N|timeout N}]\n");
   fprintf(stderr, "                          [txpower N {mW|dBm}]\n");
-  exit(1);
+  fprintf(stderr, "                          [commit]\n");
 }
 
 
@@ -55,8 +56,7 @@ get_info(int			skfd,
   memset((char *) info, 0, sizeof(struct wireless_info));
 
   /* Get wireless name */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWNAME, &wrq) < 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWNAME, &wrq) < 0)
     /* If no wireless name : no wireless extensions */
     return(-1);
   else
@@ -67,35 +67,31 @@ get_info(int			skfd,
     info->has_range = 1;
 
   /* Get network ID */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWNWID, &wrq) >= 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWNWID, &wrq) >= 0)
     {
       info->has_nwid = 1;
       memcpy(&(info->nwid), &(wrq.u.nwid), sizeof(iwparam));
     }
 
   /* Get frequency / channel */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWFREQ, &wrq) >= 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWFREQ, &wrq) >= 0)
     {
       info->has_freq = 1;
       info->freq = iw_freq2float(&(wrq.u.freq));
     }
 
   /* Get sensitivity */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWSENS, &wrq) >= 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWSENS, &wrq) >= 0)
     {
       info->has_sens = 1;
       memcpy(&(info->sens), &(wrq.u.sens), sizeof(iwparam));
     }
 
   /* Get encryption information */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   wrq.u.data.pointer = (caddr_t) info->key;
-  wrq.u.data.length = 0;
+  wrq.u.data.length = IW_ENCODING_TOKEN_MAX;
   wrq.u.data.flags = 0;
-  if(ioctl(skfd, SIOCGIWENCODE, &wrq) >= 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWENCODE, &wrq) >= 0)
     {
       info->has_key = 1;
       info->key_size = wrq.u.data.length;
@@ -103,60 +99,53 @@ get_info(int			skfd,
     }
 
   /* Get ESSID */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   wrq.u.essid.pointer = (caddr_t) info->essid;
-  wrq.u.essid.length = 0;
+  wrq.u.essid.length = IW_ESSID_MAX_SIZE;
   wrq.u.essid.flags = 0;
-  if(ioctl(skfd, SIOCGIWESSID, &wrq) >= 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWESSID, &wrq) >= 0)
     {
       info->has_essid = 1;
       info->essid_on = wrq.u.data.flags;
     }
 
   /* Get AP address */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWAP, &wrq) >= 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWAP, &wrq) >= 0)
     {
       info->has_ap_addr = 1;
       memcpy(&(info->ap_addr), &(wrq.u.ap_addr), sizeof (sockaddr));
     }
 
   /* Get NickName */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   wrq.u.essid.pointer = (caddr_t) info->nickname;
-  wrq.u.essid.length = 0;
+  wrq.u.essid.length = IW_ESSID_MAX_SIZE;
   wrq.u.essid.flags = 0;
-  if(ioctl(skfd, SIOCGIWNICKN, &wrq) >= 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWNICKN, &wrq) >= 0)
     if(wrq.u.data.length > 1)
       info->has_nickname = 1;
 
   /* Get bit rate */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWRATE, &wrq) >= 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWRATE, &wrq) >= 0)
     {
       info->has_bitrate = 1;
       memcpy(&(info->bitrate), &(wrq.u.bitrate), sizeof(iwparam));
     }
 
   /* Get RTS threshold */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWRTS, &wrq) >= 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWRTS, &wrq) >= 0)
     {
       info->has_rts = 1;
       memcpy(&(info->rts), &(wrq.u.rts), sizeof(iwparam));
     }
 
   /* Get fragmentation threshold */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWFRAG, &wrq) >= 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWFRAG, &wrq) >= 0)
     {
       info->has_frag = 1;
       memcpy(&(info->frag), &(wrq.u.frag), sizeof(iwparam));
     }
 
   /* Get operation mode */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWMODE, &wrq) >= 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWMODE, &wrq) >= 0)
     {
       if((wrq.u.mode < IW_NUM_OPER_MODE) && (wrq.u.mode >= 0))
 	info->has_mode = 1;
@@ -164,9 +153,8 @@ get_info(int			skfd,
     }
 
   /* Get Power Management settings */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   wrq.u.power.flags = 0;
-  if(ioctl(skfd, SIOCGIWPOWER, &wrq) >= 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWPOWER, &wrq) >= 0)
     {
       info->has_power = 1;
       memcpy(&(info->power), &(wrq.u.power), sizeof(iwparam));
@@ -174,8 +162,7 @@ get_info(int			skfd,
 
 #if WIRELESS_EXT > 9
   /* Get Transmit Power */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWTXPOW, &wrq) >= 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWTXPOW, &wrq) >= 0)
     {
       info->has_txpower = 1;
       memcpy(&(info->txpower), &(wrq.u.txpower), sizeof(iwparam));
@@ -184,8 +171,7 @@ get_info(int			skfd,
 
 #if WIRELESS_EXT > 10
   /* Get retry limit/lifetime */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWRETRY, &wrq) >= 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWRETRY, &wrq) >= 0)
     {
       info->has_retry = 1;
       memcpy(&(info->retry), &(wrq.u.retry), sizeof(iwparam));
@@ -605,6 +591,66 @@ print_devices(int	skfd)
 
 /*------------------------------------------------------------------*/
 /*
+ * Macro to handle errors when setting WE
+ * Print a nice error message and exit...
+ * We define them as macro so that "return" do the right thing.
+ * The "do {...} while(0)" is a standard trick
+ */
+#define ERR_SET_EXT(rname, request) \
+	fprintf(stderr, "Error for wireless request \"%s\" (%X) :\n", \
+		rname, request)
+
+#define ABORT_ARG_NUM(rname, request) \
+	do { \
+		ERR_SET_EXT(rname, request); \
+		fprintf(stderr, "    too few arguments.\n"); \
+		return(-1); \
+	} while(0)
+
+#define ABORT_ARG_TYPE(rname, request, arg) \
+	do { \
+		ERR_SET_EXT(rname, request); \
+		fprintf(stderr, "    invalid argument \"%s\".\n", arg); \
+		return(-2); \
+	} while(0)
+
+#define ABORT_ARG_SIZE(rname, request, max) \
+	do { \
+		ERR_SET_EXT(rname, request); \
+		fprintf(stderr, "    argument too big (max %d)\n", max); \
+		return(-3); \
+	} while(0)
+
+/*------------------------------------------------------------------*/
+/*
+ * Wrapper to push some Wireless Parameter in the driver
+ * Use standard wrapper and add pretty error message if fail...
+ */
+#define IW_SET_EXT_ERR(skfd, ifname, request, wrq, rname) \
+	do { \
+	if(iw_set_ext(skfd, ifname, request, wrq) < 0) { \
+		ERR_SET_EXT(rname, request); \
+		fprintf(stderr, "    SET failed on device %-1.8s ; %s.\n", \
+			ifname, strerror(errno)); \
+		return(-5); \
+	} } while(0)
+
+/*------------------------------------------------------------------*/
+/*
+ * Wrapper to extract some Wireless Parameter out of the driver
+ * Use standard wrapper and add pretty error message if fail...
+ */
+#define IW_GET_EXT_ERR(skfd, ifname, request, wrq, rname) \
+	do { \
+	if(iw_get_ext(skfd, ifname, request, wrq) < 0) { \
+		ERR_SET_EXT(rname, request); \
+		fprintf(stderr, "    GET failed on device %-1.8s ; %s.\n", \
+			ifname, strerror(errno)); \
+		return(-6); \
+	} } while(0)
+
+/*------------------------------------------------------------------*/
+/*
  * Set the wireless options requested on command line
  * This function is too long and probably should be split,
  * because it look like the perfect definition of spaghetti code,
@@ -619,23 +665,32 @@ set_info(int		skfd,		/* The socket */
   struct iwreq		wrq;
   int			i;
 
-  /* Set dev name */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-
-  /* if nothing after the device name */
-  if(count<1)
-    iw_usage();
+  /* if nothing after the device name - will never happen */
+  if(count < 1)
+    {
+      fprintf(stderr, "Error : too few arguments.\n");
+      return(-1);
+    }
 
   /* The other args on the line specify options to be set... */
   for(i = 0; i < count; i++)
     {
+      /* ---------- Commit changes to driver ---------- */
+      if(!strncmp(args[i], "commit", 6))
+	{
+	  /* No args */
+	  IW_SET_EXT_ERR(skfd, ifname, SIOCSIWCOMMIT, &wrq,
+			 "Commit changes");
+	  continue;
+	}
+
       /* ---------- Set network ID ---------- */
       if((!strcasecmp(args[i], "nwid")) ||
 	 (!strcasecmp(args[i], "domain")))
 	{
 	  i++;
 	  if(i >= count)
-	    iw_usage();
+	    ABORT_ARG_NUM("Set NWID", SIOCSIWNWID);
 	  if((!strcasecmp(args[i], "off")) ||
 	     (!strcasecmp(args[i], "any")))
 	    wrq.u.nwid.disabled = 1;
@@ -643,27 +698,21 @@ set_info(int		skfd,		/* The socket */
 	    if(!strcasecmp(args[i], "on"))
 	      {
 		/* Get old nwid */
-		if(ioctl(skfd, SIOCGIWNWID, &wrq) < 0)
-		  {
-		    fprintf(stderr, "SIOCGIWNWID: %s\n", strerror(errno));
-		    return(-1);
-		  }
-		strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+		IW_GET_EXT_ERR(skfd, ifname, SIOCGIWNWID, &wrq,
+			       "Set NWID");
 		wrq.u.nwid.disabled = 0;
 	      }
 	    else
 	      if(sscanf(args[i], "%lX", (unsigned long *) &(wrq.u.nwid.value))
 		 != 1)
-		iw_usage();
+		ABORT_ARG_TYPE("Set NWID", SIOCSIWNWID, args[i]);
 	      else
 		wrq.u.nwid.disabled = 0;
 	  wrq.u.nwid.fixed = 1;
 
-	  if(ioctl(skfd, SIOCSIWNWID, &wrq) < 0)
-	    {
-	      fprintf(stderr, "SIOCSIWNWID: %s\n", strerror(errno));
-	      return(-1);
-	    }
+	  /* Set new nwid */
+	  IW_SET_EXT_ERR(skfd, ifname, SIOCSIWNWID, &wrq,
+			 "Set NWID");
 	  continue;
 	}
 
@@ -674,20 +723,17 @@ set_info(int		skfd,		/* The socket */
 	  double		freq;
 
 	  if(++i >= count)
-	    iw_usage();
+	    ABORT_ARG_NUM("Set Frequency", SIOCSIWFREQ);
 	  if(sscanf(args[i], "%lg", &(freq)) != 1)
-	    iw_usage();
+	    ABORT_ARG_TYPE("Set Frequency", SIOCSIWFREQ, args[i]);
 	  if(index(args[i], 'G')) freq *= GIGA;
 	  if(index(args[i], 'M')) freq *= MEGA;
 	  if(index(args[i], 'k')) freq *= KILO;
 
 	  iw_float2freq(freq, &(wrq.u.freq));
 
-	  if(ioctl(skfd, SIOCSIWFREQ, &wrq) < 0)
-	    {
-	      fprintf(stderr, "SIOCSIWFREQ: %s\n", strerror(errno));
-	      return(-1);
-	    }
+	  IW_SET_EXT_ERR(skfd, ifname, SIOCSIWFREQ, &wrq,
+			 "Set Frequency");
 	  continue;
 	}
 
@@ -695,15 +741,12 @@ set_info(int		skfd,		/* The socket */
       if(!strncmp(args[i], "sens", 4))
 	{
 	  if(++i >= count)
-	    iw_usage();
+	    ABORT_ARG_NUM("Set Sensitivity", SIOCSIWSENS);
 	  if(sscanf(args[i], "%d", &(wrq.u.sens.value)) != 1)
-	    iw_usage();
+	    ABORT_ARG_TYPE("Set Sensitivity", SIOCSIWSENS, args[i]);
 
-	  if(ioctl(skfd, SIOCSIWSENS, &wrq) < 0)
-	    {
-	      fprintf(stderr, "SIOCSIWSENS: %s\n", strerror(errno));
-	      return(-1);
-	    }
+	  IW_SET_EXT_ERR(skfd, ifname, SIOCSIWSENS, &wrq,
+			 "Set Sensitivity");
 	  continue;
 	}
 
@@ -714,7 +757,7 @@ set_info(int		skfd,		/* The socket */
 	  unsigned char	key[IW_ENCODING_TOKEN_MAX];
 
 	  if(++i >= count)
-	    iw_usage();
+	    ABORT_ARG_NUM("Set Encode", SIOCSIWENCODE);
 
 	  if(!strcasecmp(args[i], "on"))
 	    {
@@ -722,12 +765,8 @@ set_info(int		skfd,		/* The socket */
 	      wrq.u.data.pointer = (caddr_t) key;
 	      wrq.u.data.length = 0;
 	      wrq.u.data.flags = 0;
-	      if(ioctl(skfd, SIOCGIWENCODE, &wrq) < 0)
-		{
-		  fprintf(stderr, "SIOCGIWENCODE: %s\n", strerror(errno));
-		  return(-1);
-		}
-	      strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+	      IW_GET_EXT_ERR(skfd, ifname, SIOCGIWENCODE, &wrq,
+			     "Set Encode");
 	      wrq.u.data.flags &= ~IW_ENCODE_DISABLED;	/* Enable */
 	    }
 	  else
@@ -760,8 +799,8 @@ set_info(int		skfd,		/* The socket */
 		  buff = malloc(strlen(args[i]) + 1);
 		  if(buff == NULL)
 		    {
-		      fprintf(stderr, "Setting key : Malloc failed (string too long ?)\n");
-		      return(-1);
+		      fprintf(stderr, "Set Encode : Malloc failed (string too long ?)\n");
+		      return(-10);
 		    }
 		  strcpy(buff, args[i]);
 
@@ -814,18 +853,17 @@ set_info(int		skfd,		/* The socket */
 		      gotone = 1;
 		    }
 		}
+	      /* Pointer is absent in new API */
+	      if(wrq.u.data.pointer == NULL)
+		wrq.u.data.flags = IW_ENCODE_NOKEY;
 
 	      if(!gotone)
-		iw_usage();
+		ABORT_ARG_TYPE("Set Encode", SIOCSIWENCODE, args[i]);
 	      --i;
 	    }
 
-	  if(ioctl(skfd, SIOCSIWENCODE, &wrq) < 0)
-	    {
-	      fprintf(stderr, "SIOCSIWENCODE(%d): %s\n",
-		      errno, strerror(errno));
-	      return(-1);
-	    }
+	  IW_SET_EXT_ERR(skfd, ifname, SIOCSIWENCODE, &wrq,
+			 "Set Encode");
 	  continue;
   	}
 
@@ -836,7 +874,7 @@ set_info(int		skfd,		/* The socket */
 
 	  i++;
 	  if(i >= count)
-	    iw_usage();
+	    ABORT_ARG_NUM("Set ESSID", SIOCSIWESSID);
 	  if((!strcasecmp(args[i], "off")) ||
 	     (!strcasecmp(args[i], "any")))
 	    {
@@ -850,23 +888,15 @@ set_info(int		skfd,		/* The socket */
 		wrq.u.essid.pointer = (caddr_t) essid;
 		wrq.u.essid.length = 0;
 		wrq.u.essid.flags = 0;
-		if(ioctl(skfd, SIOCGIWESSID, &wrq) < 0)
-		  {
-		    fprintf(stderr, "SIOCGIWESSID: %s\n", strerror(errno));
-		    return(-1);
-		  }
-		strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+		IW_GET_EXT_ERR(skfd, ifname, SIOCGIWESSID, &wrq,
+			       "Set ESSID");
 		wrq.u.essid.flags = 1;
 	      }
 	    else
 	      /* Check the size of what the user passed us to avoid
 	       * buffer overflows */
 	      if(strlen(args[i]) > IW_ESSID_MAX_SIZE)
-		{
-		  fprintf(stderr, "ESSID too long (max %d): ``%s''\n",
-			  IW_ESSID_MAX_SIZE, args[i]);
-		  iw_usage();
-		}
+		ABORT_ARG_SIZE("Set ESSID", SIOCSIWESSID, IW_ESSID_MAX_SIZE);
 	      else
 		{
 		  int		temp;
@@ -886,11 +916,8 @@ set_info(int		skfd,		/* The socket */
 
 	  wrq.u.essid.pointer = (caddr_t) essid;
 	  wrq.u.essid.length = strlen(essid) + 1;
-	  if(ioctl(skfd, SIOCSIWESSID, &wrq) < 0)
-	    {
-	      fprintf(stderr, "SIOCSIWESSID: %s\n", strerror(errno));
-	      return(-1);
-	    }
+	  IW_SET_EXT_ERR(skfd, ifname, SIOCSIWESSID, &wrq,
+			 "Set ESSID");
 	  continue;
 	}
 
@@ -898,24 +925,14 @@ set_info(int		skfd,		/* The socket */
       if(!strcasecmp(args[i], "ap"))
 	{
 	  if(++i >= count)
-	    iw_usage();
+	    ABORT_ARG_NUM("Set AP Address", SIOCSIWAP);
 
-	  /* Check if we have valid address types */
-	  if(iw_check_addr_type(skfd, ifname) < 0)
-	    {
-	      fprintf(stderr, "%-8.8s  Interface doesn't support MAC & IP addresses\n", ifname);
-	      return(-1);
-	    }
-
-	  /* Get the address */
+	  /* Get the address and check if the interface supports it */
 	  if(iw_in_addr(skfd, ifname, args[i++], &(wrq.u.ap_addr)) < 0)
-	    iw_usage();
+	    ABORT_ARG_TYPE("Set AP Address", SIOCSIWAP, args[i-1]);
 
-	  if(ioctl(skfd, SIOCSIWAP, &wrq) < 0)
-	    {
-	      fprintf(stderr, "SIOCSIWAP: %s\n", strerror(errno));
-	      return(-1);
-	    }
+	  IW_SET_EXT_ERR(skfd, ifname, SIOCSIWAP, &wrq,
+			 "Set AP Address");
 	  continue;
 	}
 
@@ -924,21 +941,14 @@ set_info(int		skfd,		/* The socket */
 	{
 	  i++;
 	  if(i >= count)
-	    iw_usage();
+	    ABORT_ARG_NUM("Set Nickname", SIOCSIWNICKN);
 	  if(strlen(args[i]) > IW_ESSID_MAX_SIZE)
-	    {
-	      fprintf(stderr, "Name too long (max %d) : ``%s''\n",
-		      IW_ESSID_MAX_SIZE, args[i]);
-	      iw_usage();
-	    }
+	    ABORT_ARG_SIZE("Set Nickname", SIOCSIWNICKN, IW_ESSID_MAX_SIZE);
 
 	  wrq.u.essid.pointer = (caddr_t) args[i];
 	  wrq.u.essid.length = strlen(args[i]) + 1;
-	  if(ioctl(skfd, SIOCSIWNICKN, &wrq) < 0)
-	    {
-	      fprintf(stderr, "SIOCSIWNICKN: %s\n", strerror(errno));
-	      return(-1);
-	    }
+	  IW_SET_EXT_ERR(skfd, ifname, SIOCSIWNICKN, &wrq,
+			 "Set Nickname");
 	  continue;
 	}
 
@@ -947,7 +957,7 @@ set_info(int		skfd,		/* The socket */
 	 (!strcmp(args[i], "rate")))
 	{
 	  if(++i >= count)
-	    iw_usage();
+	    ABORT_ARG_NUM("Set Bit Rate", SIOCSIWRATE);
 	  if(!strcasecmp(args[i], "auto"))
 	    {
 	      wrq.u.bitrate.value = -1;
@@ -958,12 +968,8 @@ set_info(int		skfd,		/* The socket */
 	      if(!strcasecmp(args[i], "fixed"))
 		{
 		  /* Get old bitrate */
-		  if(ioctl(skfd, SIOCGIWRATE, &wrq) < 0)
-		    {
-		      fprintf(stderr, "SIOCGIWRATE: %s\n", strerror(errno));
-		      return(-1);
-		    }
-		  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+		  IW_GET_EXT_ERR(skfd, ifname, SIOCGIWRATE, &wrq,
+				 "Set Bit Rate");
 		  wrq.u.bitrate.fixed = 1;
 		}
 	      else			/* Should be a numeric value */
@@ -971,7 +977,7 @@ set_info(int		skfd,		/* The socket */
 		  double		brate;
 
 		  if(sscanf(args[i], "%lg", &(brate)) != 1)
-		    iw_usage();
+		    ABORT_ARG_TYPE("Set Bit Rate", SIOCSIWRATE, args[i]);
 		  if(index(args[i], 'G')) brate *= GIGA;
 		  if(index(args[i], 'M')) brate *= MEGA;
 		  if(index(args[i], 'k')) brate *= KILO;
@@ -994,11 +1000,8 @@ set_info(int		skfd,		/* The socket */
 		}
 	    }
 
-	  if(ioctl(skfd, SIOCSIWRATE, &wrq) < 0)
-	    {
-	      fprintf(stderr, "SIOCSIWRATE: %s\n", strerror(errno));
-	      return(-1);
-	    }
+	  IW_SET_EXT_ERR(skfd, ifname, SIOCSIWRATE, &wrq,
+			 "Set Bit Rate");
 	  continue;
 	}
 
@@ -1007,7 +1010,7 @@ set_info(int		skfd,		/* The socket */
 	{
 	  i++;
 	  if(i >= count)
-	    iw_usage();
+	    ABORT_ARG_NUM("Set RTS Threshold", SIOCSIWRTS);
 	  wrq.u.rts.value = -1;
 	  wrq.u.rts.fixed = 1;
 	  wrq.u.rts.disabled = 0;
@@ -1021,25 +1024,18 @@ set_info(int		skfd,		/* The socket */
 		if(!strcasecmp(args[i], "fixed"))
 		  {
 		    /* Get old RTS threshold */
-		    if(ioctl(skfd, SIOCGIWRTS, &wrq) < 0)
-		      {
-			fprintf(stderr, "SIOCGIWRTS: %s\n", strerror(errno));
-			return(-1);
-		      }
-		    strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+		    IW_GET_EXT_ERR(skfd, ifname, SIOCGIWRTS, &wrq,
+				   "Set RTS Threshold");
 		    wrq.u.rts.fixed = 1;
 		  }
 		else			/* Should be a numeric value */
 		  if(sscanf(args[i], "%ld", (unsigned long *) &(wrq.u.rts.value))
 		     != 1)
-		    iw_usage();
+		    ABORT_ARG_TYPE("Set RTS Threshold", SIOCSIWRTS, args[i]);
 	    }
 
-	  if(ioctl(skfd, SIOCSIWRTS, &wrq) < 0)
-	    {
-	      fprintf(stderr, "SIOCSIWRTS: %s\n", strerror(errno));
-	      return(-1);
-	    }
+	  IW_SET_EXT_ERR(skfd, ifname, SIOCSIWRTS, &wrq,
+			 "Set RTS Threshold");
 	  continue;
 	}
 
@@ -1048,7 +1044,7 @@ set_info(int		skfd,		/* The socket */
 	{
 	  i++;
 	  if(i >= count)
-	    iw_usage();
+	    ABORT_ARG_NUM("Set Fragmentation Threshold", SIOCSIWFRAG);
 	  wrq.u.frag.value = -1;
 	  wrq.u.frag.fixed = 1;
 	  wrq.u.frag.disabled = 0;
@@ -1062,25 +1058,20 @@ set_info(int		skfd,		/* The socket */
 		if(!strcasecmp(args[i], "fixed"))
 		  {
 		    /* Get old fragmentation threshold */
-		    if(ioctl(skfd, SIOCGIWFRAG, &wrq) < 0)
-		      {
-			fprintf(stderr, "SIOCGIWFRAG: %s\n", strerror(errno));
-			return(-1);
-		      }
-		    strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+		    IW_GET_EXT_ERR(skfd, ifname, SIOCGIWFRAG, &wrq,
+				   "Set Fragmentation Threshold");
 		    wrq.u.frag.fixed = 1;
 		  }
 		else			/* Should be a numeric value */
-		  if(sscanf(args[i], "%ld", (unsigned long *) &(wrq.u.frag.value))
+		  if(sscanf(args[i], "%ld",
+			    (unsigned long *) &(wrq.u.frag.value))
 		     != 1)
-		    iw_usage();
+		    ABORT_ARG_TYPE("Set Fragmentation Threshold", SIOCSIWFRAG,
+				   args[i]);
 	    }
 
-	  if(ioctl(skfd, SIOCSIWFRAG, &wrq) < 0)
-	    {
-	      fprintf(stderr, "SIOCSIWFRAG: %s\n", strerror(errno));
-	      return(-1);
-	    }
+	  IW_SET_EXT_ERR(skfd, ifname, SIOCSIWFRAG, &wrq,
+			 "Set Fragmentation Threshold");
 	  continue;
 	}
 
@@ -1091,7 +1082,7 @@ set_info(int		skfd,		/* The socket */
 
 	  i++;
 	  if(i >= count)
-	    iw_usage();
+	    ABORT_ARG_NUM("Set Mode", SIOCSIWMODE);
 
 	  if(sscanf(args[i], "%d", &k) != 1)
 	    {
@@ -1101,14 +1092,11 @@ set_info(int		skfd,		/* The socket */
 		k++;
 	    }
 	  if((k >= IW_NUM_OPER_MODE) || (k < 0))
-	    iw_usage();
+	    ABORT_ARG_TYPE("Set Mode", SIOCSIWMODE, args[i]);
 
 	  wrq.u.mode = k;
-	  if(ioctl(skfd, SIOCSIWMODE, &wrq) < 0)
-	    {
-	      fprintf(stderr, "SIOCSIWMODE: %s\n", strerror(errno));
-	      return(-1);
-	    }
+	  IW_SET_EXT_ERR(skfd, ifname, SIOCSIWMODE, &wrq,
+			 "Set Mode");
 	  continue;
 	}
 
@@ -1116,7 +1104,7 @@ set_info(int		skfd,		/* The socket */
       if(!strncmp(args[i], "power", 3))
 	{
 	  if(++i >= count)
-	    iw_usage();
+	    ABORT_ARG_NUM("Set Power Management", SIOCSIWPOWER);
 
 	  if(!strcasecmp(args[i], "off"))
 	    wrq.u.power.disabled = 1;	/* i.e. max size */
@@ -1124,12 +1112,8 @@ set_info(int		skfd,		/* The socket */
 	    if(!strcasecmp(args[i], "on"))
 	      {
 		/* Get old Power info */
-		if(ioctl(skfd, SIOCGIWPOWER, &wrq) < 0)
-		  {
-		    fprintf(stderr, "SIOCGIWPOWER: %s\n", strerror(errno));
-		    return(-1);
-		  }
-		strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+		IW_GET_EXT_ERR(skfd, ifname, SIOCGIWPOWER, &wrq,
+			       "Set Power Management");
 		wrq.u.power.disabled = 0;
 	      }
 	    else
@@ -1145,14 +1129,14 @@ set_info(int		skfd,		/* The socket */
 		  {
 		    wrq.u.power.flags |= IW_POWER_MIN;
 		    if(++i >= count)
-		      iw_usage();
+		      ABORT_ARG_NUM("Set Power Management", SIOCSIWPOWER);
 		  }
 		else
 		  if(!strcasecmp(args[i], "max"))
 		    {
 		      wrq.u.power.flags |= IW_POWER_MAX;
 		      if(++i >= count)
-			iw_usage();
+			ABORT_ARG_NUM("Set Power Management", SIOCSIWPOWER);
 		    }
 
 		/* Check value type */
@@ -1160,14 +1144,14 @@ set_info(int		skfd,		/* The socket */
 		  {
 		    wrq.u.power.flags |= IW_POWER_PERIOD;
 		    if(++i >= count)
-		      iw_usage();
+		      ABORT_ARG_NUM("Set Power Management", SIOCSIWPOWER);
 		  }
 		else
 		  if(!strcasecmp(args[i], "timeout"))
 		    {
 		      wrq.u.power.flags |= IW_POWER_TIMEOUT;
 		      if(++i >= count)
-			iw_usage();
+			ABORT_ARG_NUM("Set Power Management", SIOCSIWPOWER);
 		    }
 
 		/* Is there any value to grab ? */
@@ -1203,16 +1187,13 @@ set_info(int		skfd,		/* The socket */
 		      }
 		  }
 		if(!gotone)
-		  iw_usage();
+		  ABORT_ARG_TYPE("Set Power Management", SIOCSIWPOWER,
+				 args[i]);
 		--i;
 	      }
 
-	  if(ioctl(skfd, SIOCSIWPOWER, &wrq) < 0)
-	    {
-	      fprintf(stderr, "SIOCSIWPOWER(%d): %s\n",
-		      errno, strerror(errno));
-	      return(-1);
-	    }
+	  IW_SET_EXT_ERR(skfd, ifname, SIOCSIWPOWER, &wrq,
+		       "Set Power Management");
 	  continue;
   	}
 
@@ -1223,14 +1204,13 @@ set_info(int		skfd,		/* The socket */
 	  struct iw_range	range;
 
 	  if(++i >= count)
-	    iw_usage();
+	    ABORT_ARG_NUM("Set Tx Power", SIOCSIWTXPOW);
 
 	  /* Extract range info */
 	  if(iw_get_range_info(skfd, ifname, &range) < 0)
 	    memset(&range, 0, sizeof(range));
 
 	  /* Prepare the request */
-	  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
 	  wrq.u.txpower.value = -1;
 	  wrq.u.txpower.fixed = 1;
 	  wrq.u.txpower.disabled = 0;
@@ -1245,12 +1225,8 @@ set_info(int		skfd,		/* The socket */
 		if(!strcasecmp(args[i], "fixed"))
 		  {
 		    /* Get old tx-power */
-		    if(ioctl(skfd, SIOCGIWTXPOW, &wrq) < 0)
-		      {
-			fprintf(stderr, "SIOCGIWTXPOW: %s\n", strerror(errno));
-			return(-1);
-		      }
-		    strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+		    IW_GET_EXT_ERR(skfd, ifname, SIOCGIWTXPOW, &wrq,
+				   "Set Tx Power");
 		    wrq.u.txpower.fixed = 1;
 		  }
 		else			/* Should be a numeric value */
@@ -1261,7 +1237,7 @@ set_info(int		skfd,		/* The socket */
 		    /* Get the value */
 		    if(sscanf(args[i], "%ld",
 			      (unsigned long *) &(power)) != 1)
-		      iw_usage();
+		      ABORT_ARG_TYPE("Set Tx Power", SIOCSIWTXPOW, args[i]);
 
 		    /* Check if milliwatt */
 		    ismwatt = (index(args[i], 'm') != NULL);
@@ -1292,24 +1268,21 @@ set_info(int		skfd,		/* The socket */
 		  }
 	      }
 
-	  if(ioctl(skfd, SIOCSIWTXPOW, &wrq) < 0)
-	    {
-	      fprintf(stderr, "SIOCSIWTXPOW: %s\n", strerror(errno));
-	      return(-1);
-	    }
+	  IW_SET_EXT_ERR(skfd, ifname, SIOCSIWTXPOW, &wrq,
+			 "Set Tx Power");
 	  continue;
 	}
 #endif
 
 #if WIRELESS_EXT > 10
-      /* ---------- Set Power Management ---------- */
+      /* ---------- Set Retry limit ---------- */
       if(!strncmp(args[i], "retry", 3))
 	{
 	  double		temp;
 	  int		gotone = 0;
 
 	  if(++i >= count)
-	    iw_usage();
+	    ABORT_ARG_NUM("Set Retry Limit", SIOCSIWRETRY);
 
 	  /* Default - nope */
 	  wrq.u.retry.flags = IW_RETRY_LIMIT;
@@ -1320,14 +1293,14 @@ set_info(int		skfd,		/* The socket */
 	    {
 	      wrq.u.retry.flags |= IW_RETRY_MIN;
 	      if(++i >= count)
-		iw_usage();
+		ABORT_ARG_NUM("Set Retry Limit", SIOCSIWRETRY);
 	    }
 	  else
 	    if(!strcasecmp(args[i], "max"))
 	      {
 		wrq.u.retry.flags |= IW_RETRY_MAX;
 		if(++i >= count)
-		  iw_usage();
+		  ABORT_ARG_NUM("Set Retry Limit", SIOCSIWRETRY);
 	      }
 
 	  /* Check value type */
@@ -1335,14 +1308,14 @@ set_info(int		skfd,		/* The socket */
 	    {
 	      wrq.u.retry.flags |= IW_RETRY_LIMIT;
 	      if(++i >= count)
-		iw_usage();
+		ABORT_ARG_NUM("Set Retry Limit", SIOCSIWRETRY);
 	    }
 	  else
 	    if(!strncasecmp(args[i], "lifetime", 4))
 	      {
 		wrq.u.retry.flags |= IW_RETRY_LIFETIME;
 		if(++i >= count)
-		  iw_usage();
+		  ABORT_ARG_NUM("Set Retry Limit", SIOCSIWRETRY);
 	      }
 
 	  /* Is there any value to grab ? */
@@ -1362,15 +1335,11 @@ set_info(int		skfd,		/* The socket */
 	    }
 
 	  if(!gotone)
-	    iw_usage();
+	    ABORT_ARG_TYPE("Set Retry Limit", SIOCSIWRETRY, args[i]);
 	  --i;
 
-	  if(ioctl(skfd, SIOCSIWRETRY, &wrq) < 0)
-	    {
-	      fprintf(stderr, "SIOCSIWRETRY(%d): %s\n",
-		      errno, strerror(errno));
-	      return(-1);
-	    }
+	  IW_SET_EXT_ERR(skfd, ifname, SIOCSIWRETRY, &wrq,
+			 "Set Retry Limit");
 	  continue;
 	}
 
@@ -1378,8 +1347,8 @@ set_info(int		skfd,		/* The socket */
 
       /* ---------- Other ---------- */
       /* Here we have an unrecognised arg... */
-      fprintf(stderr, "Invalid argument : %s\n", args[i]);
-      iw_usage();
+      fprintf(stderr, "Error : unrecognised wireless request \"%s\"\n",
+	      args[i]);
       return(-1);
     }		/* for(index ... */
   return(0);

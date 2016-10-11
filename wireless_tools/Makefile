@@ -4,8 +4,9 @@
 
 # Targets to build
 STATIC=libiw.a
-DYNAMIC=libiw.so.22
+DYNAMIC=libiw.so.23
 PROGS= iwconfig iwlist iwpriv iwspy iwgetid
+MANPAGES=iwconfig.8 iwlist.8 iwpriv.8 iwspy.8
 
 # Composition of the library :
 OBJS = iwlib.o
@@ -16,26 +17,12 @@ IWLIBS=$(OBJS)
 
 # Installation directory. By default, go in local.
 # Distributions should probably use /usr/sbin, but they probably know better...
-INSTALL_DIR= /usr/local/sbin
-INSTALL_LIB= /usr/local/lib
-INSTALL_INC= /usr/local/include
+INSTALL_DIR= /usr/local/sbin/
+INSTALL_LIB= /usr/local/lib/
+INSTALL_INC= /usr/local/include/
+INSTALL_MAN= /usr/local/man
 
-# This is our header selection. Try to hide the mess and the misery :-(
-# Please choose *only one* of the define...
-
-# Kernel headers 2.4.X + Glibc 2.2 - Mandrake 8.0, Debian 2.3, RH 7.1
-#HEADERS= -DGLIBC22_HEADERS
-
-# Kernel headers 2.0.X + Glibc 2.0 - Debian 2.0, RH 5
-# Kernel headers 2.2.X + Glibc 2.1 - Debian 2.2, RH 6.1
-# Kernel headers 2.4.X + Glibc 2.1 - Debian 2.2 upgraded, RH 7.0
-HEADERS= -DGLIBC_HEADERS
-
-# Kernel headers 2.2.X + Glibc 2.0 - Debian 2.1
-#HEADERS= -DKLUDGE_HEADERS
-
-# Kernel headers 2.0.X + libc5 - old systems
-#HEADERS= -DLIBC5_HEADERS
+# Header selection is now supposed to be automatic...
 
 # Use private copy of Wireless Extension definition instead of the
 # system wide one in /usr/include/linux. Use with care.
@@ -76,21 +63,24 @@ iwgetid: iwgetid.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 # Compilation of the dynamic library
-libiw.so.22: $(OBJS)
+$(DYNAMIC): $(OBJS)
 	$(CC) -O2 -shared -o $@ -Wl,-soname,$@ -lm -lc $^
 
 # Compilation of the static library
-libiw.a: $(OBJS)
+$(STATIC): $(OBJS)
 	$(RM) $@
 	ar cru $@ $^
 	ranlib $@
 
 # So crude but so effective ;-)
+# Less crude thanks to many contributions ;-)
 install::
-	cp $(PROGS) $(INSTALL_DIR)
-	cp $(STATIC) $(DYNAMIC) $(INSTALL_LIB)
-	echo "Don't forget to fix you /etc/ld.so.conf and run ldconfig."
-	cp iwlib.h $(INSTALL_INC)
+	install -m 755 $(PROGS) $(INSTALL_DIR)
+	install -m 644 $(STATIC) $(INSTALL_LIB)
+	install -m 755 $(DYNAMIC) $(INSTALL_LIB)
+	echo "Don't forget to fix your /etc/ld.so.conf and run ldconfig."
+	install -m 644 iwlib.h $(INSTALL_INC)
+	install -m 644 $(MANPAGES) $(INSTALL_MAN)/man8/
 
 clean::
 	$(RM_CMD) 

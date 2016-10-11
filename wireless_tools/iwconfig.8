@@ -20,6 +20,8 @@ iwconfig \- configure a wireless network interface
 .BI "                   [rate " R "] [rts " RT "] [frag " FT "] [txpower " T ]
 .br
 .BI "                   [enc " E "] [key " K "] [power " P "] [retry " R ]
+.br
+.BI "                   [commit]
 .\"
 .\" DESCRIPTION part
 .\"
@@ -324,6 +326,15 @@ is the short retry limit (non RTS/CTS packets).
 .I "	iwconfig eth0 retry lifetime 300m"
 .br
 .I "	iwconfig eth0 retry min limit 8"
+.TP
+.BR commit
+Some cards may not apply changes done through Wireless Extensions
+immediately (they may wait to agregate the changes or apply it only
+when the card is brought up). This command (when available) force
+the card to apply all pending changes.
+.br
+This is normally not needed, because the card will eventually apply
+the changes, but can be usefull for debugging.
 .\"
 .\" DISPLAY part
 .\"
