@@ -26,6 +26,7 @@ int main(int argc, char** argv)
 
 	int devsock;
 	struct ifreq ifbuffer;
+	char buf[20];
 
 	if ((argc != 2) || (argv[1][0] == '-')) {
 		printf("Usage: macaddr interface\n");
@@ -47,7 +48,7 @@ int main(int argc, char** argv)
 	}
 	close(devsock);
 
-	puts(iw_ether_ntoa((struct ether_addr *) ifbuffer.ifr_ifru.ifru_hwaddr.sa_data));
+	puts(iw_saether_ntop(&ifbuffer.ifr_ifru.ifru_hwaddr, buf));
 
 	exit(0);
 }

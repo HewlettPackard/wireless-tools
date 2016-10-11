@@ -23,6 +23,10 @@ RANLIB = ranlib
 ## This is mostly useful for embedded platforms without maths.
 # BUILD_NOLIBM = y
 
+## Uncomment this to strip binary from symbols. This reduce binary size
+## by a few percent but make debug worse...
+# BUILD_STRIPPING = y
+
 # ***************************************************************************
 # ***** Most users should not need to change anything beyond this point *****
 # ***************************************************************************
@@ -43,7 +47,7 @@ PROGS= iwconfig iwlist iwpriv iwspy iwgetid iwevent ifrename
 MANPAGES8=iwconfig.8 iwlist.8 iwpriv.8 iwspy.8 iwgetid.8 iwevent.8 ifrename.8
 MANPAGES7=wireless.7
 MANPAGES5=iftab.5
-EXTRAPROGS= macaddr
+EXTRAPROGS= macaddr iwmulticall
 
 # Composition of the library :
 OBJS = iwlib.o
@@ -75,9 +79,16 @@ LDCONFIG = ldconfig
 # Do we want to build with or without libm ?
 ifdef BUILD_NOLIBM
   LIBS=
-  WELIB_FLAG = -DWE_NOLIBM=y
+  WELIB_FLAG= -DWE_NOLIBM=y
 else
   LIBS= -lm
+endif
+
+# Stripping or not ?
+ifdef BUILD_STRIPPING
+  STRIPFLAGS= -Wl,-s
+else
+  STRIPFLAGS=
 endif
 
 # Other flags
@@ -92,7 +103,7 @@ PICFLAG=-fPIC
 all:: $(IWLIB) $(PROGS)
 
 %: %.o
-	$(CC) $(LDFLAGS) $(XCFLAGS) -o $@ $^ $(LIBS)
+	$(CC) $(LDFLAGS) $(STRIPFLAGS) $(XCFLAGS) -o $@ $^ $(LIBS)
 %.o: %.c wireless.h
 	$(CC) $(XCFLAGS) -c $<
 %.so: %.c wireless.h
@@ -114,34 +125,27 @@ ifrename: ifrename.o $(IWLIB)
 
 macaddr: macaddr.o $(IWLIB)
 
+# Always do symbol stripping here
+iwmulticall: iwmulticall.o
+	$(CC) $(LDFLAGS) -Wl,-s $(XCFLAGS) -o $@ $^ $(LIBS)
+
 # It's a kind of magic...
 wireless.h:
 	cp $(WEXT_HEADER) wireless.h
 
 # Compilation of the dynamic library
 $(DYNAMIC): $(OBJS:.o=.so)
-	$(CC) -shared -o $@ -Wl,-soname,$@ $(LIBS) -lc $^
+	$(CC) -shared -o $@ -Wl,-soname,$@ $(STRIPFLAGS) $(LIBS) -lc $^
 
 # Compilation of the static library
-$(STATIC): $(OBJS)
+$(STATIC): $(OBJS:.o=.so)
 	$(RM) $@
 	$(AR) cru $@ $^
 	$(RANLIB) $@
 
-# So crude but so effective ;-)
+# Installation : So crude but so effective ;-)
 # Less crude thanks to many contributions ;-)
-install:: all $(IWLIB_INSTALL)
-	install -m 755 -d $(INSTALL_DIR)
-	install -m 755 $(PROGS) $(INSTALL_DIR)
-	install -m 755 -d $(INSTALL_INC)
-	install -m 644 iwlib.h $(INSTALL_INC)
-	install -m 644 wireless.h $(INSTALL_INC)
-	install -m 755 -d $(INSTALL_MAN)/man8/
-	install -m 644 $(MANPAGES8) $(INSTALL_MAN)/man8/
-	install -m 755 -d $(INSTALL_MAN)/man7/
-	install -m 644 $(MANPAGES7) $(INSTALL_MAN)/man7/
-	install -m 755 -d $(INSTALL_MAN)/man5/
-	install -m 644 $(MANPAGES5) $(INSTALL_MAN)/man5/
+install:: $(IWLIB_INSTALL) install-bin install-hdr install-man
 
 # Install the dynamic library
 install-dynamic:: $(DYNAMIC)
@@ -155,6 +159,35 @@ install-dynamic:: $(DYNAMIC)
 install-static:: $(STATIC)
 	install -m 755 -d $(INSTALL_LIB)
 	install -m 644 $(STATIC) $(INSTALL_LIB)
+
+# All the binaries. Careful, no dependancy on install-dynamic
+install-bin:: all
+	install -m 755 -d $(INSTALL_DIR)
+	install -m 755 $(PROGS) $(INSTALL_DIR)
+
+# Headers to go with the wireless lib (dev)
+install-hdr:: wireless.h
+	install -m 755 -d $(INSTALL_INC)
+	install -m 644 iwlib.h $(INSTALL_INC)
+	install -m 644 wireless.h $(INSTALL_INC)
+
+# How could you live without those manapages ?
+install-man::
+	install -m 755 -d $(INSTALL_MAN)/man8/
+	install -m 644 $(MANPAGES8) $(INSTALL_MAN)/man8/
+	install -m 755 -d $(INSTALL_MAN)/man7/
+	install -m 644 $(MANPAGES7) $(INSTALL_MAN)/man7/
+	install -m 755 -d $(INSTALL_MAN)/man5/
+	install -m 644 $(MANPAGES5) $(INSTALL_MAN)/man5/
+
+install-iwmulticall:: iwmulticall
+	install -m 755 -d $(INSTALL_DIR)
+	install -m 755 $< $(INSTALL_DIR)/iwconfig
+	( cd $(INSTALL_DIR) ; \
+	  ln -f -s iwconfig iwlist ; \
+	  ln -f -s iwconfig iwspy ; \
+	  ln -f -s iwconfig iwpriv ; \
+	  ln -f -s iwconfig iwgetid )
 
 clean::
 	$(RM_CMD) 

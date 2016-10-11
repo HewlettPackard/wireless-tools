@@ -66,11 +66,28 @@ attempt to change the name of the interface to the interface name
 given by the mapping.
 .PP
 The interface name of a mapping is either a plain interface name (such as
-.IR eth2 " or " wlan0 )
+.IR eth2 " or " wlan1 )
 or a interface name pattern containing a single wildcard (such as
 .IR eth* " or " wlan* ).
 In case of wildcard, the kernel replace the '*' with the lowest
-available integer making this interface name unique.
+available integer making this interface name unique. Note that
+wildcard is only supported for kernel 2.6.1 and 2.4.30 and later.
+.PP
+It is discouraged to try to map interfaces to default interfaces names
+such as
+.IR eth0 ", " wlan0 " or " ppp0 .
+The kernel use those as the default name for any new interface,
+therefore most likely an interface will already use this name and
+prevent ifrename to use it. Even if you use takeover, the interface
+may already be up in some cases. Not using those name will allow you
+to immediately spot unconfigured or new interfaces.
+.br
+Good names are either totally unique and meaningfull,
+such as
+.IR mydsl " or " privatehub ,
+or use larger integer, such as
+.IR eth5 " or " wlan5 .
+The second type is usually easier to integrate in various network utilities.
 .\"
 .\" DESCRIPTORS part
 .\"
@@ -156,6 +173,18 @@ using
 This selector is usually only supported on 16 bits cards, for 32 bits
 cards it is advised to use the selector
 .BR businfo .
+.TP
+.BI SYSFS{ filename } " value"
+Matches the sysfs attribute given by filename to the specified value. sysfs attributes of the interface can be read in one of the directory in the directory 
+.IR /sys/class/net/ .
+For example, the filename
+.I address
+is the MAC address of the device and should be identical to the selector
+.BR mac .
+.br
+The sysfs filesystem is only supported with 2.6.X kernel and need to
+be mounted. sysfs selectors are not as efficient as other selectors,
+therefore they should be avoided for maximum performance.
 .\"
 .\" EXAMPLE part
 .\"
@@ -169,6 +198,8 @@ eth3		driver wavelan interrupt 15 baseaddress 0x390
 eth4		driver pcnet32 businfo 0000:02:05.0
 .br
 air*		mac 00:07:0E:* arp 1
+.br
+myvpn	SYSFS{address} 00:10:83:*
 .\"
 .\" AUTHOR part
 .\"

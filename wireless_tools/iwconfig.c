@@ -22,22 +22,25 @@
 static void
 iw_usage(void)
 {
-  fprintf(stderr, "Usage: iwconfig interface [essid {NN|on|off}]\n");
-  fprintf(stderr, "                          [nwid {NN|on|off}]\n");
-  fprintf(stderr, "                          [mode {managed|ad-hoc|...}\n");
-  fprintf(stderr, "                          [freq N.NNNN[k|M|G]]\n");
-  fprintf(stderr, "                          [channel N]\n");
-  fprintf(stderr, "                          [ap {N|off|auto}]\n");
-  fprintf(stderr, "                          [sens N]\n");
-  fprintf(stderr, "                          [nick N]\n");
-  fprintf(stderr, "                          [rate {N|auto|fixed}]\n");
-  fprintf(stderr, "                          [rts {N|auto|fixed|off}]\n");
-  fprintf(stderr, "                          [frag {N|auto|fixed|off}]\n");
-  fprintf(stderr, "                          [enc {NNNN-NNNN|off}]\n");
-  fprintf(stderr, "                          [power {period N|timeout N}]\n");
-  fprintf(stderr, "                          [txpower N {mW|dBm}]\n");
-  fprintf(stderr, "                          [commit]\n");
-  fprintf(stderr, "       Check man pages for more details.\n\n");
+  fprintf(stderr,
+	"Usage: iwconfig interface [essid {NN|on|off}]\n"
+	"                          [nwid {NN|on|off}]\n"
+	"                          [mode {managed|ad-hoc|...}\n"
+	"                          [freq N.NNNN[k|M|G]]\n"
+	"                          [channel N]\n"
+	"                          [ap {N|off|auto}]\n"
+	"                          [sens N]\n"
+	"                          [nick N]\n"
+	"                          [rate {N|auto|fixed}]\n"
+	"                          [rts {N|auto|fixed|off}]\n"
+	"                          [frag {N|auto|fixed|off}]\n"
+	"                          [enc {NNNN-NNNN|off}]\n"
+	"                          [power {period N|timeout N}]\n"
+	"                          [retry {limit N|lifetime N}]\n"
+	"                          [txpower N {mW|dBm}]\n"
+	"                          [commit]\n"
+	"       Check man pages for more details.\n\n"
+  );
 }
 
 
@@ -154,6 +157,38 @@ get_info(int			skfd,
       info->has_stats = 1;
     }
 
+#ifdef DISPLAY_WPA
+  /* Note : currently disabled to not bloat iwconfig output. Also,
+   * if does not make total sense to display parameters that we
+   * don't allow (yet) to configure.
+   * For now, use iwlist instead... Jean II */
+
+  /* Get WPA/802.1x/802.11i security parameters */
+  if((info->has_range) && (info->range.we_version_compiled > 17))
+    {
+      wrq.u.param.flags = IW_AUTH_KEY_MGMT;
+      if(iw_get_ext(skfd, ifname, SIOCGIWAUTH, &wrq) >= 0)
+	{
+	  info->has_auth_key_mgmt = 1;
+	  info->auth_key_mgmt = wrq.u.param.value;
+	}
+
+      wrq.u.param.flags = IW_AUTH_CIPHER_PAIRWISE;
+      if(iw_get_ext(skfd, ifname, SIOCGIWAUTH, &wrq) >= 0)
+	{
+	  info->has_auth_cipher_pairwise = 1;
+	  info->auth_cipher_pairwise = wrq.u.param.value;
+	}
+
+      wrq.u.param.flags = IW_AUTH_CIPHER_GROUP;
+      if(iw_get_ext(skfd, ifname, SIOCGIWAUTH, &wrq) >= 0)
+	{
+	  info->has_auth_cipher_group = 1;
+	  info->auth_cipher_group = wrq.u.param.value;
+	}
+    }
+#endif
+
   return(0);
 }
 
@@ -204,7 +239,7 @@ display_info(struct wireless_info *	info,
   /* Display Network ID */
   if(info->b.has_nwid)
     {
-      /* Note : should display proper number of digit according to info
+      /* Note : should display proper number of digits according to info
        * in range structure */
       if(info->b.nwid.disabled)
 	printf("NWID:off/any  ");
@@ -225,7 +260,7 @@ display_info(struct wireless_info *	info,
     {
       double		freq = info->b.freq;	/* Frequency/channel */
       int		channel = -1;		/* Converted to channel */
-      /* Some driver insist of returning channel instead of frequency.
+      /* Some drivers insist of returning channel instead of frequency.
        * This fixes them up. Note that, driver should still return
        * frequency, because other tools depend on it. */
       if(info->has_range && (freq < KILO))
@@ -252,7 +287,7 @@ display_info(struct wireless_info *	info,
 	printf("Cell:");
       else
 	printf("Access Point:");
-      printf(" %s   ", iw_pr_ether(buffer, info->ap_addr.sa_data));
+      printf(" %s   ", iw_sawap_ntop(&info->ap_addr, buffer));
     }
 
   /* Display the currently used/set bit-rate */
@@ -397,7 +432,7 @@ display_info(struct wireless_info *	info,
     {
       printf("Encryption key:");
       if((info->b.key_flags & IW_ENCODE_DISABLED) || (info->b.key_size == 0))
-	printf("off\n          ");
+	printf("off");
       else
 	{
 	  /* Display the key */
@@ -412,9 +447,25 @@ display_info(struct wireless_info *	info,
 	    printf("   Security mode:restricted");
 	  if(info->b.key_flags & IW_ENCODE_OPEN)
 	    printf("   Security mode:open");
-	  printf("\n          ");
  	}
+      printf("\n          ");
     }
+
+#ifdef DISPLAY_WPA
+  /* Display WPA/802.1x/802.11i security parameters */
+  if(info->has_auth_key_mgmt || info->has_auth_cipher_pairwise ||
+     info->has_auth_cipher_group)
+    {
+      printf("Auth params:");
+      if(info->has_auth_key_mgmt)
+	printf(" key_mgmt:0x%X ", info->auth_key_mgmt);
+      if(info->has_auth_cipher_pairwise)
+	printf(" cipher_pairwise:0x%X ", info->auth_cipher_pairwise);
+      if(info->has_auth_cipher_group)
+	printf(" cipher_group:0x%X ", info->auth_cipher_group);
+      printf("\n          ");
+    }
+#endif
 
   /* Display Power Management information */
   /* Note : we display only one parameter, period or timeout. If a device
@@ -424,7 +475,7 @@ display_info(struct wireless_info *	info,
       printf("Power Management");
       /* Disabled ? */
       if(info->power.disabled)
-	printf(":off\n          ");
+	printf(":off");
       else
 	{
 	  /* Let's check the value and its type */
@@ -442,8 +493,8 @@ display_info(struct wireless_info *	info,
 	  /* Let's check if nothing (simply on) */
 	  if(info->power.flags == IW_POWER_ON)
 	    printf(":on");
-	  printf("\n          ");
  	}
+      printf("\n          ");
     }
 
   /* Display statistics */
@@ -812,6 +863,7 @@ set_info(int		skfd,		/* The socket */
       if(!strcasecmp(args[i], "essid"))
 	{
 	  char		essid[IW_ESSID_MAX_SIZE + 1];
+	  int		we_kernel_version;
 
 	  i++;
 	  if(i >= count)
@@ -826,6 +878,7 @@ set_info(int		skfd,		/* The socket */
 	    if(!strcasecmp(args[i], "on"))
 	      {
 		/* Get old essid */
+		memset(essid, '\0', sizeof(essid));
 		wrq.u.essid.pointer = (caddr_t) essid;
 		wrq.u.essid.length = IW_ESSID_MAX_SIZE + 1;
 		wrq.u.essid.flags = 0;
@@ -835,10 +888,10 @@ set_info(int		skfd,		/* The socket */
 	      }
 	    else
 	      {
-		/* '-' allow to escape the ESSID string, allowing
+		/* '-' or '--' allow to escape the ESSID string, allowing
 		 * to set it to the string "any" or "off".
 		 * This is a big ugly, but it will do for now */
-		if(!strcmp(args[i], "-"))
+		if((!strcmp(args[i], "-")) || (!strcmp(args[i], "--")))
 		  {
 		    i++;
 		    if(i >= count)
@@ -867,8 +920,14 @@ set_info(int		skfd,		/* The socket */
 		  }
 	      }
 
+	  /* Get version from kernel, device may not have range... */
+	  we_kernel_version = iw_get_kernel_we_version();
+
+	  /* Finally set the ESSID value */
 	  wrq.u.essid.pointer = (caddr_t) essid;
 	  wrq.u.essid.length = strlen(essid) + 1;
+	  if(we_kernel_version > 20)
+	    wrq.u.essid.length--;
 	  IW_SET_EXT_ERR(skfd, ifname, SIOCSIWESSID, &wrq,
 			 "Set ESSID");
 	  continue;
@@ -909,14 +968,20 @@ set_info(int		skfd,		/* The socket */
       /* ---------- Set NickName ---------- */
       if(!strncmp(args[i], "nick", 4))
 	{
+	  int		we_kernel_version;
+
 	  i++;
 	  if(i >= count)
 	    ABORT_ARG_NUM("Set Nickname", SIOCSIWNICKN);
 	  if(strlen(args[i]) > IW_ESSID_MAX_SIZE)
 	    ABORT_ARG_SIZE("Set Nickname", SIOCSIWNICKN, IW_ESSID_MAX_SIZE);
 
+	  we_kernel_version = iw_get_kernel_we_version();
+
 	  wrq.u.essid.pointer = (caddr_t) args[i];
 	  wrq.u.essid.length = strlen(args[i]) + 1;
+	  if(we_kernel_version > 20)
+	    wrq.u.essid.length--;
 	  IW_SET_EXT_ERR(skfd, ifname, SIOCSIWNICKN, &wrq,
 			 "Set Nickname");
 	  continue;
@@ -1082,6 +1147,7 @@ set_info(int		skfd,		/* The socket */
 	    if(!strcasecmp(args[i], "on"))
 	      {
 		/* Get old Power info */
+		wrq.u.power.flags = 0;
 		IW_GET_EXT_ERR(skfd, ifname, SIOCGIWPOWER, &wrq,
 			       "Set Power Management");
 		wrq.u.power.disabled = 0;
@@ -1218,8 +1284,13 @@ set_info(int		skfd,		/* The socket */
 			  ABORT_ARG_TYPE("Set Tx Power", SIOCSIWTXPOW,
 					 args[i]);
 
-			/* Check if milliwatt */
-			ismwatt = (index(args[i], 'm') != NULL);
+			/* Check if milliWatt
+			 * We authorise a single 'm' as a shorthand for 'mW',
+			 * on the other hand a 'd' probably means 'dBm'... */
+			ismwatt = ((index(args[i], 'm') != NULL)
+				   && (index(args[i], 'd') == NULL));
+
+			/* We could check 'W' alone... Another time... */
 
 			/* Convert */
 			if(range.txpower_capa & IW_TXPOW_RELATIVE)
@@ -1374,15 +1445,24 @@ main(int	argc,
       iw_usage();
     else
       /* Special case for version... */
-      if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version"))
+      if(!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version"))
 	goterr = iw_print_version_info("iwconfig");
       else
-	/* The device name must be the first argument */
-	if(argc == 2)
-	  print_info(skfd, argv[1], NULL, 0);
-	else
-	  /* The other args on the line specify options to be set... */
-	  goterr = set_info(skfd, argv + 2, argc - 2, argv[1]);
+	{
+	  /* '--' escape device name */
+	  if((argc > 2) && !strcmp(argv[1], "--"))
+	    {
+	      argv++;
+	      argc--;
+	    }
+
+	  /* The device name must be the first argument */
+	  if(argc == 2)
+	    print_info(skfd, argv[1], NULL, 0);
+	  else
+	    /* The other args on the line specify options to be set... */
+	    goterr = set_info(skfd, argv + 2, argc - 2, argv[1]);
+	}
 
   /* Close the socket. */
   iw_sockets_close(skfd);

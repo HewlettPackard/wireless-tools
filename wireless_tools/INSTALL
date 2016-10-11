@@ -71,6 +71,10 @@ Other useful Makefile options :
 	Note that you should pass the same command line options for
 all invocations of make ("make" and "make install").
 
+	If you want the absolute minimal footprint, you may want to
+look into the multicall version of the tools. You can build it with
+"make iwmulticall" and install it with "make install-iwmulticall".
+
 Old kernel with older Wireless Extensions :
 -----------------------------------------
 	Kernel prior to 2.2.14 : Those kernels include Wireless

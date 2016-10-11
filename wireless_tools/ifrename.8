@@ -88,8 +88,23 @@ printed.
 When used with
 .IR -i ,
 specify the new name of the interface. The list of mappings from the
-configuration file is bypassed. The new name may be a wildcard
-containing a single '*'.
+configuration file is bypassed, the interface specified with
+.I -i
+is renamed directly to
+.IR newname .
+The new name may be a wildcard containing a single '*'.
+.br
+When used without 
+.IR -i ,
+rename interfaces by using only mappings that would rename them to
+.IR newname .
+The new name may not be a wildcard. This use of ifrename is
+discouraged, because inefficient
+.RI ( -n " without " -i ).
+All the interfaces of the system need to be processed at each
+invocation, therefore in most case it is not faster than just letting
+ifrename renaming all of them (without both 
+.IR -n " and " -i ).
 .TP
 .B -t
 Enable name takeover support. This allow interface name swapping

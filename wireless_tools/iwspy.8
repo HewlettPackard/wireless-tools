@@ -25,17 +25,22 @@ iwspy \- Get wireless statistics from specific nodes
 .\"
 .SH DESCRIPTION
 .B Iwspy
-is used to set a list of addresses in a wireless network interface and
-to read back quality of link information for each of those. This
-information is the same as the one available in
+is used to set a list of addresses to monitor in a wireless network
+interface and to read back quality of link information for each of
+those. This information is the same as the one available in
 .I /proc/net/wireless
 : quality of the link, signal strength and noise level.
 .PP
 This information is updated each time a new packet is received, so
-each address of the list add some overhead in the driver.
+each address of the list adds some overhead in the driver.
 .PP
-Note the this functionality work only for node part of the current
-wireless cells.
+Note that this functionality works only for nodes part of the current
+wireless cell, you can not monitor Access Points you are not
+associated with (you can use Scanning for that) and nodes in other
+cells. In Managed mode, in most case packets are relayed by the Access
+Point, in this case you will get the signal strength of the Access
+Point. For those reasons this functionality is mostly useful in Ad-Hoc
+and Master mode.
 .\"
 .\" PARAMETER part
 .\"
@@ -44,7 +49,7 @@ You may set any number of addresses up to 8.
 .TP
 .BR DNSNAME " | " IPADDR
 Set an IP address, or in some cases a DNS name (using the name
-resolver). As the hardware work with hardware addresses,
+resolver). As the hardware works with hardware addresses,
 .B iwspy
 will translate this IP address through
 .IR ARP .
@@ -73,10 +78,10 @@ Set the
 .I low
 and
 .I high
-signal strength threshold for the iwspy event (for driver that support
-it).
+signal strength threshold for the iwspy event (for drivers that
+support it).
 .br
-Every time the signal strengh for any of the address monitored
+Every time the signal strength for any of the address monitored
 with iwspy goes lower than the low threshold or goes higher than the
 high threshold, a Wireless Event will be generated.
 .br

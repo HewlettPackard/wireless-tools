@@ -241,8 +241,6 @@ static void
 iw_usage(void)
 {
   fprintf(stderr, "Usage: iwpriv interface [private-command [private-arguments]]\n");
-  fprintf(stderr, "              interface [roam {on|off}]\n");
-  fprintf(stderr, "              interface [port {ad-hoc|managed|N}]\n");
 }
 
 /************************* SETTING ROUTINES **************************/
@@ -269,7 +267,7 @@ set_private_cmd(int		skfd,		/* Socket */
   int		offset = 0;	/* Space for sub-ioctl index */
 
   /* Check if we have a token index.
-   * Do it now so that sub-ioctl takes precendence, and so that we
+   * Do it now so that sub-ioctl takes precedence, and so that we
    * don't have to bother with it later on... */
   if((count >= 1) && (sscanf(args[0], "[%i]", &temp) == 1))
     {
@@ -412,14 +410,14 @@ set_private_cmd(int		skfd,		/* Socket */
 	  break;
 
 	default:
-	  fprintf(stderr, "Not yet implemented...\n");
+	  fprintf(stderr, "Not implemented...\n");
 	  return(-1);
 	}
 	  
       if((priv[k].set_args & IW_PRIV_SIZE_FIXED) &&
 	 (wrq.u.data.length != (priv[k].set_args & IW_PRIV_SIZE_MASK)))
 	{
-	  printf("The command %s need exactly %d argument...\n",
+	  printf("The command %s needs exactly %d argument(s)...\n",
 		 cmdname, priv[k].set_args & IW_PRIV_SIZE_MASK);
 	  return(-1);
 	}
@@ -453,7 +451,7 @@ set_private_cmd(int		skfd,		/* Socket */
 	}
       else
 	{
-	  /* Thirst case : args won't fit in wrq, or variable number of args */
+	  /* Third case : args won't fit in wrq, or variable number of args */
 	  wrq.u.data.pointer = (caddr_t) buffer;
 	  wrq.u.data.flags = subcmd;
 	}
@@ -538,7 +536,7 @@ set_private_cmd(int		skfd,		/* Socket */
 		if(j)
 		  printf("           %.*s", 
 			 (int) strlen(cmdname), "                ");
-		printf("%s\n", iw_pr_ether(scratch, hwa->sa_data));
+		printf("%s\n", iw_saether_ntop(hwa, scratch));
 	      }
 	  }
 	  break;
@@ -620,7 +618,7 @@ print_priv_info(int		skfd,
     }
   else
     {
-      printf("%-8.16s  Available private ioctl :\n", ifname);
+      printf("%-8.16s  Available private ioctls :\n", ifname);
       /* Print them all */
       for(k = 0; k < n; k++)
 	if(priv[k].name[0] != '\0')

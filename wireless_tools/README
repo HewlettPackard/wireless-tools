@@ -16,7 +16,7 @@ Precompiled version :
 -------------------
 	Most Linux distributions offer precompiled package containing
 these tools. And many of them preinstall them by default. On the other
-hand, installation of this package is (now) easy and allow you to get
+hand, installation of this package is (now) easy and allows you to get
 a more up-to-date version.
 
 INSTALL
@@ -26,7 +26,7 @@ INSTALL
 
 DISTRIBUTION.txt
 ----------------
-	This file will document how to configure wireless cards at
+	This file documents how to configure wireless cards at
 boot time with various Linux distributions (using Wireless
 Extensions). Please read it carefully before asking questions.
 	In this file, I try to collect all the specifics of Wireless
@@ -35,7 +35,7 @@ your help to complete this file.
 
 HOTPLUG.txt
 -----------
-	This file document how to manage and configure removable
+	This file documents how to manage and configure removable
 wireless cards using Hotplug. This is more advanced than the simple
 procedures of DISTRIBUTION.txt. This is currently mostly Debian
 specific, but I hope you will contribute for other distributions.
@@ -65,8 +65,8 @@ read locally with the command :
 localised man pages (fr/*)
 -------------------
 	Localised man pages are not made by me, therefore the only
-localisations available are those sent to me by courageous volonteers
-and are expect those man pages to 'lag' compared to the english
+localisations available are those sent to me by courageous volonteers,
+and I expect those man pages to 'lag' compared to the english
 version (i.e. not have all the latest updates). Translating man pages
 is not a very gratifying task, especially due to my broken english,
 and many technical terms don't translate well to other languages, so
@@ -84,7 +84,7 @@ iwlist.c
 
 iwspy.c
 -------
-	Mobile IP support test and allows get get stats per MAC
+	Mobile IP support test and allows to get stats per MAC
 address (instead of globally). Also, for some drivers/devices, this is
 the only way to get stats in Ad-Hoc mode.
 
@@ -100,8 +100,8 @@ iwgetid.c
 
 iwevent.c
 ---------
-	Display Wireless Events. This is new, so there is not much support
-in drivers for it yet...
+	Display Wireless Events. Most recent drivers will support this
+relatively new feature, but some older drivers may not support it.
 
 ifrename.c :
 ----------
@@ -131,7 +131,7 @@ your kernel/drivers are old, you may want to try the older releases...
 sample_xxx.c :
 ------------
 	Various samples of code showing how to implement some of the
-more tricky feature of Wireless Extensions in your driver.
+more tricky features of Wireless Extensions in your driver.
 	Note that there is no guarantee that this code compiles, let
 alone works, but it should point you in the proper direction.
 	Also, have a look at existing drivers in the Linux kernel.

@@ -14,6 +14,19 @@
 #include "iwlib.h"		/* Header */
 #include <sys/time.h>
 
+/****************************** TYPES ******************************/
+
+/*
+ * Scan state and meta-information, used to decode events...
+ */
+typedef struct iwscan_state
+{
+  /* State */
+  int			ap_num;		/* Access Point number 1->N */
+  int			val_index;	/* Value in table 0->(N-1) */
+} iwscan_state;
+
+
 /*********************** FREQUENCIES/CHANNELS ***********************/
 
 /*------------------------------------------------------------------*/
@@ -143,13 +156,13 @@ print_ap_info(int	skfd,
       if(has_qual)
 	{
 	  /* Print stats for this address */
-	  printf("    %s : ", iw_pr_ether(temp, hwa[i].sa_data));
+	  printf("    %s : ", iw_saether_ntop(&hwa[i], temp));
 	  iw_print_stats(temp, sizeof(buffer), &qual[i], &range, has_range);
 	  printf("%s\n", temp);
 	}
       else
 	/* Only print the address */
-	printf("    %s\n", iw_pr_ether(temp, hwa[i].sa_data));
+	printf("    %s\n", iw_saether_ntop(&hwa[i], temp));
     }
   printf("\n");
   return(0);
@@ -255,7 +268,7 @@ print_keys_info(int		skfd,
 	  wrq.u.data.flags = k;
 	  if(iw_get_ext(skfd, ifname, SIOCGIWENCODE, &wrq) < 0)
 	    {
-	      fprintf(stderr, "SIOCGIWENCODE: %s\n", strerror(errno));
+	      fprintf(stderr, "Error reading wireless keys (SIOCGIWENCODE): %s\n", strerror(errno));
 	      break;
 	    }
 	  if((wrq.u.data.flags & IW_ENCODE_DISABLED) ||
@@ -277,19 +290,60 @@ print_keys_info(int		skfd,
       wrq.u.data.pointer = (caddr_t) key;
       wrq.u.data.length = IW_ENCODING_TOKEN_MAX;
       wrq.u.data.flags = 0;	/* Set index to zero to get current */
-      if(iw_get_ext(skfd, ifname, SIOCGIWENCODE, &wrq) < 0)
+      if(iw_get_ext(skfd, ifname, SIOCGIWENCODE, &wrq) >= 0)
 	{
-	  fprintf(stderr, "SIOCGIWENCODE: %s\n", strerror(errno));
-	  return(-1);
+	  /* Note : if above fails, we have already printed an error
+	   * message int the loop above */
+	  printf("          Current Transmit Key: [%d]\n",
+		 wrq.u.data.flags & IW_ENCODE_INDEX);
+	  if(wrq.u.data.flags & IW_ENCODE_RESTRICTED)
+	    printf("          Security mode:restricted\n");
+	  if(wrq.u.data.flags & IW_ENCODE_OPEN)
+	    printf("          Security mode:open\n");
 	}
-      printf("          Current Transmit Key: [%d]\n",
-	     wrq.u.data.flags & IW_ENCODE_INDEX);
-      if(wrq.u.data.flags & IW_ENCODE_RESTRICTED)
-	printf("          Security mode:restricted\n");
-      if(wrq.u.data.flags & IW_ENCODE_OPEN)
-	printf("          Security mode:open\n");
 
-      printf("\n\n");
+      /* Print WPA/802.1x/802.11i security parameters */
+      if(range.we_version_compiled > 17)
+	{
+	  /* Display advance encryption capabilities */
+	  if(range.enc_capa)
+	    {
+	      const char *	auth_string[] = { "WPA",
+						  "WPA2",
+						  "CIPHER TKIP",
+						  "CIPHER CCMP" };
+	      const int		auth_num = (sizeof(auth_string) /
+					    sizeof(auth_string[1]));
+	      int		i;
+	      int		mask = 0x1;
+
+	      printf("          Authentication capabilities :\n");
+	      for(i = 0; i < auth_num; i++)
+		{
+		  if(range.enc_capa & mask)
+		    printf("\t\t%s\n", auth_string[i]);
+		  mask <<= 1;
+		}
+	    }
+
+	  /* Current values for authentication */
+	  wrq.u.param.flags = IW_AUTH_KEY_MGMT;
+	  if(iw_get_ext(skfd, ifname, SIOCGIWAUTH, &wrq) >= 0)
+	      printf("          Current key_mgmt:0x%X\n",
+		     wrq.u.param.value);
+
+	  wrq.u.param.flags = IW_AUTH_CIPHER_PAIRWISE;
+	  if(iw_get_ext(skfd, ifname, SIOCGIWAUTH, &wrq) >= 0)
+	      printf("          Current cipher_pairwise:0x%X\n",
+		     wrq.u.param.value);
+
+	  wrq.u.param.flags = IW_AUTH_CIPHER_GROUP;
+	  if(iw_get_ext(skfd, ifname, SIOCGIWAUTH, &wrq) >= 0)
+	    printf("          Current cipher_group:0x%X\n",
+		   wrq.u.param.value);
+	}
+
+     printf("\n\n");
     }
   return(0);
 }
@@ -305,7 +359,8 @@ get_pm_value(int		skfd,
 	     char *		ifname,
 	     struct iwreq *	pwrq,
 	     int		flags,
-	     char *		buffer)
+	     char *		buffer,
+	     int                buflen)
 {
   /* Get Another Power Management value */
   pwrq->u.power.flags = flags;
@@ -314,7 +369,7 @@ get_pm_value(int		skfd,
       /* Let's check the value and its type */
       if(pwrq->u.power.flags & IW_POWER_TYPE)
 	{
-	  iw_print_pm_value(buffer, sizeof(buffer),
+	  iw_print_pm_value(buffer, buflen,
 			    pwrq->u.power.value, pwrq->u.power.flags);
 	  printf("\n                 %s", buffer);
 	}
@@ -436,7 +491,8 @@ print_pm_info(int		skfd,
 		pm_mask = IW_POWER_MIN;
 	      /* If we have something to ask for... */
 	      if(pm_mask)
-		get_pm_value(skfd, ifname, &wrq, pm_mask, buffer);
+		get_pm_value(skfd, ifname, &wrq, pm_mask,
+			     buffer, sizeof(buffer));
 
 	      /* And if we have both a period and a timeout, ask the other */
 	      pm_mask = (range.pm_capa & (~(wrq.u.power.flags) &
@@ -444,7 +500,8 @@ print_pm_info(int		skfd,
 	      if(pm_mask)
 		{
 		  int	base_mask = pm_mask;
-		  flags = get_pm_value(skfd, ifname, &wrq, pm_mask, buffer);
+		  flags = get_pm_value(skfd, ifname, &wrq, pm_mask,
+				       buffer, sizeof(buffer));
 		  pm_mask = 0;
 
 		  /* If we have been returned a MIN value, ask for the MAX */
@@ -455,7 +512,8 @@ print_pm_info(int		skfd,
 		    pm_mask = IW_POWER_MIN | base_mask;
 		  /* If we have something to ask for... */
 		  if(pm_mask)
-		    get_pm_value(skfd, ifname, &wrq, pm_mask, buffer);
+		    get_pm_value(skfd, ifname, &wrq, pm_mask,
+				 buffer, sizeof(buffer));
 		}
 	    }
 	}
@@ -734,11 +792,279 @@ print_retry_info(int		skfd,
 
 /*------------------------------------------------------------------*/
 /*
+ * Parse, and display the results of a WPA or WPA2 IE.
+ *
+ */
+static void 
+iw_print_ie_unknown(unsigned char *	iebuf,
+		    int			buflen)
+{
+  int	ielen = iebuf[1] + 2;
+  int	i;
+
+  if(ielen > buflen)
+    ielen = buflen;
+
+  printf("Unknown: ");
+  for(i = 0; i < ielen; i++)
+    printf("%02X", iebuf[i]);
+  printf("\n");
+}
+
+/*-----------------------------------------------------------------*/
+/*
+ * Display the cipher type for the value passed in.
+ *
+ */
+static inline void 
+iw_print_ie_cipher(unsigned char	csuite)
+{
+  switch (csuite)
+    {
+    case 0x00:
+      printf("None or same as Group ");
+      break;
+ 
+    case 0x01:
+      printf("WEP-40 ");
+      break;
+ 
+    case 0x02:
+      printf("TKIP ");
+      break;
+ 
+    case 0x03:
+      printf("WRAP ");
+      break;
+ 
+    case 0x04:
+      printf("CCMP ");
+      break;
+ 
+    case 0x05:
+      printf("WEP-104 ");
+      break;
+ 
+    default:
+      printf("Unknown ");
+      break;
+    }
+ }
+ 
+/*------------------------------------------------------------------*/
+/*
+ * Parse, and display the results of a WPA or WPA2 IE.
+ *
+ */
+static inline void 
+iw_print_ie_wpa(unsigned char *	iebuf,
+		int		buflen)
+{
+  int			ielen = iebuf[1] + 2;
+  int			offset = 2;	/* Skip the IE id, and the length. */
+  unsigned char		wpa1_oui[3] = {0x00, 0x50, 0xf2};
+  unsigned char		wpa2_oui[3] = {0x00, 0x0f, 0xac};
+  unsigned char *	wpa_oui;
+  int			i;
+  uint16_t		ver = 0;
+  uint16_t		cnt = 0;
+
+  if(ielen > buflen)
+    ielen = buflen;
+
+  switch(iebuf[0])
+    {
+    case 0x30:		/* WPA2 */
+      /* Check if we have enough data */
+      if(ielen < 4)
+	{
+	  iw_print_ie_unknown(iebuf, buflen);
+ 	  return;
+	}
+
+      wpa_oui = wpa2_oui;
+      break;
+
+    case 0xdd:		/* WPA or else */
+      wpa_oui = wpa1_oui;
+ 
+      /* Not all IEs that start with 0xdd are WPA. 
+       * So check that the OUI is valid. */
+      if((ielen < 8)
+	 || ((memcmp(&iebuf[offset], wpa_oui, 3) != 0)
+	     && (iebuf[offset+3] == 0x01)))
+ 	{
+	  iw_print_ie_unknown(iebuf, buflen);
+ 	  return;
+ 	}
+
+       offset += 4;
+       break;
+
+    default:
+      return;
+    }
+  
+  /* Pick version number (little endian) */
+  ver = iebuf[offset] | (iebuf[offset + 1] << 8);
+  offset += 2;
+
+  if(iebuf[0] == 0xdd)
+    printf("WPA Version %d\n", ver);
+  if(iebuf[0] == 0x30)
+    printf("IEEE 802.11i/WPA2 Version %d\n", ver);
+
+  /* From here, everything is technically optional. */
+
+  /* Check if we are done */
+  if(ielen < (offset + 4))
+    {
+      /* We have a short IE.  So we should assume TKIP/TKIP. */
+      printf("                        Group Cipher : TKIP\n");
+      printf("                        Pairwise Cipher : TKIP\n");
+      return;
+    }
+ 
+  /* Next we have our group cipher. */
+  if(memcmp(&iebuf[offset], wpa_oui, 3) != 0)
+    {
+      printf("                        Group Cipher : Proprietary\n");
+    }
+  else
+    {
+      printf("                        Group Cipher : ");
+      iw_print_ie_cipher(iebuf[offset+3]);
+      printf("\n");
+    }
+  offset += 4;
+
+  /* Check if we are done */
+  if(ielen < (offset + 2))
+    {
+      /* We don't have a pairwise cipher, or auth method. Assume TKIP. */
+      printf("                        Pairwise Ciphers (1) : TKIP\n");
+      return;
+    }
+
+  /* Otherwise, we have some number of pairwise ciphers. */
+  cnt = iebuf[offset] | (iebuf[offset + 1] << 8);
+  offset += 2;
+  printf("                        Pairwise Ciphers (%d) : ", cnt);
+
+  if(ielen < (offset + 4*cnt))
+    return;
+
+  for(i = 0; i < cnt; i++)
+    {
+      if(memcmp(&iebuf[offset], wpa_oui, 3) != 0)
+ 	{
+ 	  printf("Proprietary  ");
+ 	}
+      else
+	{
+ 	  iw_print_ie_cipher(iebuf[offset+3]);
+ 	}
+      offset+=4;
+    }
+  printf("\n");
+ 
+  /* Check if we are done */
+  if(ielen < (offset + 2))
+    return;
+
+  /* Now, we have authentication suites. */
+  cnt = iebuf[offset] | (iebuf[offset + 1] << 8);
+  offset += 2;
+  printf("                        Authentication Suites (%d) : ", cnt);
+
+  if(ielen < (offset + 4*cnt))
+    return;
+
+  for(i = 0; i < cnt; i++)
+    {
+      if(memcmp(&iebuf[offset], wpa_oui, 3) != 0)
+ 	{
+ 	  printf("Proprietary  ");
+ 	}
+      else
+	{
+ 	  switch(iebuf[offset+3])
+ 	    {
+ 	    case 0x00:
+ 	      printf("Reserved  ");
+ 	      break;
+
+ 	    case 0x01:
+ 	      printf("802.1X  ");
+ 	      break;
+
+ 	    case 0x02:
+ 	      printf("PSK  ");
+ 	      break;
+
+ 	    default:
+ 	      printf("Unknown  ");
+ 	      break;
+ 	    }
+ 	}
+       offset+=4;
+     }
+  printf("\n");
+ 
+  /* Check if we are done */
+  if(ielen < (offset + 1))
+    return;
+
+  /* Otherwise, we have capabilities bytes.
+   * For now, we only care about preauth which is in bit position 1 of the
+   * first byte.  (But, preauth with WPA version 1 isn't supposed to be 
+   * allowed.) 8-) */
+  if(iebuf[offset] & 0x01)
+    {
+      printf("                       Preauthentication Supported\n");
+    }
+}
+ 
+/*------------------------------------------------------------------*/
+/*
+ * Process a generic IE and display the info in human readable form
+ * for some of the most interesting ones.
+ * For now, we only decode the WPA IEs.
+ */
+static inline void
+iw_print_gen_ie(unsigned char *	buffer,
+		int		buflen)
+{
+  int offset = 0;
+
+  /* Loop on each IE, each IE is minimum 2 bytes */
+  while(offset <= (buflen - 2))
+    {
+      printf("                    IE: ");
+
+      /* Check IE type */
+      switch(buffer[offset])
+	{
+	case 0xdd:	/* WPA1 (and other) */
+	case 0x30:	/* WPA2 */
+	  iw_print_ie_wpa(buffer + offset, buflen);
+	  break;
+	default:
+	  iw_print_ie_unknown(buffer + offset, buflen);
+	}
+      /* Skip over this IE to the next one in the list. */
+      offset += buffer[offset+1] + 2;
+    }
+}
+
+/*------------------------------------------------------------------*/
+/*
  * Print one element from the scanning results
  */
-static inline int
-print_scanning_token(struct iw_event *	event,	/* Extracted token */
-		     int		ap_num,	/* AP number */
+static inline void
+print_scanning_token(struct stream_descr *	stream,	/* Stream of events */
+		     struct iw_event *		event,	/* Extracted token */
+		     struct iwscan_state *	state,
 		     struct iw_range *	iw_range,	/* Range info */
 		     int		has_range)
 {
@@ -748,9 +1074,9 @@ print_scanning_token(struct iw_event *	event,	/* Extracted token */
   switch(event->cmd)
     {
     case SIOCGIWAP:
-      printf("          Cell %02d - Address: %s\n", ap_num,
-	     iw_pr_ether(buffer, event->u.ap_addr.sa_data));
-      ap_num++;
+      printf("          Cell %02d - Address: %s\n", state->ap_num,
+	     iw_saether_ntop(&event->u.ap_addr, buffer));
+      state->ap_num++;
       break;
     case SIOCGIWNWID:
       if(event->u.nwid.disabled)
@@ -781,9 +1107,9 @@ print_scanning_token(struct iw_event *	event,	/* Extracted token */
     case SIOCGIWESSID:
       {
 	char essid[IW_ESSID_MAX_SIZE+1];
+	memset(essid, '\0', sizeof(essid));
 	if((event->u.essid.pointer) && (event->u.essid.length))
 	  memcpy(essid, event->u.essid.pointer, event->u.essid.length);
-	essid[event->u.essid.length] = '\0';
 	if(event->u.essid.flags)
 	  {
 	    /* Does it have an ESSID index ? */
@@ -794,14 +1120,14 @@ print_scanning_token(struct iw_event *	event,	/* Extracted token */
 	      printf("                    ESSID:\"%s\"\n", essid);
 	  }
 	else
-	  printf("                    ESSID:off/any\n");
+	  printf("                    ESSID:off/any/hidden\n");
       }
       break;
     case SIOCGIWENCODE:
       {
 	unsigned char	key[IW_ENCODING_TOKEN_MAX];
 	if(event->u.data.pointer)
-	  memcpy(key, event->u.essid.pointer, event->u.data.length);
+	  memcpy(key, event->u.data.pointer, event->u.data.length);
 	else
 	  event->u.data.flags |= IW_ENCODE_NOKEY;
 	printf("                    Encryption key:");
@@ -826,8 +1152,23 @@ print_scanning_token(struct iw_event *	event,	/* Extracted token */
       }
       break;
     case SIOCGIWRATE:
+      if(state->val_index == 0)
+	printf("                    Bit Rates:");
+      else
+	if((state->val_index % 5) == 0)
+	  printf("\n                              ");
+	else
+	  printf("; ");
       iw_print_bitrate(buffer, sizeof(buffer), event->u.bitrate.value);
-      printf("                    Bit Rate:%s\n", buffer);
+      printf("%s", buffer);
+      /* Check for termination */
+      if(stream->value == NULL)
+	{
+	  printf("\n");
+	  state->val_index = 0;
+	}
+      else
+	state->val_index++;
       break;
     case IWEVQUAL:
       {
@@ -836,6 +1177,10 @@ print_scanning_token(struct iw_event *	event,	/* Extracted token */
 	printf("                    %s\n", buffer);
 	break;
       }
+    case IWEVGENIE:
+      /* Informations Elements are complex, let's do only some of them */
+      iw_print_gen_ie(event->u.data.pointer, event->u.data.length);
+      break;
     case IWEVCUSTOM:
       {
 	char custom[IW_CUSTOM_MAX+1];
@@ -849,9 +1194,6 @@ print_scanning_token(struct iw_event *	event,	/* Extracted token */
       printf("                    (Unknown Wireless Token 0x%04X)\n",
 	     event->cmd);
    }	/* switch(event->cmd) */
-
-  /* May have changed */
-  return(ap_num);
 }
 
 /*------------------------------------------------------------------*/
@@ -870,7 +1212,7 @@ print_scanning_info(int		skfd,
   struct iw_range	range;
   int			has_range;
   struct timeval	tv;				/* Select timeout */
-  int			timeout = 5000000;		/* 5s */
+  int			timeout = 15000000;		/* 15s */
 
   /* Avoid "Unused parameter" warning */
   args = args; count = count;
@@ -1017,8 +1359,9 @@ print_scanning_info(int		skfd,
     {
       struct iw_event		iwe;
       struct stream_descr	stream;
-      int			ap_num = 1;
+      struct iwscan_state	state = { .ap_num = 1, .val_index = 0 };
       int			ret;
+      
 #if 0
       /* Debugging code. In theory useless, because it's debugged ;-) */
       int	i;
@@ -1028,14 +1371,15 @@ print_scanning_info(int		skfd,
       printf("]\n");
 #endif
       printf("%-8.16s  Scan completed :\n", ifname);
-      iw_init_event_stream(&stream, buffer, wrq.u.data.length);
+      iw_init_event_stream(&stream, (char *) buffer, wrq.u.data.length);
       do
 	{
 	  /* Extract an event and print it */
 	  ret = iw_extract_event_stream(&stream, &iwe,
 					range.we_version_compiled);
 	  if(ret > 0)
-	    ap_num = print_scanning_token(&iwe, ap_num, &range, has_range);
+	    print_scanning_token(&stream, &iwe, &state,
+				 &range, has_range);
 	}
       while(ret > 0);
       printf("\n");
@@ -1131,11 +1475,14 @@ print_event_capa_info(int		skfd,
 
 /************************* COMMON UTILITIES *************************/
 /*
- * This section was written by Michael Tokarev <mjt@tls.msk.ru>
- * But modified by me ;-)
+ * This section was initially written by Michael Tokarev <mjt@tls.msk.ru>
+ * but heavily modified by me ;-)
  */
 
-/* command list */
+/*------------------------------------------------------------------*/
+/*
+ * Map command line arguments to the proper procedure...
+ */
 typedef struct iwlist_entry {
   const char *cmd;
   iw_enum_handler fn;
@@ -1244,14 +1591,13 @@ main(int	argc,
   if(argc == 1 || argc > 3)
     iw_usage(1);
 
-  if (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))
+  /* Those don't apply to all interfaces */
+  if((argc == 2) && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help")))
     iw_usage(0);
-
-  /* This is also handled slightly differently */
-  if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version"))
+  if((argc == 2) && (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version")))
     return(iw_print_version_info("iwlist"));
 
-  if (argc == 2)
+  if(argc == 2)
     {
       cmd = argv[1];
       dev = NULL;

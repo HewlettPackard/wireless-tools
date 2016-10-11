@@ -45,8 +45,7 @@
     && __GLIBC__ == 2 \
     && __GLIBC_MINOR__ >= 2 \
     && LINUX_VERSION_CODE >= KERNEL_VERSION(2,2,0)
-//#define GLIBC22_HEADERS
-#define GENERIC_HEADERS
+#define HEADERS_GENERIC
 
 /* Kernel headers 2.4.X + Glibc 2.1 - Debian 2.2 upgraded, RH 7.0
  * Kernel headers 2.2.X + Glibc 2.1 - Debian 2.2, RH 6.1 */
@@ -54,81 +53,42 @@
       && __GLIBC__ == 2 \
       && __GLIBC_MINOR__ == 1 \
       && LINUX_VERSION_CODE >= KERNEL_VERSION(2,2,0)
-//#define GLIBC_HEADERS
-#define GENERIC_HEADERS
-
-/* Kernel headers 2.2.X + Glibc 2.0 - Debian 2.1 */
-#elif defined(__GLIBC__) \
-      && __GLIBC__ == 2 \
-      && __GLIBC_MINOR__ == 0 \
-      && LINUX_VERSION_CODE >= KERNEL_VERSION(2,0,0) \
-      && LINUX_VERSION_CODE < KERNEL_VERSION(2,1,0)
-#define GLIBC_HEADERS
-#define KLUDGE_HEADERS
-
-/* Note : is it really worth supporting kernel 2.0.X, knowing that
- * we require WE v9, which is only available in 2.2.X and higher ?
- * I guess one could use 2.0.x with an upgraded wireless.h... */
-
-/* Kernel headers 2.0.X + Glibc 2.0 - Debian 2.0, RH 5 */
-#elif defined(__GLIBC__) \
-      && __GLIBC__ == 2 \
-      && __GLIBC_MINOR__ == 0 \
-      && LINUX_VERSION_CODE < KERNEL_VERSION(2,1,0) \
-      && LINUX_VERSION_CODE >= KERNEL_VERSION(2,0,0)
-#define GLIBC_HEADERS
-
-/* Kernel headers 2.0.X + libc5 - old systems */
-#elif defined(_LINUX_C_LIB_VERSION_MAJOR) \
-      && _LINUX_C_LIB_VERSION_MAJOR == 5 \
-      && LINUX_VERSION_CODE >= KERNEL_VERSION(2,0,0) \
-      && LINUX_VERSION_CODE < KERNEL_VERSION(2,1,0)
-#define LIBC5_HEADERS
+#define HEADERS_GENERIC
+#define HEADERS_KERNEL
 
 /* Unsupported combination */
 #else
 #error "Your kernel/libc combination is not supported"
 #endif
 
-#ifdef GENERIC_HEADERS 
+#ifdef HEADERS_GENERIC 
 /* Proposed by Dr. Michael Rietz <rietz@mail.amps.de>, 27.3.2 */
-/* If this works for all, it might be more stable on the long term - Jean II */
 #include <net/if_arp.h>		/* For ARPHRD_ETHER */
 #include <sys/socket.h>		/* For AF_INET & struct sockaddr */
 #include <netinet/in.h>         /* For struct sockaddr_in */
 #include <netinet/if_ether.h>
-#endif /* GENERIC_HEADERS */    
+#endif /* HEADERS_GENERIC */    
 
-#ifdef GLIBC22_HEADERS 
-/* Added by Ross G. Miller <Ross_Miller@baylor.edu>, 3/28/01 */
-#include <linux/if_arp.h> 	/* For ARPHRD_ETHER */
-#include <linux/socket.h>	/* For AF_INET & struct sockaddr */
-#include <sys/socket.h>
-#endif /* GLIBC22_HEADERS */    
+/* Fixup to be able to include kernel includes in userspace.
+ * Basically, kill the sparse annotations... Jean II */
+#ifndef __user
+#define __user
+#endif
 
-#ifdef KLUDGE_HEADERS
-#include <socketbits.h>
-#endif	/* KLUDGE_HEADERS */
-
-#ifdef GLIBC_HEADERS
-#include <linux/if_arp.h>	/* For ARPHRD_ETHER */
-#include <linux/socket.h>	/* For AF_INET & struct sockaddr */
-#include <linux/in.h>		/* For struct sockaddr_in */
-#endif	/* KLUDGE_HEADERS || GLIBC_HEADERS */
-
-#ifdef LIBC5_HEADERS
-#include <sys/socket.h>		/* For AF_INET & struct sockaddr & socket() */
-#include <linux/if_arp.h>	/* For ARPHRD_ETHER */
-#include <linux/in.h>		/* For struct sockaddr_in */
-#endif	/* LIBC5_HEADERS */
-
-/* Those 3 headers were previously included in wireless.h */
 #include <linux/types.h>		/* for "caddr_t" et al		*/
+
+#ifdef HEADERS_KERNEL
+/* Traditionally we have used kernel headers, included in wireless.h */
 #include <linux/socket.h>		/* for "struct sockaddr" et al	*/
 #include <linux/if.h>			/* for IFNAMSIZ and co... */
+#else	/* !HEADERS_KERNEL */
+/* Glibc systems headers are supposedly less problematic than kernel ones */
+#include <sys/socket.h>			/* for "struct sockaddr" et al	*/
+#include <net/if.h>			/* for IFNAMSIZ and co... */
+#endif	/* !HEADERS_KERNEL */
 
-/* Private copy of Wireless extensions */
-#include <wireless.h>
+/* Private copy of Wireless extensions (in this directoty) */
+#include "wireless.h"
 
 /* Make gcc understant that when we say inline, we mean it.
  * I really hate when the compiler is trying to be more clever than me,
@@ -139,11 +99,26 @@
  * Fortunately, in gcc 3.4, they now automatically inline static functions
  * with a single call site. Hurrah !
  * Jean II */
+#undef IW_GCC_HAS_BROKEN_INLINE
 #if __GNUC__ == 3
 #if __GNUC_MINOR__ >= 1 && __GNUC_MINOR__ < 4
+#define IW_GCC_HAS_BROKEN_INLINE	1
+#endif	/* __GNUC_MINOR__ */
+#endif	/* __GNUC__ */
+/* However, gcc 4.0 has introduce a new "feature", when compiling with
+ * '-Os', it does not want to inline iw_ether_cmp() and friends.
+ * So, we need to fix inline again !
+ * Jean II */
+#if __GNUC__ == 4
+#define IW_GCC_HAS_BROKEN_INLINE	1
+#endif	/* __GNUC__ */
+/* Now, really fix the inline */
+#ifdef IW_GCC_HAS_BROKEN_INLINE
+#ifdef inline
+#undef inline
+#endif	/* inline */
 #define inline		inline		__attribute__((always_inline))
-#endif
-#endif /* __GNUC__ */
+#endif	/* IW_GCC_HAS_BROKEN_INLINE */
 
 #ifdef __cplusplus
 extern "C" {
@@ -156,9 +131,11 @@ extern "C" {
 
 /* Various versions information */
 /* Recommended Wireless Extension version */
-#define WE_VERSION	17
+#define WE_VERSION	20
+/* Maximum forward compatibility built in this version of WT */
+#define WE_MAX_VERSION	21
 /* Version of Wireless Tools */
-#define WT_VERSION	27
+#define WT_VERSION	28
 
 /* Paths */
 #define PROC_NET_WIRELESS	"/proc/net/wireless"
@@ -171,31 +148,10 @@ extern "C" {
 /* For doing log10/exp10 without libm */
 #define LOG10_MAGIC	1.25892541179
 
-/* Backward compatibility for Wireless Extension 9 */
-#ifndef IW_POWER_MODIFIER
-#define IW_POWER_MODIFIER	0x000F	/* Modify a parameter */
-#define IW_POWER_MIN		0x0001	/* Value is a minimum  */
-#define IW_POWER_MAX		0x0002	/* Value is a maximum */
-#define IW_POWER_RELATIVE	0x0004	/* Value is not in seconds/ms/us */
-#endif /* IW_POWER_MODIFIER */
-
-#ifndef IW_ENCODE_NOKEY
-#define IW_ENCODE_NOKEY         0x0800  /* Key is write only, so not here */
-#define IW_ENCODE_MODE		0xF000	/* Modes defined below */
-#endif /* IW_ENCODE_NOKEY */
-#ifndef IW_ENCODE_TEMP
-#define IW_ENCODE_TEMP		0x0400  /* Temporary key */
-#endif /* IW_ENCODE_TEMP */
-
-/* More backward compatibility */
-#ifndef SIOCSIWCOMMIT
-#define SIOCSIWCOMMIT	SIOCSIWNAME
-#endif /* SIOCSIWCOMMIT */
-
-/* Still more backward compatibility */
-#ifndef IW_FREQ_FIXED
-#define IW_FREQ_FIXED	0x01
-#endif /* IW_FREQ_FIXED */
+/* Backward compatibility for network headers */
+#ifndef ARPHRD_IEEE80211
+#define ARPHRD_IEEE80211 801		/* IEEE 802.11			*/
+#endif /* ARPHRD_IEEE80211 */
 
 /****************************** TYPES ******************************/
 
@@ -261,6 +217,14 @@ typedef struct wireless_info
   int		has_stats;
   iwrange	range;
   int		has_range;
+
+  /* Auth params for WPA/802.1x/802.11i */
+  int		auth_key_mgmt;
+  int		has_auth_key_mgmt;
+  int		auth_cipher_pairwise;
+  int		has_auth_cipher_pairwise;
+  int		auth_cipher_group;
+  int		has_auth_cipher_group;
 } wireless_info;
 
 /* Structure for storing an entry of a wireless scan.
@@ -428,37 +392,51 @@ void
 			     int	flags);
 /* ----------------------- TIME SUBROUTINES ----------------------- */
 void
-	iw_print_timeval(char *			buffer,
-			 int			buflen,
-			 const struct timeval *	time);
+	iw_print_timeval(char *				buffer,
+			 int				buflen,
+			 const struct timeval *		time,
+			 const struct timezone *	tz);
 /* --------------------- ADDRESS SUBROUTINES ---------------------- */
 int
-	iw_check_mac_addr_type(int	skfd,
-			       char *	ifname);
+	iw_check_mac_addr_type(int		skfd,
+			       const char *	ifname);
 int
-	iw_check_if_addr_type(int	skfd,
-			      char *	ifname);
+	iw_check_if_addr_type(int		skfd,
+			      const char *	ifname);
 #if 0
 int
 	iw_check_addr_type(int		skfd,
-			   char *	ifname);
+			   const char *	ifname);
 #endif
+#if 0
 int
 	iw_get_mac_addr(int			skfd,
 			const char *		name,
 			struct ether_addr *	eth,
 			unsigned short *	ptype);
+#endif
+char *
+	iw_mac_ntop(const unsigned char *	mac,
+		    int				maclen,
+		    char *			buf,
+		    int				buflen);
 void
-	iw_ether_ntop(const struct ether_addr* eth, char* buf);
-char*
-	iw_ether_ntoa(const struct ether_addr* eth);
+	iw_ether_ntop(const struct ether_addr *	eth,
+		      char *			buf);
+char *
+	iw_sawap_ntop(const struct sockaddr *	sap,
+		      char *			buf);
+int
+	iw_mac_aton(const char *	orig,
+		    unsigned char *	mac,
+		    int			macmax);
 int
 	iw_ether_aton(const char* bufp, struct ether_addr* eth);
 int
 	iw_in_inet(char *bufp, struct sockaddr *sap);
 int
 	iw_in_addr(int			skfd,
-		   char *		ifname,
+		   const char *		ifname,
 		   char *		bufp,
 		   struct sockaddr *	sap);
 /* ----------------------- MISC SUBROUTINES ------------------------ */
@@ -545,21 +523,24 @@ iw_sockets_close(int	skfd)
 }
 
 /*------------------------------------------------------------------*/
-/* Backwards compatability
- * Actually, those form are much easier to use when dealing with
- * struct sockaddr... */
-static inline char*
-iw_pr_ether(char* bufp, const unsigned char* addr)
+/*
+ * Display an Ethernet Socket Address in readable format.
+ */
+static inline char *
+iw_saether_ntop(const struct sockaddr *sap, char* bufp)
 {
-  iw_ether_ntop((const struct ether_addr *) addr, bufp);
+  iw_ether_ntop((const struct ether_addr *) sap->sa_data, bufp);
   return bufp;
 }
-/* Backwards compatability */
+/*------------------------------------------------------------------*/
+/*
+ * Input an Ethernet Socket Address and convert to binary.
+ */
 static inline int
-iw_in_ether(const char *bufp, struct sockaddr *sap)
+iw_saether_aton(const char *bufp, struct sockaddr *sap)
 {
   sap->sa_family = ARPHRD_ETHER;
-  return iw_ether_aton(bufp, (struct ether_addr *) sap->sa_data) ? 0 : -1;
+  return iw_ether_aton(bufp, (struct ether_addr *) sap->sa_data);
 }
 
 /*------------------------------------------------------------------*/
@@ -582,6 +563,16 @@ iw_null_ether(struct sockaddr *sap)
 {
   sap->sa_family = ARPHRD_ETHER;
   memset((char *) sap->sa_data, 0x00, ETH_ALEN);
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Compare two ethernet addresses
+ */
+static inline int
+iw_ether_cmp(const struct ether_addr* eth1, const struct ether_addr* eth2)
+{
+  return memcmp(eth1, eth2, sizeof(*eth1));
 }
 
 #ifdef __cplusplus

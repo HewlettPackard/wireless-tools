@@ -22,21 +22,20 @@
  * Subject to the Gnu Public License, version 2.  
  * TODO: make it support token ring etc.
  * $Id: nameif.c,v 1.3 2003/03/06 23:26:52 ecki Exp $
- * Add hotplug compatibility : ifname -i eth0. Jean II - 03.12.03
- * Add MAC address wildcard : 01:23:45:*. Jean II - 03.12.03
- * Add interface name wildcard : wlan*. Jean II - 03.12.03
- * Add interface name probing for modular systems. Jean II - 18.02.03
  * -------------------------------------------------------
  *
- *	The last 4 patches never made it into the regular version of
- * 'nameif', and had some 'issues', which is the reason of this rewrite.
+ *	It started with a series of patches to nameif which never made
+ * into the regular version, and had some architecural 'issues' with
+ * those patches, which is the reason of this rewrite.
  *	Difference with standard 'nameif' :
  *	o 'nameif' has only a single selector, the interface MAC address.
  *	o Modular selector architecture, easily add new selectors.
+ *	o Wide range of selector, including sysfs...
  *	o hotplug invocation support.
  *	o module loading support.
  *	o MAC address wildcard.
  *	o Interface name wildcard ('eth*' or 'wlan*').
+ *	o Non-Ethernet MAC addresses (any size, not just 48 bits)
  */
 
 /***************************** INCLUDES *****************************/
@@ -81,11 +80,13 @@ const int SELECT_BASEADDR	= 7;	/* Select by HW Base Address */
 const int SELECT_IRQ		= 8;	/* Select by HW Irq line */
 const int SELECT_INTERRUPT	= 9;	/* Select by HW Irq line */
 const int SELECT_IWPROTO	= 10;	/* Select by Wireless Protocol */
-const int SELECT_PCMCIASLOT	= 11;	/* Select by Wireless Protocol */
-#define SELECT_NUM		12
+const int SELECT_PCMCIASLOT	= 11;	/* Select by Pcmcia Slot */
+const int SELECT_SYSFS		= 12;	/* Select by sysfs file */
+#define SELECT_NUM		13
 
 #define HAS_MAC_EXACT	1
 #define HAS_MAC_FILTER	2
+#define MAX_MAC_LEN	16	/* Maximum lenght of MAC address */
 
 const struct ether_addr	zero_mac = {{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}};
 
@@ -106,6 +107,29 @@ const struct option long_opt[] =
 /* Pcmcia stab files */
 #define PCMCIA_STAB1	"/var/lib/pcmcia/stab"
 #define PCMCIA_STAB2	"/var/run/stab"
+
+/* Max number of sysfs file we support */
+#define SYSFS_MAX_FILE	5
+
+/* Userspace headers lag, fix that... */
+#ifndef ARPHRD_IEEE1394
+#define ARPHRD_IEEE1394 24
+#endif
+#ifndef ARPHRD_EUI64
+#define ARPHRD_EUI64 27
+#endif
+#ifndef ARPHRD_IRDA
+#define ARPHRD_IRDA 783
+#endif
+
+/* Length of various non-standard MAC addresses */
+const int	weird_mac_len[][2] =
+{
+  { ARPHRD_IEEE1394, 8 },
+  { ARPHRD_EUI64, 8 },
+  { ARPHRD_IRDA, 4 },
+};
+const int weird_mac_len_num = sizeof(weird_mac_len) / sizeof(weird_mac_len[0]);
 
 /****************************** TYPES ******************************/
 
@@ -141,8 +165,9 @@ typedef struct if_mapping
   int			active[SELECT_NUM];	/* Selectors active */
 
   /* Selector data */
-  struct ether_addr	mac;			/* Exact MAC address, hex */
-  char			mac_filter[6*3 + 1];	/* WildCard, ascii */
+  unsigned char		mac[MAX_MAC_LEN];	/* Exact MAC address, hex */
+  int			mac_len;		/* Length (usually 6) */
+  char			mac_filter[16*3 + 1];	/* WildCard, ascii */
   unsigned short	hw_type;		/* Link/ARP type */
   char			driver[32];		/* driver short name */
   char		bus_info[ETHTOOL_BUSINFO_LEN];	/* Bus info for this IF. */
@@ -151,13 +176,22 @@ typedef struct if_mapping
   unsigned char		irq;			/* HW irq line */
   char			iwproto[IFNAMSIZ + 1];	/* Wireless/protocol name */
   int			pcmcia_slot;		/* Pcmcia slot */
-} if_mapping; 
+  char *		sysfs[SYSFS_MAX_FILE];	/* sysfs selectors */
+} if_mapping;
+
+/* Extra parsing information when adding a mapping */
+typedef struct add_extra
+{ 
+  char *		modif_pos;		/* Descriptor modifier */
+  size_t		modif_len;
+} parsing_extra;
 
 /* Prototype for adding a selector to a mapping. Return -1 if invalid value. */
 typedef int (*mapping_add)(struct if_mapping *	ifnode,
 			   int *		active,
 			   char *		pos,
 			   size_t		len,
+			   struct add_extra *	extra,
 			   int			linenum);
 
 /* Prototype for comparing the selector of two mapping. Return 0 if matches. */
@@ -178,6 +212,15 @@ typedef struct mapping_selector
   mapping_get	get_fn;
 } mapping_selector;
 
+/* sysfs global data */
+typedef struct sysfs_metadata
+{
+  char *		root;			/* Root of the sysfs */
+  int			rlen;			/* Size of it */
+  int			filenum;		/* Number of files */
+  char *		filename[SYSFS_MAX_FILE];	/* Name of files */
+} sysfs_metadata;
+
 /**************************** PROTOTYPES ****************************/
 
 static int
@@ -185,6 +228,7 @@ static int
 		       int *			active,
 		       char *			pos,
 		       size_t			len,
+		       struct add_extra *	extra,
 		       int			linenum);
 static int
 	mapping_cmpmac(struct if_mapping *	ifnode,
@@ -199,6 +243,7 @@ static int
 		       int *			active,
 		       char *			pos,
 		       size_t			len,
+		       struct add_extra *	extra,
 		       int			linenum);
 static int
 	mapping_cmparp(struct if_mapping *	ifnode,
@@ -213,6 +258,7 @@ static int
 			  int *			active,
 			  char *		pos,
 			  size_t		len,
+			  struct add_extra *	extra,
 			  int			linenum);
 static int
 	mapping_cmpdriver(struct if_mapping *	ifnode,
@@ -222,6 +268,7 @@ static int
 			   int *		active,
 			   char *		pos,
 			   size_t		len,
+			   struct add_extra *	extra,
 			   int			linenum);
 static int
 	mapping_cmpbusinfo(struct if_mapping *	ifnode,
@@ -231,6 +278,7 @@ static int
 			    int *		active,
 			    char *		pos,
 			    size_t		len,
+			    struct add_extra *	extra,
 			    int			linenum);
 static int
 	mapping_cmpfirmware(struct if_mapping *	ifnode,
@@ -245,6 +293,7 @@ static int
 			    int *		active,
 			    char *		pos,
 			    size_t		len,
+			    struct add_extra *	extra,
 			    int			linenum);
 static int
 	mapping_cmpbaseaddr(struct if_mapping *	ifnode,
@@ -254,6 +303,7 @@ static int
 		       int *			active,
 		       char *			pos,
 		       size_t			len,
+		       struct add_extra *	extra,
 		       int			linenum);
 static int
 	mapping_cmpirq(struct if_mapping *	ifnode,
@@ -268,6 +318,7 @@ static int
 			   int *		active,
 			   char *		pos,
 			   size_t		len,
+			   struct add_extra *	extra,
 			   int			linenum);
 static int
 	mapping_cmpiwproto(struct if_mapping *	ifnode,
@@ -282,6 +333,7 @@ static int
 			      int *			active,
 			      char *			pos,
 			      size_t			len,
+			      struct add_extra *	extra,
 			      int			linenum);
 static int
 	mapping_cmppcmciaslot(struct if_mapping *	ifnode,
@@ -291,6 +343,21 @@ static int
 			      const char *		ifname,
 			      struct if_mapping *	target,
 			      int			flag);
+static int
+	mapping_addsysfs(struct if_mapping *	ifnode,
+			 int *			active,
+			 char *			pos,
+			 size_t			len,
+			 struct add_extra *	extra,
+			 int			linenum);
+static int
+	mapping_cmpsysfs(struct if_mapping *	ifnode,
+			 struct if_mapping *	target);
+static int
+	mapping_getsysfs(int			skfd,
+			 const char *		ifname,
+			 struct if_mapping *	target,
+			 int			flag);
 
 /**************************** VARIABLES ****************************/
 
@@ -321,6 +388,8 @@ const struct mapping_selector	selector_list[] =
   { "iwproto", &mapping_addiwproto, &mapping_cmpiwproto, &mapping_getiwproto },
   /* Pcmcia slot from cardmgr */
   { "pcmciaslot", &mapping_addpcmciaslot, &mapping_cmppcmciaslot, &mapping_getpcmciaslot },
+  /* sysfs file (udev emulation) */
+  { "sysfs", &mapping_addsysfs, &mapping_cmpsysfs, &mapping_getsysfs },
   /* The Terminator */
   { NULL, NULL, NULL, NULL },
 };
@@ -328,6 +397,17 @@ const int selector_num = sizeof(selector_list)/sizeof(selector_list[0]);
 
 /* List of active selectors */
 int	selector_active[SELECT_NUM];	/* Selectors active */
+
+/*
+ * All the following flags are controlled by the command line switches...
+ * It's a bit hackish to have them all as global, so maybe we should pass
+ * them in a big struct as function arguments... More complex and
+ * probably not worth it ?
+ */
+
+/* Invocation type */
+int	print_newname = 0;
+char *	new_name = NULL;
 
 /* Takeover support */
 int	force_takeover = 0;	/* Takeover name from other interface */
@@ -338,6 +418,13 @@ int	dry_run = 0;		/* Just print new name, don't rename */
 
 /* Verbose support (i.e. debugging) */
 int	verbose = 0;
+
+/* sysfs global data */
+struct sysfs_metadata	sysfs_global =
+{
+  NULL, 0,
+  0, { NULL, NULL, NULL, NULL, NULL },
+};
 
 /******************** INTERFACE NAME MANAGEMENT ********************/
 /*
@@ -515,9 +602,13 @@ mapping_addmac(struct if_mapping *	ifnode,
 	       int *			active,
 	       char *			string,
 	       size_t			len,
+	       struct add_extra *	extra,
 	       int			linenum)
 {
   size_t	n;
+
+  /* Avoid "Unused parameter" warning */
+  extra = extra;
 
   /* Verify validity of string */
   if(len >= sizeof(ifnode->mac_filter))
@@ -547,7 +638,9 @@ mapping_addmac(struct if_mapping *	ifnode,
   else
     {
       /* Not a wildcard : "01:23:45:67:89:AB" */
-      if(iw_ether_aton(ifnode->mac_filter, &ifnode->mac) != 1)
+      ifnode->mac_len = iw_mac_aton(ifnode->mac_filter,
+				    ifnode->mac, MAX_MAC_LEN);
+      if(ifnode->mac_len == 0)
 	{
 	  fprintf(stderr, "Error: Invalid MAC address `%s' at line %d\n",
 		  ifnode->mac_filter, linenum);
@@ -555,7 +648,7 @@ mapping_addmac(struct if_mapping *	ifnode,
 	}
 
       /* Check that it's not NULL */
-      if(!memcmp(&ifnode->mac, &zero_mac, 6))
+      if((ifnode->mac_len == 6) && (!memcmp(&ifnode->mac, &zero_mac, 6)))
 	{
 	  fprintf(stderr,
 		  "Warning: MAC address is null at line %d, this is dangerous...\n",
@@ -590,8 +683,8 @@ mapping_cmpmac(struct if_mapping *	ifnode,
     return(fnmatch(ifnode->mac_filter, target->mac_filter, FNM_CASEFOLD));
   else
     /* Exact matching, in hex */
-    return(memcmp(&ifnode->mac.ether_addr_octet, &target->mac.ether_addr_octet,
-		  6));
+    return((ifnode->mac_len != target->mac_len) ||
+	   memcmp(ifnode->mac, target->mac, ifnode->mac_len));
 }
 
 /*------------------------------------------------------------------*/
@@ -604,10 +697,14 @@ mapping_getmac(int			skfd,
 	       struct if_mapping *	target,
 	       int			flag)
 {
-  int	ret;
+  struct ifreq	ifr;
+  int		ret;
+  int		i;
 
-  /* Extract MAC address */
-  ret = iw_get_mac_addr(skfd, ifname, &target->mac, &target->hw_type);
+  /* Get MAC address */
+  bzero(&ifr, sizeof(struct ifreq));
+  strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
+  ret = ioctl(skfd, SIOCGIFHWADDR, &ifr);
   if(ret < 0)
     {
       fprintf(stderr, "Error: Can't read MAC address on interface `%s' : %s\n",
@@ -615,11 +712,25 @@ mapping_getmac(int			skfd,
       return(-1);
     }
 
+  /* Extract ARP type */
+  target->hw_type = ifr.ifr_hwaddr.sa_family;
+  /* Calculate address length */
+  target->mac_len = 6;
+  for(i = 0; i < weird_mac_len_num; i++)
+    if(weird_mac_len[i][0] == ifr.ifr_hwaddr.sa_family)
+      {
+	target->mac_len = weird_mac_len[i][1];
+	break;
+      }
+  /* Extract MAC address bytes */
+  memcpy(target->mac, ifr.ifr_hwaddr.sa_data, target->mac_len);
+
   /* Check the type of comparison */
   if((flag == HAS_MAC_FILTER) || verbose)
     {
       /* Convert to ASCII */
-      iw_ether_ntop(&target->mac, target->mac_filter);
+      iw_mac_ntop(target->mac, target->mac_len,
+		  target->mac_filter, sizeof(target->mac_filter));
     }
 
   target->active[SELECT_MAC] = flag;
@@ -642,10 +753,14 @@ mapping_addarp(struct if_mapping *	ifnode,
 	       int *			active,
 	       char *			string,
 	       size_t			len,
+	       struct add_extra *	extra,
 	       int			linenum)
 {
   size_t	n;
   unsigned int	type;
+
+  /* Avoid "Unused parameter" warning */
+  extra = extra;
 
   /* Verify validity of string, convert to int */
   n = strspn(string, "0123456789"); 
@@ -705,12 +820,16 @@ mapping_adddriver(struct if_mapping *	ifnode,
 		  int *			active,
 		  char *		string,
 		  size_t		len,
+		  struct add_extra *	extra,
 		  int			linenum)
 {
+  /* Avoid "Unused parameter" warning */
+  extra = extra;
+
   /* Plain string, minimal verification */
   if(len >= sizeof(ifnode->driver))
     { 
-      fprintf(stderr, "Driver name too long at line %d\n", linenum);  
+      fprintf(stderr, "Error: Driver name too long at line %d\n", linenum);  
       return(-1);
     }
 
@@ -750,11 +869,15 @@ mapping_addbusinfo(struct if_mapping *	ifnode,
 		   int *		active,
 		   char *		string,
 		   size_t		len,
+		   struct add_extra *	extra,
 		   int			linenum)
 {
 #if 0
   size_t	n;
 #endif
+
+  /* Avoid "Unused parameter" warning */
+  extra = extra;
 
   /* Verify validity of string */
   if(len >= sizeof(ifnode->bus_info))
@@ -809,8 +932,12 @@ mapping_addfirmware(struct if_mapping *	ifnode,
 		    int *		active,
 		    char *		string,
 		    size_t		len,
+		    struct add_extra *	extra,
 		    int			linenum)
 {
+  /* Avoid "Unused parameter" warning */
+  extra = extra;
+
   /* Verify validity of string */
   if(len >= sizeof(ifnode->fw_version))
     { 
@@ -913,10 +1040,14 @@ mapping_addbaseaddr(struct if_mapping *	ifnode,
 		    int *		active,
 		    char *		string,
 		    size_t		len,
+		    struct add_extra *	extra,
 		    int			linenum)
 {
   size_t	n;
   unsigned int	address;
+
+  /* Avoid "Unused parameter" warning */
+  extra = extra;
 
   /* Verify validity of string */
   n = strspn(string, "0123456789ABCDEFabcdefx"); 
@@ -963,10 +1094,14 @@ mapping_addirq(struct if_mapping *	ifnode,
 	       int *			active,
 	       char *			string,
 	       size_t			len,
+	       struct add_extra *	extra,
 	       int			linenum)
 {
   size_t	n;
   unsigned int	irq;
+
+  /* Avoid "Unused parameter" warning */
+  extra = extra;
 
   /* Verify validity of string */
   n = strspn(string, "0123456789"); 
@@ -1068,8 +1203,12 @@ mapping_addiwproto(struct if_mapping *	ifnode,
 		   int *		active,
 		   char *		string,
 		   size_t		len,
+		   struct add_extra *	extra,
 		   int			linenum)
 {
+  /* Avoid "Unused parameter" warning */
+  extra = extra;
+
   /* Verify validity of string */
   if(len >= sizeof(ifnode->iwproto))
     { 
@@ -1144,12 +1283,16 @@ mapping_getiwproto(int			skfd,
  */
 static int
 mapping_addpcmciaslot(struct if_mapping *	ifnode,
-	       int *			active,
-	       char *			string,
-	       size_t			len,
-	       int			linenum)
+		      int *			active,
+		      char *			string,
+		      size_t			len,
+		      struct add_extra *	extra,
+		      int			linenum)
 {
   size_t	n;
+
+  /* Avoid "Unused parameter" warning */
+  extra = extra;
 
   /* Verify validity of string, convert to int */
   n = strspn(string, "0123456789"); 
@@ -1176,7 +1319,7 @@ mapping_addpcmciaslot(struct if_mapping *	ifnode,
  */
 static int
 mapping_cmppcmciaslot(struct if_mapping *	ifnode,
-	       struct if_mapping *	target)
+		      struct if_mapping *	target)
 {
   return(!(ifnode->pcmcia_slot == target->pcmcia_slot));
 }
@@ -1290,8 +1433,257 @@ mapping_getpcmciaslot(int			skfd,
 
   /* Cleanup */
   free(linebuf);
+  fclose(stream);
 
   return(target->active[SELECT_PCMCIASLOT] ? 0 : -1);
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Add a sysfs selector to a mapping
+ */
+static int
+mapping_addsysfs(struct if_mapping *	ifnode,
+		 int *			active,
+		 char *			string,
+		 size_t			len,
+		 struct add_extra *	extra,
+		 int			linenum)
+{
+  int		findex;	/* filename index */
+  char *	sdup;
+
+  /* Check if we have a modifier */
+  if((extra == NULL) || (extra->modif_pos == NULL))
+    { 
+      fprintf(stderr, "Error: No SYSFS filename at line %d\n", linenum);  
+      return(-1);
+    }
+
+  /* Search if the filename already exist */
+  for(findex = 0; findex < sysfs_global.filenum; findex++)
+    {
+      if(!strcmp(extra->modif_pos, sysfs_global.filename[findex]))
+	break;
+    }
+
+  /* If filename does not exist, creates it */
+  if(findex == sysfs_global.filenum)
+    {
+      if(findex == SYSFS_MAX_FILE)
+	{
+	  fprintf(stderr, "Error: Too many SYSFS filenames at line %d\n", linenum);  
+	  return(-1);
+	}
+      sdup = strndup(extra->modif_pos, extra->modif_len);
+      if(sdup == NULL)
+	{
+	  fprintf(stderr, "Error: Can't allocate SYSFS file\n");  
+	  return(-1);
+	}
+      sysfs_global.filename[findex] = sdup;
+      sysfs_global.filenum++;
+    }
+
+  /* Store value */
+  sdup = strndup(string, len);
+  if(sdup == NULL)
+    {
+      fprintf(stderr, "Error: Can't allocate SYSFS value\n");  
+      return(-1);
+    }
+  ifnode->sysfs[findex] = sdup;
+
+  /* Activate */
+  ifnode->active[SELECT_SYSFS] = 1;
+  active[SELECT_SYSFS] = 1;
+
+  if(verbose)
+    fprintf(stderr,
+	    "Parsing : Added SYSFS filename `%s' value `%s' from line %d.\n",
+	    sysfs_global.filename[findex], ifnode->sysfs[findex], linenum);
+
+  return(0);
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Compare all the sysfs values of two mappings
+ */
+static int
+mapping_cmpsysfs(struct if_mapping *	ifnode,
+		 struct if_mapping *	target)
+{
+  int		findex;	/* filename index */
+  int		match = 1;
+
+  /* Loop on all sysfs selector */
+  for(findex = 0; findex < sysfs_global.filenum; findex++)
+    {
+      /* If the mapping defines this sysfs selector.. */
+      if(ifnode->sysfs[findex] != NULL)
+	/* And if the sysfs values don't match */
+	if((target->sysfs[findex] == NULL) ||
+	   (fnmatch(ifnode->sysfs[findex], target->sysfs[findex],
+		    FNM_CASEFOLD)))
+	  /* Then the sysfs selector doesn't match */
+	  match = 0;
+    }
+
+  return(!match);
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Extract all the sysfs values of an interface
+ */
+static int
+mapping_getsysfs(int			skfd,
+		 const char *		ifname,
+		 struct if_mapping *	target,
+		 int			flag)
+{
+  FILE *	stream;
+  char *	linebuf = NULL;
+  size_t	linelen = 0; 
+  char *	sdup;
+  int		findex;	/* filename index */
+
+  /* Avoid "Unused parameter" warning */
+  skfd = skfd;
+  flag = flag;
+
+  /* Check if we know the root of the sysfs filesystem */
+  if(sysfs_global.root == NULL)
+    {
+      /* Open the mount file for reading */
+      stream = fopen("/proc/mounts", "r");
+      if(!stream) 
+	{
+	  fprintf(stderr, "Error: Can't open /proc/mounts file: %s\n",
+		  strerror(errno)); 
+	  return(-1);
+	}
+
+      /* Read each line of file
+       * getline is a GNU extension :-( The buffer is recycled and increased
+       * as needed by getline. */
+      while(getline(&linebuf, &linelen, stream) > 0)
+	{
+	  char *	p;
+	  size_t	n;
+
+	  /* Get the line starting with sysfs */
+	  p = linebuf;
+	  while(isspace(*p))
+	    ++p; 
+	  if(!strncasecmp(p, "sysfs ", 6))
+	    {
+	      /* Find the mount point */
+	      p += 6;
+	      while(isspace(*p))
+		++p;
+	      n = strcspn(p, " \t\n");
+	      sdup = strndup(p, n);
+	      if((n == 0) || (sdup == NULL))
+		{
+		  fprintf(stderr, "Error: Can't parse /proc/mounts file: %s\n",
+			  strerror(errno)); 
+		  return(-1);
+		}
+	      /* Store it */
+	      sysfs_global.root = sdup;
+	      sysfs_global.rlen = n;
+	      break;
+	    }
+	  /* Finished -> next line */
+	}
+
+      /* Cleanup */
+      fclose(stream);
+
+      /* Check if we found it */
+      if(sysfs_global.root == NULL)
+	{
+	  fprintf(stderr, "Error: Can't find sysfs in /proc/mounts file\n");
+	  free(linebuf);
+	  return(-1);
+	}
+    }
+
+  /* Loop on all sysfs selector */
+  for(findex = 0; findex < sysfs_global.filenum; findex++)
+    {
+      char *	fname;
+      int	flen;
+      char *	p;
+      ssize_t	n;
+
+      /* Construct complete filename for the sysfs selector */
+      flen = (sysfs_global.rlen + 11 + strlen(ifname) + 1 +
+	      strlen(sysfs_global.filename[findex]) + 1);
+      fname = malloc(flen);
+      if(fname == NULL)
+	{
+	  fprintf(stderr, "Error: Can't allocate SYSFS filename\n");  
+	  free(linebuf);
+	  return(-1);
+	}
+      sprintf(fname, "%s/class/net/%s/%s", sysfs_global.root, ifname,
+	      sysfs_global.filename[findex]);
+
+      /* Open the sysfs file for reading */
+      stream = fopen(fname, "r");
+      if(!stream) 
+	{
+	  /* Some sysfs attribute may no exist for some interface */
+	  if(verbose)
+	    fprintf(stderr, "Error: Can't open file `%s': %s\n", fname,
+		    strerror(errno)); 
+	  /* Next sysfs selector */
+	  continue;
+	}
+
+      /* Read file. Only one line in file. */
+      n = getline(&linebuf, &linelen, stream);
+      fclose(stream);
+      if(n <= 0)
+	{
+	  /* Some sysfs attribute are void for some interface */
+	  if(verbose)
+	    fprintf(stderr, "Error: Can't read file `%s'\n", fname);
+	  /* Next sysfs selector */
+	  continue;
+	}
+
+      /* Get content, remove trailing '/n', save it */
+      p = linebuf;
+      if(p[n - 1] == '\n')
+	n--;
+      sdup = strndup(p, n);
+      if(sdup == NULL)
+	{
+	  fprintf(stderr, "Error: Can't allocate SYSFS value\n"); 
+	  free(linebuf);
+	  return(-1);
+	}
+      target->sysfs[findex] = sdup;
+
+      /* Activate */
+      target->active[SELECT_SYSFS] = 1;
+
+      if(verbose)
+	fprintf(stderr,
+		"Querying %s : Got SYSFS filename `%s' value `%s'.\n",
+		ifname, sysfs_global.filename[findex], target->sysfs[findex]);
+
+      /* Finished : Next sysfs selector */
+    }
+
+  /* Cleanup */
+  free(linebuf);
+
+  return(target->active[SELECT_SYSFS] ? 0 : -1);
 }
 
 
@@ -1334,8 +1726,11 @@ mapping_create(char *	pos,
   memcpy(ifnode->ifname, pos, len); 
   ifnode->ifname[len] = '\0'; 
 
-  /* Check the interface name and issue various pedantic warnings */
-  if((!strcmp(ifnode->ifname, "eth0")) || (!strcmp(ifnode->ifname, "wlan0")))
+  /* Check the interface name and issue various pedantic warnings.
+   * We assume people using takeover want to force interfaces to those
+   * names and know what they are doing, so don't bother them... */
+  if((!force_takeover) &&
+     ((!strcmp(ifnode->ifname, "eth0")) || (!strcmp(ifnode->ifname, "wlan0"))))
     fprintf(stderr,
 	    "Warning: Interface name is `%s' at line %d, can't be mapped reliably.\n",
 	    ifnode->ifname, linenum);
@@ -1433,10 +1828,11 @@ selector_find(const char *	string,
 static int
 mapping_readfile(const char *	filename)
 {
-  FILE *	stream;
-  char *	linebuf = NULL;
-  size_t	linelen = 0; 
-  int		linenum = 0; 
+  FILE *		stream;
+  char *		linebuf = NULL;
+  size_t		linelen = 0; 
+  int			linenum = 0; 
+  struct add_extra	extrainfo;
 
   /* Reset the list of filters */
   bzero(selector_active, sizeof(selector_active));
@@ -1497,9 +1893,10 @@ mapping_readfile(const char *	filename)
       while(*p != '\0')
 	{
 	  const struct mapping_selector *	selector = NULL;
+	  struct add_extra *			extra = NULL;
 
-	  /* Selector name length */
-	  n = strcspn(p, " \t\n");
+	  /* Selector name length - stop at modifier start */
+	  n = strcspn(p, " \t\n{");
 
 	  /* Find it */
 	  selector = selector_find(p, n, linenum);
@@ -1508,9 +1905,33 @@ mapping_readfile(const char *	filename)
 	      ret = -1;
 	      break;
 	    }
+	  p += n;
+
+	  /* Check for modifier */
+	  if(*p == '{')
+	    {
+	      p++;
+	      /* Find end of modifier */
+	      e = strchr(p, '}');
+	      if(e == NULL)
+		{
+		  fprintf(stderr,
+			  "Error: unterminated selector modifier value on line %d\n",
+			  linenum);
+		  ret = -1;
+		  break;	/* Line ended */
+		}
+	      /* Fill in struct and hook it */
+	      extrainfo.modif_pos = p;
+	      extrainfo.modif_len = e - p;
+	      extra = &extrainfo;
+	      /* Terminate modifier value */
+	      e[0] = '\0';
+	      /* Skip it */
+	      p = e + 1;
+	    }
 
 	  /* Get to selector value */
-	  p += n;
 	  p += strspn(p, " \t\n"); 
 	  if(*p == '\0')
 	    {
@@ -1548,7 +1969,8 @@ mapping_readfile(const char *	filename)
 	  p[n] = '\0';
 
 	  /* Add it to the mapping */
-	  ret = selector->add_fn(ifnode, selector_active, p, n, linenum);
+	  ret = selector->add_fn(ifnode, selector_active, p, n,
+				 extra, linenum);
 	  if(ret < 0)
 	    break;
 
@@ -1683,8 +2105,7 @@ static void
 probe_mappings(int		skfd)
 {
   struct if_mapping *	ifnode;
-  struct ether_addr	mac;			/* Exact MAC address, hex */
-  unsigned short	hw_type;
+  struct ifreq		ifr;
 
   /* Look over all our mappings */
   for(ifnode = mapping_list; ifnode != NULL; ifnode = ifnode->next)
@@ -1703,7 +2124,8 @@ probe_mappings(int		skfd)
        * Obviously, we expect this command to 'fail', as
        * the interface will load with the old/wrong name.
        */
-      iw_get_mac_addr(skfd, ifnode->ifname, &mac, &hw_type);
+      strncpy(ifr.ifr_name, ifnode->ifname, IFNAMSIZ);
+      ioctl(skfd, SIOCGIFHWADDR, &ifr);
     }
 }
 
@@ -1720,8 +2142,7 @@ probe_debian(int		skfd)
   FILE *		stream;
   char *		linebuf = NULL;
   size_t		linelen = 0; 
-  struct ether_addr	mac;			/* Exact MAC address, hex */
-  unsigned short	hw_type;
+  struct ifreq		ifr;
 
   /* Open Debian config file */
   stream = fopen(DEBIAN_CONFIG_FILE, "r");
@@ -1769,8 +2190,9 @@ probe_debian(int		skfd)
 		fprintf(stderr, "Probing : Trying to load interface [%s]\n",
 			p);
 
-	      /* Do it ! */
-	      iw_get_mac_addr(skfd, p, &mac, &hw_type);
+	      /* Load interface */
+	      strncpy(ifr.ifr_name, p, IFNAMSIZ);
+	      ioctl(skfd, SIOCGIFHWADDR, &ifr);
 
 	      /* Go to next interface name */
 	      p = e;
@@ -1824,7 +2246,6 @@ process_rename(int	skfd,
       star[1] = 'd';
     }
 
-
   /* Change the name of the interface */
   if(if_set_name(skfd, ifname, newname, retname) < 0)
     {
@@ -1869,6 +2290,11 @@ process_ifname(int	skfd,
   if(mapping == NULL)
     return(-1);
 
+  /* If user specified a new name, keep only interfaces that would
+   * match the new name... */
+  if((new_name != NULL) && (if_match_ifname(mapping->ifname, new_name) != 0))
+    return(-1);
+
   /* Check if user want only dry-run.
    * Note that, in the case of wildcard, we don't resolve the wildcard.
    * That would be tricky to do... */
@@ -1888,7 +2314,7 @@ process_ifname(int	skfd,
     }
 
   /* Check if called with an explicit interface name */
-  if(!count)
+  if(print_newname)
     {
       /* Always print out the *new* interface name so that
        * the calling script can pick it up and know where its interface
@@ -1953,7 +2379,6 @@ main(int	argc,
 {
   const char *	conf_file = DEFAULT_CONF;
   char *	ifname = NULL;
-  char *	newname = NULL;
   int		use_probe = 0;
   int		is_debian = 0;
   int		skfd;
@@ -1984,7 +2409,7 @@ main(int	argc,
 	  ifname = optarg;
 	  break;
 	case 'n':
-	  newname = optarg;
+	  new_name = optarg;
 	  break;
 	case 'p':
 	  use_probe = 1;
@@ -2013,13 +2438,13 @@ main(int	argc,
     }
 
   /* Check if interface name was specified with -i. */
-  if(ifname)
+  if(ifname != NULL)
     {
       /* Check is target name specified */
-      if(newname != NULL)
+      if(new_name != NULL)
 	{
 	  /* User want to simply rename an interface to a specified name */
-	  ret = process_rename(skfd, ifname, newname);
+	  ret = process_rename(skfd, ifname, new_name);
 	}
       else
 	{
@@ -2028,6 +2453,7 @@ main(int	argc,
 	   * Process the network interface specified on the command line,
 	   * and return the new name on stdout.
 	   */
+	  print_newname = 1;
 	  ret = process_ifname(skfd, ifname, NULL, 0);
 	}
     }
@@ -2045,7 +2471,7 @@ main(int	argc,
       /* Rename all system interfaces
        * Mostly used for boot time processing (from init scripts).
        */
-      ret = process_iflist(skfd, &newname, 1);
+      ret = process_iflist(skfd, NULL, 0);
     }
 
   /* Cleanup */

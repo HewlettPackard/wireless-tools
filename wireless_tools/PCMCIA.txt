@@ -1,8 +1,8 @@
 	Pcmcia Wireless configuration
 	-----------------------------
 
-	One of the most exciting thing having happen after release 20
-is the addition of Wireless Extension support in the Pcmcia init
+	One of the most exciting things having happen after release 20
+is the addition of Wireless Tools support in the Pcmcia init
 scripts. Here is a quick intro on the subject...
 
 Pre-requisite :
@@ -14,11 +14,11 @@ Pre-requisite :
 
 Raylink driver :
 --------------
-	The Raylink driver as of 1.70 doesn't support yet writable
+	The Raylink driver as of 1.70 doesn't support writable
 Wireless Extensions, so enabling wireless.opts on this driver will
-make thing worse.
+make things worse.
 	On the other hand, the latest version of the Raylink driver
-accept Wireless Extensions at boot time, so the procedure described
+accepts Wireless Extensions at boot time, so the procedure described
 below will work.
 
 Distribution specific notes :
@@ -36,7 +36,7 @@ proper init scripts and those instructions will apply.
 
 Basic support :
 -------------
-	The file /etc/pcmcia/wireless.opts contain some templates for
+	The file /etc/pcmcia/wireless.opts contains some templates for
 the most common drivers. Just fill in your card configuration in the
 template corresponding to your driver configuration.
 	Then, to activate it, you just need to remove or comment the 4
@@ -75,13 +75,13 @@ esac
 
 Scheme support :
 --------------
-	The file wireless.opts fully support schemes. This allow you
+	The file wireless.opts fully supports schemes. This allow you
 to define different configurations (home, work...) and to switch on
 the fly between them.
 	The best way to explain it is to show an example.
 	Let's say you have an infrastructured setup at work (MY_WORK)
-and an adhoc network at home (MY_HOME). Moreover, when a specific card
-is inserted, you want it to be in adhoc mode (TEST). The work setup
+and an Ad-Hoc network at home (MY_HOME). Moreover, when a specific card
+is inserted, you want it to be in Ad-Hoc mode (TEST). The work setup
 will be the default...
 
 	Each Wireless LAN will have the following configuration :

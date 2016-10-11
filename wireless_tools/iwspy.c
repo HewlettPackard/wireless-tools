@@ -75,7 +75,7 @@ print_spy_info(int	skfd,
   for(i = 0; i < n; i++)
     {
       /* Print stats for each address */
-      printf("    %s : ", iw_pr_ether(temp, hwa[i].sa_data));
+      printf("    %s : ", iw_saether_ntop(&hwa[i], temp));
       iw_print_stats(temp, sizeof(temp), &qual[i], &range, has_range);
       printf("%s\n", temp);
     }

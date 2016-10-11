@@ -1,7 +1,7 @@
 .\" Jean II - HPLB - 1996 => HPL - 2004
 .\" iwconfig.8
 .\"
-.TH IWCONFIG 8 "22 June 2004" "wireless-tools" "Linux Programmer's Manual"
+.TH IWCONFIG 8 "09 March 2006" "wireless-tools" "Linux Programmer's Manual"
 .\"
 .\" NAME part
 .\"
@@ -13,9 +13,9 @@ iwconfig \- configure a wireless network interface
 .SH SYNOPSIS
 .BI "iwconfig [" interface ]
 .br
-.BI "iwconfig " interface " [essid " X "] [nwid " N "] [freq " F "] [channel " C ]
+.BI "iwconfig " interface " [essid " X "] [nwid " N "] [mode " M "] [freq " F "]
 .br
-.BI "                   [sens " S "] [mode " M "] [ap " A "] [nick " NN ]
+.BI "                   [channel " C ] [sens " S "] [ap " A "] [nick " NN ]
 .br
 .BI "                   [rate " R "] [rts " RT "] [frag " FT "] [txpower " T ]
 .br
@@ -64,11 +64,19 @@ promiscuous) with
 .IR off " or " any " (and " on
 to reenable it).
 .br
+If the ESSID of your network is one of the special keywords
+.RI ( off ", " on " or " any ),
+you should use
+.I --
+to escape it.
+.br
 .B Examples :
 .br
 .I "	iwconfig eth0 essid any"
 .br
 .I "	iwconfig eth0 essid ""My Network""
+.br
+.I "	iwconfig eth0 essid -- ""ANY""
 .TP
 .BR nwid / domain
 Set the Network ID (in some products it may also be called Domain
@@ -90,42 +98,15 @@ to reenable it).
 .br
 .I "	iwconfig eth0 nwid off"
 .TP
-.BR freq / channel
-Set the operating frequency or channel in the device. A value below
-1000 indicates a channel number, a value greater than 1000 is a
-frequency in Hz. You may append the suffix k, M or G to the value (for
-example, "2.46G" for 2.46 GHz frequency), or add enough '0'.
-.br
-Channels are usually numbered starting at 1, and you may use
-.IR iwlist (8)
-to get the total number of channels, list the available frequencies,
-and display the current frequency as a channel. Depending on
-regulations, some frequencies/channels may not be available.
-.br
-.B Examples :
-.br
-.I "	iwconfig eth0 freq 2422000000"
-.br
-.I "	iwconfig eth0 freq 2.422G"
-.br
-.I "	iwconfig eth0 channel 3"
-.TP
-.B sens
-Set the sensitivity threshold. This is the lowest signal level for
-which the hardware attempt packet reception, signals weaker than this
-are ignored. This is used to avoid receiving background noise, so you
-should set it according to the average noise level. Positive values
-are assumed to be the raw value used by the hardware or a percentage,
-negative values are assumed to be dBm.
-.br
-With some hardware, this parameter also controls the defer threshold
-(lowest signal level for which the hardware consider the channel busy)
-and the handover threshold (signal level where the hardware start
-looking for a new access point).
+.BR nick [name]
+Set the nickname, or the station name. Some 802.11 products do define
+it, but this is not used as far as the protocols (MAC, IP, TCP) are
+concerned and completely useless as far as configuration goes. Only
+some wireless diagnostic tools may use it.
 .br
 .B Example :
 .br
-.I "	iwconfig eth0 sens -80"
+.I "	iwconfig eth0 nickname ""My Linux Node""
 .TP
 .B mode
 Set the operating mode of the device, which depends on the network
@@ -141,7 +122,8 @@ topology. The mode can be
 .I Secondary
 (the node acts as a backup master/repeater),
 .I Monitor
-(the node acts as a passive monitor and only receives packets) or
+(the node is not associated with any cell and passively monitor all
+packets on the frequency) or
 .IR Auto .
 .br
 .B Example :
@@ -150,11 +132,50 @@ topology. The mode can be
 .br
 .I "	iwconfig eth0 mode Ad-Hoc"
 .TP
+.BR freq / channel
+Set the operating frequency or channel in the device. A value below
+1000 indicates a channel number, a value greater than 1000 is a
+frequency in Hz. You may append the suffix k, M or G to the value (for
+example, "2.46G" for 2.46 GHz frequency), or add enough '0'.
+.br
+Channels are usually numbered starting at 1, and you may use
+.IR iwlist (8)
+to get the total number of channels, list the available frequencies,
+and display the current frequency as a channel. Depending on
+regulations, some frequencies/channels may not be available.
+.br
+When using Managed mode, most often the Access Point dictates the
+channel and the driver may refuse the setting of the frequency. In
+Ad-Hoc mode, the frequency setting may only be used at initial cell
+creation, and may be ignored when joining an existing cell.
+.br
+You may also use
+.I off
+or
+.I auto
+to let the card pick up the best channel (when supported).
+.br
+.B Examples :
+.br
+.I "	iwconfig eth0 freq 2422000000"
+.br
+.I "	iwconfig eth0 freq 2.422G"
+.br
+.I "	iwconfig eth0 channel 3"
+.br
+.I "	iwconfig eth0 channel auto"
+.TP
 .B ap
 Force the card to register to the Access Point given by the address,
-if it is possible. When the quality of the connection goes too low,
-the driver may revert back to automatic mode (the card selects the
-best Access Point in range).
+if it is possible. This address is the cell identity of the Access
+Point, as reported by wireless scanning, which may be different from
+its network MAC address. If the wireless link is point to point, set
+the address of the other end of the link. If the link is ad-hoc, set
+the cell identity of the ad-hoc network.
+.br
+When the quality of the connection goes too low, the driver may revert
+back to automatic mode (the card selects the best Access Point in
+range).
 .br
 You may also use
 .I off
@@ -172,16 +193,6 @@ to force the card to reassociate with the currently best Access Point.
 .I "	iwconfig eth0 ap any"
 .br
 .I "	iwconfig eth0 ap off"
-.TP
-.BR nick [name]
-Set the nickname, or the station name. Some 802.11 products do define
-it, but this is not used as far as the protocols (MAC, IP, TCP) are
-concerned and completely useless as far as configuration goes. Only
-some diagnostic tools may use it.
-.br
-.B Example :
-.br
-.I "	iwconfig eth0 nickname ""My Linux Node""
 .TP
 .BR rate / bit [rate]
 For cards supporting multiple bit rates, set the bit-rate in b/s. The
@@ -208,12 +219,100 @@ the driver will use all bit-rates lower and equal than this value.
 .br
 .I "	iwconfig eth0 rate 5.5M auto"
 .TP
+.BR txpower
+For cards supporting multiple transmit powers, sets the transmit power
+in dBm. If
+.I W
+is the power in Watt, the power in dBm is
+.IR "P = 30 + 10.log(W)" .
+If the value is postfixed by
+.IR mW ,
+it will be automatically converted to dBm.
+.br
+In addition, 
+.IR on " and " off
+enable and disable the radio, and
+.IR auto " and " fixed
+enable and disable power control (if those features are available).
+.br
+.B Examples :
+.br
+.I "	iwconfig eth0 txpower 15"
+.br
+.I "	iwconfig eth0 txpower 30mW"
+.br
+.I "	iwconfig eth0 txpower auto"
+.br
+.I "	iwconfig eth0 txpower off"
+.TP
+.B sens
+Set the sensitivity threshold. This define how sensitive is the card
+to poor operating conditions (low signal, interference). Positive
+values are assumed to be the raw value used by the hardware or a
+percentage, negative values are assumed to be dBm. Depending on the
+hardware implementation, this parameter may control various functions.
+.br
+On modern cards, this parameter usually control handover/roaming
+threshold, the lowest signal level for which the hardware remains
+associated with the current Access Point. When the signal level goes
+below this threshold the card starts looking for a new/better Access
+Point. Some cards may use the number of missed beacons to trigger
+this. For high density of Access Points, a higher threshold make sure
+the card is always associated with the best AP, for low density of
+APs, a lower threshold minimise the number of failed handoffs.
+.br
+On more ancient card this parameter usually controls the defer
+threshold, the lowest signal level for which the hardware considers
+the channel busy. Signal levels above this threshold make the hardware
+inhibits its own transmission whereas signals weaker than this are
+ignored and the hardware is free to transmit. This is usually strongly
+linked to the receive threshold, the lowest signal level for which the
+hardware attempts packet reception. Proper setting of these thresholds
+prevent the card to waste time on background noise while still
+receiving weak transmissions. Modern designs seems to control those
+thresholds automatically.
+.br
+.br
+.B Example :
+.br
+.I "	iwconfig eth0 sens -80"
+.br
+.I "	iwconfig eth0 sens 2"
+.TP
+.BR retry
+Most cards have MAC retransmissions, and some allow to set the
+behaviour of the retry mechanism.
+.br
+To set the maximum number of retries, enter
+.IR "limit `value'" .
+This is an absolute value (without unit).
+To set the maximum length of time the MAC should retry, enter
+.IR "lifetime `value'" .
+By defaults, this value in in seconds, append the suffix m or u to
+specify values in milliseconds or microseconds.
+.br
+You can also add the
+.IR min " and " max
+modifiers. If the card supports automatic mode, they define the bounds
+of the limit or lifetime. Some other cards define different values
+depending on packet size, for example in 802.11
+.I min limit
+is the short retry limit (non RTS/CTS packets).
+.br
+.B Examples :
+.br
+.I "	iwconfig eth0 retry 16"
+.br
+.I "	iwconfig eth0 retry lifetime 300m"
+.br
+.I "	iwconfig eth0 retry min limit 8"
+.TP
 .BR rts [_threshold]
 RTS/CTS adds a handshake before each packet transmission to make sure
 that the channel is clear. This adds overhead, but increases
 performance in case of hidden nodes or a large number of active
 nodes. This parameter sets the size of the smallest packet for which
-the node sends RTS ; a value equal to the maximum packet size disable
+the node sends RTS ; a value equal to the maximum packet size disables
 the mechanism. You may also set this parameter to
 .IR auto ", " fixed " or " off .
 .br
@@ -228,8 +327,15 @@ Fragmentation allows to split an IP packet in a burst of smaller
 fragments transmitted on the medium. In most cases this adds overhead,
 but in a very noisy environment this reduces the error penalty and
 allow packets to get through interference bursts. This parameter sets
-the maximum fragment size ; a value equal to the maximum packet size
-disable the mechanism. You may also set this parameter to
+the maximum fragment size which is always lower than the maximum
+packet size.
+.br
+This parameter may also control Frame Bursting available on some
+cards, the ability to send multiple IP packets together. This
+mechanism would be enabled if the fragment size is larger than the
+maximum packet size.
+.br
+You may also set this parameter to
 .IR auto ", " fixed " or " off .
 .br
 .B Examples :
@@ -329,62 +435,9 @@ management mode to
 .br
 .I "	iwconfig eth0 power min period 2 power max period 4"
 .TP
-.BR txpower
-For cards supporting multiple transmit powers, set the transmit power in dBm. If 
-.I W
-is the power in Watt, the power in dBm is
-.IR "P = 30 + 10.log(W)" .
-If the value is postfixed by
-.IR mW ,
-it will be automatically converted to dBm.
-.br
-In addition, 
-.IR on " and " off
-enable and disable the radio, and
-.IR auto " and " fixed
-enable and disable power control (if those features are available).
-.br
-.B Examples :
-.br
-.I "	iwconfig eth0 txpower 15"
-.br
-.I "	iwconfig eth0 txpower 30mW"
-.br
-.I "	iwconfig eth0 txpower auto"
-.br
-.I "	iwconfig eth0 txpower off"
-.TP
-.BR retry
-Most cards have MAC retransmissions, and some allow to set the
-behaviour of the retry mechanism.
-.br
-To set the maximum number of retries, enter
-.IR "limit `value'" .
-This is an absolute value (without unit).
-The set the maximum length of time the MAC should retry, enter
-.IR "lifetime `value'" .
-By defaults, this value in in seconds, append the suffix m or u to
-specify values in milliseconds or microseconds.
-.br
-You can also add the
-.IR min " and " max
-modifiers. If the card supports automatic mode, they define the bounds
-of the limit or lifetime. Some other cards define different values
-depending on packet size, for example in 802.11
-.I min limit
-is the short retry limit (non RTS/CTS packets).
-.br
-.B Examples :
-.br
-.I "	iwconfig eth0 retry 16"
-.br
-.I "	iwconfig eth0 retry lifetime 300m"
-.br
-.I "	iwconfig eth0 retry min limit 8"
-.TP
 .BR commit
 Some cards may not apply changes done through Wireless Extensions
-immediately (they may wait to agregate the changes or apply it only
+immediately (they may wait to aggregate the changes or apply it only
 when the card is brought up via ifconfig). This command (when
 available) forces the card to apply all pending changes.
 .br
@@ -411,7 +464,7 @@ the
 of operation, the
 .B Access Point
 address, the
-.B bit-rate
+.BR bit-rate ,
 the
 .BR "RTS threshold" ", the " "fragmentation threshold" ,
 the
@@ -421,10 +474,10 @@ and the
 settings (depending on availability).
 .PP
 The parameters displayed have the same meaning and values as the
-parameter you can set, please refer to the previous part for a
+parameters you can set, please refer to the previous part for a
 detailed explanation of them.
 .br
-Some parameters are only displayed in short/abreviated form (such as
+Some parameters are only displayed in short/abbreviated form (such as
 encryption). You may use
 .IR iwlist (8)
 to get all the details.
