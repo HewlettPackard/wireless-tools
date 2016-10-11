@@ -1,7 +1,7 @@
 .\" Jean II - HPLB - 1996 => HPL - 2004
 .\" iwconfig.8
 .\"
-.TH IWCONFIG 8 "09 March 2006" "wireless-tools" "Linux Programmer's Manual"
+.TH IWCONFIG 8 "30 March 2006" "wireless-tools" "Linux Programmer's Manual"
 .\"
 .\" NAME part
 .\"
@@ -21,7 +21,7 @@ iwconfig \- configure a wireless network interface
 .br
 .BI "                   [enc " E "] [key " K "] [power " P "] [retry " R ]
 .br
-.BI "                   [commit]
+.BI "                   [modu " M "] [commit]
 .br
 .BI "iwconfig --help"
 .br
@@ -78,11 +78,10 @@ to escape it.
 .br
 .I "	iwconfig eth0 essid -- ""ANY""
 .TP
-.BR nwid / domain
-Set the Network ID (in some products it may also be called Domain
-ID). As all adjacent wireless networks share the same medium, this
-parameter is used to differenciate them (create logical colocated
-networks) and identify nodes belonging to the same cell.
+.BR nwid
+Set the Network ID. As all adjacent wireless networks share the same
+medium, this parameter is used to differentiate them (create logical
+colocated networks) and identify nodes belonging to the same cell.
 .br
 This parameter is only used for pre-802.11 hardware, the 802.11
 protocol uses the ESSID and AP Address for this function.
@@ -285,14 +284,15 @@ behaviour of the retry mechanism.
 .br
 To set the maximum number of retries, enter
 .IR "limit `value'" .
-This is an absolute value (without unit).
+This is an absolute value (without unit), and the default (when
+nothing is specified).
 To set the maximum length of time the MAC should retry, enter
 .IR "lifetime `value'" .
 By defaults, this value in in seconds, append the suffix m or u to
 specify values in milliseconds or microseconds.
 .br
 You can also add the
-.IR min " and " max
+.IR short ", " long ", " min " and " max
 modifiers. If the card supports automatic mode, they define the bounds
 of the limit or lifetime. Some other cards define different values
 depending on packet size, for example in 802.11
@@ -304,6 +304,8 @@ is the short retry limit (non RTS/CTS packets).
 .I "	iwconfig eth0 retry 16"
 .br
 .I "	iwconfig eth0 retry lifetime 300m"
+.br
+.I "	iwconfig eth0 retry short 12"
 .br
 .I "	iwconfig eth0 retry min limit 8"
 .TP
@@ -406,12 +408,14 @@ To set the period between wake ups, enter
 .IR "period `value'" .
 To set the timeout before going back to sleep, enter
 .IR "timeout `value'" .
+To set the generic level of power saving, enter
+.IR "saving `value'" .
 You can also add the
 .IR min " and " max
 modifiers. By default, those values are in seconds, append the suffix
 m or u to specify values in milliseconds or microseconds. Sometimes,
-those values are without units (number of beacon periods, dwell or
-similar).
+those values are without units (number of beacon periods, dwell,
+percentage or similar).
 .br
 .IR off " and " on
 disable and reenable power management. Finally, you may set the power
@@ -431,15 +435,43 @@ management mode to
 .br
 .I "	iwconfig eth0 power timeout 300u all"
 .br
+.I "	iwconfig eth0 power saving 3"
+.br
 .I "	iwconfig eth0 power off"
 .br
 .I "	iwconfig eth0 power min period 2 power max period 4"
 .TP
+.BR modu [lation]
+Force the card to use a specific set of modulations. Modern cards
+support various modulations, some which are standard, such as 802.11b
+or 802.11g, and some proprietary. This command force the card to only
+use the specific set of modulations listed on the command line. This
+can be used to fix interoperability issues.
+.br
+The list of available modulations depend on the card/driver and can be
+displayed using
+.IR "iwlist modulation" .
+Note that some card/driver may not be able to select each modulation
+listed independantly, some may come as a group. You may also set this
+parameter to
+.IR auto
+let the card/driver do its best.
+.br
+.B Examples :
+.br
+.I "	iwconfig eth0 modu 11g"
+.br
+.I "	iwconfig eth0 modu CCK OFDMa"
+.br
+.I "	iwconfig eth0 modu auto"
+.TP
 .BR commit
 Some cards may not apply changes done through Wireless Extensions
 immediately (they may wait to aggregate the changes or apply it only
-when the card is brought up via ifconfig). This command (when
-available) forces the card to apply all pending changes.
+when the card is brought up via
+.IR ifconfig ).
+This command (when available) forces the card to apply all pending
+changes.
 .br
 This is normally not needed, because the card will eventually apply
 the changes, but can be useful for debugging.

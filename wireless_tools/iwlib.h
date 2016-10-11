@@ -1,12 +1,12 @@
 /*
  *	Wireless Tools
  *
- *		Jean II - HPLB 97->99 - HPL 99->04
+ *		Jean II - HPLB 97->99 - HPL 99->07
  *
  * Common header for the Wireless Extension library...
  *
  * This file is released under the GPL license.
- *     Copyright (c) 1997-2004 Jean Tourrilhes <jt@hpl.hp.com>
+ *     Copyright (c) 1997-2007 Jean Tourrilhes <jt@hpl.hp.com>
  */
 
 #ifndef IWLIB_H
@@ -33,41 +33,17 @@
 #include <unistd.h>
 
 /* This is our header selection. Try to hide the mess and the misery :-(
- * Don't look, you would go blind ;-) */
+ * Don't look, you would go blind ;-)
+ * Note : compatibility with *old* distributions has been removed,
+ * you will need Glibc 2.2 and older to compile (which means 
+ * Mandrake 8.0, Debian 2.3, RH 7.1 or older).
+ */
 
-#ifndef LINUX_VERSION_CODE
-#include <linux/version.h>
-#endif
-
-/* Kernel headers 2.4.X + Glibc 2.2 - Mandrake 8.0, Debian 2.3, RH 7.1
- * Kernel headers 2.2.X + Glibc 2.2 - Slackware 8.0 */
-#if defined(__GLIBC__) \
-    && __GLIBC__ == 2 \
-    && __GLIBC_MINOR__ >= 2 \
-    && LINUX_VERSION_CODE >= KERNEL_VERSION(2,2,0)
-#define HEADERS_GENERIC
-
-/* Kernel headers 2.4.X + Glibc 2.1 - Debian 2.2 upgraded, RH 7.0
- * Kernel headers 2.2.X + Glibc 2.1 - Debian 2.2, RH 6.1 */
-#elif defined(__GLIBC__) \
-      && __GLIBC__ == 2 \
-      && __GLIBC_MINOR__ == 1 \
-      && LINUX_VERSION_CODE >= KERNEL_VERSION(2,2,0)
-#define HEADERS_GENERIC
-#define HEADERS_KERNEL
-
-/* Unsupported combination */
-#else
-#error "Your kernel/libc combination is not supported"
-#endif
-
-#ifdef HEADERS_GENERIC 
-/* Proposed by Dr. Michael Rietz <rietz@mail.amps.de>, 27.3.2 */
+/* Set of headers proposed by Dr. Michael Rietz <rietz@mail.amps.de>, 27.3.2 */
 #include <net/if_arp.h>		/* For ARPHRD_ETHER */
 #include <sys/socket.h>		/* For AF_INET & struct sockaddr */
 #include <netinet/in.h>         /* For struct sockaddr_in */
 #include <netinet/if_ether.h>
-#endif /* HEADERS_GENERIC */    
 
 /* Fixup to be able to include kernel includes in userspace.
  * Basically, kill the sparse annotations... Jean II */
@@ -77,15 +53,9 @@
 
 #include <linux/types.h>		/* for "caddr_t" et al		*/
 
-#ifdef HEADERS_KERNEL
-/* Traditionally we have used kernel headers, included in wireless.h */
-#include <linux/socket.h>		/* for "struct sockaddr" et al	*/
-#include <linux/if.h>			/* for IFNAMSIZ and co... */
-#else	/* !HEADERS_KERNEL */
 /* Glibc systems headers are supposedly less problematic than kernel ones */
 #include <sys/socket.h>			/* for "struct sockaddr" et al	*/
 #include <net/if.h>			/* for IFNAMSIZ and co... */
-#endif	/* !HEADERS_KERNEL */
 
 /* Private copy of Wireless extensions (in this directoty) */
 #include "wireless.h"
@@ -126,16 +96,17 @@ extern "C" {
 
 /****************************** DEBUG ******************************/
 
+//#define DEBUG 1
 
 /************************ CONSTANTS & MACROS ************************/
 
 /* Various versions information */
 /* Recommended Wireless Extension version */
-#define WE_VERSION	20
+#define WE_VERSION	21
 /* Maximum forward compatibility built in this version of WT */
-#define WE_MAX_VERSION	21
+#define WE_MAX_VERSION	22
 /* Version of Wireless Tools */
-#define WT_VERSION	28
+#define WT_VERSION	29
 
 /* Paths */
 #define PROC_NET_WIRELESS	"/proc/net/wireless"
@@ -152,6 +123,36 @@ extern "C" {
 #ifndef ARPHRD_IEEE80211
 #define ARPHRD_IEEE80211 801		/* IEEE 802.11			*/
 #endif /* ARPHRD_IEEE80211 */
+
+#ifndef IW_EV_LCP_PK_LEN
+/* Size of the Event prefix when packed in stream */
+#define IW_EV_LCP_PK_LEN	(4)
+/* Size of the various events when packed in stream */
+#define IW_EV_CHAR_PK_LEN	(IW_EV_LCP_PK_LEN + IFNAMSIZ)
+#define IW_EV_UINT_PK_LEN	(IW_EV_LCP_PK_LEN + sizeof(__u32))
+#define IW_EV_FREQ_PK_LEN	(IW_EV_LCP_PK_LEN + sizeof(struct iw_freq))
+#define IW_EV_PARAM_PK_LEN	(IW_EV_LCP_PK_LEN + sizeof(struct iw_param))
+#define IW_EV_ADDR_PK_LEN	(IW_EV_LCP_PK_LEN + sizeof(struct sockaddr))
+#define IW_EV_QUAL_PK_LEN	(IW_EV_LCP_PK_LEN + sizeof(struct iw_quality))
+#define IW_EV_POINT_PK_LEN	(IW_EV_LCP_PK_LEN + 4)
+
+struct iw_pk_event
+{
+	__u16		len;			/* Real lenght of this stuff */
+	__u16		cmd;			/* Wireless IOCTL */
+	union iwreq_data	u;		/* IOCTL fixed payload */
+} __attribute__ ((packed));
+struct	iw_pk_point
+{
+  void __user	*pointer;	/* Pointer to the data  (in user space) */
+  __u16		length;		/* number of fields or size in bytes */
+  __u16		flags;		/* Optional params */
+} __attribute__ ((packed));
+
+#define IW_EV_LCP_PK2_LEN	(sizeof(struct iw_pk_event) - sizeof(union iwreq_data))
+#define IW_EV_POINT_PK2_LEN	(IW_EV_LCP_PK2_LEN + sizeof(struct iw_pk_point) - IW_EV_POINT_OFF)
+
+#endif	/* IW_EV_LCP_PK_LEN */
 
 /****************************** TYPES ******************************/
 
@@ -244,6 +245,8 @@ typedef struct wireless_scan
   struct wireless_config	b;	/* Basic information */
   iwstats	stats;			/* Signal strength */
   int		has_stats;
+  iwparam	maxbitrate;		/* Max bit rate in bps */
+  int		has_maxbitrate;
 } wireless_scan;
 
 /*
@@ -270,6 +273,14 @@ typedef int (*iw_enum_handler)(int	skfd,
 			       char *	ifname,
 			       char *	args[],
 			       int	count);
+
+/* Describe a modulation */
+typedef struct iw_modul_descr
+{
+  unsigned int		mask;		/* Modulation bitmask */
+  char			cmd[8];		/* Short name */
+  char *		verbose;	/* Verbose description */
+} iw_modul_descr;
 
 /**************************** PROTOTYPES ****************************/
 /*
@@ -379,7 +390,8 @@ void
 	iw_print_pm_value(char *	buffer,
 			  int		buflen,
 			  int		value,
-			  int		flags);
+			  int		flags,
+			  int		we_version);
 void
 	iw_print_pm_mode(char *		buffer,
 			 int		buflen,
@@ -389,7 +401,8 @@ void
 	iw_print_retry_value(char *	buffer,
 			     int	buflen,
 			     int	value,
-			     int	flags);
+			     int	flags,
+			     int	we_version);
 /* ----------------------- TIME SUBROUTINES ----------------------- */
 void
 	iw_print_timeval(char *				buffer,
@@ -469,6 +482,11 @@ int
 /* Modes as human readable strings */
 extern const char * const	iw_operation_mode[];
 #define IW_NUM_OPER_MODE	7
+#define IW_NUM_OPER_MODE_EXT	8
+
+/* Modulations as human readable strings */
+extern const struct iw_modul_descr	iw_modul_list[];
+#define IW_SIZE_MODUL_LIST	16
 
 /************************* INLINE FUNTIONS *************************/
 /*
