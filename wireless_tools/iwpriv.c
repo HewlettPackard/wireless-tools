@@ -1,77 +1,470 @@
 /*
- * Warning : this program need wireless extensions...
+ *	Wireless Tools
+ *
+ *		Jean II - HPLB '99
+ *
+ * Main code for "iwconfig". This is the generic tool for most
+ * manipulations...
+ * You need to link this code against "iwcommon.c" and "-lm".
  */
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <linux/netdevice.h>
-#include <linux/if.h>
-#include <linux/if_arp.h>
-#include <linux/if_ether.h>
-#include <linux/ipx.h>
-#include <linux/wireless.h>
-#include <stdio.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 
-int skfd = -1;				/* generic raw socket desc.	*/
-int ipx_sock = -1;			/* IPX socket			*/
-int ax25_sock = -1;			/* AX.25 socket			*/
-int inet_sock = -1;			/* INET socket			*/
-int ddp_sock = -1;			/* Appletalk DDP socket		*/
+#include "iwcommon.h"		/* Header */
 
-static int sockets_open()
+/************************* MISC SUBROUTINES **************************/
+
+/*------------------------------------------------------------------*/
+/*
+ * Print usage string
+ */
+static void
+iw_usage(void)
 {
-	inet_sock=socket(AF_INET, SOCK_DGRAM, 0);
-	ipx_sock=socket(AF_IPX, SOCK_DGRAM, 0);
-	ax25_sock=socket(AF_AX25, SOCK_DGRAM, 0);
-	ddp_sock=socket(AF_APPLETALK, SOCK_DGRAM, 0);
-	/*
-	 *	Now pick any (exisiting) useful socket family for generic queries
-	 */
-	if(inet_sock!=-1)
-		return inet_sock;
-	if(ipx_sock!=-1)
-		return ipx_sock;
-	if(ax25_sock!=-1)
-		return ax25_sock;
-	/*
-	 *	If this is -1 we have no known network layers and its time to jump.
-	 */
-	 
-	return ddp_sock;
+  fprintf(stderr, "Usage: iwpriv interface [private-command [private-arguments]]\n");
+  fprintf(stderr, "              interface [roam {on|off}]\n");
+  fprintf(stderr, "              interface [port [n]]\n");
+  exit(1);
 }
 
-int
-byte_size(args)
+/************************ GENERIC FUNCTIONS *************************/
+
+/*------------------------------------------------------------------*/
+/*
+ * Print on the screen in a neat fashion all the info we have collected
+ * on a device.
+ */
+static void
+print_priv_info(int		skfd,
+		char *		ifname)
 {
-  int	ret = args & IW_PRIV_SIZE_MASK;
+  int		k;
+  iwprivargs	priv[16];
+  int		n;
+  char *	argtype[] = { "    ", "byte", "char", "", "int", "float" };
 
-  if(((args & IW_PRIV_TYPE_MASK) == IW_PRIV_TYPE_INT) ||
-     ((args & IW_PRIV_TYPE_MASK) == IW_PRIV_TYPE_FLOAT))
-    ret <<= 2;
+  /* Read the private ioctls */
+  n = get_priv_info(skfd, ifname, priv);
 
-  if((args & IW_PRIV_TYPE_MASK) == IW_PRIV_TYPE_NONE)
-    return 0;
-
-  return ret;
+  /* Is there any ? */
+  if(n <= 0)
+    {
+      /* Could skip this message ? */
+      fprintf(stderr, "%-8.8s  no private ioctls.\n\n",
+	      ifname);
+    }
+  else
+    {
+      printf("%-8.8s  Available private ioctl :\n", ifname);
+      /* Print the all */
+      for(k = 0; k < n; k++)
+	printf("          %s (%X) : set %3d %s & get %3d %s\n",
+	       priv[k].name, priv[k].cmd,
+	       priv[k].set_args & IW_PRIV_SIZE_MASK,
+	       argtype[(priv[k].set_args & IW_PRIV_TYPE_MASK) >> 12],
+	       priv[k].get_args & IW_PRIV_SIZE_MASK,
+	       argtype[(priv[k].get_args & IW_PRIV_TYPE_MASK) >> 12]);
+      printf("\n");
+    }
 }
 
+/*------------------------------------------------------------------*/
+/*
+ * Get info on all devices and print it on the screen
+ */
+static void
+print_priv_devices(int		skfd)
+{
+  char		buff[1024];
+  struct ifconf ifc;
+  struct ifreq *ifr;
+  int i;
+
+  /* Get list of active devices */
+  ifc.ifc_len = sizeof(buff);
+  ifc.ifc_buf = buff;
+  if(ioctl(skfd, SIOCGIFCONF, &ifc) < 0)
+    {
+      fprintf(stderr, "SIOCGIFCONF: %s\n", strerror(errno));
+      return;
+    }
+  ifr = ifc.ifc_req;
+
+  /* Print them */
+  for(i = ifc.ifc_len / sizeof(struct ifreq); --i >= 0; ifr++)
+    print_priv_info(skfd, ifr->ifr_name);
+}
+
+/************************* SETTING ROUTINES **************************/
+
+/*------------------------------------------------------------------*/
+/*
+ * Execute a private command on the interface
+ */
+static int
+set_private(int		skfd,		/* Socket */
+	    char *	args[],		/* Command line args */
+	    int		count,		/* Args count */
+	    char *	ifname)		/* Dev name */
+{
+  u_char	buffer[1024];
+  struct iwreq		wrq;
+  int		i = 0;		/* Start with first arg */
+  int		k;
+  iwprivargs	priv[16];
+  int		number;
+
+  /* Read the private ioctls */
+  number = get_priv_info(skfd, ifname, priv);
+
+  /* Is there any ? */
+  if(number <= 0)
+    {
+      /* Could skip this message ? */
+      fprintf(stderr, "%-8.8s  no private ioctls.\n\n",
+	      ifname);
+      return(-1);
+    }
+
+  /* Search the correct ioctl */
+  k = -1;
+  while((++k < number) && strcmp(priv[k].name, args[i]));
+
+  /* If not found... */
+  if(k == number)
+    {
+      fprintf(stderr, "Invalid command : %s\n", args[i]);
+      return(-1);
+    }
+	  
+  /* Next arg */
+  i++;
+
+  /* If we have to set some data */
+  if((priv[k].set_args & IW_PRIV_TYPE_MASK) &&
+     (priv[k].set_args & IW_PRIV_SIZE_MASK))
+    {
+      switch(priv[k].set_args & IW_PRIV_TYPE_MASK)
+	{
+	case IW_PRIV_TYPE_BYTE:
+	  /* Number of args to fetch */
+	  wrq.u.data.length = count - 1;
+	  if(wrq.u.data.length > (priv[k].set_args & IW_PRIV_SIZE_MASK))
+	    wrq.u.data.length = priv[k].set_args & IW_PRIV_SIZE_MASK;
+
+	  /* Fetch args */
+	  for(; i < wrq.u.data.length + 1; i++)
+	    sscanf(args[i], "%d", (int *)(buffer + i - 1));
+	  break;
+
+	case IW_PRIV_TYPE_INT:
+	  /* Number of args to fetch */
+	  wrq.u.data.length = count - 1;
+	  if(wrq.u.data.length > (priv[k].set_args & IW_PRIV_SIZE_MASK))
+	    wrq.u.data.length = priv[k].set_args & IW_PRIV_SIZE_MASK;
+
+	  /* Fetch args */
+	  for(; i < wrq.u.data.length + 1; i++)
+	    sscanf(args[i], "%d", ((u_int *) buffer) + i - 1);
+	  break;
+
+	case IW_PRIV_TYPE_CHAR:
+	  if(i < count)
+	    {
+	      /* Size of the string to fetch */
+	      wrq.u.data.length = strlen(args[i]) + 1;
+	      if(wrq.u.data.length > (priv[k].set_args & IW_PRIV_SIZE_MASK))
+		wrq.u.data.length = priv[k].set_args & IW_PRIV_SIZE_MASK;
+
+	      /* Fetch string */
+	      memcpy(buffer, args[i], wrq.u.data.length);
+	      buffer[sizeof(buffer) - 1] = '\0';
+	      i++;
+	    }
+	  else
+	    {
+	      wrq.u.data.length = 1;
+	      buffer[0] = '\0';
+	    }
+	  break;
+
+	default:
+	  fprintf(stderr, "Not yet implemented...\n");
+	  return(-1);
+	}
+	  
+      if((priv[k].set_args & IW_PRIV_SIZE_FIXED) &&
+	 (wrq.u.data.length != (priv[k].set_args & IW_PRIV_SIZE_MASK)))
+	{
+	  printf("The command %s need exactly %d argument...\n",
+		 priv[k].name, priv[k].set_args & IW_PRIV_SIZE_MASK);
+	  return(-1);
+	}
+    }	/* if args to set */
+  else
+    {
+      wrq.u.data.length = 0L;
+    }
+
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+
+  if((priv[k].set_args & IW_PRIV_SIZE_FIXED) &&
+     (byte_size(priv[k].set_args) < IFNAMSIZ))
+    memcpy(wrq.u.name, buffer, IFNAMSIZ);
+  else
+    {
+      wrq.u.data.pointer = (caddr_t) buffer;
+      wrq.u.data.flags = 0;
+    }
+
+  /* Perform the private ioctl */
+  if(ioctl(skfd, priv[k].cmd, &wrq) < 0)
+    {
+      fprintf(stderr, "Interface doesn't accept private ioctl...\n");
+      fprintf(stderr, "%X: %s\n", priv[k].cmd, strerror(errno));
+      return(-1);
+    }
+
+  /* If we have to get some data */
+  if((priv[k].get_args & IW_PRIV_TYPE_MASK) &&
+     (priv[k].get_args & IW_PRIV_SIZE_MASK))
+    {
+      int	j;
+      int	n = 0;		/* number of args */
+
+      printf("%-8.8s  %s:", ifname, priv[k].name);
+
+      if((priv[k].get_args & IW_PRIV_SIZE_FIXED) &&
+	 (byte_size(priv[k].get_args) < IFNAMSIZ))
+	{
+	  memcpy(buffer, wrq.u.name, IFNAMSIZ);
+	  n = priv[k].get_args & IW_PRIV_SIZE_MASK;
+	}
+      else
+	n = wrq.u.data.length;
+
+      switch(priv[k].get_args & IW_PRIV_TYPE_MASK)
+	{
+	case IW_PRIV_TYPE_BYTE:
+	  /* Display args */
+	  for(j = 0; j < n; j++)
+	    printf("%d  ", buffer[j]);
+	  printf("\n");
+	  break;
+
+	case IW_PRIV_TYPE_INT:
+	  /* Display args */
+	  for(j = 0; j < n; j++)
+	    printf("%d  ", ((u_int *) buffer)[i]);
+	  printf("\n");
+	  break;
+
+	case IW_PRIV_TYPE_CHAR:
+	  /* Display args */
+	  buffer[wrq.u.data.length - 1] = '\0';
+	  printf("%s\n", buffer);
+	  break;
+
+	default:
+	  fprintf(stderr, "Not yet implemented...\n");
+	  return(-1);
+	}
+    }	/* if args to set */
+
+  return(0);
+}
+
+/********************** PRIVATE IOCTLS MANIPS ***********************/
+/*
+ * Convenient access to some private ioctls of some devices
+ */
+
+/*------------------------------------------------------------------*/
+/*
+ * Set roaming mode on and off
+ * Found in wavelan_cs driver
+ */
+static int
+set_roaming(int		skfd,		/* Socket */
+	    char *	args[],		/* Command line args */
+	    int		count,		/* Args count */
+	    char *	ifname)		/* Dev name */
+{
+  u_char	buffer[1024];
+  struct iwreq		wrq;
+  int		i = 0;		/* Start with first arg */
+  int		k;
+  iwprivargs	priv[16];
+  int		number;
+  char		RoamState;		/* buffer to hold new roam state */
+  char		ChangeRoamState=0;	/* whether or not we are going to
+					   change roam states */
+
+  /* Read the private ioctls */
+  number = get_priv_info(skfd, ifname, priv);
+
+  /* Is there any ? */
+  if(number <= 0)
+    {
+      /* Could skip this message ? */
+      fprintf(stderr, "%-8.8s  no private ioctls.\n\n",
+	      ifname);
+      return(-1);
+    }
+
+  if(count != 1)
+    iw_usage();
+
+  if(!strcasecmp(args[i], "on"))
+    {
+      printf("%-8.8s  enable roaming\n", ifname);
+      if(!number)
+	{
+	  fprintf(stderr, "This device doesn't support roaming\n");
+	  return(-1);
+	}
+      ChangeRoamState=1;
+      RoamState=1;
+    }
+  else
+    if(!strcasecmp(args[i], "off"))
+      {
+	i++;
+	printf("%-8.8s  disable roaming\n",  ifname);
+	if(!number)
+	  {
+	    fprintf(stderr, "This device doesn't support roaming\n");
+	    return(-1);
+	  }
+	ChangeRoamState=1;
+	RoamState=0;
+      }
+    else
+      {
+	iw_usage();
+	return(-1);
+      }
+
+  if(ChangeRoamState)
+    {
+      k = -1;
+      while((++k < number) && strcmp(priv[k].name, "setroam"));
+      if(k == number)
+	{
+	  fprintf(stderr, "This device doesn't support roaming\n");
+	  return(-1);
+	}
+      strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+
+      buffer[0]=RoamState;
+
+      memcpy(wrq.u.name, &buffer, IFNAMSIZ);
+
+      if(ioctl(skfd, priv[k].cmd, &wrq) < 0)
+	{
+	  fprintf(stderr, "Roaming support is broken.\n");
+	  exit(0);
+	}
+    }
+  i++;
+
+  return(i);
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Get and set the port type
+ * Found in wavelan2_cs and wvlan_cs drivers
+ */
+static int
+port_type(int		skfd,		/* Socket */
+	  char *	args[],		/* Command line args */
+	  int		count,		/* Args count */
+	  char *	ifname)		/* Dev name */
+{
+  struct iwreq	wrq;
+  int		i = 0;		/* Start with first arg */
+  int		k;
+  iwprivargs	priv[16];
+  int		number;
+  char		ptype = 0;
+
+  /* Read the private ioctls */
+  number = get_priv_info(skfd, ifname, priv);
+
+  /* Is there any ? */
+  if(number <= 0)
+    {
+      /* Could skip this message ? */
+      fprintf(stderr, "%-8.8s  no private ioctls.\n\n", ifname);
+      return(-1);
+    }
+
+  /* Arguments ? */
+  if(count == 0)
+    {
+      /* So, we just want to see the current value... */
+      k = -1;
+      while((++k < number) && strcmp(priv[k].name, "gport_type"));
+      if(k == number)
+	{
+	  fprintf(stderr, "This device doesn't support getting port type\n");
+	  return(-1);
+	}
+      strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+
+      /* Get it */
+      if(ioctl(skfd, priv[k].cmd, &wrq) < 0)
+	{
+	  fprintf(stderr, "Port type support is broken.\n");
+	  exit(0);
+	}
+      ptype = *wrq.u.name;
+
+      /* Display it */
+      printf("%-8.8s  Port type is %d.\n\n", ifname, ptype);
+
+      return(0);
+    }
+
+  if(count != 1)
+    iw_usage();
+
+  /* Read it */
+  if(sscanf(args[i], "%d", (int *) &ptype) != 1)
+    iw_usage();
+  
+  k = -1;
+  while((++k < number) && strcmp(priv[k].name, "sport_type"));
+  if(k == number)
+    {
+      fprintf(stderr, "This device doesn't support setting port type\n");
+      return(-1);
+    }
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+
+  *(wrq.u.name) = ptype;
+
+  if(ioctl(skfd, priv[k].cmd, &wrq) < 0)
+    {
+      fprintf(stderr, "Invalid port type\n");
+      exit(0);
+    }
+
+  i++;
+  return(i);
+}
+
+/******************************* MAIN ********************************/
+
+/*------------------------------------------------------------------*/
+/*
+ * The main !
+ */
 int
 main(int	argc,
      char **	argv)
 {
-  struct iwreq		wrq;
-  char *		ifname = argv[1];
-  struct iw_priv_args	priv[16];
-  int			k;
-
-  if(argc < 2)
-    exit(0);
+  int skfd = -1;		/* generic raw socket desc.	*/
+  int goterr = 0;
 
   /* Create a channel to the NET kernel. */
   if((skfd = sockets_open()) < 0)
@@ -80,151 +473,52 @@ main(int	argc,
       exit(-1);
     }
 
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  wrq.u.data.pointer = (caddr_t) priv;
-  wrq.u.data.length = 0;
-  wrq.u.data.flags = 0;
-  if(ioctl(skfd, SIOCGIWPRIV, &wrq) < 0)
+  /* No argument : show the list of all device + info */
+  if(argc == 1)
     {
-      fprintf(stderr, "Interface doesn't provide private interface info...\n");
-      fprintf(stderr, "SIOCGIWPRIV: %s\n", strerror(errno));
-      return(-1);
+      print_priv_devices(skfd);
+      close(skfd);
+      exit(0);
     }
 
-  /* If no args... */
-  if(argc < 3)
+  /* Special cases take one... */
+  /* Help */
+  if((!strncmp(argv[1], "-h", 9)) ||
+     (!strcmp(argv[1], "--help")))
     {
-      char *	argtype[] = { "    ", "byte", "char", "", "int", "float" };
-
-      printf("Available private ioctl :\n");
-      for(k = 0; k < wrq.u.data.length; k++)
-	printf("%s (%lX) : set %3d %s & get %3d %s\n",
-	       priv[k].name, priv[k].cmd,
-	       priv[k].set_args & IW_PRIV_SIZE_MASK,
-	       argtype[(priv[k].set_args & IW_PRIV_TYPE_MASK) >> 12],
-	       priv[k].get_args & IW_PRIV_SIZE_MASK,
-	       argtype[(priv[k].get_args & IW_PRIV_TYPE_MASK) >> 12]);
+      iw_usage();
+      close(skfd);
+      exit(0);
     }
-  else
+
+  /* The device name must be the first argument */
+  /* Name only : show for that device only */
+  if(argc == 2)
     {
-      u_char	buffer[1024];
+      print_priv_info(skfd, argv[1]);
+      close(skfd);
+      exit(0);
+    }
 
-      /* Seach the correct ioctl */
-      k = -1;
-      while((++k < wrq.u.data.length) && strcmp(priv[k].name, argv[2]))
-	;
-      /* If not found... */
-      if(k == wrq.u.data.length)
-	fprintf(stderr, "Invalid argument : %s\n", argv[2]);
+  /* Special cases take two... */
+  /* Roaming */
+  if(!strncmp(argv[2], "roam", 4))
+    {
+      goterr = set_roaming(skfd, argv + 3, argc - 3, argv[1]);
+      close(skfd);
+      exit(0);
+    }
 
-      /* If we have to set some data */
-      if((priv[k].set_args & IW_PRIV_TYPE_MASK) &&
-	 (priv[k].set_args & IW_PRIV_SIZE_MASK))
-	{
-	  int	i;
+  /* Port type */
+  if(!strncmp(argv[2], "port", 4))
+    {
+      goterr = port_type(skfd, argv + 3, argc - 3, argv[1]);
+      close(skfd);
+      exit(0);
+    }
 
-	  /* Warning : we may have no args to set... */
-
-	  switch(priv[k].set_args & IW_PRIV_TYPE_MASK)
-	    {
-	    case IW_PRIV_TYPE_BYTE:
-	      /* Number of args to fetch */
-	      wrq.u.data.length = argc - 3;
-	      if(wrq.u.data.length > (priv[k].set_args & IW_PRIV_SIZE_MASK))
-		wrq.u.data.length = priv[k].set_args & IW_PRIV_SIZE_MASK;
-
-	      /* Fetch args */
-	      for(i = 0; i < wrq.u.data.length; i++)
-		sscanf(argv[i + 3], "%d", buffer + i);
-	      break;
-
-	    case IW_PRIV_TYPE_INT:
-	      /* Number of args to fetch */
-	      wrq.u.data.length = argc - 3;
-	      if(wrq.u.data.length > (priv[k].set_args & IW_PRIV_SIZE_MASK))
-		wrq.u.data.length = priv[k].set_args & IW_PRIV_SIZE_MASK;
-
-	      /* Fetch args */
-	      for(i = 0; i < wrq.u.data.length; i++)
-		sscanf(argv[i + 3], "%d", ((u_int *) buffer) + i);
-	      break;
-
-	    default:
-	      fprintf(stderr, "Not yet implemented...\n");
-	      return(-1);
-	    }
-
-	  if((priv[k].set_args & IW_PRIV_SIZE_FIXED) &&
-	     (wrq.u.data.length != (priv[k].set_args & IW_PRIV_SIZE_MASK)))
-	    {
-	      printf("The command %s need exactly %d argument...\n",
-		     priv[k].name, priv[k].set_args & IW_PRIV_SIZE_MASK);
-	      return(-1);
-	    }
-	}	/* if args to set */
-      else
-	{
-	  wrq.u.data.length = 0L;
-	}
-
-      strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-
-      if((priv[k].set_args & IW_PRIV_SIZE_FIXED) &&
-	 (byte_size(priv[k].set_args) < IFNAMSIZ))
-	memcpy(wrq.u.name, buffer, IFNAMSIZ);
-      else
-	{
-	  wrq.u.data.pointer = (caddr_t) buffer;
-	  wrq.u.data.flags = 0;
-	}
-
-      if(ioctl(skfd, priv[k].cmd, &wrq) < 0)
-	{
-	  fprintf(stderr, "Interface doesn't accept private ioctl...\n");
-	  fprintf(stderr, "%X: %s\n", priv[k].cmd, strerror(errno));
-	  return(-1);
-	}
-
-      /* If we have to get some data */
-      if((priv[k].get_args & IW_PRIV_TYPE_MASK) &&
-	 (priv[k].get_args & IW_PRIV_SIZE_MASK))
-	{
-	  int	i;
-	  int	n;		/* number of args */
-
-	  if((priv[k].get_args & IW_PRIV_SIZE_FIXED) &&
-	     (byte_size(priv[k].get_args) < IFNAMSIZ))
-	    {
-	      memcpy(buffer, wrq.u.name, IFNAMSIZ);
-	      n = priv[k].get_args & IW_PRIV_SIZE_MASK;
-	    }
-	  else
-	    n = wrq.u.data.length;
-
-	  switch(priv[k].get_args & IW_PRIV_TYPE_MASK)
-	    {
-	    case IW_PRIV_TYPE_BYTE:
-	      /* Display args */
-	      for(i = 0; i < n; i++)
-		printf("%d  ", buffer[i]);
-	      printf("\n");
-	      break;
-
-	    case IW_PRIV_TYPE_INT:
-	      /* Display args */
-	      for(i = 0; i < n; i++)
-		printf("%d  ", ((u_int *) buffer)[i]);
-	      printf("\n");
-	      break;
-
-	    default:
-	      fprintf(stderr, "Not yet implemented...\n");
-	      return(-1);
-	    }
-
-	}	/* if args to set */
-
-    }	/* if ioctl list else ioctl exec */
+  /* Otherwise, it's a private ioctl */
+  goterr = set_private(skfd, argv + 2, argc - 2, argv[1]);
 
   /* Close the socket. */
   close(skfd);

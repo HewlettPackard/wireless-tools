@@ -13,9 +13,15 @@ iwspy \- Get wireless statistics from specific nodes
 .SH SYNOPSIS
 .BI "iwspy " interface
 .br
-.BI "iwspy " interface " [+] " IPADDR " | hw " HWADDR " [...]"
+.BI "iwspy " interface " [+] " IPADDR " | " HWADDR " [...]"
 .br
 .BI "iwspy " interface " off"
+.br
+.BI "iwspy " interface " freq"
+.br
+.BI "iwspy " interface " ap"
+.br
+.BI "iwspy " interface " rate"
 .\"
 .\" DESCRIPTION part
 .\"
@@ -29,6 +35,10 @@ information is the same as the one available in
 .PP
 This information is updated each time a new packet is received, so
 each address of the list add some overhead in the driver.
+.PP
+.B Iwspy
+Can also display the list of frequencies available for the device or the
+list of Access Points in range.
 .\"
 .\" PARAMETER part
 .\"
@@ -36,7 +46,8 @@ each address of the list add some overhead in the driver.
 You may set any number of addresses up to 8.
 .TP
 .B IPADDR
-Set an IP address. As the hardware work with hardware addresses,
+Set an IP address, or in some cases a domain name. As the hardware
+work with hardware addresses,
 .B iwspy
 will translate this address through
 .IR ARP .
@@ -46,9 +57,11 @@ will fail. In those case,
 .IR ping (8)
 this address and retry.
 .TP
-.B hw HWADDR
+.B HWADDR
 Set a hardware (MAC) address (this address is not translated & checked
-like the IP one).
+like the IP one). The address must contain a semicolon
+.RB ( : )
+to be recognised as a hardware address.
 .TP
 .B +
 Add the new set of addresses at the end of the current list instead of
@@ -56,7 +69,21 @@ replacing it. The address list is unique for each device, so each user
 should use this option to avoid conflicts.
 .TP
 .B off
-Remove the current list of addresses and disable the functionality
+Remove the current list of addresses and disable the spy functionality
+.TP
+.B freq
+Give the list of available frequencies in the device and the number of
+defined channels. Please note that usually the driver returns the
+total number of channels and only the frequencies available in the
+present locale, so there is no one to one mapping between frequencies
+displayed and channel numbers.
+.TP
+.B ap
+Give the list of Access Points in range, and optionally the quality of
+link to them.
+.TP
+.BR rate / bit [ rate ]
+List the bit-rates supported by the device.
 .\"
 .\" FILES part
 .\"

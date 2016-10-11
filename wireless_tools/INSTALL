@@ -1,0 +1,35 @@
+You need :
+--------
+	o A kernel supporting wireless extensions
+		-> from 2.1.17 onward
+		-> from 2.0.30 onward
+		-> patch available for 1.2.13
+		Note : CONFIG_NET_RADIO must be enabled
+	o Driver supporting wireless extensions
+		-> Wavelan isa from kernel 2.1.17 onward
+		-> Wavelan pcmcia from pcmcia 2.9.2 onward
+		-> Netwave pcmcia from pcmcia 2.9.12 onward
+		-> Wavelan IEEE pcmcia drivers
+		-> Proxim RangeLan2/Symphony driver
+		-> Patch your favourite driver
+	Note : more recent kernels and drivers are likely to support
+		more wireless extension features...
+
+Compile wireless tools :
+----------------------
+	In theory, a make should suffice.
+	In practice, there is big troubles with the headers. Depending
+on which version of the kernel headers (might be different from
+kernel) and library headers you have, you need to play with the
+options buried in iwcommon.h.
+
+
+This package was originally created by:
+
+	Jean <jt@hpl.hp.com>
+
+And is now being maintained by:
+	Justin Seger <jseger@media.mit.edu>
+
+It seem that I've been taking over !
+	Jean <jt@hpl.hp.com>

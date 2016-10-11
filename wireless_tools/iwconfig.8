@@ -13,7 +13,11 @@ iwconfig \- configure a wireless network interface
 .SH SYNOPSIS
 .BI "iwconfig [" interface ]
 .br
-.BI "iwconfig " interface " [nwid " N "] [freq " F ]
+.BI "iwconfig " interface " [essid " X "] [nwid " N "] [freq " F "] [channel " C ]
+.br
+.BI "                   [sens " S "] [enc " E "] [ap " A "] [nick " NN ]
+.br
+.BI "                   [rate " R "] [rts " RT "] [frag " FT ]
 .\"
 .\" DESCRIPTION part
 .\"
@@ -38,16 +42,101 @@ device for details.
 .\"
 .SH PARAMETERS
 .TP
-.B nwid
-Set the Network ID (in some products it is also called Domain). As all
-adjacent wireless networks share the same medium, this number is used
-to differenciate them (create virtual networks).
+.B essid
+Set the ESSID (or Network Name - in some products it may also called
+Domain ID). The ESSID is used to identify cells which are part of the
+same virtual network.
+.br
+As opposed to the NWID which defines a single cell, the ESSID defines
+a group of cell connected via repeaters or infrastructure, where the
+user may roam.  With some card, you may disable the ESSID checking
+(ESSID promiscuous) with
+.IR off " (and " on
+to reenable it).
+.TP
+.BR nwid / domain
+Set the Network ID (in some products it is also called Domain ID). As
+all adjacent wireless networks share the same medium, this parameter
+is used to differenciate them (create logical colocated networks) and
+identify nodes belonguing to the same cell. With some card, you may
+disable the Network ID checking (NWID promiscuous) with
+.IR off " (and " on
+to reenable it).
 .TP
 .BR freq / channel
 Set the operating frequency or channel in the device. Value below 1000
 are the channel number, value over this is the frequency in Hz. You
-may prepend the suffix k, M or G to the value (for example, "2.46G"
-for 2.46 GHz frequency).
+must prepend the suffix k, M or G to the value (for example, "2.46G"
+for 2.46 GHz frequency), or add enough '0'.
+.br
+Channels are usually numbered starting at 1,
+and you may use
+.IR iwpriv (8)
+to get the total number of channels and list the available
+frequencies. Depending on regulations, some frequencies/channels may
+not be available.
+.TP
+.B sens
+Set the sensitivity threshold. This is the lowest signal level for
+which we attempt a packet reception, signal lower than this are not
+received. This is used to avoid receiving background noise, so you
+should set it according to the average noise level. Positive values
+are assumed to be the raw value used by the hardware or a percentage,
+negative values are assumed to be dBm.
+.br
+With some hardware, this parameter also control the defer threshold
+(lowest signal level for which we consider the channel busy) and the
+handover threshold (lowest signal level where we stay associated with
+the current access point).
+.TP
+.B enc
+Set the encryption or scrambing key (the syntax is
+.IR XXXX-XXXX-XXXX-XXXX " or " XXXXXXXX ).
+Used also to control the encryption feature
+.RI ( on / off ).
+.TP
+.B ap
+Register to the Access Point given by the address, if it is
+possible. When the quality of the connection goes too low, the driver
+may revert back to automatic mode.
+.TP
+.BR nick [ name ]
+Set the nickname, or the station name. Most 802.11 products do define
+it, but this is not used as far as the protocols (MAC, IP, TCP) are
+concerned and completely accessory as far as configuration goes. In
+fact only some diagnostic tools may use it.
+.TP
+.BR rate / bit [ rate ]
+For cards supporting multiple bit rates, set the bit-rate in b/s. The
+bit-rate is the speed at which bits are transmitted over the medium,
+the user speed of the link is lower due to medium sharing and
+overhead.
+.br
+You must prepend the suffix k, M or G to the value (decimal multiplier
+: 10^3, 10^6 and 10^9 b/s), or add enough '0'. Values below 1000 are
+card specific, usually an index in the bit-rate list. Use
+.I auto
+to select the automatic bit-rate mode (fallback to lower rate on noisy
+channels), which is the default for most cards, and
+.I fixed
+to revert back to fixed setting.
+.TP
+.BR rts [ _threshold ]
+RTS/CTS adds a handshake before each packet transmission to make sure
+that the channel is clear. This adds overhead, but increase
+performance in case of hidden nodes or large number of active
+nodes. This parameters set the size of the smallest packet for which
+the node sends RTS, a value equal to the maximum packet size disable
+the scheme. You may also set this parameter to
+.IR auto ", " fixed " or " off .
+.TP
+.BR frag [ mentation_threshold ]
+Fragmentation allow to split a IP packet in a burst of smaller
+fragments transmitted on the medium. In most cases this adds overhead,
+but in very noisy environment this reduce the error penalty. This
+parameter set the maximum fragment size, a value equal to the maximum
+packet size disable the scheme. You may also set this parameter to
+.IR auto ", " fixed " or " off .
 .\"
 .\" DISPLAY part
 .\"
@@ -57,10 +146,24 @@ For each device which support wireless extensions,
 will display the name of the
 .B MAC protocol
 used (name of device for proprietary protocols), the
-.B NWID
-and the
+.B ESSID
+(Network Name), the
+.BR NWID ,
+the
 .B frequency
-(if available).
+(or channel), the
+.BR sensitivity ,
+the
+.B Access Point
+address, the
+.B bit-rate
+(with
+.B (f)
+if fixed), the
+.BR "RTS threshold" ", the " "fragmentation threshold" ,
+and the
+.B encryption key
+(depending on availability). See above for explanations.
 .PP
 If
 .I /proc/net/wireless

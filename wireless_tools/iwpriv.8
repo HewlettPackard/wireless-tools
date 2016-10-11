@@ -1,0 +1,113 @@
+.\" Jean II - HPLB - 96
+.\" iwpriv.8
+.\"
+.TH IWPRIV 8 "31 October 1996" "net-tools" "Linux Programmer's Manual"
+.\"
+.\" NAME part
+.\"
+.SH NAME
+iwpriv \- configure optionals (private) parameters of a wireless
+network interface
+.\"
+.\" SYNOPSIS part
+.\"
+.SH SYNOPSIS
+.BI "iwpriv [" interface ]
+.br
+.BI "iwpriv " interface " " private-command " [" private-parameters ]
+.br
+.BI "iwpriv " interface " roam " {on,off}
+.br
+.BI "iwpriv " interface " port " [ N ]
+.\"
+.\" DESCRIPTION part
+.\"
+.SH DESCRIPTION
+.B Iwpriv
+is the companion tool to
+.IR iwconfig (8).
+.B Iwpriv
+deals with parameters and setting specific to each driver (as opposed to
+.I iwconfig
+which deals with generic ones) and a few commands that doesn't fit well in
+.I iwconfig
+(like listing the available frequencies).
+.PP
+Without any argument,
+.B iwpriv
+list the available private commands available on each interface, and
+the parameters that they require. Using this information, the user may
+apply those interface specific commands on the specified interface.
+.PP
+In theory, the documentation of each device driver should indicate how
+to use those interface specific commands and their effect.
+.\"
+.\" PARAMETER part
+.\"
+.SH PARAMETERS
+.TP
+.B roam
+Enable or disable roaming, if supported. Call the private command
+.IR setroam .
+Found in the
+.I wavelan_cs
+driver.
+.TP
+.B port
+Read or configure the port type. Call the private commands
+.IR gport_type " and " sport_type .
+Found in the
+.IR wavelan2_cs " and " wvlan_cs " drivers."
+.TP
+.I private-command
+Execute the specified
+.I private-command
+on the interface. The command may take or require arguments, and may
+display information. Refer to the device driver documentation for
+information on how to use and the effect.
+.\"
+.\" DISPLAY part
+.\"
+.SH DISPLAY
+For each device which support private commands,
+.I iwpriv
+will display the list of private commands available.
+.PP
+This include the name of the private command, the number or arguments
+that may be set and their type, and the number or arguments that may
+be display and their type.
+.PP
+For example, you may have the following display :
+.br
+.B "eth0      Available private ioctl :"
+.br
+.B "          setqualthr (89F0) : set   1 byte & get   0"
+.br
+.B "          gethisto (89F7) : set   0      & get  16 int"
+.PP
+This indicate that you may set the quality threshold and display an
+histogram of up to 16 values with the following commands :
+.br
+.I "  iwpriv eth0 setqualthr 20"
+.br
+.I "  iwpriv eth0 gethisto"
+.\"
+.\" AUTHOR part
+.\"
+.SH AUTHOR
+Jean Tourrilhes \- jt@hplb.hpl.hp.com
+.\"
+.\" FILES part
+.\"
+.SH FILES
+.I /proc/net/wireless
+.\"
+.\" SEE ALSO part
+.\"
+.SH SEE ALSO
+.BR ifconfig (8),
+.BR iwconfig (8),
+.BR iwspy (8),
+.BR wavelan (4),
+.BR wavelan_cs (4),
+.BR xircnw_cs (4).

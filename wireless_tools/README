@@ -1,0 +1,31 @@
+	This package contain the Wireless tools, used to manipulate
+the Wireless Extensions. The Wireless Extension is an interface
+allowing you to set Wireless LAN specific parameters and get the
+specific stats.
+
+iwconfig.c
+----------
+	The main wireless tool. Used for device configuration.
+	You need of course to compile it.
+	This also includes the functionality previously contained in iwpriv.c.
+	It allows you to access device specific extensions.
+
+iwspy.c
+-------
+	Mobile IP support test and allow get get stats per MAC address
+	(instead of globally).
+
+iwpriv.c
+--------
+	Manipulate driver private ioctls.
+
+xwireless.c
+-----------
+	Graphical tool for the Netwave created by Dag Brattli <dagb@cs.uit.no>
+
+
+	The man page should describe adequately the behaviour of the tools.
+	The list of changes, credits and errata notes are in
+iwcommon.h. Compilation might be tricky.
+
+	Jean <jt@hpl.hp.com>
