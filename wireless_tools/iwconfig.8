@@ -1,7 +1,7 @@
-.\" Jean II - HPLB - 96
+.\" Jean II - HPLB - 1996 => HPL - 2004
 .\" iwconfig.8
 .\"
-.TH IWCONFIG 8 "31 October 1996" "net-tools" "Linux Programmer's Manual"
+.TH IWCONFIG 8 "22 June 2004" "wireless-tools" "Linux Programmer's Manual"
 .\"
 .\" NAME part
 .\"
@@ -41,9 +41,9 @@ may also be used to display those parameters, and the wireless
 statistics (extracted from
 .IR /proc/net/wireless ).
 .PP
-All these parameters and statistics are device dependant. Each driver
-will provide only some of them depending on the hardware support, and
-the range of value may change. Please refer to the man page of each
+All these parameters and statistics are device dependent. Each driver
+will provide only some of them depending on hardware support, and the
+range of values may change. Please refer to the man page of each
 device for details.
 .\"
 .\" PARAMETER part
@@ -51,14 +51,16 @@ device for details.
 .SH PARAMETERS
 .TP
 .B essid
-Set the ESSID (or Network Name - in some products it may also called
-Domain ID). The ESSID is used to identify cells which are part of the
-same virtual network.
+Set the ESSID (or Network Name - in some products it may also be
+called Domain ID). The ESSID is used to identify cells which are part
+of the same virtual network.
 .br
-As opposed to the NWID which defines a single cell, the ESSID defines
-a group of cell connected via repeaters or infrastructure, where the
-user may roam.  With some card, you may disable the ESSID checking
-(ESSID promiscuous) with
+As opposed to the AP Address or NWID which define a single cell, the
+ESSID defines a group of cells connected via repeaters or
+infrastructure, where the user may roam transparently.
+.br
+With some cards, you may disable the ESSID checking (ESSID
+promiscuous) with
 .IR off " or " any " (and " on
 to reenable it).
 .br
@@ -69,11 +71,16 @@ to reenable it).
 .I "	iwconfig eth0 essid ""My Network""
 .TP
 .BR nwid / domain
-Set the Network ID (in some products it is also called Domain ID). As
-all adjacent wireless networks share the same medium, this parameter
-is used to differenciate them (create logical colocated networks) and
-identify nodes belonguing to the same cell. With some card, you may
-disable the Network ID checking (NWID promiscuous) with
+Set the Network ID (in some products it may also be called Domain
+ID). As all adjacent wireless networks share the same medium, this
+parameter is used to differenciate them (create logical colocated
+networks) and identify nodes belonging to the same cell.
+.br
+This parameter is only used for pre-802.11 hardware, the 802.11
+protocol uses the ESSID and AP Address for this function.
+.br
+With some cards, you may disable the Network ID checking (NWID
+promiscuous) with
 .IR off " (and " on
 to reenable it).
 .br
@@ -84,19 +91,20 @@ to reenable it).
 .I "	iwconfig eth0 nwid off"
 .TP
 .BR freq / channel
-Set the operating frequency or channel in the device. Value below 1000
-are the channel number, value over this is the frequency in Hz. You
-must append the suffix k, M or G to the value (for example, "2.46G"
-for 2.46 GHz frequency), or add enough '0'.
+Set the operating frequency or channel in the device. A value below
+1000 indicates a channel number, a value greater than 1000 is a
+frequency in Hz. You may append the suffix k, M or G to the value (for
+example, "2.46G" for 2.46 GHz frequency), or add enough '0'.
 .br
-Channels are usually numbered starting at 1,
-and you may use
-.IR iwpriv (8)
-to get the total number of channels and list the available
-frequencies. Depending on regulations, some frequencies/channels may
-not be available.
+Channels are usually numbered starting at 1, and you may use
+.IR iwlist (8)
+to get the total number of channels, list the available frequencies,
+and display the current frequency as a channel. Depending on
+regulations, some frequencies/channels may not be available.
 .br
 .B Examples :
+.br
+.I "	iwconfig eth0 freq 2422000000"
 .br
 .I "	iwconfig eth0 freq 2.422G"
 .br
@@ -104,16 +112,16 @@ not be available.
 .TP
 .B sens
 Set the sensitivity threshold. This is the lowest signal level for
-which we attempt a packet reception, signal lower than this are not
-received. This is used to avoid receiving background noise, so you
+which the hardware attempt packet reception, signals weaker than this
+are ignored. This is used to avoid receiving background noise, so you
 should set it according to the average noise level. Positive values
 are assumed to be the raw value used by the hardware or a percentage,
 negative values are assumed to be dBm.
 .br
-With some hardware, this parameter also control the defer threshold
-(lowest signal level for which we consider the channel busy) and the
-handover threshold (lowest signal level where we stay associated with
-the current access point).
+With some hardware, this parameter also controls the defer threshold
+(lowest signal level for which the hardware consider the channel busy)
+and the handover threshold (signal level where the hardware start
+looking for a new access point).
 .br
 .B Example :
 .br
@@ -122,18 +130,18 @@ the current access point).
 .B mode
 Set the operating mode of the device, which depends on the network
 topology. The mode can be
-.I Ad-hoc
+.I Ad-Hoc
 (network composed of only one cell and without Access Point),
 .I Managed
 (node connects to a network composed of many Access Points, with roaming),
 .I Master
-(the node is the synchronisation master or act as an Access Point),
+(the node is the synchronisation master or acts as an Access Point),
 .I Repeater
-(the node forward packets between other wireless nodes),
+(the node forwards packets between other wireless nodes),
 .I Secondary
-(the node act as a backup master/repeater),
+(the node acts as a backup master/repeater),
 .I Monitor
-(the node act as a passive monitor and only receives packets) or
+(the node acts as a passive monitor and only receives packets) or
 .IR Auto .
 .br
 .B Example :
@@ -145,8 +153,8 @@ topology. The mode can be
 .B ap
 Force the card to register to the Access Point given by the address,
 if it is possible. When the quality of the connection goes too low,
-the driver may revert back to automatic mode (the card finds the best
-Access Point in range).
+the driver may revert back to automatic mode (the card selects the
+best Access Point in range).
 .br
 You may also use
 .I off
@@ -155,7 +163,7 @@ or you may use
 .I any
 or
 .I auto
-to force the card to reassociate with the current best Access Point.
+to force the card to reassociate with the currently best Access Point.
 .br
 .B Example :
 .br
@@ -166,10 +174,10 @@ to force the card to reassociate with the current best Access Point.
 .I "	iwconfig eth0 ap off"
 .TP
 .BR nick [name]
-Set the nickname, or the station name. Most 802.11 products do define
+Set the nickname, or the station name. Some 802.11 products do define
 it, but this is not used as far as the protocols (MAC, IP, TCP) are
-concerned and completely accessory as far as configuration goes. In
-fact only some diagnostic tools may use it.
+concerned and completely useless as far as configuration goes. Only
+some diagnostic tools may use it.
 .br
 .B Example :
 .br
@@ -179,18 +187,18 @@ fact only some diagnostic tools may use it.
 For cards supporting multiple bit rates, set the bit-rate in b/s. The
 bit-rate is the speed at which bits are transmitted over the medium,
 the user speed of the link is lower due to medium sharing and
-overhead.
+various overhead.
 .br
-You must append the suffix k, M or G to the value (decimal multiplier
-: 10^3, 10^6 and 10^9 b/s), or add enough '0'. Values below 1000 are
+You may append the suffix k, M or G to the value (decimal multiplier :
+10^3, 10^6 and 10^9 b/s), or add enough '0'. Values below 1000 are
 card specific, usually an index in the bit-rate list. Use
 .I auto
-to select the automatic bit-rate mode (fallback to lower rate on noisy
+to select automatic bit-rate mode (fallback to lower rate on noisy
 channels), which is the default for most cards, and
 .I fixed
 to revert back to fixed setting. If you specify a bit-rate value and append
 .IR auto ,
-the driver will use all bit lower and equal than this value.
+the driver will use all bit-rates lower and equal than this value.
 .br
 .B Examples :
 .br
@@ -202,11 +210,11 @@ the driver will use all bit lower and equal than this value.
 .TP
 .BR rts [_threshold]
 RTS/CTS adds a handshake before each packet transmission to make sure
-that the channel is clear. This adds overhead, but increase
-performance in case of hidden nodes or large number of active
-nodes. This parameters set the size of the smallest packet for which
-the node sends RTS, a value equal to the maximum packet size disable
-the scheme. You may also set this parameter to
+that the channel is clear. This adds overhead, but increases
+performance in case of hidden nodes or a large number of active
+nodes. This parameter sets the size of the smallest packet for which
+the node sends RTS ; a value equal to the maximum packet size disable
+the mechanism. You may also set this parameter to
 .IR auto ", " fixed " or " off .
 .br
 .B Examples :
@@ -216,11 +224,12 @@ the scheme. You may also set this parameter to
 .I "	iwconfig eth0 rts off"
 .TP
 .BR frag [mentation_threshold]
-Fragmentation allow to split a IP packet in a burst of smaller
+Fragmentation allows to split an IP packet in a burst of smaller
 fragments transmitted on the medium. In most cases this adds overhead,
-but in very noisy environment this reduce the error penalty. This
-parameter set the maximum fragment size, a value equal to the maximum
-packet size disable the scheme. You may also set this parameter to
+but in a very noisy environment this reduces the error penalty and
+allow packets to get through interference bursts. This parameter sets
+the maximum fragment size ; a value equal to the maximum packet size
+disable the mechanism. You may also set this parameter to
 .IR auto ", " fixed " or " off .
 .br
 .B Examples :
@@ -241,7 +250,7 @@ also enter the key as an ASCII string by using the
 .I s:
 prefix. Passphrase is currently not supported.
 .br
-To change which key is the current active key, just enter
+To change which key is the currently active key, just enter
 .I [index]
 (without entering any key value).
 .br
@@ -252,7 +261,7 @@ The security mode may be
 .I open
 or
 .IR restricted ,
-and its meaning depend on the card used. With most card, in
+and its meaning depends on the card used. With most cards, in
 .I open
 mode no authentication is used and the card may also accept
 non-encrypted sessions, whereas in
@@ -264,15 +273,19 @@ If you need to set multiple keys, or set a key and change the active
 key, you need to use multiple
 .B key
 directives. Arguments can be put in any order, the last one will take
-precendence.
+precedence.
 .br
 .B Examples :
 .br
 .I "	iwconfig eth0 key 0123-4567-89"
 .br
+.I "	iwconfig eth0 key [3] 0123-4567-89"
+.br
 .I "	iwconfig eth0 key s:password [2]"
 .br
-.I "	iwconfig eth0 key [2] open"
+.I "	iwconfig eth0 key [2]"
+.br
+.I "	iwconfig eth0 key open"
 .br
 .I "	iwconfig eth0 key off"
 .br
@@ -283,16 +296,16 @@ precendence.
 .BR power
 Used to manipulate power management scheme parameters and mode.
 .br
-To set the period between wake up, enter
+To set the period between wake ups, enter
 .IR "period `value'" .
 To set the timeout before going back to sleep, enter
 .IR "timeout `value'" .
 You can also add the
 .IR min " and " max
-modifiers. By defaults, those values are in seconds, append the
-suffix m or u to specify values un milliseconds or
-microseconds. Sometimes, those values are without units (number of
-dwell or the like).
+modifiers. By default, those values are in seconds, append the suffix
+m or u to specify values in milliseconds or microseconds. Sometimes,
+those values are without units (number of beacon periods, dwell or
+similar).
 .br
 .IR off " and " on
 disable and reenable power management. Finally, you may set the power
@@ -351,11 +364,11 @@ This is an absolute value (without unit).
 The set the maximum length of time the MAC should retry, enter
 .IR "lifetime `value'" .
 By defaults, this value in in seconds, append the suffix m or u to
-specify values un milliseconds or microseconds.
+specify values in milliseconds or microseconds.
 .br
 You can also add the
 .IR min " and " max
-modifiers. If the card support automatic mode, they define the bounds
+modifiers. If the card supports automatic mode, they define the bounds
 of the limit or lifetime. Some other cards define different values
 depending on packet size, for example in 802.11
 .I min limit
@@ -373,15 +386,15 @@ is the short retry limit (non RTS/CTS packets).
 Some cards may not apply changes done through Wireless Extensions
 immediately (they may wait to agregate the changes or apply it only
 when the card is brought up via ifconfig). This command (when
-available) force the card to apply all pending changes.
+available) forces the card to apply all pending changes.
 .br
 This is normally not needed, because the card will eventually apply
-the changes, but can be usefull for debugging.
+the changes, but can be useful for debugging.
 .\"
 .\" DISPLAY part
 .\"
 .SH DISPLAY
-For each device which support wireless extensions,
+For each device which supports wireless extensions,
 .I iwconfig
 will display the name of the
 .B MAC protocol
@@ -406,15 +419,33 @@ the
 and the
 .B power management
 settings (depending on availability).
+.PP
+The parameters displayed have the same meaning and values as the
+parameter you can set, please refer to the previous part for a
+detailed explanation of them.
 .br
-See above for explanations of what these parameters mean.
+Some parameters are only displayed in short/abreviated form (such as
+encryption). You may use
+.IR iwlist (8)
+to get all the details.
 .br
-If the label for some values (such as bitrate) is followed by
+Some parameters have two modes (such as bitrate). If the value is
+prefixed by
 .RB ` = ',
 it means that the parameter is fixed and forced to that value, if it
-is followed by
-.RB ` : '
-it is only the current value (device in normal auto mode).
+is prefixed by
+.RB ` : ',
+the parameter is in automatic mode and the current value is shown (and
+may change).
+.TP
+.BR "Access Point" / Cell
+An address equal to 00:00:00:00:00:00 means that the card failed to
+associate with an Access Point (most likely a configuration
+issue). The
+.B Access Point
+parameter will be shown as
+.B Cell
+in ad-hoc mode (for obvious reasons), but otherwise works the same.
 .PP
 If
 .I /proc/net/wireless
@@ -428,7 +459,7 @@ driver documentation for proper interpretation of those values.
 Overall quality of the link. May be based on the level of contention
 or interference, the bit or frame error rate, how good the received
 signal is, some timing synchronisation, or other hardware metric. This
-is an aggregate value, and depend totally on the driver and hardware.
+is an aggregate value, and depends totally on the driver and hardware.
 .TP
 .B Signal level
 Received signal strength (RSSI - how strong the received signal
@@ -442,7 +473,7 @@ mode, this may be undefined and you should use
 .IR iwspy .
 .TP
 .B Noise level
-Background noise level (when no packet is transmited). Similar
+Background noise level (when no packet is transmitted). Similar
 comments as for
 .BR "Signal level" .
 .TP
@@ -461,16 +492,16 @@ re-assemble the link layer fragments (most likely one was missing).
 .TP
 .B Tx excessive retries
 Number of packets that the hardware failed to deliver. Most MAC
-protocol will retry the packet a number of time before giving up.
+protocols will retry the packet a number of times before giving up.
 .TP
 .B Invalid misc
 Other packets lost in relation with specific wireless operations.
 .TP
 .B Missed beacon
 Number of periodic beacons from the Cell or the Access Point we have
-missed. Beacons are sent at regular interval to maintain the cell
-coordination, failure to receive them usually indicate that we are out
-of range.
+missed. Beacons are sent at regular intervals to maintain the cell
+coordination, failure to receive them usually indicates that the card
+is out of range.
 .\"
 .\" AUTHOR part
 .\"

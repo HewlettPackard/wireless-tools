@@ -1,14 +1,14 @@
 /*
  *	Wireless Tools
  *
- *		Jean II - HPLB 97->99 - HPL 99->00
+ *		Jean II - HPLB 97->99 - HPL 99->04
  *
  * Main code for "iwconfig". This is the generic tool for most
  * manipulations...
  * You need to link this code against "iwlib.c" and "-lm".
  *
  * This file is released under the GPL license.
- *     Copyright (c) 1997-2002 Jean Tourrilhes <jt@hpl.hp.com>
+ *     Copyright (c) 1997-2004 Jean Tourrilhes <jt@hpl.hp.com>
  */
 
 #include "iwlib.h"		/* Header */
@@ -16,6 +16,29 @@
 /************************** DOCUMENTATION **************************/
 
 /*
+ * BASIC PRINCIPLE
+ * ---------------
+ *	Wireless Extension recognise that each wireless device has some
+ * specific features not covered by the standard wireless extensions.
+ * Private wireless ioctls/requests allow a device to export the control
+ * of those device specific features, and allow users to directly interact
+ * with your driver.
+ *	There are many other ways you can implement such functionality :
+ *		o module parameters
+ *		o netlink socket
+ *		o file system (/proc/ or /sysfs/)
+ *		o extra character device (/dev/)
+ *	Private wireless ioctls is one of the simplest implementation,
+ * however it is limited, so you may want to check the alternatives.
+ *
+ *	Like for standard Wireless Extensions, each private wireless
+ * request is identified by an IOCTL NUMBER and carry a certain number
+ * of arguments (SET or GET).
+ *	The driver exports a description of those requests (ioctl number,
+ * request name, set and get arguments). Then, iwpriv uses those request
+ * descriptions to call the appropriate request and handle the
+ * arguments.
+ *
  * IOCTL RANGES :
  * ------------
  *	The initial implementation of iwpriv was using the SIOCDEVPRIVATE
@@ -27,74 +50,99 @@
  * worry about collisions with other usages. On the other hand, in the
  * new range, the SET convention is enforced (see below).
  *	The differences are :		SIOCDEVPRIVATE	SIOCIWFIRSTPRIV
- *		o availability :	<= 2.5.X	WE > 11 (>= 2.4.13)
+ *		o availability		<= 2.5.X	WE > 11 (>= 2.4.13)
  *		o collisions		yes		no
  *		o SET convention	optional	enforced
  *		o number		16		32
  *
  * NEW DRIVER API :
  * --------------
- *	Wireless Extension 13 introduce a new driver API. Wireless
+ *	Wireless Extension 13 introduces a new driver API. Wireless
  * Extensions requests can be handled via a iw_handler table instead
  * of through the regular ioctl handler.
  *	The new driver API can be handled only with the new ioctl range
- * and enforce the GET convention (see below).
+ * and enforces the GET convention (see below).
  *	The differences are :		old API		new API
  *		o handler		do_ioctl()	struct iw_handler_def
  *		o SIOCIWFIRSTPRIV	WE > 11		yes
  *		o SIOCDEVPRIVATE	yes		no
  *		o GET convention	optional	enforced
  *	Note that the new API before Wireless Extension 15 contains bugs
- * with regards to handling sub-ioctls and addr/float data types.
+ * when handling sub-ioctls and addr/float data types.
+ *
+ * INLINING vs. POINTER :
+ * --------------------
+ *	One of the tricky aspect of the old driver API is how the data
+ * is handled, which is how the driver is supposed to extract the data
+ * passed to it by iwpriv.
+ *	1) If the data has a fixed size (private ioctl definition
+ * has the flag IW_PRIV_SIZE_FIXED) and the byte size of the data is
+ * lower than 16 bytes, the data will be inlined. The driver can extract
+ * data in the field 'u.name' of the struct iwreq.
+ *	2) If the if the data doesn't have a fixed size or is larger than
+ * 16 bytes, the data is passed by pointer. struct iwreq contains a
+ * struct iwpoint with a user space pointer to the data. Appropriate
+ * copy_from/to_user() function should be used.
+ *	
+ *	With the new API, this is handled transparently, the data is
+ * always available as the fourth argument of the request handler
+ * (usually called 'extra').
  *
  * SET/GET CONVENTION :
  * ------------------
- *	The regular Wireless Extensions use a SET/GET convention, where
- * the low order bit identify a SET (0) or a GET (1) request.
- *	The new ioctl range enforce the SET convention : SET request will
+ *	Simplistic summary :
+ *	o even numbered ioctls are SET, restricted to root, and should not
+ * return arguments (get_args = 0).
+ *	o odd numbered ioctls are GET, authorised to anybody, and should
+ * not expect any arguments (set_args = 0).
+ *
+ *	The regular Wireless Extensions use the SET/GET convention, where
+ * the low order bit identify a SET (0) or a GET (1) request. The private
+ * Wireless Extension is not as restrictive, but still has some
+ * limitations.
+ *	The new ioctl range enforces the SET convention : SET request will
  * be available to root only and can't return any arguments. If you don't
  * like that, just use every other two ioctl.
  *	The new driver API enforce the GET convention : GET request won't
  * be able to accept any arguments (except if its fits within (union
- * iwreq_data)). If you don't like that, just use the old API (aka the
- * ioctl handler).
+ * iwreq_data)). If you don't like that, you can either use the Token Index
+ * support or the old API (aka the ioctl handler).
  *	In any case, it's a good idea to not have ioctl with both SET
  * and GET arguments. If the GET arguments doesn't fit within
  * (union iwreq_data) and SET do, or vice versa, the current code in iwpriv
  * won't work. One exception is if both SET and GET arguments fit within
  * (union iwreq_data), this case should be handled safely in a GET
  * request.
+ *	If you don't fully understand those limitations, just follow the
+ * rules of the simplistic summary ;-)
  *
  * SUB-IOCTLS :
  * ----------
- *	Wireless Extension 15 introduce sub-ioctls. For some applications,
- * 32 ioctl is not enough, and this simple mechanism allow to increase
- * the number of ioctls by adding a sub-ioctl index to some of the ioctl
- * (so basically a two level addressing).
+ *	Wireless Extension 15 introduces sub-ioctls. For some applications,
+ * 32 ioctls is not enough, and this simple mechanism allows to increase
+ * the number of ioctls by adding a sub-ioctl index to some of the ioctls
+ * (so basically it's a two level addressing).
  *	One might argue that at the point, some other mechanisms might be
  * better, like using a real filesystem abstraction (/proc, driverfs, ...),
- * but sub-ioctls are simple enough to not have much drawbacks (which means
- * that it's a quick and dirty hack ;-).
+ * but sub-ioctls are simple enough and don't have much drawbacks (which
+ * means that it's a quick and dirty hack ;-).
  *
- *	There is two slightly different variation of the sub-ioctl scheme :
- *	If the payload fit within (union iwreq_data), the first int (4 bytes)
- * is reserved as the sub-ioctl number and the regular payload shifted by
- * 4 bytes.
- *	If the ioctl use (struct iw_point), the sub-ioctl number is in the
- * flags member of the structure.
- *	Then, in your handler you would just extract the sub-ioctl number
- * and do the appropriate processing.
+ *	There are two slightly different variations of the sub-ioctl scheme :
+ *	1) If the payload fits within (union iwreq_data), the first int
+ * (4 bytes) is reserved as the sub-ioctl number and the regular payload
+ * shifted by 4 bytes. The handler must extract the sub-ioctl number,
+ * increment the data pointer and then use it in the usual way.
+ *	2) If the ioctl uses (struct iw_point), the sub-ioctl number is
+ * set in the flags member of the structure. In this case, the handler
+ * should simply get the sub-ioctl number from the flags and process the
+ * data in the usual way.
  *
  *	Sub-ioctls are declared normally in the private definition table,
- * with cmd (first arg) beeing the sub-ioctl number. Then, you need to
- * declare the real ioctl which will process the sub-ioctls with the
- * SAME ARGUMENTS and a NULL NAME.
- *	It could look like, for example :
+ * with cmd (first arg) being the sub-ioctl number. Then, you should
+ * declare the real ioctl, which will process the sub-ioctls, with
+ * the SAME ARGUMENTS and a EMPTY NAME.
+ *	Here's an example of how it could look like :
  * --------------------------------------------
-	// --- Raw access to sub-ioctl handlers ---
-	{ 0x8BE0, IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 2, 0, "set_paramN" },
-	{ 0x8BE1, IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,
-	  IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1, "get_paramN" },
 	// --- sub-ioctls handlers ---
 	{ 0x8BE0, IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1, 0, "" },
 	{ 0x8BE1, 0, IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1, "" },
@@ -103,21 +151,26 @@
 	{ 1, 0, IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1, "get_param1" },
 	{ 2, IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1, 0, "set_param2" },
 	{ 2, 0, IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1, "get_param2" },
+	// --- Raw access to sub-ioctl handlers ---
+	{ 0x8BE0, IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 2, 0, "set_paramN" },
+	{ 0x8BE1, IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,
+	  IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1, "get_paramN" },
  * --------------------------------------------
  *	And iwpriv should do the rest for you ;-)
  *
- *	Note that version of iwpriv up to v24 (included) expect at most
+ *	Note that versions of iwpriv up to v24 (included) expect at most
  * 16 ioctls definitions and will likely crash when given more.
- *	There is no fix that I can see, apart from recommending an upgrade
- * of Wireless Tools. Wireless Extensions 15 will check this condition, so
- * another workaround is restricting those extra definitions to WE-15.
+ *	There is no fix that I can see, apart from recommending your users
+ * to upgrade their Wireless Tools. Wireless Extensions 15 will check this
+ * condition, so another workaround is restricting those extra definitions
+ * to WE-15.
  *
- *	Another problem is that new API before Wireless Extension 15
- * will get it wrong when passing fixed arguments of 12-15 bytes. It will
+ *	Another problem is that the new API before Wireless Extension 15
+ * has a bug when passing fixed arguments of 12-15 bytes. It will
  * try to get them inline instead of by pointer. You can fool the new API
  * to do the right thing using fake ioctl definitions (but remember that
- * you will get more likely to hit the limit of 16 ioctl definitions).
- *	For safety, use the ioctl handler before v15.
+ * you will be more likely to hit the limit of 16 ioctl definitions).
+ *	To play safe, use the old-style ioctl handler before v15.
  *
  * NEW DATA TYPES (ADDR/FLOAT) :
  * ---------------------------
@@ -127,7 +180,7 @@
  * However, the new API before v15 won't handle them properly.
  *
  *	The first problem is that the new API won't know their size, so
- * won't copy them. This can be workaround with a fake ioctl definition.
+ * it won't copy them. This can be workaround with a fake ioctl definition.
  *	The second problem is that a fixed single addr won't be inlined
  * in struct iwreq and will be passed as a pointer. This is due to an
  * off-by-one error, where all fixed data of 16 bytes is considered too
@@ -138,17 +191,19 @@
  *
  * TOKEN INDEX :
  * -----------
- *	Token index is very similar to sub-ioctl. It allow the user
+ *	Token index is very similar to sub-ioctl. It allows the user
  * to specify an integer index in front of a bunch of other arguments
- * (addresses, strings, ...).
- *	Token index works only with data passed as pointer, and is
- * otherwise ignored. If your data would fit within struct iwreq, you
- * need to declare the command *without* IW_PRIV_SIZE_FIXED to force
+ * (addresses, strings, ...). It's specified in square brackets on the
+ * iwpriv command line before other arguments.
+ *		> iwpriv eth0 [index] args...
+ *	Token index works only when the data is passed as pointer, and
+ * is otherwise ignored. If your data would fit within struct iwreq, you
+ * should declare the command *without* IW_PRIV_SIZE_FIXED to force
  * this to happen (and check arg number yourself).
  * --------------------------------------------
 	// --- Commands that would fit in struct iwreq ---
 	{ 0x8BE0, IW_PRIV_TYPE_ADDR | 1, 0, "set_param_with_token" },
-	// --- No problem here ---
+	// --- No problem here (bigger than struct iwreq) ---
 	{ 0x8BE1, IW_PRIV_TYPE_ADDR | IW_PRIV_SIZE_FIXED | 2, 0, "again" },
  * --------------------------------------------
  *	The token index feature is pretty transparent, the token index
@@ -156,7 +211,7 @@
  * (if the user doesn't specify it) will be 0. Token index itself will
  * work with any version of Wireless Extensions.
  *	Token index is not compatible with sub-ioctl (both use the same
- * field of struct iw_point). However, token index can be use to offer
+ * field of struct iw_point). However, the token index can be used to offer
  * raw access to the sub-ioctl handlers (if it uses struct iw_point) :
  * --------------------------------------------
 	// --- sub-ioctls handler ---
@@ -175,13 +230,6 @@
 
 static const char *	argtype[] = {
   "     ", "byte ", "char ", "", "int  ", "float", "addr " };
-
-#define IW_MAX_PRIV_DEF	128
-
-/* Backward compatibility */
-#ifndef IW_PRIV_TYPE_ADDR
-#define IW_PRIV_TYPE_ADDR	0x6000
-#endif	/* IW_PRIV_TYPE_ADDR */
 
 /************************* MISC SUBROUTINES **************************/
 
@@ -221,9 +269,9 @@ set_private_cmd(int		skfd,		/* Socket */
   int		offset = 0;	/* Space for sub-ioctl index */
 
   /* Check if we have a token index.
-   * Do it know so that sub-ioctl takes precendence, and so that we
+   * Do it now so that sub-ioctl takes precendence, and so that we
    * don't have to bother with it later on... */
-  if((count > 1) && (sscanf(args[0], "[%i]", &temp) == 1))
+  if((count >= 1) && (sscanf(args[0], "[%i]", &temp) == 1))
     {
       subcmd = temp;
       args++;
@@ -261,13 +309,15 @@ set_private_cmd(int		skfd,		/* Socket */
 
       /* Save sub-ioctl number */
       subcmd = priv[k].cmd;
-      /* Reserve one int (simplify alignement issues) */
+      /* Reserve one int (simplify alignment issues) */
       offset = sizeof(__u32);
       /* Use real ioctl definition from now on */
       k = j;
 
+#if 0
       printf("<mapping sub-ioctl %s to cmd 0x%X-%d>\n", cmdname,
 	     priv[k].cmd, subcmd);
+#endif
     }
 
   /* If we have to set some data */
@@ -424,7 +474,7 @@ set_private_cmd(int		skfd,		/* Socket */
       int	j;
       int	n = 0;		/* number of args */
 
-      printf("%-8.8s  %s:", ifname, cmdname);
+      printf("%-8.16s  %s:", ifname, cmdname);
 
       /* Check where is the returned data */
       if((priv[k].get_args & IW_PRIV_SIZE_FIXED) &&
@@ -454,7 +504,7 @@ set_private_cmd(int		skfd,		/* Socket */
 
 	case IW_PRIV_TYPE_CHAR:
 	  /* Display args */
-	  buffer[wrq.u.data.length - 1] = '\0';
+	  buffer[n] = '\0';
 	  printf("%s\n", buffer);
 	  break;
 
@@ -512,31 +562,38 @@ set_private(int		skfd,		/* Socket */
 	    int		count,		/* Args count */
 	    char *	ifname)		/* Dev name */
 {
-  iwprivargs	priv[IW_MAX_PRIV_DEF];
+  iwprivargs *	priv;
   int		number;		/* Max of private ioctl */
+  int		ret;
 
   /* Read the private ioctls */
-  number = iw_get_priv_info(skfd, ifname, priv, IW_MAX_PRIV_DEF);
+  number = iw_get_priv_info(skfd, ifname, &priv);
 
   /* Is there any ? */
   if(number <= 0)
     {
-      /* Could skip this message ? */
-      fprintf(stderr, "%-8.8s  no private ioctls.\n\n",
+      /* Should I skip this message ? */
+      fprintf(stderr, "%-8.16s  no private ioctls.\n\n",
 	      ifname);
+      if(priv)
+	free(priv);
       return(-1);
     }
 
-  return(set_private_cmd(skfd, args + 1, count - 1, ifname, args[0],
-			 priv, number));
+  /* Do it */
+  ret = set_private_cmd(skfd, args + 1, count - 1, ifname, args[0],
+			priv, number);
+
+  free(priv);
+  return(ret);
 }
 
 /************************ CATALOG FUNCTIONS ************************/
 
 /*------------------------------------------------------------------*/
 /*
- * Print on the screen in a neat fashion all the info we have collected
- * on a device.
+ * Print on the screen in a neat fashion the list of private ioctls
+ * for the device.
  */
 static int
 print_priv_info(int		skfd,
@@ -545,25 +602,25 @@ print_priv_info(int		skfd,
 		int		count)
 {
   int		k;
-  iwprivargs	priv[IW_MAX_PRIV_DEF];
+  iwprivargs *	priv;
   int		n;
 
   /* Avoid "Unused parameter" warning */
   args = args; count = count;
 
   /* Read the private ioctls */
-  n = iw_get_priv_info(skfd, ifname, priv, IW_MAX_PRIV_DEF);
+  n = iw_get_priv_info(skfd, ifname, &priv);
 
   /* Is there any ? */
   if(n <= 0)
     {
-      /* Could skip this message ? */
-      fprintf(stderr, "%-8.8s  no private ioctls.\n\n",
+      /* Should I skip this message ? */
+      fprintf(stderr, "%-8.16s  no private ioctls.\n\n",
 	      ifname);
     }
   else
     {
-      printf("%-8.8s  Available private ioctl :\n", ifname);
+      printf("%-8.16s  Available private ioctl :\n", ifname);
       /* Print them all */
       for(k = 0; k < n; k++)
 	if(priv[k].name[0] != '\0')
@@ -575,13 +632,17 @@ print_priv_info(int		skfd,
 		 argtype[(priv[k].get_args & IW_PRIV_TYPE_MASK) >> 12]);
       printf("\n");
     }
+
+  /* Cleanup */
+  if(priv)
+    free(priv);
   return(0);
 }
 
 /*------------------------------------------------------------------*/
 /*
- * Print on the screen in a neat fashion all the info we have collected
- * on a device.
+ * Print on the screen in a neat fashion the list of private GET ioctl
+ * data for the device and data returned by those.
  */
 static int
 print_priv_all(int		skfd,
@@ -590,28 +651,28 @@ print_priv_all(int		skfd,
 	       int		count)
 {
   int		k;
-  iwprivargs	priv[IW_MAX_PRIV_DEF];
+  iwprivargs *	priv;
   int		n;
 
   /* Avoid "Unused parameter" warning */
   args = args; count = count;
 
   /* Read the private ioctls */
-  n = iw_get_priv_info(skfd, ifname, priv, IW_MAX_PRIV_DEF);
+  n = iw_get_priv_info(skfd, ifname, &priv);
 
   /* Is there any ? */
   if(n <= 0)
     {
-      /* Could skip this message ? */
-      fprintf(stderr, "%-8.8s  no private ioctls.\n\n",
+      /* Should I skip this message ? */
+      fprintf(stderr, "%-8.16s  no private ioctls.\n\n",
 	      ifname);
     }
   else
     {
-      printf("%-8.8s  Available read-only private ioctl :\n", ifname);
+      printf("%-8.16s  Available read-only private ioctl :\n", ifname);
       /* Print them all */
       for(k = 0; k < n; k++)
-	/* We call all ioctl that don't have a null name, don't require
+	/* We call all ioctls that don't have a null name, don't require
 	 * args and return some (avoid triggering "reset" commands) */
 	if((priv[k].name[0] != '\0') && (priv[k].set_args == 0) &&
 	   (priv[k].get_args != 0))
@@ -619,13 +680,10 @@ print_priv_all(int		skfd,
 			  priv, n);
       printf("\n");
     }
-#if 0
-  // Debug
-  printf("struct ifreq = %d ; struct iwreq = %d ; IFNAMSIZ = %d\n",
-	 sizeof(struct ifreq), sizeof(struct iwreq), IFNAMSIZ);
-  printf("struct iw_freq = %d ; struct sockaddr = %d\n",
-	 sizeof(struct iw_freq), sizeof(struct sockaddr));
-#endif
+
+  /* Cleanup */
+  if(priv)
+    free(priv);
   return(0);
 }
 
@@ -638,6 +696,8 @@ print_priv_all(int		skfd,
 /*
  * Set roaming mode on and off
  * Found in wavelan_cs driver
+ * Note : this is obsolete, most 802.11 devices should use the
+ * SIOCSIWAP request.
  */
 static int
 set_roaming(int		skfd,		/* Socket */
@@ -649,23 +709,40 @@ set_roaming(int		skfd,		/* Socket */
   struct iwreq		wrq;
   int		i = 0;		/* Start with first arg */
   int		k;
-  iwprivargs	priv[IW_MAX_PRIV_DEF];
+  iwprivargs *	priv;
   int		number;
+  int		roamcmd;
   char		RoamState;		/* buffer to hold new roam state */
   char		ChangeRoamState=0;	/* whether or not we are going to
 					   change roam states */
 
   /* Read the private ioctls */
-  number = iw_get_priv_info(skfd, ifname, priv, IW_MAX_PRIV_DEF);
+  number = iw_get_priv_info(skfd, ifname, &priv);
 
   /* Is there any ? */
   if(number <= 0)
     {
-      /* Could skip this message ? */
-      fprintf(stderr, "%-8.8s  no private ioctls.\n\n",
+      /* Should I skip this message ? */
+      fprintf(stderr, "%-8.16s  no private ioctls.\n\n",
 	      ifname);
+      if(priv)
+	free(priv);
       return(-1);
     }
+
+  /* Get the ioctl number */
+  k = -1;
+  while((++k < number) && strcmp(priv[k].name, "setroam"));
+  if(k == number)
+    {
+      fprintf(stderr, "This device doesn't support roaming\n");
+      free(priv);
+      return(-1);
+    }
+  roamcmd = priv[k].cmd;
+
+  /* Cleanup */
+  free(priv);
 
   if(count != 1)
     {
@@ -675,7 +752,7 @@ set_roaming(int		skfd,		/* Socket */
 
   if(!strcasecmp(args[i], "on"))
     {
-      printf("%-8.8s  enable roaming\n", ifname);
+      printf("%-8.16s  enable roaming\n", ifname);
       if(!number)
 	{
 	  fprintf(stderr, "This device doesn't support roaming\n");
@@ -688,7 +765,7 @@ set_roaming(int		skfd,		/* Socket */
     if(!strcasecmp(args[i], "off"))
       {
 	i++;
-	printf("%-8.8s  disable roaming\n",  ifname);
+	printf("%-8.16s  disable roaming\n",  ifname);
 	if(!number)
 	  {
 	    fprintf(stderr, "This device doesn't support roaming\n");
@@ -705,20 +782,13 @@ set_roaming(int		skfd,		/* Socket */
 
   if(ChangeRoamState)
     {
-      k = -1;
-      while((++k < number) && strcmp(priv[k].name, "setroam"));
-      if(k == number)
-	{
-	  fprintf(stderr, "This device doesn't support roaming\n");
-	  return(-1);
-	}
       strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
 
       buffer[0]=RoamState;
 
       memcpy(wrq.u.name, &buffer, IFNAMSIZ);
 
-      if(ioctl(skfd, priv[k].cmd, &wrq) < 0)
+      if(ioctl(skfd, roamcmd, &wrq) < 0)
 	{
 	  fprintf(stderr, "Roaming support is broken.\n");
 	  return(-1);
@@ -732,6 +802,7 @@ set_roaming(int		skfd,		/* Socket */
 /*
  * Get and set the port type
  * Found in wavelan2_cs and wvlan_cs drivers
+ * TODO : Add support for HostAP ?
  */
 static int
 port_type(int		skfd,		/* Socket */
@@ -742,19 +813,21 @@ port_type(int		skfd,		/* Socket */
   struct iwreq	wrq;
   int		i = 0;		/* Start with first arg */
   int		k;
-  iwprivargs	priv[IW_MAX_PRIV_DEF];
+  iwprivargs *	priv;
   int		number;
   char		ptype = 0;
   char *	modes[] = { "invalid", "managed (BSS)", "reserved", "ad-hoc" };
 
   /* Read the private ioctls */
-  number = iw_get_priv_info(skfd, ifname, priv, IW_MAX_PRIV_DEF);
+  number = iw_get_priv_info(skfd, ifname, &priv);
 
   /* Is there any ? */
   if(number <= 0)
     {
-      /* Could skip this message ? */
-      fprintf(stderr, "%-8.8s  no private ioctls.\n\n", ifname);
+      /* Should I skip this message ? */
+      fprintf(stderr, "%-8.16s  no private ioctls.\n\n", ifname);
+      if(priv)
+	free(priv);
       return(-1);
     }
 
@@ -768,7 +841,7 @@ port_type(int		skfd,		/* Socket */
       if(k == number)
 	{
 	  fprintf(stderr, "This device doesn't support getting port type\n");
-	  return(-1);
+	  goto err;
 	}
       strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
 
@@ -776,21 +849,22 @@ port_type(int		skfd,		/* Socket */
       if(ioctl(skfd, priv[k].cmd, &wrq) < 0)
 	{
 	  fprintf(stderr, "Port type support is broken.\n");
-	  exit(0);
+	  goto err;
 	}
       ptype = *wrq.u.name;
 
       /* Display it */
-      printf("%-8.8s  Current port mode is %s <port type is %d>.\n\n",
+      printf("%-8.16s  Current port mode is %s <port type is %d>.\n\n",
 	     ifname, modes[(int) ptype], ptype);
 
+      free(priv);
       return(0);
     }
 
   if(count != 1)
     {
       iw_usage();
-      return(-1);
+      goto err;
     }
 
   /* Read it */
@@ -805,7 +879,7 @@ port_type(int		skfd,		/* Socket */
     if(sscanf(args[i], "%i", (int *) &ptype) != 1)
       {
 	iw_usage();
-	return(-1);
+	goto err;
       }
   
   k = -1;
@@ -814,7 +888,7 @@ port_type(int		skfd,		/* Socket */
   if(k == number)
     {
       fprintf(stderr, "This device doesn't support setting port type\n");
-      return(-1);
+      goto err;
     }
   strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
 
@@ -823,10 +897,15 @@ port_type(int		skfd,		/* Socket */
   if(ioctl(skfd, priv[k].cmd, &wrq) < 0)
     {
       fprintf(stderr, "Invalid port type (or setting not allowed)\n");
-      return(-1);
+      goto err;
     }
 
+  free(priv);
   return(0);
+
+ err:
+  free(priv);
+  return(-1);
 }
 
 /******************************* MAIN ********************************/
@@ -849,7 +928,7 @@ main(int	argc,
       return(-1);
     }
 
-  /* No argument : show the list of all device + info */
+  /* No argument : show the list of all devices + ioctl list */
   if(argc == 1)
     iw_enum_devices(skfd, &print_priv_info, NULL, 0);
   else
@@ -890,7 +969,7 @@ main(int	argc,
 		  goterr = set_private(skfd, argv + 2, argc - 2, argv[1]);
 
   /* Close the socket. */
-  close(skfd);
+  iw_sockets_close(skfd);
 
   return(goterr);
 }

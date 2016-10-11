@@ -3,51 +3,58 @@
 ##
 
 ## Installation directory. By default, go in /usr/local
-## Distributions should probably use /usr, but they probably know better...
+## Distributions should probably use /, but they probably know better...
 ifndef PREFIX
   PREFIX = /usr/local
 endif
 
-## Compiler to use
+## Compiler to use (modify this for cross compile)
 CC = gcc
+## Other tools you need to modify for cross compile (static lib only)
+AR = ar
+RANLIB = ranlib
 
-## Uncomment this to build against this kernel
-# KERNEL_SRC = /usr/src/linux
-
-## Uncomment this to force a particular version of wireless extensions.
-## This would use private copy of Wireless Extension definition instead
-## of the system wide one in /usr/include/linux. Use with care.
-## Can be used to create multiple versions of the tools on the same system
-## for multiple kernels or get around broken distributions.
-# FORCE_WEXT_VERSION = 16
-
-## Uncomment this to build tools using dynamic version of the library
-# BUILD_SHARED = y
+## Uncomment this to build tools using static version of the library
+## Mostly useful for embedded platforms without ldd, or to create
+## a local version (non-root).
+# BUILD_STATIC = y
 
 ## Uncomment this to build without using libm (less efficient)
-## This is mostly useful for embedded platforms
+## This is mostly useful for embedded platforms without maths.
 # BUILD_NOLIBM = y
 
 # ***************************************************************************
 # ***** Most users should not need to change anything beyond this point *****
 # ***************************************************************************
 
+# Version of the Wireless Tools
+WT_VERSION := $(shell sed -ne "/WT_VERSION/{s:\([^0-9]*\)::;p;q;}" < iwlib.h )
+
+# Version of Wireless Extensions.
+WE_VERSION := $(shell sed -ne "/WE_VERSION/{s:\([^0-9]*\)::;p;q;}" < iwlib.h )
+
+# Always use local header for wireless extensions
+WEXT_HEADER = wireless.$(WE_VERSION).h
+
 # Targets to build
 STATIC=libiw.a
-DYNAMIC=libiw.so.26
-PROGS= iwconfig iwlist iwpriv iwspy iwgetid iwevent
-MANPAGES8=iwconfig.8 iwlist.8 iwpriv.8 iwspy.8 iwgetid.8 iwevent.8
+DYNAMIC=libiw.so.$(WT_VERSION)
+PROGS= iwconfig iwlist iwpriv iwspy iwgetid iwevent ifrename
+MANPAGES8=iwconfig.8 iwlist.8 iwpriv.8 iwspy.8 iwgetid.8 iwevent.8 ifrename.8
 MANPAGES7=wireless.7
-EXTRAPROGS= macaddr iwredir
+MANPAGES5=iftab.5
+EXTRAPROGS= macaddr
 
 # Composition of the library :
 OBJS = iwlib.o
 
-# Select library to link tool with
-ifdef BUILD_SHARED
-  IWLIB=$(DYNAMIC)
-else
+# Select which library to build and to link tool with
+ifdef BUILD_STATIC
   IWLIB=$(STATIC)
+  IWLIB_INSTALL=install-static
+else
+  IWLIB=$(DYNAMIC)
+  IWLIB_INSTALL=install-dynamic
 endif
 
 # Standard name for dynamic library so that the dynamic linker can pick it.
@@ -60,21 +67,10 @@ INSTALL_LIB= $(PREFIX)/lib/
 INSTALL_INC= $(PREFIX)/include/
 INSTALL_MAN= $(PREFIX)/man/
 
-# Use local header if the version of wireless extensions is specified
-ifdef FORCE_WEXT_VERSION
-  WEXT_FLAG = -DWEXT_HEADER=\"wireless.$(FORCE_WEXT_VERSION).h\"
-endif
-
+# Various commands
 RM = rm -f
-
-RM_CMD = $(RM) *.BAK *.bak *.o *.so ,* *~ *.a *.orig *.rej
-
-ifdef KERNEL_SRC
-  ifeq ($(wildcard $(KERNEL_SRC)/include/linux/wireless.h),)
-    $(error Kernel source is missing or incomplete)
-  endif
-  KERNEL_INCLUDES = -I $(KERNEL_SRC)/include
-endif
+RM_CMD = $(RM) *.BAK *.bak *.d *.o *.so ,* *~ *.a *.orig *.rej *.out
+LDCONFIG = ldconfig
 
 # Do we want to build with or without libm ?
 ifdef BUILD_NOLIBM
@@ -84,18 +80,22 @@ else
   LIBS= -lm
 endif
 
-#CFLAGS=-O2 -W -Wall -Wstrict-prototypes -Wmissing-prototypes -Werror
-CFLAGS=-O2 -W -Wall -Wstrict-prototypes
-XCFLAGS=$(CFLAGS) $(WARN) $(HEADERS) $(WEXT_FLAG) $(WELIB_FLAG) $(KERNEL_INCLUDES)
+# Other flags
+CFLAGS=-Os -W -Wall -Wstrict-prototypes -Wmissing-prototypes -Wshadow \
+	-Wpointer-arith -Wcast-qual -Winline -I.
+#CFLAGS=-O2 -W -Wall -Wstrict-prototypes -I.
+DEPFLAGS=-MMD
+XCFLAGS=$(CFLAGS) $(DEPFLAGS) $(WARN) $(HEADERS) $(WELIB_FLAG)
 PICFLAG=-fPIC
 
-all:: $(STATIC) $(DYNAMIC) $(PROGS)
+# Standard compilation targets
+all:: $(IWLIB) $(PROGS)
 
 %: %.o
 	$(CC) $(LDFLAGS) $(XCFLAGS) -o $@ $^ $(LIBS)
-%.o: %.c
+%.o: %.c wireless.h
 	$(CC) $(XCFLAGS) -c $<
-%.so: %.c
+%.so: %.c wireless.h
 	$(CC) $(XCFLAGS) $(PICFLAG) -c -o $@ $<
 
 iwconfig: iwconfig.o $(IWLIB)
@@ -106,13 +106,17 @@ iwpriv: iwpriv.o $(IWLIB)
 
 iwspy: iwspy.o $(IWLIB)
 
-iwgetid: iwgetid.o
+iwgetid: iwgetid.o $(IWLIB)
 
 iwevent: iwevent.o $(IWLIB)
 
-iwredir: iwredir.o
+ifrename: ifrename.o $(IWLIB)
 
 macaddr: macaddr.o $(IWLIB)
+
+# It's a kind of magic...
+wireless.h:
+	cp $(WEXT_HEADER) wireless.h
 
 # Compilation of the dynamic library
 $(DYNAMIC): $(OBJS:.o=.so)
@@ -121,32 +125,43 @@ $(DYNAMIC): $(OBJS:.o=.so)
 # Compilation of the static library
 $(STATIC): $(OBJS)
 	$(RM) $@
-	ar cru $@ $^
-	ranlib $@
+	$(AR) cru $@ $^
+	$(RANLIB) $@
 
 # So crude but so effective ;-)
 # Less crude thanks to many contributions ;-)
-install:: all
+install:: all $(IWLIB_INSTALL)
 	install -m 755 -d $(INSTALL_DIR)
 	install -m 755 $(PROGS) $(INSTALL_DIR)
-	install -m 755 -d $(INSTALL_LIB)
-	install -m 644 $(STATIC) $(INSTALL_LIB)
-	install -m 755 $(DYNAMIC) $(INSTALL_LIB)
-	ln -sfn $(DYNAMIC) $(INSTALL_LIB)/$(DYNAMIC_LINK)
-	echo "Don't forget to add $(INSTALL_LIB) to /etc/ld.so.conf, and run ldconfig."
 	install -m 755 -d $(INSTALL_INC)
 	install -m 644 iwlib.h $(INSTALL_INC)
+	install -m 644 wireless.h $(INSTALL_INC)
 	install -m 755 -d $(INSTALL_MAN)/man8/
 	install -m 644 $(MANPAGES8) $(INSTALL_MAN)/man8/
 	install -m 755 -d $(INSTALL_MAN)/man7/
 	install -m 644 $(MANPAGES7) $(INSTALL_MAN)/man7/
+	install -m 755 -d $(INSTALL_MAN)/man5/
+	install -m 644 $(MANPAGES5) $(INSTALL_MAN)/man5/
+
+# Install the dynamic library
+install-dynamic:: $(DYNAMIC)
+	install -m 755 -d $(INSTALL_LIB)
+	install -m 755 $(DYNAMIC) $(INSTALL_LIB)
+	ln -sfn $(DYNAMIC) $(INSTALL_LIB)/$(DYNAMIC_LINK)
+	@echo "*** Don't forget to add $(INSTALL_LIB) to /etc/ld.so.conf, and run ldconfig as root. ***"
+	@$(LDCONFIG) || echo "*** Could not run ldconfig ! ***"
+
+# Install the static library
+install-static:: $(STATIC)
+	install -m 755 -d $(INSTALL_LIB)
+	install -m 644 $(STATIC) $(INSTALL_LIB)
 
 clean::
 	$(RM_CMD) 
 
 realclean::
 	$(RM_CMD) 
-	$(RM) $(STATIC) $(DYNAMIC) $(PROGS) $(EXTRAPROGS)
+	$(RM) $(STATIC) $(DYNAMIC) $(PROGS) $(EXTRAPROGS) libiw* wireless.h
 
 uninstall::
 	for f in $(PROGS); do \
@@ -156,41 +171,16 @@ uninstall::
 	$(RM) $(INSTALL_LIB)/$(DYNAMIC)
 	$(RM) $(INSTALL_LIB)/$(DYNAMIC_LINK)
 	$(RM) $(INSTALL_INC)/iwlib.h
+	$(RM) $(INSTALL_INC)/wireless.h
 	for f in $(MANPAGES8); do \
 	  $(RM) $(INSTALL_MAN)/man8/$$f; \
 	done
 	for f in $(MANPAGES7); do \
 	  $(RM) $(INSTALL_MAN)/man7/$$f; \
 	done
+	for f in $(MANPAGES5); do \
+	  $(RM) $(INSTALL_MAN)/man5/$$f; \
+	done
 
-# Versioned install...
-# We rename each of the tool with a suffix corresponding to the version
-# of WE it was compiled with. We use "iwredir" for the redirection...
-
-vinstall:: iwredir install
-	@wev=$(FORCE_WEXT_VERSION) ; \
-	if [ "$$wev" == "" ] ; then \
-	  wev=`./iwredir -wev`; \
-	else :; fi ; \
-	echo "Installing tools for WE-$$wev..." ; \
-	for f in $(PROGS); do \
-	  mv $(INSTALL_DIR)/$$f $(INSTALL_DIR)/$$f$$wev; \
-	done;
-	install -m 755 iwredir $(INSTALL_DIR)
-	for f in $(PROGS); do \
-	  ln $(INSTALL_DIR)/iwredir $(INSTALL_DIR)/$$f; \
-	done;
-
-vuninstall:: uninstall
-	@wev=$(FORCE_WEXT_VERSION) ; \
-	if [ "$$wev" == "" ] ; then \
-	  wev=`./iwredir -wev`; \
-	else :; fi ; \
-	for f in $(PROGS); do \
-	  rm $(INSTALL_DIR)/$$f$$wev; \
-	done;
-	$(RM) $(INSTALL_DIR)/iwredir;
-
-depend::
-	makedepend -s "# DO NOT DELETE" -- $(INCLUDES) -- $(SRCS)
-# DO NOT DELETE
+# Include dependancies
+-include *.d

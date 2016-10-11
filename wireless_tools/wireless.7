@@ -1,7 +1,7 @@
-.\" Jean Tourrilhes - HPL - 2002
+.\" Jean Tourrilhes - HPL - 2002 - 2004
 .\" wireless.7
 .\"
-.TH WIRELESS 7 "12 July 2002" "net-tools" "Linux Programmer's Manual"
+.TH WIRELESS 7 "4 March 2004" "wireless-tools" "Linux Programmer's Manual"
 .\"
 .\" NAME part
 .\"
@@ -13,7 +13,7 @@ wireless \- Wireless Tools and Wireless Extensions
 .SH SYNOPSIS
 .B iwconfig
 .br
-.B iwpriv -a
+.B iwpriv \-a
 .br
 .\"
 .\" DESCRIPTION part
@@ -23,40 +23,42 @@ The
 .B Wireless Extensions
 is an API allowing you manipulate Wireless LAN networking interfaces.
 It is composed of a variety of tools and configuration files. It is
-documented in more details in the Linux Wireless LAN Howto.
+documented in more detail in the Linux Wireless LAN Howto.
 .br
 The
 .B Wireless Tools
-are use to change configuration on the fly, to get statistics and
-diagnose those interfaces. They are described in their own man page
-(see below).
+are used to change the configuration of wireless LAN networking
+interfaces on the fly, to get their current configuration, to get
+statistics and diagnose them. They are described in their own man
+page, see below for references.
 .br
 .B Wireless configuration
 is specific to each Linux distribution. This man page will contain in
-the future the configuration procedure for a few common distributions
-(when I get the necessary info from them). For the time being, check
-the various files included with the Wireless Tools package.
+the future the configuration procedure for a few common
+distributions. For the time being, check the file DISTRIBUTIONS.txt
+included with the Wireless Tools package.
 .\"
 .\" DEBIAN 3.0 part
 .\"
 .SH DEBIAN 3.0
-Debian 3.0 (and later) has integrated wireless configuration in their
-network scripts.
+In Debian 3.0 (and later) you can configure wireless LAN networking
+devices using the network configuration tool
+.BR ifupdown (8).
 .TP
 .B File :
 .I /etc/network/interfaces
 .TP
 .B Form :
-.RI wireless_ "<function> <value>"
+.RI wireless\- "<function> <value>"
 .br
-wireless_essid Home
+wireless\-essid Home
 .br
-wireless_mode ad_hoc
+wireless\-mode Ad\-Hoc
 .TP
 .B See also :
-.I /etc/network/if-pre-up.d/wireless-tool
+.I /etc/network/if\-pre\-up.d/wireless\-tools
 .br
-.I /usr/share/doc/wireless.##/README.Debian
+.I /usr/share/doc/wireless\-tools/README.Debian
 .\"
 .\" SuSE 8.0 part
 .\"
@@ -70,14 +72,14 @@ network scripts.
 .B File :
 .I /etc/sysconfig/network/wireless
 .br
-.I /etc/sysconfig/network/ifcfg-*
+.I /etc/sysconfig/network/ifcfg\-*
 .TP
 .B Form :
 .RI WIRELESS_ "<function>" = "<value>"
 .br
 WIRELESS_ESSID="Home"
 .br
-WIRELESS_MODE=ad_hoc
+WIRELESS_MODE=Ad\-Hoc
 .TP
 .B See also :
 man ifup
@@ -96,9 +98,9 @@ package, you can use this method.
 .B Form :
 *,*,*,*)
 .br
-    ESSID="MY_ESSID"
+    ESSID="Home"
 .br
-    MODE="Managed"
+    MODE="Ad-Hoc"
 .br
     ;;
 .TP

@@ -1,13 +1,13 @@
 /*
  *	Wireless Tools
  *
- *		Jean II - HPLB '99
+ *		Jean II - HPLB '99 - HPL 99->04
  *
  * This tool can manipulate the spy list : add addresses and display stat
  * You need to link this code against "iwlib.c" and "-lm".
  *
  * This file is released under the GPL license.
- *     Copyright (c) 1997-2002 Jean Tourrilhes <jt@hpl.hp.com>
+ *     Copyright (c) 1997-2004 Jean Tourrilhes <jt@hpl.hp.com>
  */
 
 #include "iwlib.h"		/* Header */
@@ -44,7 +44,7 @@ print_spy_info(int	skfd,
   wrq.u.data.flags = 0;
   if(iw_get_ext(skfd, ifname, SIOCGIWSPY, &wrq) < 0)
     {
-      fprintf(stderr, "%-8.8s  Interface doesn't support wireless statistic collection\n\n", ifname);
+      fprintf(stderr, "%-8.16s  Interface doesn't support wireless statistic collection\n\n", ifname);
       return(-1);
     }
 
@@ -54,7 +54,7 @@ print_spy_info(int	skfd,
   /* Check if we have valid mac address type */
   if(iw_check_mac_addr_type(skfd, ifname) < 0)
     {
-      fprintf(stderr, "%-8.8s  Interface doesn't support MAC addresses\n\n", ifname);
+      fprintf(stderr, "%-8.16s  Interface doesn't support MAC addresses\n\n", ifname);
       return(-2);
     }
 
@@ -64,9 +64,9 @@ print_spy_info(int	skfd,
 
   /* Display it */
   if(n == 0)
-    printf("%-8.8s  No statistics to collect\n", ifname);
+    printf("%-8.16s  No statistics to collect\n", ifname);
   else
-    printf("%-8.8s  Statistics collected:\n", ifname);
+    printf("%-8.16s  Statistics collected:\n", ifname);
  
   /* The two lists */
   hwa = (struct sockaddr *) buffer;
@@ -76,25 +76,25 @@ print_spy_info(int	skfd,
     {
       /* Print stats for each address */
       printf("    %s : ", iw_pr_ether(temp, hwa[i].sa_data));
-      iw_print_stats(temp, &qual[i], &range, has_range);
+      iw_print_stats(temp, sizeof(temp), &qual[i], &range, has_range);
       printf("%s\n", temp);
     }
-#if WIRELESS_EXT > 11
-  if((n > 0) && (has_range))
+
+  if((n > 0) && (has_range) && (range.we_version_compiled > 11))
     {
       iwstats	stats;
 
       /* Get /proc/net/wireless */
-      if(iw_get_stats(skfd, ifname, &stats) >= 0)
+      if(iw_get_stats(skfd, ifname, &stats, &range, has_range) >= 0)
 	{
-	  iw_print_stats(buffer, &stats.qual, &range, has_range);
-	  printf("    Link/Cell/AP      : %s\n", buffer);
+	  iw_print_stats(temp, sizeof(temp), &stats.qual, &range, has_range);
+	  printf("    Link/Cell/AP      : %s\n", temp);
 	  /* Display the static data */
-	  iw_print_stats(temp, &range.avg_qual, &range, has_range);
+	  iw_print_stats(temp, sizeof(temp),
+			 &range.avg_qual, &range, has_range);
 	  printf("    Typical/Reference : %s\n", temp);
 	}
     }
-#endif /* WIRELESS_EXT > 11 */
 
   printf("\n");
   return(0);
@@ -110,7 +110,6 @@ get_spy_threshold(int		skfd,		/* The socket */
 		  char *	args[],		/* Command line args */
 		  int		count)		/* Args count */
 {
-#if WIRELESS_EXT > 15
   struct iwreq		wrq;
   struct iw_thrspy	threshold;
   iwrange	range;
@@ -141,14 +140,14 @@ get_spy_threshold(int		skfd,		/* The socket */
       if(threshold.low.level > range.max_qual.level)
 	{
 	  /* Statistics are in dBm (absolute power measurement) */
-	  printf("%-8.8s  Low threshold:%d dBm  High threshold:%d dBm\n\n",
+	  printf("%-8.16s  Low threshold:%d dBm  High threshold:%d dBm\n\n",
 		 ifname,
 		 threshold.low.level - 0x100, threshold.high.level - 0x100);
 	}
       else
 	{
 	  /* Statistics are relative values (0 -> max) */
-	  printf("%-8.8s  Low threshold:%d/%d  High threshold:%d/%d\n\n",
+	  printf("%-8.16s  Low threshold:%d/%d  High threshold:%d/%d\n\n",
 		 ifname,
 		 threshold.low.level, range.max_qual.level,
 		 threshold.high.level, range.max_qual.level);
@@ -157,19 +156,12 @@ get_spy_threshold(int		skfd,		/* The socket */
   else
     {
       /* We can't read the range, so we don't know... */
-      printf("%-8.8s  Low threshold:%d  High threshold:%d\n\n",
+      printf("%-8.16s  Low threshold:%d  High threshold:%d\n\n",
 	     ifname,
 	     threshold.low.level, threshold.high.level);
     }
 
   return(0);
-#else /* WIRELESS_EXT > 15 */
-  /* Avoid "Unused parameter" warning */
-  skfd = skfd; ifname = ifname; args = args; count = count;
-
-  fprintf(stderr, "Feature not available...\n");
-  return(-1);
-#endif /* WIRELESS_EXT > 15 */
 }
 
 /************************* SETTING ROUTINES **************************/
@@ -207,12 +199,12 @@ set_spy_info(int		skfd,		/* The socket */
 	  /* Check if we have valid mac address type */
 	  if(iw_check_mac_addr_type(skfd, ifname) < 0)
 	    {
-	      fprintf(stderr, "%-8.8s  Interface doesn't support MAC addresses\n", ifname);
+	      fprintf(stderr, "%-8.16s  Interface doesn't support MAC addresses\n", ifname);
 	      return(-1);
 	    }
 
 	  wrq.u.data.pointer = (caddr_t) buffer;
-	  wrq.u.data.length = 0;
+	  wrq.u.data.length = IW_MAX_SPY;
 	  wrq.u.data.flags = 0;
 	  if(iw_get_ext(skfd, ifname, SIOCGIWSPY, &wrq) < 0)
 	    {
@@ -275,7 +267,6 @@ set_spy_threshold(int		skfd,		/* The socket */
 		  char *	args[],		/* Command line args */
 		  int		count)		/* Args count */
 {
-#if WIRELESS_EXT > 15
   struct iwreq		wrq;
   struct iw_thrspy	threshold;
   int			low_thr;
@@ -294,19 +285,19 @@ set_spy_threshold(int		skfd,		/* The socket */
       /* Try to get our threshold */
       if(count < 2)
 	{
-	  fprintf(stderr, "%-8.8s  Need two threshold values\n", ifname);
+	  fprintf(stderr, "%-8.16s  Need two threshold values\n", ifname);
 	  return(-1);
 	}
       if((sscanf(args[0], "%i", &low_thr) != 1) ||
 	 (sscanf(args[1], "%i", &high_thr) != 1))
 	{
-	  fprintf(stderr, "%-8.8s  Invalid threshold values\n", ifname);
+	  fprintf(stderr, "%-8.16s  Invalid threshold values\n", ifname);
 	  return(-1);
 	}
       /* Basic sanity check */
       if(high_thr < low_thr)
 	{
-	  fprintf(stderr, "%-8.8s  Inverted threshold range\n", ifname);
+	  fprintf(stderr, "%-8.16s  Inverted threshold range\n", ifname);
 	  return(-1);
 	}
       /* Copy thresholds */
@@ -328,13 +319,6 @@ set_spy_threshold(int		skfd,		/* The socket */
     }
 
   return(0);
-#else /* WIRELESS_EXT > 15 */
-  /* Avoid "Unused parameter" warning */
-  skfd = skfd; ifname = ifname; args = args; count = count;
-
-  fprintf(stderr, "Feature not available...\n");
-  return(-1);
-#endif /* WIRELESS_EXT > 15 */
 }
 
 /******************************* MAIN ********************************/
@@ -386,7 +370,7 @@ main(int	argc,
 	      goterr = set_spy_info(skfd, argv[1], argv + 2, argc - 2);
 
   /* Close the socket. */
-  close(skfd);
+  iw_sockets_close(skfd);
 
   return(goterr);
 }

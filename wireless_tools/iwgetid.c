@@ -6,20 +6,12 @@
  * Just print the ESSID or NWID...
  *
  * This file is released under the GPL license.
- *     Copyright (c) 1997-2002 Jean Tourrilhes <jt@hpl.hp.com>
+ *     Copyright (c) 1997-2004 Jean Tourrilhes <jt@hpl.hp.com>
  */
 
 #include "iwlib.h"		/* Header */
 
 #include <getopt.h>
-
-#define FORMAT_DEFAULT	0	/* Nice looking display for the user */
-#define FORMAT_SCHEME	1	/* To be used as a Pcmcia Scheme */
-#define WTYPE_ESSID	0	/* Display ESSID or NWID */
-#define WTYPE_AP	1	/* Display AP/Cell Address */
-#define WTYPE_FREQ	2	/* Display frequency/channel */
-#define WTYPE_MODE	3	/* Display mode */
-#define WTYPE_PROTO	4	/* Display protocol name */
 
 /*
  * Note on Pcmcia Schemes :
@@ -68,119 +60,17 @@
  * Jean II - 29/3/01
  */
 
-/*************************** SUBROUTINES ***************************/
-/*
- * Just for the heck of it, let's try to not link with iwlib.
- * This will keep the binary small and tiny...
- *
- * Note : maybe it's time to admit that we have lost the battle
- * and we start using iwlib ? Maybe we should default to dynamic
- * lib first...
- */
+/**************************** CONSTANTS ****************************/
 
-/*------------------------------------------------------------------*/
-/*
- * Open a socket.
- * Depending on the protocol present, open the right socket. The socket
- * will allow us to talk to the driver.
- */
-int
-iw_sockets_open(void)
-{
-        int ipx_sock = -1;              /* IPX socket                   */
-        int ax25_sock = -1;             /* AX.25 socket                 */
-        int inet_sock = -1;             /* INET socket                  */
-        int ddp_sock = -1;              /* Appletalk DDP socket         */
-
-        /*
-         * Now pick any (exisiting) useful socket family for generic queries
-	 * Note : don't open all the socket, only returns when one matches,
-	 * all protocols might not be valid.
-	 * Workaround by Jim Kaba <jkaba@sarnoff.com>
-	 * Note : in 99% of the case, we will just open the inet_sock.
-	 * The remaining 1% case are not fully correct...
-         */
-        inet_sock=socket(AF_INET, SOCK_DGRAM, 0);
-        if(inet_sock!=-1)
-                return inet_sock;
-        ipx_sock=socket(AF_IPX, SOCK_DGRAM, 0);
-        if(ipx_sock!=-1)
-                return ipx_sock;
-        ax25_sock=socket(AF_AX25, SOCK_DGRAM, 0);
-        if(ax25_sock!=-1)
-                return ax25_sock;
-        ddp_sock=socket(AF_APPLETALK, SOCK_DGRAM, 0);
-        /*
-         * If this is -1 we have no known network layers and its time to jump.
-         */
-        return ddp_sock;
-}
-
-/*------------------------------------------------------------------*/
-/*
- * Display an Ethernet address in readable format.
- */
-void
-iw_ether_ntop(const struct ether_addr* eth, char* buf)
-{
-  sprintf(buf, "%02X:%02X:%02X:%02X:%02X:%02X",
-	  eth->ether_addr_octet[0], eth->ether_addr_octet[1],
-	  eth->ether_addr_octet[2], eth->ether_addr_octet[3],
-	  eth->ether_addr_octet[4], eth->ether_addr_octet[5]);
-}
-
-/*------------------------------------------------------------------*/
-/*
- * Convert our internal representation of frequencies to a floating point.
- */
-double
-iw_freq2float(iwfreq *	in)
-{
-#ifdef WE_NOLIBM
-  /* Version without libm : slower */
-  int		i;
-  double	res = (double) in->m;
-  for(i = 0; i < in->e; i++)
-    res *= 10;
-  return(res);
-#else	/* WE_NOLIBM */
-  /* Version with libm : faster */
-  return ((double) in->m) * pow(10,in->e);
-#endif	/* WE_NOLIBM */
-}
-
-/*------------------------------------------------------------------*/
-/*
- * Output a frequency with proper scaling
- */
-void
-iw_print_freq(char *	buffer,
-	      double	freq)
-{
-  if(freq < KILO)
-    sprintf(buffer, "Channel:%g", freq);
-  else
-    {
-      if(freq >= GIGA)
-	sprintf(buffer, "Frequency:%gGHz", freq / GIGA);
-      else
-	{
-	  if(freq >= MEGA)
-	    sprintf(buffer, "Frequency:%gMHz", freq / MEGA);
-	  else
-	    sprintf(buffer, "Frequency:%gkHz", freq / KILO);
-	}
-    }
-}
-
-/*------------------------------------------------------------------*/
-const char * const iw_operation_mode[] = { "Auto",
-					"Ad-Hoc",
-					"Managed",
-					"Master",
-					"Repeater",
-					"Secondary",
-					"Monitor" };
+#define FORMAT_DEFAULT	0	/* Nice looking display for the user */
+#define FORMAT_SCHEME	1	/* To be used as a Pcmcia Scheme */
+#define FORMAT_RAW	2	/* Raw value, for shell scripts */
+#define WTYPE_ESSID	0	/* Display ESSID or NWID */
+#define WTYPE_AP	1	/* Display AP/Cell Address */
+#define WTYPE_FREQ	2	/* Display frequency/channel */
+#define WTYPE_CHANNEL	3	/* Display channel (converted from freq) */
+#define WTYPE_MODE	4	/* Display mode */
+#define WTYPE_PROTO	5	/* Display protocol name */
 
 /************************ DISPLAY ESSID/NWID ************************/
 
@@ -199,12 +89,14 @@ print_essid(int			skfd,
   unsigned int		i;
   unsigned int		j;
 
+  /* Make shure ESSID is NULL terminated */
+  memset(essid, 0, sizeof(essid));
+
   /* Get ESSID */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   wrq.u.essid.pointer = (caddr_t) essid;
   wrq.u.essid.length = IW_ESSID_MAX_SIZE + 1;
   wrq.u.essid.flags = 0;
-  if(ioctl(skfd, SIOCGIWESSID, &wrq) < 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWESSID, &wrq) < 0)
     return(-1);
 
   switch(format)
@@ -220,8 +112,11 @@ print_essid(int			skfd,
 	return(-2);
       printf("%s\n", pessid);
       break;
+    case FORMAT_RAW:
+      printf("%s\n", essid);
+      break;
     default:
-      printf("%-8.8s  ESSID:\"%s\"\n", ifname, essid);
+      printf("%-8.16s  ESSID:\"%s\"\n", ifname, essid);
       break;
     }
 
@@ -240,8 +135,7 @@ print_nwid(int		skfd,
   struct iwreq		wrq;
 
   /* Get network ID */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWNWID, &wrq) < 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWNWID, &wrq) < 0)
     return(-1);
 
   switch(format)
@@ -250,8 +144,11 @@ print_nwid(int		skfd,
       /* Prefix with nwid to avoid name space collisions */
       printf("nwid%X\n", wrq.u.nwid.value);
       break;
+    case FORMAT_RAW:
+      printf("%X\n", wrq.u.nwid.value);
+      break;
     default:
-      printf("%-8.8s  NWID:%X\n", ifname, wrq.u.nwid.value);
+      printf("%-8.16s  NWID:%X\n", ifname, wrq.u.nwid.value);
       break;
     }
 
@@ -273,8 +170,7 @@ print_ap(int		skfd,
   char			buffer[64];
 
   /* Get AP Address */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWAP, &wrq) < 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWAP, &wrq) < 0)
     return(-1);
 
   /* Print */
@@ -284,10 +180,11 @@ print_ap(int		skfd,
     case FORMAT_SCHEME:
       /* I think ':' are not problematic, because Pcmcia scripts
        * seem to handle them properly... */
+    case FORMAT_RAW:
       printf("%s\n", buffer);
       break;
     default:
-      printf("%-8.8s  Access Point/Cell: %s\n", ifname, buffer);
+      printf("%-8.16s  Access Point/Cell: %s\n", ifname, buffer);
       break;
     }
 
@@ -310,8 +207,7 @@ print_freq(int		skfd,
   char			buffer[64];
 
   /* Get frequency / channel */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWFREQ, &wrq) < 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWFREQ, &wrq) < 0)
     return(-1);
 
   /* Print */
@@ -319,11 +215,64 @@ print_freq(int		skfd,
   switch(format)
     {
     case FORMAT_SCHEME:
+      /* Prefix with freq to avoid name space collisions */
+      printf("freq%g\n", freq);
+      break;
+    case FORMAT_RAW:
       printf("%g\n", freq);
       break;
     default:
-      iw_print_freq(buffer, freq);
-      printf("%-8.8s  %s\n", ifname, buffer);
+      iw_print_freq(buffer, sizeof(buffer), freq, -1, wrq.u.freq.flags);
+      printf("%-8.16s  %s\n", ifname, buffer);
+      break;
+    }
+
+  return(0);
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Display the channel (converted from frequency) if possible
+ */
+static int
+print_channel(int		skfd,
+	      const char *	ifname,
+	      int		format)
+{
+  struct iwreq		wrq;
+  struct iw_range	range;
+  double		freq;
+  int			channel;
+
+  /* Get frequency / channel */
+  if(iw_get_ext(skfd, ifname, SIOCGIWFREQ, &wrq) < 0)
+    return(-1);
+
+  /* Convert to channel */
+  if(iw_get_range_info(skfd, ifname, &range) < 0)
+    return(-2);
+  freq = iw_freq2float(&(wrq.u.freq));
+  if(freq < KILO)
+    channel = (int) freq;
+  else
+    {
+      channel = iw_freq_to_channel(freq, &range);
+      if(channel < 0)
+	return(-3);
+    }
+
+  /* Print */
+  switch(format)
+    {
+    case FORMAT_SCHEME:
+      /* Prefix with freq to avoid name space collisions */
+      printf("channel%d\n", channel);
+      break;
+    case FORMAT_RAW:
+      printf("%d\n", channel);
+      break;
+    default:
+      printf("%-8.16s  Channel:%d\n", ifname, channel);
       break;
     }
 
@@ -342,8 +291,7 @@ print_mode(int		skfd,
   struct iwreq		wrq;
 
   /* Get frequency / channel */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWMODE, &wrq) < 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWMODE, &wrq) < 0)
     return(-1);
   if(wrq.u.mode >= IW_NUM_OPER_MODE)
     return(-2);
@@ -352,10 +300,17 @@ print_mode(int		skfd,
   switch(format)
     {
     case FORMAT_SCHEME:
+      /* Strip all white space and stuff */
+      if(wrq.u.mode == IW_MODE_ADHOC)
+	printf("AdHoc\n");
+      else
+	printf("%s\n", iw_operation_mode[wrq.u.mode]);
+      break;
+    case FORMAT_RAW:
       printf("%d\n", wrq.u.mode);
       break;
     default:
-      printf("%-8.8s  Mode:%s\n", ifname, iw_operation_mode[wrq.u.mode]);
+      printf("%-8.16s  Mode:%s\n", ifname, iw_operation_mode[wrq.u.mode]);
       break;
     }
 
@@ -378,8 +333,7 @@ print_protocol(int		skfd,
   unsigned int		j;
 
   /* Get Protocol name */
-  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
-  if(ioctl(skfd, SIOCGIWNAME, &wrq) < 0)
+  if(iw_get_ext(skfd, ifname, SIOCGIWNAME, &wrq) < 0)
     return(-1);
   strncpy(proto, wrq.u.name, IFNAMSIZ);
   proto[IFNAMSIZ] = '\0';
@@ -397,8 +351,11 @@ print_protocol(int		skfd,
 	return(-2);
       printf("%s\n", pproto);
       break;
+    case FORMAT_RAW:
+      printf("%s\n", proto);
+      break;
     default:
-      printf("%-8.8s  Protocol Name:\"%s\"\n", ifname, proto);
+      printf("%-8.16s  Protocol Name:\"%s\"\n", ifname, proto);
       break;
     }
 
@@ -425,6 +382,11 @@ print_one_device(int		skfd,
     case WTYPE_AP:
       /* Try to print an AP */
       ret = print_ap(skfd, ifname, format);
+      break;
+
+    case WTYPE_CHANNEL:
+      /* Try to print channel */
+      ret = print_channel(skfd, ifname, format);
       break;
 
     case WTYPE_FREQ:
@@ -458,6 +420,11 @@ print_one_device(int		skfd,
 /*------------------------------------------------------------------*/
 /*
  * Try the various devices until one return something we can use
+ *
+ * Note : we can't use iw_enum_devices() because we want a different
+ * behaviour :
+ *	1) Stop at the first valid wireless device
+ *	2) Only go through active devices
  */
 static int
 scan_devices(int		skfd,
@@ -498,9 +465,11 @@ iw_usage(int status)
   fputs("Usage iwgetid [OPTIONS] [ifname]\n"
 	"  Options are:\n"
 	"    -a,--ap       Print the access point address\n"
+	"    -c,--channel  Print the current channel\n"
 	"    -f,--freq     Print the current frequency\n"
 	"    -m,--mode     Print the current mode\n"
 	"    -p,--protocol Print the protocol name\n"
+	"    -r,--raw      Format the output as raw value for shell scripts\n"
 	"    -s,--scheme   Format the output as a PCMCIA scheme identifier\n"
 	"    -h,--help     Print this message\n",
 	status ? stderr : stdout);
@@ -509,10 +478,12 @@ iw_usage(int status)
 
 static const struct option long_opts[] = {
   { "ap", no_argument, NULL, 'a' },
+  { "channel", no_argument, NULL, 'c' },
   { "freq", no_argument, NULL, 'f' },
   { "mode", no_argument, NULL, 'm' },
   { "protocol", no_argument, NULL, 'p' },
   { "help", no_argument, NULL, 'h' },
+  { "raw", no_argument, NULL, 'r' },
   { "scheme", no_argument, NULL, 's' },
   { NULL, 0, NULL, 0 }
 };
@@ -532,13 +503,18 @@ main(int	argc,
   int	ret = -1;
 
   /* Check command line arguments */
-  while((opt = getopt_long(argc, argv, "afhmps", long_opts, NULL)) > 0)
+  while((opt = getopt_long(argc, argv, "acfhmprs", long_opts, NULL)) > 0)
     {
       switch(opt)
 	{
 	case 'a':
 	  /* User wants AP/Cell Address */
 	  wtype = WTYPE_AP;
+	  break;
+
+	case 'c':
+	  /* User wants channel only */
+	  wtype = WTYPE_CHANNEL;
 	  break;
 
 	case 'f':
@@ -558,6 +534,11 @@ main(int	argc,
 
 	case 'h':
 	  iw_usage(0);
+	  break;
+
+	case 'r':
+	  /* User wants a Raw format */
+	  format = FORMAT_RAW;
 	  break;
 
 	case 's':
@@ -595,6 +576,6 @@ main(int	argc,
     }
 
   fflush(stdout);
-  close(skfd);
+  iw_sockets_close(skfd);
   return(ret);
 }

@@ -1,8 +1,8 @@
 .\" Guus Sliepen - 2001
-.\" Completed and fixed up by Jean Tourrilhes - 2002
+.\" Completed and fixed up by Jean Tourrilhes - 2002-2003
 .\" iwgetid.8
 .\"
-.TH IWGETID 8 "7 August 2001" "net-tools" "Linux Programmer's Manual"
+.TH IWGETID 8 "02 December 2003" "wireless-tools" "Linux Programmer's Manual"
 .\"
 .\" NAME part
 .\"
@@ -12,9 +12,9 @@ iwgetid \- Report ESSID, NWID or AP/Cell Address of wireless network
 .\" SYNOPSIS part
 .\"
 .SH SYNOPSIS
-.BI "iwgetid " [interface] " [--scheme] [--ap] [--freq] [--mode]"
+.BI "iwgetid " [interface] " [--raw] [--scheme] [--ap] [--freq]"
 .br
-.BI "                   [--protocol]
+.BI "                   [--mode] [--protocol] [--channel]
 .br
 .\"
 .\" DESCRIPTION part
@@ -34,26 +34,42 @@ will print the
 of the device, and if the device doesn't have any ESSID it will print
 its
 .IR NWID .
+.br
+The default formatting output is pretty-print.
 .\"
 .\" OPTIONS part
 .\"
 .SH OPTIONS
 .TP
+.B --raw
+This option disables pretty-printing of the information. This options
+is orthogonal to the other options (except
+.BR --scheme ),
+so with the appropriate combination of options you can print the raw
+ESSID, AP Address or Mode.
+.br
+This format is ideal when storing the result of iwgetid as a
+variable in
+.I Shell
+or
+.I Perl
+scripts or to pass the result as an argument on the command line of
+.BR iwconfig .
+.TP
 .B --scheme
-This option disables pretty-printing of the information, only the raw
-ESSID (or NWID, or AP Address) is printed. Also, characters that are
-not alphanumerics (like space, punctuation and control characters) are
-skipped.
+This option is similar to the previous one, it disables
+pretty-printing of the information and remove all characters that are
+not alphanumerics (like space, punctuation and control characters).
 .br
 The resulting output is a valid Pcmcia scheme identifier (that may be
 used as an argument of the command
 .BR "cardctl scheme" ).
 This format is also ideal when using the result of iwgetid as a
-variable in
+selector in
 .I Shell
 or
 .I Perl
-scripts.
+scripts, or as a file name.
 .TP
 .B --ap
 Display the MAC address of the Wireless
@@ -67,6 +83,12 @@ Display the current
 or
 .I channel
 used by the interface.
+.TP
+.B --channel
+Display the current
+.I channel
+used by the interface. The channel is determined using the current
+frequency and the frequency list provided by the interface.
 .TP
 .B --mode
 Display the current

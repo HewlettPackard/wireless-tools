@@ -103,7 +103,7 @@ You can now add extra statements to the iface sections of the files in
 /etc/network/interfaces that are specific for wireless interfaces. They
 are of the form:
 
-    wireless_<function> <value>
+    wireless-<function> <value>
 
 Before the interface is brought up, such a statement will result in the
 execution of the following command:
@@ -117,8 +117,8 @@ iface eth0 inet static
     network 192.168.1.0
     netmask 255.255.255.0
     broadcast 192.168.1.255
-    wireless_essid Home
-    wireless_mode ad_hoc
+    wireless-essid Home
+    wireless-mode ad-hoc
 
 	The current Debian script support all arguments present in
 wireless.opts apart from Nickname. You can check this in the script
@@ -135,19 +135,19 @@ do everything pcmcia schemes can do, and more. Here is part of mine:
 
 auto wlan0
 mapping wlan0
-        script /usr/local/bin/ifscheme
+        script /usr/local/bin/ifscheme-mapping
 
 iface wlan0-home inet static
         address 192.168.1.5
         gateway 192.168.1.1
         netmask 255.255.255.0
-        wireless_mode ad_hoc
-        wireless_essid wortroot
-        wireless_nick dragon
-        wireless_channel 1
+        wireless-mode ad-hoc
+        wireless-essid wortroot
+        wireless-nick dragon
+        wireless-channel 1
 
 iface wlan0-away inet dhcp
-        wireless_mode managed
+        wireless-mode managed
 
 Now I can type 'ifscheme -s away' when I leave home, rather like
 cardctl scheme.
@@ -171,8 +171,23 @@ ifupdown.
 
 				-----
 
-	You may also want to check ifupdown-roaming :
+		(Contributed by Jean Tourrilhes <jt@hpl.hp.com>)
+	The 'ifscheme' scripts mentionned above are now available in
+Debian Sarge, in the 'ifscheme' package.
+	The MAC address based mapping mentioned above is deprecated,
+you should use 'ifrename' to assign a consistent interface name to
+each of your network interface. This is documented in
+HOTPLUG.txt. This enable the combination of MAC address identification
+of interfaces with scheme multi-configuration.
+
+				-----
+
+	If you need automatic wireless configuration, you can look at
+the following packages :
+	o ifupdown-roaming :
 		http://panopticon.csustan.edu/thood/ifupdown-roaming.html
+	o waproamd
+		http://0pointer.de/lennart/projects/waproamd/
 
 ---------------------------------------------------------------------
 
@@ -339,12 +354,20 @@ eth0, eth1, ...).
 all of them. The script doing the configuration and where you can
 check the details is :
 		/etc/network/network-scripts/ifup-wireless
-	You will of course need the Wireless Extension package :
+	You will of course need the Wireless Tools package :
 		rpm -Uvh wireless-tools-XX-Xmdk.XXX.rpm
 
 	Mandrake can also have wireless setting added to its
 Auto-Install procedure :
 	http://members.shaw.ca/mandrake/drakx/8.2/HTML/section4-13.html
+
+				-----
+
+		(in e-mail from Thierry Vignaud <tvignaud@mandrakesoft.com>)
+	You may use the following tool :
+		o drakconnect
+	You may read the following documentation :
+		o ifcfg
 
 ---------------------------------------------------------------------
 

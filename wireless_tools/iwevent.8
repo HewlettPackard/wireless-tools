@@ -1,7 +1,7 @@
-.\" Jean Tourrilhes - HPL - 2002
+.\" Jean Tourrilhes - HPL - 2002 - 2004
 .\" iwevent.8
 .\"
-.TH IWEVENT 8 "25 January 2002" "net-tools" "Linux Programmer's Manual"
+.TH IWEVENT 8 "23 June 2004" "net-tools" "Linux Programmer's Manual"
 .\"
 .\" NAME part
 .\"
@@ -69,9 +69,9 @@ available (see
 .B Tx packet dropped
 A packet directed at this address has been dropped because the
 interface believes this node doesn't answer anymore (usually maximum
-of MAC level retry exceeded). An early indication that the node may
-have left the cell or gone out of range, but may be due to fading or
-excessive contention.
+of MAC level retry exceeded). This is usually an early indication that
+the node may have left the cell or gone out of range, but it may be
+due to fading or excessive contention.
 .TP
 .B Custom driver event
 Event specific to the driver. Please check the driver documentation.
@@ -90,10 +90,12 @@ Point (mode master).
 The signal strength for one of the address in the spy list went under
 the low threshold or went above than the high threshold.
 .PP
-Only some of those events will be generated on some wireless
-interfaces by the wireless driver, and their support depend on the
-specific hardware/driver combination. Please refer to driver
-documentation for details.
+Most wireless drivers generate only a subset of those events, not all
+of them, the exact list depends on the specific hardware/driver
+combination. Please refer to driver documentation for details on when
+they are generated, and use
+.IR iwlist (8)
+to check what the driver supports.
 .\"
 .\" AUTHOR part
 .\"
@@ -106,4 +108,5 @@ Jean Tourrilhes \- jt@hpl.hp.com
 .BR iwconfig (8),
 .BR iwlist (8),
 .BR iwspy (8),
-.BR iwpriv (8).
+.BR iwpriv (8),
+.BR wireless (7).
