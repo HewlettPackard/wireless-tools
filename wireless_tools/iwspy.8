@@ -16,14 +16,6 @@ iwspy \- Get wireless statistics from specific nodes
 .BI "iwspy " interface " [+] " IPADDR " | " HWADDR " [...]"
 .br
 .BI "iwspy " interface " off"
-.br
-.BI "iwspy " interface " freq"
-.br
-.BI "iwspy " interface " ap"
-.br
-.BI "iwspy " interface " rate"
-.br
-.BI "iwspy " interface " keys"
 .\"
 .\" DESCRIPTION part
 .\"
@@ -38,9 +30,8 @@ information is the same as the one available in
 This information is updated each time a new packet is received, so
 each address of the list add some overhead in the driver.
 .PP
-.B Iwspy
-Can also display the list of frequencies available for the device or the
-list of Access Points in range.
+Note the this functionality work only for node part of the current
+wireless cells.
 .\"
 .\" PARAMETER part
 .\"
@@ -72,24 +63,6 @@ should use this option to avoid conflicts.
 .TP
 .B off
 Remove the current list of addresses and disable the spy functionality
-.TP
-.B freq
-Give the list of available frequencies in the device and the number of
-defined channels. Please note that usually the driver returns the
-total number of channels and only the frequencies available in the
-present locale, so there is no one to one mapping between frequencies
-displayed and channel numbers.
-.TP
-.B ap
-Give the list of Access Points in range, and optionally the quality of
-link to them.
-.TP
-.BR rate / bit [rate]
-List the bit-rates supported by the device.
-.TP
-.BR keys / enc [ryption]
-List the encryption key sizes supported and display all the encryption
-keys availables in the device.
 .\"
 .\" FILES part
 .\"
@@ -101,5 +74,6 @@ keys availables in the device.
 .SH SEE ALSO
 .BR iwconfig (8),
 .BR ifconfig (8),
+.BR iwlist (8).
 .BR iwpriv (8).
 

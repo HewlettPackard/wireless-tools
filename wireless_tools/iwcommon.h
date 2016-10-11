@@ -1,9 +1,11 @@
 /*
  *	Wireless Tools
  *
- *		Jean II - HPLB '99
+ *		Jean II - HPLB 97->99 - HPL 99->00
  *
  * Common header for the wireless tools...
+ *
+ * This file is released under the GPL license.
  */
 
 #ifndef IWCOMMON_H
@@ -89,6 +91,43 @@
  *		- set timeout or period and its value
  *		- Reception mode (unicast/multicast/all)
  *	o Updated man pages with all that ;-)
+ *
+ * wireless 21 :
+ * -----------
+ *		(from Alan McReynolds <alan_mcreynolds@hpl.hp.com>)
+ *	o Use proper macros for compilation directives [Makefile]
+ *		(From Jean Tourrilhes)
+ *	o Put licensing info everywhere (almost). Yes, it's GPL !
+ *	o Document the use of /etc/pcmcia/wireless.opts
+ *	o Add min/max modifiers to power management parameters [iwconfig]
+ *		-> requested by Lee Keyser-Allen for the Spectrum24 driver
+ *	o Optionally output a second power management parameter [iwconfig]
+ *	---
+ *	o Common subroutines to display stats & power saving info [iwcommon]
+ *	o Display all power management info, capability and values [iwspy]
+ *	---
+ *	o Optional index for ESSID (for Aironet driver) [iwcommon]
+ *	o IW_ENCODE_NOKEY for write only keys [iwconfig/iwspy]
+ *	o Common subrouting to print encoding keys [iwspy]
+ *	---
+ *	o Transmit Power stuff (dBm + mW) [iwconfig/iwspy]
+ *	o Cleaner formatting algorithm when displaying params [iwconfig]
+ *	---
+ *	o Fix get_range_info() and use it everywhere - Should fix core dumps.
+ *	o Catch WE version differences between tools and driver and
+ *	  warn user. Thanks to Tobias Ringstrom for the tip... [iwcommon]
+ *	o Add Retry limit and lifetime support. [iwconfig/iwlist]
+ *	o Display "Cell:" instead of "Access Point:" in ad-hoc mode [iwconfig]
+ *	o Header fix for glibc2.2 by Ross G. Miller <Ross_Miller@baylor.edu>
+ *	o Move header selection flags in Makefile [iwcommon/Makefile]
+ *	o Spin-off iwlist.c from iwspy.c. iwspy is now much smaller
+ *	  After moving this bit of code all over the place, from iwpriv
+ *	  to iwconfig to iwspy, it now has a home of its own... [iwspy/iwlist]
+ *	o Wrote quick'n'dirty iwgetid.
+ *	o Remove output of second power management parameter [iwconfig]
+ *	  Please use iwlist, I don't want to bloat iwconfig
+ *	---
+ *	o Fix bug in display ints - "Allen Miu" <aklmiu@mit.edu> [iwpriv]
  */
 
 /* ----------------------------- TODO ----------------------------- */
@@ -99,8 +138,6 @@
  * --------
  *	Make disable a per encryption key modifier if some hardware
  *	requires it.
- *	Should not mention "Access Point" but something different when
- *	in ad-hoc mode.
  *
  * iwpriv :
  * ------
@@ -108,7 +145,7 @@
  *
  * iwspy :
  * -----
- *	?
+ *	-
  *
  * Doc & man pages :
  * ---------------
@@ -135,17 +172,8 @@
 #include <netdb.h>		/* gethostbyname, getnetbyname */
 
 /* This is our header selection. Try to hide the mess and the misery :-(
- * Please choose only one of the define...
- */
-/* Kernel headers 2.0.X + Glibc 2.0 - Debian 2.0, RH5
- * Kernel headers 2.2.X + Glibc 2.1 - Debian 2.2, RH6.1 */
-#define GLIBC_HEADERS
-
-/* Kernel headers 2.2.X + Glibc 2.0 - Debian 2.1 */
-#undef KLUDGE_HEADERS
-
-/* Kernel headers 2.0.X + libc5 - old systems */
-#undef LIBC5_HEADERS
+ * The selection has been moved in the Makefile, here we have only
+ * the ugly part. Don't look, you would go blind ;-) */
 
 #ifdef KLUDGE_HEADERS
 #include <socketbits.h>
@@ -157,18 +185,34 @@
 #include <linux/in.h>		/* For struct sockaddr_in */
 #endif	/* KLUDGE_HEADERS || GLIBC_HEADERS */
 
+#ifdef GLIBC22_HEADERS 
+/* Added by Ross G. Miller <Ross_Miller@baylor.edu>, 3/28/01 */
+#include <linux/if_arp.h> 	/* For ARPHRD_ETHER */
+#include <linux/socket.h>	/* For AF_INET & struct sockaddr */
+#include <sys/socket.h>
+#endif /* GLIBC22_HEADERS */    
+
 #ifdef LIBC5_HEADERS
 #include <sys/socket.h>		/* For AF_INET & struct sockaddr & socket() */
 #include <linux/if_arp.h>	/* For ARPHRD_ETHER */
 #include <linux/in.h>		/* For struct sockaddr_in */
 #endif	/* LIBC5_HEADERS */
 
-/* Wireless extensions */
+#ifdef PRIVATE_WE_HEADER
+/* Private copy of Wireless extensions */
+#include "wireless.h"
+#else	/* PRIVATE_WE_HEADER */
+/* System wide Wireless extensions */
 #include <linux/wireless.h>
+#endif	/* PRIVATE_WE_HEADER */
 
-#if WIRELESS_EXT < 8
-#error "Wireless Extension v9 or newer required :-(\n\
+#if WIRELESS_EXT < 9
+#error "Wireless Extension v9 or newer required :-(\
 Use Wireless Tools v19 or update your kernel headers"
+#endif
+#if WIRELESS_EXT < 11
+#warning "Wireless Extension v11 recommended...\
+You may update your kernel and/or system headers to get the new features..."
 #endif
 
 /****************************** DEBUG ******************************/
@@ -181,6 +225,19 @@ Use Wireless Tools v19 or update your kernel headers"
 #define MEGA	1e6
 #define GIGA	1e9
 
+/* Backward compatibility for Wireless Extension 9 */
+#ifndef IW_POWER_MODIFIER
+#define IW_POWER_MODIFIER	0x000F	/* Modify a parameter */
+#define IW_POWER_MIN		0x0001	/* Value is a minimum  */
+#define IW_POWER_MAX		0x0002	/* Value is a maximum */
+#define IW_POWER_RELATIVE	0x0004	/* Value is not in seconds/ms/us */
+#endif IW_POWER_MODIFIER
+
+#ifndef IW_ENCODE_NOKEY
+#define IW_ENCODE_NOKEY         0x0800  /* Key is write only, so not here */
+#define IW_ENCODE_MODE		0xF000	/* Modes defined below */
+#endif IW_ENCODE_NOKEY
+
 /****************************** TYPES ******************************/
 
 /* Shortcuts */
@@ -188,6 +245,7 @@ typedef struct iw_statistics	iwstats;
 typedef struct iw_range		iwrange;
 typedef struct iw_param		iwparam;
 typedef struct iw_freq		iwfreq;
+typedef struct iw_quality	iwqual;
 typedef struct iw_priv_args	iwprivargs;
 typedef struct sockaddr		sockaddr;
 
@@ -222,6 +280,10 @@ typedef struct wireless_info
   int		mode;			/* Operation mode */
   int		has_power;
   iwparam	power;			/* Power management parameters */
+  int		has_txpower;
+  iwparam	txpower;		/* Transmit Power in dBm */
+  int		has_retry;
+  iwparam	retry;			/* Retry limit or lifetime */
 
   /* Stats */
   iwstats	stats;
@@ -252,6 +314,38 @@ void
 		   iwfreq *	out);
 double
 	freq2float(iwfreq *	in);
+/* ---------------------- POWER SUBROUTINES ----------------------- */
+int
+	dbm2mwatt(int	in);
+int
+	mwatt2dbm(int	in);
+/* -------------------- STATISTICS SUBROUTINES -------------------- */
+void
+	print_stats(FILE *	stream,
+		    iwqual *	qual,
+		    iwrange *	range,
+		    int		has_range);
+/* --------------------- ENCODING SUBROUTINES --------------------- */
+void
+	print_key(FILE *		stream,
+		  unsigned char	*	key,
+		  int			key_size,
+		  int			key_flags);
+/* ----------------- POWER MANAGEMENT SUBROUTINES ----------------- */
+void
+	print_pm_value(FILE *	stream,
+		       int	value,
+		       int	flags);
+void
+	print_pm_mode(FILE *	stream,
+		      int	flags);
+/* --------------- RETRY LIMIT/LIFETIME SUBROUTINES --------------- */
+#if WIRELESS_EXT > 10
+void
+	print_retry_value(FILE *	stream,
+			  int		value,
+			  int		flags);
+#endif
 /* --------------------- ADDRESS SUBROUTINES ---------------------- */
 int
 	check_addr_type(int	skfd,

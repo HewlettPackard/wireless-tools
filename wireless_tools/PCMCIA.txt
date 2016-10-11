@@ -1,0 +1,135 @@
+	One of the most exciting thing having happen after release 20
+is the addition of Wireless Extension support in the Pcmcia init
+scripts. Here is a quick intro on the subject...
+
+Pre-requisite :
+-------------
+	o Pcmcia package with Wireless Extension support : 3.1.15 onward
+	o A driver with Wireless Extension support
+	o The tools (iwconfig and co.) installed in the /usr/local/sbin
+		or /usr/sbin
+
+Raylink driver :
+--------------
+	The Raylink driver as of 1.70 doesn't support yet writable
+Wireless Extensions, so enabling wireless.opts on this driver will
+make thing worse.
+
+Pcmcia precompiled package :
+--------------------------
+	The Pcmcia package part of many distributions, especially
+those from Red-Hat, include some weird init scripts. Because of this,
+the present feature won't work.
+	On the other hand, the Pcmcia package in source form from the
+official Linux-Pcmcia web site will install the proper init scripts.
+
+Basic support :
+-------------
+	The file /etc/pcmcia/wireless.opts contain some templates for
+the most common drivers. Just fill in your card configuration in the
+template corresponding to your driver configuration.
+	Then, to activate it, you just need to remove or comment the 4
+lines at the top of wireless.opts and restart the Pcmcia package.
+
+	Things to take care of :
+	The options of wireless.opts will be used directly as
+arguments of iwconfig. So, you need iwconfig, and you need to check
+the man page of iwconfig to know how to format them.
+	A quick way to determine the correct options without
+restarting Pcmcia is to play a bit with iwconfig directly to see what
+is possible and what is the proper setup of the card and to copy that
+in wireless.opts.
+	At the end of wireless.opts, there is also a generic template
+containing all the possible options and explaining their meaning. Not
+all of them are supported by all cards (actually, most cards support a
+limited subset of it).
+	The current card templates are designed to match the MAC
+address of the card. Please check that this matches with your card.
+	Also, sample describe the most common/useful options available
+with the card, for more advance option, borrow options from the
+template. You can also remove some options, the card will usually
+initialise with a sane value.
+
+	Alternatively, you can also discard the current wireless.opts
+and replace it with a file looking like this :
+----------- wireless.opts ---------------------
+case "$ADDRESS" in
+*,*,*,*)
+    ESSID="MY_ESSID"
+    MODE="Managed"
+    ;;
+esac
+-----------------------------------------------
+
+
+Scheme support :
+--------------
+	The file wireless.opts fully support schemes. This allow you
+to define different configurations (home, work...) and to switch on
+the fly between them.
+	The best way to explain it is to show an example.
+	Let's say you have an infrastructured setup at work (MY_WORK)
+and an adhoc network at home (MY_HOME). Moreover, when a specific card
+is inserted, you want it to be in adhoc mode (TEST). The work setup
+will be the default...
+
+	Each Wireless LAN will have the following configuration :
+--------- wireless.opts --------------------
+# Lucent Wavelan IEEE - Ad-Hoc mode for test card
+*,*,*,00:60:1D:03:9F:2D)
+    ESSID="TEST"
+    MODE="Ad-Hoc"
+    FREQ="10"
+    RATE="1M"
+    ;;
+
+# Lucent Wavelan IEEE - Ad-Hoc mode at home
+home,*,*,00:60:1D:*|home,*,*,00:02:2D:*)
+    ESSID="MY_HOME"
+    MODE="Ad-Hoc"
+    FREQ="5"
+    ;;
+
+# Lucent Wavelan IEEE - infrastructured mode at work
+*,*,*,00:60:1D:*|*,*,*,00:02:2D:*)
+    ESSID="MY_WORK"
+    MODE="Managed"
+    KEY="s:verysecurekey"
+    ;;
+--------------------------------------------
+
+	Don't forget the IP configuration :
+--------- network.opts ---------------------
+# Wavelan IEEE : ad-hoc mode for test card
+*,*,*,00:60:1D:03:9F:2D)
+    DHCP="n"
+    IPADDR="10.0.0.1"
+    NETMASK="255.255.255.0"
+    NETWORK="10.0.0.0"
+    BROADCAST="10.0.0.255"
+    ;;
+
+# Wavelan IEEE : ad-hoc mode at home
+home,*,*,00:60:1D:*|home,*,*,00:02:2D:*)
+    DHCP="n"
+    IPADDR="10.0.1.19"
+    NETMASK="255.255.255.0"
+    NETWORK="10.0.1.0"
+    BROADCAST="10.0.1.255"
+    GATEWAY="15.0.1.1"
+    ;;
+
+# Wavelan IEEE : infrastructured mode at work
+*,*,*,00:60:1D:*|*,*,*,00:02:2D:*)
+    DHCP="y"
+    ;;
+--------------------------------------------
+
+	Now, when you are at work you do :
+> cardctl scheme default
+	And at home, you do :
+> cardctl scheme home
+
+	I guess you get the idea ;-)
+
+	Jean <jt@hpl.hp.com>

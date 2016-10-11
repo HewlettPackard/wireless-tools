@@ -5,9 +5,7 @@ Very important note :
 	Kernels that support this version of the Wireless Tools are listed
 	below. For all kernels before that, please use the version v19 of
 	the Wireless Tools.
-	If your kernel has the relevant Wireless Extensions but the tools
-	refuse to compile, then your kernel headers in /usr/include are
-	pointing to the wrong place (very common with Debian).
+	You might have headers troubles and it doesn't compile, see below...
 
 You need :
 --------
@@ -16,13 +14,17 @@ You need :
 		-> from 2.2.14 onward
 		-> from 2.3.24 onward
 		Note : CONFIG_NET_RADIO must be enabled
+	o (Optional) A Pcmcia package supporting Wireless Extension
 	o A driver supporting wireless extensions
-		-> Wavelan isa from kernels above
-		-> Wavelan pcmcia from pcmcia 3.1.2 onward
-		-> Netwave pcmcia from pcmcia 3.1.2 onward
+		-> Wavelan isa
+		-> Wavelan pcmcia
+		-> Netwave pcmcia
 		-> Wavelan IEEE pcmcia drivers
+		-> Aironet MPL driver
 		-> Proxim RangeLan2/Symphony driver
-		-> Patch your favourite driver
+		-> Raylink/WegGear2.4 driver
+		-> Check my web page for latest list of drivers,
+			otherwise patch your favourite driver...
 	Note : more recent kernels and drivers are likely to support
 		more wireless extension features...
 
@@ -32,35 +34,55 @@ Recommended versions :
 	o Kernel (wireless extension definition) :
 		-> Kernel 2.2.14 onward
 		-> Kernel 2.3.24 onward
+	o Pcmcia package :
+		-> Pcmcia 3.1.15 onward
 	o Drivers with wireless extension support :
 		-> Wavelan isa from kernels above
 		-> Wavelan pcmcia from pcmcia 3.1.1 onward
 		-> Netwave pcmcia from pcmcia 3.1.2 onward
-		-> Wavelan IEEE pcmcia GPL driver (wvlan) 1.0.1 onward
-		-> Wavelan IEEE pcmcia binary driver (wavelan2) v4.00 onward
+		-> Wavelan IEEE pcmcia GPL driver (wvlan_cs) 1.0.5 onward
+		-> Aironet MPL driver (airo_cs.c) 1.4 onward
 		-> Proxim RangeLan2/Symphony driver 1.4.3 onward
+		-> Raylink/WegGear2.4 driver 1.70 (note : read only)
 
 Compile wireless tools :
 ----------------------
-	In theory, a "make" should suffice.
-	In practice, there is big troubles with the headers. If you
-have glibc and kernel 2.2.X headers, that should be all
-right. Depending on which version of the kernel headers (might be
-different from kernel) and library headers you have, you need to play
-with the options buried in iwcommon.h.
+	In theory, a "make" should suffice to create the tools.
+	In practice, there is big troubles with the kernel
+headers. See below for how to fix that.
 	Note : as some internal data structures change from kernel to
-kernel, you are advised to not use the precompiled version but to
-recompile your own.
-	"xwireless" is not currently in a compilable state.
+kernel, you are advised to not use the precompiled version of the
+tools but to recompile your own.
 
 Installation :
 ------------
+	If I were you, I would not trust a "make install". If you feel
+courageous, just do "make install". It may even do the right thing.
 	I advise to copy the executable (iwconfig, iwspy and iwpriv)
-in /usr/local/bin or /usr/local/sbin. The man pages (iwconfig.8,
-iwspy.8 and iwpriv.8) should be copied in /usr/local/man/man8 or
+in /usr/local/sbin or /usr/sbin. The man pages (iwconfig.8, iwspy.8
+and iwpriv.8) should be copied in /usr/local/man/man8 or
 /usr/man/man8.
+	In fact, if you want to use Pcmcia wireless.opts, this step is
+mandatory...
 
+Kernel headers (why it doesn't compile) :
+---------------------------------------
+	Some changes in the kernel headers and glibc headers are
+making my life difficult.
+	If you have glibc and kernel 2.2.X headers (or greater), that
+should be all right. This is the default for most modern distributions.
+	In the other cases, depending on which version of the kernel
+headers (might be different from kernel) and library headers you have,
+you need to play with the options at the top of the Makefile.
 
-List of contributors and changelog is in iwcommon.h.
+	The second issue is that some distributions install some
+independant kernel headers in /usr/include. If you upgrade your
+kernel, those headers become out of sync and you don't benefit from
+the latest Wireless Extensions. Even worse, it can sometimes prevent
+the tools from compiling.
+	The trick is to copy the file .../include/linux/wireless.h
+from the kernel to the /usr/include headers.
+	A similar procedure may be used to update Wireless Extensions
+in an older kernel...
 
 	Jean <jt@hpl.hp.com>

@@ -1,45 +1,82 @@
+	Wireless Tools
+	--------------
+
 	This package contain the Wireless tools, used to manipulate
 the Wireless Extensions. The Wireless Extension is an interface
 allowing you to set Wireless LAN specific parameters and get the
 specific stats.
 
-INSTALL
--------
-	Installation instruction and requirements.
-
-man pages (iwconfig.8, iwpriv.8, iwspy.8)
----------
-	As far as I know, the man pages are the most complete, up to
-date and accurate documentation of the wireless tools, and you really
-should read them.
-	They can either be copied in a location where the command
-"man" will find them, or can be read with the command :
-		nroff -man xxx.8 | more
-
 web page
 --------
 	You'll find a lot of useful info on :
+		http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Tools.html
 		http://web.hpl.hp.com/personal/Jean_Tourrilhes/Linux/
+
+INSTALL
+-------
+	This file contains installation instruction and requirements.
+
+PCMCIA.txt
+----------
+	This file describes how to use Pcmcia init script to configure
+Wireless Extensions and how to use Pcmcia schemes.
+
+man pages (iwconfig.8, iwlist.8, iwpriv.8, iwspy.8)
+---------
+	VERY IMPORTANT : I try to keep the man page up to date, so
+you'd better read them before asking questions.
+	ALSO IMPORTANT : Those man pages describe the capacity of the
+tools, no device implement the full range (and driver usually
+implement even less).
+
+	As far as I know, the man pages are the most complete, up to
+date and accurate documentation of the wireless tools. An update of
+the web page related to Wireless Extension is long overdue. Send
+feedback to me.
+	The man pages can either be copied in a location where the
+command "man" will find them, such as /usr/local/man/man8, or can be
+read locally with the command :
+		nroff -man xxx.8 | less
 
 iwconfig.c
 ----------
 	The main wireless tool. Used for device configuration and to see
-	the most common parameters.
+the most common wireless parameters.
+
+iwlist.c
+--------
+	Display some large chunk of information not displayed by iwconfig.
+	For example, all bit rates, all frequencies, all keys...
 
 iwspy.c
 -------
 	Mobile IP support test and allow get get stats per MAC address
-	(instead of globally). Also display available bit rates and
-	frequencies.
+(instead of globally). Also, for some driver/device, this is the only
+way to get stats in Ad-Hoc mode.
 
 iwpriv.c
 --------
-	Manipulate driver private ioctls (all that is not available in
-	iwconfig). These are device specific parameters.
+	Manipulate driver private ioctls : all parameters that are
+specific to a driver or a device and therefore not part of iwconfig.
 
-xwireless.c
+iwgetid.c
+---------
+	Output the ESSID or NWID of the specified device.
+	Can also output it in a form that can be used as a Pcmcia Scheme.
+
+Changelog, contributions
+------------------------
+	See iwcommon.h
+
+wireless.h
+----------
+	Definition of the Wireless Extensions. You may drop this file
+in your kernel headers to update the Wireless Extensions.
+
+Other tools :
 -----------
-	Graphical tool for the Netwave created by Dag Brattli <dagb@cs.uit.no>
+	My web page above list many other tools using Wireless
+Extensions that you may find useful...
 
 
 	The list of changes, credits and errata notes are in

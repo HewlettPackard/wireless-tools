@@ -1,9 +1,11 @@
 /*
  *	Wireless Tools
  *
- *		Jean II - HPLB '99
+ *		Jean II - HPLB 97->99 - HPL 99->00
  *
  * Common subroutines to all the wireless tools...
+ *
+ * This file is released under the GPL license.
  */
 
 #include "iwcommon.h"		/* Header */
@@ -56,13 +58,54 @@ get_range_info(int		skfd,
 	       iwrange *	range)
 {
   struct iwreq		wrq;
+  char			buffer[sizeof(iwrange) * 2];	/* Large enough */
+
+  /* Cleanup */
+  memset(buffer, 0, sizeof(range));
 
   strcpy(wrq.ifr_name, ifname);
-  wrq.u.data.pointer = (caddr_t) range;
+  wrq.u.data.pointer = (caddr_t) buffer;
   wrq.u.data.length = 0;
   wrq.u.data.flags = 0;
   if(ioctl(skfd, SIOCGIWRANGE, &wrq) < 0)
     return(-1);
+
+  /* Copy stuff at the right place, ignore extra */
+  memcpy((char *) range, buffer, sizeof(iwrange));
+
+  /* Lot's of people have driver and tools out of sync as far as Wireless
+   * Extensions are concerned. It's because /usr/include/linux/wireless.h
+   * and /usr/src/linux/include/linux/wireless.h are different.
+   * We try to catch this stuff here... */
+
+  /* For new versions, we can check the version directly, for old versions
+   * we use magic. 300 bytes is a also magic number, don't touch... */
+  if((WIRELESS_EXT > 10) && (wrq.u.data.length >= 300))
+    {
+#if WIRELESS_EXT > 10
+      /* Version verification - for new versions */
+      if(range->we_version_compiled != WIRELESS_EXT)
+	{
+	  fprintf(stderr, "Warning : Device %s has been compiled with version %d\n", ifname, range->we_version_compiled);
+	  fprintf(stderr, "of Wireless Extension, while we are using version %d.\n", WIRELESS_EXT);
+	  fprintf(stderr, "Some things may be broken...\n\n");
+	}
+#endif /* WIRELESS_EXT > 10 */
+    }
+  else
+    {
+      /* Version verification - for old versions */
+      if(wrq.u.data.length != sizeof(iwrange))
+	{
+	  fprintf(stderr, "Warning : Device %s has been compiled with a different version\n", ifname);
+	  fprintf(stderr, "of Wireless Extension than ours (we are using version %d).\n", WIRELESS_EXT);
+	  fprintf(stderr, "Some things may be broken...\n\n");
+	}
+    }
+
+  /* Note : we are only trying to catch compile difference, not source.
+   * If the driver source has not been updated to the latest, it doesn't
+   * matter because the new fields are set to zero */
 
   return(0);
 }
@@ -126,6 +169,224 @@ freq2float(iwfreq *	in)
   return ((double) in->m) * pow(10,in->e);
 }
 
+/************************ POWER SUBROUTINES *************************/
+
+/*------------------------------------------------------------------*/
+/*
+ * Convert a value in dBm to a value in milliWatt.
+ */
+int
+dbm2mwatt(int	in)
+{
+  return((int) (floor(pow(10.0, (((double) in) / 10.0)))));
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Convert a value in milliWatt to a value in dBm.
+ */
+int
+mwatt2dbm(int	in)
+{
+  return((int) (ceil(10.0 * log10((double) in))));
+}
+
+/********************** STATISTICS SUBROUTINES **********************/
+
+/*------------------------------------------------------------------*/
+/*
+ * Output the link statistics, taking care of formating
+ */
+void
+print_stats(FILE *	stream,
+	    iwqual *	qual,
+	    iwrange *	range,
+	    int		has_range)
+{
+  /* Just do it */
+  if(has_range && (qual->level != 0))
+    {
+      /* If the statistics are in dBm */
+      if(qual->level > range->max_qual.level)
+	{
+	  /* Statistics are in dBm (absolute power measurement) */
+	  fprintf(stream,
+		  "Quality:%d/%d  Signal level:%d dBm  Noise level:%d dBm%s\n",
+		  qual->qual, range->max_qual.qual,
+		  qual->level - 0x100, qual->noise - 0x100,
+		  (qual->updated & 0x7) ? " (updated)" : "");
+	}
+      else
+	{
+	  /* Statistics are relative values (0 -> max) */
+	  fprintf(stream,
+		  "Quality:%d/%d  Signal level:%d/%d  Noise level:%d/%d%s\n",
+		  qual->qual, range->max_qual.qual,
+		  qual->level, range->max_qual.level,
+		  qual->noise, range->max_qual.noise,
+		  (qual->updated & 0x7) ? " (updated)" : "");
+	}
+    }
+  else
+    {
+      /* We can't read the range, so we don't know... */
+      fprintf(stream, "Quality:%d  Signal level:%d  Noise level:%d%s\n",
+	      qual->qual, qual->level, qual->noise,
+	      (qual->updated & 0x7) ? " (updated)" : "");
+    }
+}
+
+/*********************** ENCODING SUBROUTINES ***********************/
+
+/*------------------------------------------------------------------*/
+/*
+ * Output the encoding key, with a nice formating
+ */
+void
+print_key(FILE *		stream,
+	  unsigned char	*	key,
+	  int			key_size,
+	  int			key_flags)
+{
+  int	i;
+
+  /* Is the key present ??? */
+  if(key_flags & IW_ENCODE_NOKEY)
+    {
+      /* Nope : print dummy */
+      printf("**");
+      for(i = 1; i < key_size; i++)
+	{
+	  if((i & 0x1) == 0)
+	    printf("-");
+	  printf("**");
+	}
+    }
+  else
+    {
+      /* Yes : print the key */
+      printf("%.2X", key[0]);
+      for(i = 1; i < key_size; i++)
+	{
+	  if((i & 0x1) == 0)
+	    printf("-");
+	  printf("%.2X", key[i]);
+	}
+    }
+}
+
+
+/******************* POWER MANAGEMENT SUBROUTINES *******************/
+
+/*------------------------------------------------------------------*/
+/*
+ * Output a power management value with all attributes...
+ */
+void
+print_pm_value(FILE *	stream,
+	       int	value,
+	       int	flags)
+{
+  /* Modifiers */
+  if(flags & IW_POWER_MIN)
+    fprintf(stream, " min");
+  if(flags & IW_POWER_MAX)
+    fprintf(stream, " max");
+
+  /* Type */
+  if(flags & IW_POWER_TIMEOUT)
+    fprintf(stream, " timeout:");
+  else
+    fprintf(stream, " period:");
+
+  /* Display value without units */
+  if(flags & IW_POWER_RELATIVE)
+    fprintf(stream, "%g  ", ((double) value) / MEGA);
+  else
+    {
+      /* Display value with units */
+      if(value >= (int) MEGA)
+	fprintf(stream, "%gs  ", ((double) value) / MEGA);
+      else
+	if(value >= (int) KILO)
+	  fprintf(stream, "%gms  ", ((double) value) / KILO);
+	else
+	  fprintf(stream, "%dus  ", value);
+    }
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Output a power management mode
+ */
+void
+print_pm_mode(FILE *	stream,
+	      int	flags)
+{
+  /* Print the proper mode... */
+  switch(flags & IW_POWER_MODE)
+    {
+    case IW_POWER_UNICAST_R:
+      fprintf(stream, " mode:Unicast only received");
+      break;
+    case IW_POWER_MULTICAST_R:
+      fprintf(stream, " mode:Multicast only received");
+      break;
+    case IW_POWER_ALL_R:
+      fprintf(stream, " mode:All packets received");
+      break;
+    case IW_POWER_FORCE_S:
+      fprintf(stream, " mode:Force sending");
+      break;
+    case IW_POWER_REPEATER:
+      fprintf(stream, " mode:Repeat multicasts");
+      break;
+    default:
+    }
+}
+
+/***************** RETRY LIMIT/LIFETIME SUBROUTINES *****************/
+
+#if WIRELESS_EXT > 10
+/*------------------------------------------------------------------*/
+/*
+ * Output a retry value with all attributes...
+ */
+void
+print_retry_value(FILE *	stream,
+		  int		value,
+		  int		flags)
+{
+  /* Modifiers */
+  if(flags & IW_RETRY_MIN)
+    fprintf(stream, " min");
+  if(flags & IW_RETRY_MAX)
+    fprintf(stream, " max");
+
+  /* Type lifetime of limit */
+  if(flags & IW_RETRY_LIFETIME)
+    {
+      fprintf(stream, " lifetime:");
+
+      /* Display value without units */
+      if(flags & IW_POWER_RELATIVE)
+	fprintf(stream, "%g", ((double) value) / MEGA);
+      else
+	{
+	  /* Display value with units */
+	  if(value >= (int) MEGA)
+	    fprintf(stream, "%gs", ((double) value) / MEGA);
+	  else
+	    if(value >= (int) KILO)
+	      fprintf(stream, "%gms", ((double) value) / KILO);
+	    else
+	      fprintf(stream, "%dus", value);
+	}
+    }
+  else
+    fprintf(stream, " limit:%d", value);
+}
+#endif	/* WIRELESS_EXT > 10 */
 
 /*********************** ADDRESS SUBROUTINES ************************/
 /*

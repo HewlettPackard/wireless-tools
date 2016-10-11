@@ -1,11 +1,13 @@
 /*
  *	Wireless Tools
  *
- *		Jean II - HPLB '99
+ *		Jean II - HPLB 97->99 - HPL 99->00
  *
  * Main code for "iwconfig". This is the generic tool for most
  * manipulations...
  * You need to link this code against "iwcommon.c" and "-lm".
+ *
+ * This file is released under the GPL license.
  */
 
 #include "iwcommon.h"		/* Header */
@@ -253,7 +255,7 @@ set_private(int		skfd,		/* Socket */
 	case IW_PRIV_TYPE_INT:
 	  /* Display args */
 	  for(j = 0; j < n; j++)
-	    printf("%d  ", ((u_int *) buffer)[i]);
+	    printf("%d  ", ((u_int *) buffer)[j]);
 	  printf("\n");
 	  break;
 

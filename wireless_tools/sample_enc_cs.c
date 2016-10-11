@@ -1,3 +1,8 @@
+/* Note : this particular snipset of code is available under
+ * the LGPL, MPL or BSD license (at your choice).
+ * Jean II
+ */
+
 #define MAX_KEY_SIZE	16
 #define	MAX_KEYS	8
 int	key_on = 0;

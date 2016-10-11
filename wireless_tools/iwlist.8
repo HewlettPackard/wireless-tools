@@ -1,0 +1,79 @@
+.\" Jean II - HPLB - 96
+.\" iwlist.8
+.\"
+.TH IWLIST 8 "31 October 1996" "net-tools" "Linux Programmer's Manual"
+.\"
+.\" NAME part
+.\"
+.SH NAME
+iwlist \- Get wireless statistics from specific nodes
+.\"
+.\" SYNOPSIS part
+.\"
+.SH SYNOPSIS
+.BI "iwlist " interface " freq"
+.br
+.BI "iwlist " interface " ap"
+.br
+.BI "iwlist " interface " rate"
+.br
+.BI "iwlist " interface " keys"
+.br
+.BI "iwlist " interface " power"
+.br
+.BI "iwlist " interface " txpower"
+.br
+.BI "iwlist " interface " retry"
+.\"
+.\" DESCRIPTION part
+.\"
+.SH DESCRIPTION
+.B Iwlist
+is used to display some large chunk of information from a wireless
+network interface that is not displayed by iwconfig. This is typically
+list of parameters.
+.\"
+.\" PARAMETER part
+.\"
+.SH PARAMETERS
+.TP
+.B freq
+Give the list of available frequencies in the device and the number of
+defined channels. Please note that usually the driver returns the
+total number of channels and only the frequencies available in the
+present locale, so there is no one to one mapping between frequencies
+displayed and channel numbers.
+.TP
+.B ap
+Give the list of Access Points in range, and optionally the quality of
+link to them.
+.TP
+.BR rate / bit [rate]
+List the bit-rates supported by the device.
+.TP
+.BR keys / enc [ryption]
+List the encryption key sizes supported and display all the encryption
+keys availables in the device.
+.TP
+.B power
+List the various Power Management attributes and modes of the device.
+.TP
+.B txpower
+List the various Transmit Power available on the device.
+.TP
+.B retry
+List the transmit retry limits and retry lifetime on the device.
+.\"
+.\" FILES part
+.\"
+.SH FILES
+.I /proc/net/wireless
+.\"
+.\" SEE ALSO part
+.\"
+.SH SEE ALSO
+.BR iwconfig (8),
+.BR ifconfig (8),
+.BR iwspy (8).
+.BR iwpriv (8).
+
