@@ -17,6 +17,9 @@
 #define FORMAT_SCHEME	1	/* To be used as a Pcmcia Scheme */
 #define WTYPE_ESSID	0	/* Display ESSID or NWID */
 #define WTYPE_AP	1	/* Display AP/Cell Address */
+#define WTYPE_FREQ	2	/* Display frequency/channel */
+#define WTYPE_MODE	3	/* Display mode */
+#define WTYPE_PROTO	4	/* Display protocol name */
 
 /*
  * Note on Pcmcia Schemes :
@@ -69,6 +72,10 @@
 /*
  * Just for the heck of it, let's try to not link with iwlib.
  * This will keep the binary small and tiny...
+ *
+ * Note : maybe it's time to admit that we have lost the battle
+ * and we start using iwlib ? Maybe we should default to dynamic
+ * lib first...
  */
 
 /*------------------------------------------------------------------*/
@@ -122,6 +129,59 @@ iw_ether_ntop(const struct ether_addr* eth, char* buf)
 	  eth->ether_addr_octet[4], eth->ether_addr_octet[5]);
 }
 
+/*------------------------------------------------------------------*/
+/*
+ * Convert our internal representation of frequencies to a floating point.
+ */
+double
+iw_freq2float(iwfreq *	in)
+{
+#ifdef WE_NOLIBM
+  /* Version without libm : slower */
+  int		i;
+  double	res = (double) in->m;
+  for(i = 0; i < in->e; i++)
+    res *= 10;
+  return(res);
+#else	/* WE_NOLIBM */
+  /* Version with libm : faster */
+  return ((double) in->m) * pow(10,in->e);
+#endif	/* WE_NOLIBM */
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Output a frequency with proper scaling
+ */
+void
+iw_print_freq(char *	buffer,
+	      double	freq)
+{
+  if(freq < KILO)
+    sprintf(buffer, "Channel:%g", freq);
+  else
+    {
+      if(freq >= GIGA)
+	sprintf(buffer, "Frequency:%gGHz", freq / GIGA);
+      else
+	{
+	  if(freq >= MEGA)
+	    sprintf(buffer, "Frequency:%gMHz", freq / MEGA);
+	  else
+	    sprintf(buffer, "Frequency:%gkHz", freq / KILO);
+	}
+    }
+}
+
+/*------------------------------------------------------------------*/
+const char * const iw_operation_mode[] = { "Auto",
+					"Ad-Hoc",
+					"Managed",
+					"Master",
+					"Repeater",
+					"Secondary",
+					"Monitor" };
+
 /************************ DISPLAY ESSID/NWID ************************/
 
 /*------------------------------------------------------------------*/
@@ -142,7 +202,7 @@ print_essid(int			skfd,
   /* Get ESSID */
   strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
   wrq.u.essid.pointer = (caddr_t) essid;
-  wrq.u.essid.length = 0;
+  wrq.u.essid.length = IW_ESSID_MAX_SIZE + 1;
   wrq.u.essid.flags = 0;
   if(ioctl(skfd, SIOCGIWESSID, &wrq) < 0)
     return(-1);
@@ -227,7 +287,118 @@ print_ap(int		skfd,
       printf("%s\n", buffer);
       break;
     default:
-      printf("%-8.8s  Access Point: %s\n", ifname, buffer);
+      printf("%-8.8s  Access Point/Cell: %s\n", ifname, buffer);
+      break;
+    }
+
+  return(0);
+}
+
+/****************************** OTHER ******************************/
+
+/*------------------------------------------------------------------*/
+/*
+ * Display the frequency (or channel) if possible
+ */
+static int
+print_freq(int		skfd,
+	   const char *	ifname,
+	   int		format)
+{
+  struct iwreq		wrq;
+  double		freq;
+  char			buffer[64];
+
+  /* Get frequency / channel */
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+  if(ioctl(skfd, SIOCGIWFREQ, &wrq) < 0)
+    return(-1);
+
+  /* Print */
+  freq = iw_freq2float(&(wrq.u.freq));
+  switch(format)
+    {
+    case FORMAT_SCHEME:
+      printf("%g\n", freq);
+      break;
+    default:
+      iw_print_freq(buffer, freq);
+      printf("%-8.8s  %s\n", ifname, buffer);
+      break;
+    }
+
+  return(0);
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Display the mode if possible
+ */
+static int
+print_mode(int		skfd,
+	   const char *	ifname,
+	   int		format)
+{
+  struct iwreq		wrq;
+
+  /* Get frequency / channel */
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+  if(ioctl(skfd, SIOCGIWMODE, &wrq) < 0)
+    return(-1);
+  if(wrq.u.mode >= IW_NUM_OPER_MODE)
+    return(-2);
+
+  /* Print */
+  switch(format)
+    {
+    case FORMAT_SCHEME:
+      printf("%d\n", wrq.u.mode);
+      break;
+    default:
+      printf("%-8.8s  Mode:%s\n", ifname, iw_operation_mode[wrq.u.mode]);
+      break;
+    }
+
+  return(0);
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Display the ESSID if possible
+ */
+static int
+print_protocol(int		skfd,
+	       const char *	ifname,
+	       int		format)
+{
+  struct iwreq		wrq;
+  char			proto[IFNAMSIZ + 1];	/* Protocol */
+  char			pproto[IFNAMSIZ + 1];	/* Pcmcia format */
+  unsigned int		i;
+  unsigned int		j;
+
+  /* Get Protocol name */
+  strncpy(wrq.ifr_name, ifname, IFNAMSIZ);
+  if(ioctl(skfd, SIOCGIWNAME, &wrq) < 0)
+    return(-1);
+  strncpy(proto, wrq.u.name, IFNAMSIZ);
+  proto[IFNAMSIZ] = '\0';
+
+  switch(format)
+    {
+    case FORMAT_SCHEME:
+      /* Strip all white space and stuff */
+      j = 0;
+      for(i = 0; i < strlen(proto); i++)
+	if(isalnum(proto[i]))
+	  pproto[j++] = proto[i];
+      pproto[j] = '\0';
+      if((j == 0) || (j > 32))
+	return(-2);
+      printf("%s\n", pproto);
+      break;
+    default:
+      printf("%-8.8s  Protocol Name:\"%s\"\n", ifname, proto);
       break;
     }
 
@@ -249,20 +420,36 @@ print_one_device(int		skfd,
   int ret;
 
   /* Check wtype */
-  if(wtype == WTYPE_AP)
+  switch(wtype)
     {
+    case WTYPE_AP:
       /* Try to print an AP */
       ret = print_ap(skfd, ifname, format);
-      return(ret);
-    }
+      break;
 
-  /* Try to print an ESSID */
-  ret = print_essid(skfd, ifname, format);
+    case WTYPE_FREQ:
+      /* Try to print frequency */
+      ret = print_freq(skfd, ifname, format);
+      break;
 
-  if(ret < 0)
-    {
-      /* Try to print a nwid */
-      ret = print_nwid(skfd, ifname, format);
+    case WTYPE_MODE:
+      /* Try to print the mode */
+      ret = print_mode(skfd, ifname, format);
+      break;
+
+    case WTYPE_PROTO:
+      /* Try to print the protocol */
+      ret = print_protocol(skfd, ifname, format);
+      break;
+
+    default:
+      /* Try to print an ESSID */
+      ret = print_essid(skfd, ifname, format);
+      if(ret < 0)
+	{
+	  /* Try to print a nwid */
+	  ret = print_nwid(skfd, ifname, format);
+	}
     }
 
   return(ret);
@@ -310,15 +497,21 @@ iw_usage(int status)
 {
   fputs("Usage iwgetid [OPTIONS] [ifname]\n"
 	"  Options are:\n"
-	"    -a,--ap      Print the access point address\n"
-	"    -h,--help    Print this message\n"
-	"    -s,--scheme  Format the output as a PCMCIA scheme identifier\n",
+	"    -a,--ap       Print the access point address\n"
+	"    -f,--freq     Print the current frequency\n"
+	"    -m,--mode     Print the current mode\n"
+	"    -p,--protocol Print the protocol name\n"
+	"    -s,--scheme   Format the output as a PCMCIA scheme identifier\n"
+	"    -h,--help     Print this message\n",
 	status ? stderr : stdout);
   exit(status);
 }
 
 static const struct option long_opts[] = {
   { "ap", no_argument, NULL, 'a' },
+  { "freq", no_argument, NULL, 'f' },
+  { "mode", no_argument, NULL, 'm' },
+  { "protocol", no_argument, NULL, 'p' },
   { "help", no_argument, NULL, 'h' },
   { "scheme", no_argument, NULL, 's' },
   { NULL, 0, NULL, 0 }
@@ -339,13 +532,28 @@ main(int	argc,
   int	ret = -1;
 
   /* Check command line arguments */
-  while((opt = getopt_long(argc, argv, "ahs", long_opts, NULL)) > 0)
+  while((opt = getopt_long(argc, argv, "afhmps", long_opts, NULL)) > 0)
     {
       switch(opt)
 	{
 	case 'a':
 	  /* User wants AP/Cell Address */
 	  wtype = WTYPE_AP;
+	  break;
+
+	case 'f':
+	  /* User wants frequency/channel */
+	  wtype = WTYPE_FREQ;
+	  break;
+
+	case 'm':
+	  /* User wants the mode */
+	  wtype = WTYPE_MODE;
+	  break;
+
+	case 'p':
+	  /* User wants the protocol */
+	  wtype = WTYPE_PROTO;
 	  break;
 
 	case 'h':

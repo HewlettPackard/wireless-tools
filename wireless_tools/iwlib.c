@@ -9,7 +9,43 @@
  *     Copyright (c) 1997-2002 Jean Tourrilhes <jt@hpl.hp.com>
  */
 
+/***************************** INCLUDES *****************************/
+
 #include "iwlib.h"		/* Header */
+
+/************************ CONSTANTS & MACROS ************************/
+
+/* Various versions information */
+/* Recommended Wireless Extension version */
+#define WE_VERSION	15
+/* Version of Wireless Tools */
+#define WT_VERSION	25
+
+/*
+ * Verify a few things about Wireless Extensions.
+ * I try to maximise backward and forward compatibility, but things are
+ * tricky because I'm fixing bugs and adding new features.
+ * Wireless Tools *must* be compiled with the same version of WE
+ * as the driver. Sometime, the size or layout of some structure changes,
+ * and might produce interesting results.
+ * Wireless Tools will usually compile properly against different
+ * versions of WE, thanks to the zillions of #ifdefs in my code.
+ * Jean II
+ */
+#if WIRELESS_EXT < 9
+#error "Wireless Extension v9 or newer required :-("
+#error "Use Wireless Tools v19 or update your kernel headers !"
+#endif
+#if WIRELESS_EXT < WE_VERSION && !defined(WEXT_HEADER)
+#warning "Wireless Extension earlier than v15 detected,"
+#warning "Not all tools features will be compiled in !"
+#warning "No worry, I'll try to make the best of it ;-)"
+#endif
+#if WIRELESS_EXT > WE_VERSION && !defined(WEXT_HEADER)
+#warning "Wireless Extension later than v15 detected,"
+#warning "Maybe you should get a more recent version"
+#warning "of the Wireless Tools package !"
+#endif
 
 /**************************** VARIABLES ****************************/
 
@@ -18,7 +54,11 @@ const char * const iw_operation_mode[] = { "Auto",
 					"Managed",
 					"Master",
 					"Repeater",
-					"Secondary" };
+					"Secondary",
+					"Monitor" };
+
+/* Disable runtime version warning in iw_get_range_info() */
+int	iw_ignore_version = 0;
 
 /************************ SOCKET SUBROUTINES *************************/
 
@@ -60,9 +100,7 @@ iw_sockets_open(void)
 
 /*------------------------------------------------------------------*/
 /*
- * Extract the interface name out of /proc/net/wireless
- * Important note : this procedure will work only with /proc/net/wireless
- * and not /proc/net/dev, because it doesn't guarantee a ' ' after the ':'.
+ * Extract the interface name out of /proc/net/wireless or /proc/net/dev.
  */
 static inline char *
 iw_get_ifname(char *	name,	/* Where to store the name */
@@ -75,10 +113,17 @@ iw_get_ifname(char *	name,	/* Where to store the name */
   while(isspace(*buf))
     buf++;
 
+#ifndef IW_RESTRIC_ENUM
+  /* Get name up to the last ':'. Aliases may contain ':' in them,
+   * but the last one should be the separator */
+  end = strrchr(buf, ':');
+#else
   /* Get name up to ": "
    * Note : we compare to ": " to make sure to process aliased interfaces
-   * properly. */
+   * properly. Doesn't work on /proc/net/dev, because it doesn't guarantee
+   * a ' ' after the ':'*/
   end = strstr(buf, ": ");
+#endif
 
   /* Not found ??? To big ??? */
   if((end == NULL) || (((end - buf) + 1) > nsize))
@@ -111,8 +156,13 @@ iw_enum_devices(int		skfd,
   struct ifreq *ifr;
   int		i;
 
+#ifndef IW_RESTRIC_ENUM
+  /* Check if /proc/net/wireless is available */
+  fh = fopen(PROC_NET_DEV, "r");
+#else
   /* Check if /proc/net/wireless is available */
   fh = fopen(PROC_NET_WIRELESS, "r");
+#endif
 
   if(fh != NULL)
     {
@@ -189,31 +239,45 @@ iw_get_range_info(int		skfd,
    * Extensions are concerned. It's because /usr/include/linux/wireless.h
    * and /usr/src/linux/include/linux/wireless.h are different.
    * We try to catch this stuff here... */
-
-  /* For new versions, we can check the version directly, for old versions
-   * we use magic. 300 bytes is a also magic number, don't touch... */
-  if((WIRELESS_EXT > 10) && (wrq.u.data.length >= 300))
+  if(!iw_ignore_version)
     {
+      /* For new versions, we can check the version directly, for old versions
+       * we use magic. 300 bytes is a also magic number, don't touch... */
+      if((WIRELESS_EXT > 10) && (wrq.u.data.length >= 300))
+	{
 #if WIRELESS_EXT > 10
-      /* Version verification - for new versions */
-      if(range->we_version_compiled != WIRELESS_EXT)
-	{
-	  fprintf(stderr, "Warning : Device %s has been compiled with version %d\n", ifname, range->we_version_compiled);
-	  fprintf(stderr, "of Wireless Extension, while we are using version %d.\n", WIRELESS_EXT);
-	  fprintf(stderr, "Some things may be broken...\n\n");
-	}
+	  /* Version verification - for new versions */
+	  if(range->we_version_compiled != WIRELESS_EXT)
+	    {
+	      fprintf(stderr, "Warning: Driver for device %s has been compiled with version %d\n", ifname, range->we_version_compiled);
+	      fprintf(stderr, "of Wireless Extension, while this program is using version %d.\n", WIRELESS_EXT);
+	      fprintf(stderr, "Some things may be broken...\n\n");
+	    }
+	  /* Driver version verification */
+	  if(range->we_version_compiled < range->we_version_source)
+	    {
+	      fprintf(stderr, "Warning: Driver for device %s recommend version %d of Wireless Extension,\n", ifname, range->we_version_source);
+	      fprintf(stderr, "but has been compiled with version %d, therefore some driver features\n", range->we_version_compiled);
+	      fprintf(stderr, "may not be available...\n\n");
+	    }
 #endif /* WIRELESS_EXT > 10 */
-    }
-  else
-    {
-      /* Version verification - for old versions */
-      if(wrq.u.data.length != sizeof(iwrange))
+	}
+      else
 	{
-	  fprintf(stderr, "Warning : Device %s has been compiled with a different version\n", ifname);
-	  fprintf(stderr, "of Wireless Extension than ours (we are using version %d).\n", WIRELESS_EXT);
-	  fprintf(stderr, "Some things may be broken...\n\n");
+	  /* Version verification - for old versions */
+	  if(wrq.u.data.length != sizeof(iwrange))
+	    {
+	      fprintf(stderr, "Warning: Driver for device %s has been compiled with an ancient version\n", ifname);
+	      fprintf(stderr, "of Wireless Extension, while this program is using version %d.\n", WIRELESS_EXT);
+	      fprintf(stderr, "Some things may be broken...\n\n");
+	    }
 	}
     }
+  /* Don't complain twice.
+   * In theory, the test apply to each individual driver, but usually
+   * all drivers are compiled from the same kernel, and most often
+   * problem is the system/glibc headers. */
+  iw_ignore_version = 1;
 
   /* Note : we are only trying to catch compile difference, not source.
    * If the driver source has not been updated to the latest, it doesn't
@@ -224,18 +288,103 @@ iw_get_range_info(int		skfd,
 
 /*------------------------------------------------------------------*/
 /*
+ * Print the WE versions of the interface.
+ */
+static int
+print_iface_version_info(int	skfd,
+			 char *	ifname,
+			 char *	args[],		/* Command line args */
+			 int	count)		/* Args count */
+{
+  struct iwreq		wrq;
+  char			buffer[sizeof(iwrange) * 2];	/* Large enough */
+  struct iw_range *	range;
+
+  /* Avoid "Unused parameter" warning */
+  args = args; count = count;
+
+  /* Cleanup */
+  memset(buffer, 0, sizeof(buffer));
+
+  wrq.u.data.pointer = (caddr_t) buffer;
+  wrq.u.data.length = sizeof(buffer);
+  wrq.u.data.flags = 0;
+  if(iw_get_ext(skfd, ifname, SIOCGIWRANGE, &wrq) < 0)
+    return(-1);
+
+  /* Copy stuff at the right place, ignore extra */
+  range = (struct iw_range *) buffer;
+
+  /* For new versions, we can check the version directly, for old versions
+   * we use magic. 300 bytes is a also magic number, don't touch... */
+  if((WIRELESS_EXT > 10) && (wrq.u.data.length >= 300))
+    {
+#if WIRELESS_EXT > 10
+      printf("%-8.8s  Recommend Wireless Extension v%d or later,\n",
+	     ifname, range->we_version_source);
+      printf("          Currently compiled with Wireless Extension v%d.\n\n",
+	     range->we_version_compiled);
+#endif /* WIRELESS_EXT > 10 */
+    }
+  else
+    {
+#if 0
+      fprintf(stderr, "%-8.8s  no Wireless Extension version information.\n\n",
+		      ifname);
+#endif
+    }
+
+
+  return(0);
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Print the WE versions of the tools.
+ */
+int
+iw_print_version_info(char *	toolname)
+{
+  int skfd;			/* generic raw socket desc.	*/
+
+  /* Create a channel to the NET kernel. */
+  if((skfd = iw_sockets_open()) < 0)
+    {
+      perror("socket");
+      return -1;
+    }
+
+  /* Information about the tools themselves */
+  if(toolname != NULL)
+    printf("%-8.8s  Version %d\n", toolname, WT_VERSION);
+  printf("          Compatible with Wireless Extension v%d or earlier,\n",
+	 WE_VERSION);
+  printf("          Currently compiled with Wireless Extension v%d.\n\n",
+	 WIRELESS_EXT);
+
+  /* Version for each device */
+  iw_enum_devices(skfd, &print_iface_version_info, NULL, 0);
+
+  close(skfd);
+
+  return 0;
+}
+
+/*------------------------------------------------------------------*/
+/*
  * Get information about what private ioctls are supported by the driver
  */
 int
 iw_get_priv_info(int		skfd,
 		 char *		ifname,
-		 iwprivargs *	priv)
+		 iwprivargs *	priv,
+		 int		maxpriv)
 {
   struct iwreq		wrq;
 
   /* Ask the driver */
   wrq.u.data.pointer = (caddr_t) priv;
-  wrq.u.data.length = 32;
+  wrq.u.data.length = maxpriv;
   wrq.u.data.flags = 0;
   if(iw_get_ext(skfd, ifname, SIOCGIWPRIV, &wrq) < 0)
     return(-1);
@@ -266,7 +415,10 @@ iw_get_basic_config(int			skfd,
     /* If no wireless name : no wireless extensions */
     return(-1);
   else
-    strcpy(info->name, wrq.u.name);
+    {
+      strncpy(info->name, wrq.u.name, IFNAMSIZ);
+      info->name[IFNAMSIZ] = '\0';
+    }
 
   /* Get network ID */
   if(iw_get_ext(skfd, ifname, SIOCGIWNWID, &wrq) >= 0)
@@ -295,7 +447,7 @@ iw_get_basic_config(int			skfd,
 
   /* Get ESSID */
   wrq.u.essid.pointer = (caddr_t) info->essid;
-  wrq.u.essid.length = IW_ESSID_MAX_SIZE;
+  wrq.u.essid.length = IW_ESSID_MAX_SIZE + 1;
   wrq.u.essid.flags = 0;
   if(iw_get_ext(skfd, ifname, SIOCGIWESSID, &wrq) >= 0)
     {
@@ -426,7 +578,64 @@ iw_set_basic_config(int			skfd,
   return(ret);
 }
 
+/*********************** PROTOCOL SUBROUTINES ***********************/
+/*
+ * Fun stuff with protocol identifiers (SIOCGIWNAME).
+ * We assume that drivers are returning sensible values in there,
+ * which is not always the case :-(
+ */
+
+/*------------------------------------------------------------------*/
+/*
+ * Compare protocol identifiers.
+ * We don't want to know if the two protocols are the exactly same,
+ * but if they interoperate at some level, and also if they accept the
+ * same type of config (ESSID vs NWID, freq...).
+ * This is supposed to work around the alphabet soup.
+ * Return 1 if protocols are compatible
+ */
+int
+iw_protocol_compare(char *	protocol1,
+		    char *	protocol2)
+{
+  char *	dot11 = "IEEE 802.11";
+  char *	dot11_ds = "Dbg";
+
+  /* If the strings are the same -> easy */
+  if(!strncmp(protocol1, protocol2, IFNAMSIZ))
+    return(1);
+
+  /* Are we dealing with one of the 802.11 variant ? */
+  if( (!strncmp(protocol1, dot11, strlen(dot11))) &&
+      (!strncmp(protocol2, dot11, strlen(dot11))) )
+    {
+      char *	sub1 = protocol1 + strlen(dot11);
+      char *	sub2 = protocol2 + strlen(dot11);
+
+      /* Skip optional separator */
+      if(*sub1 == '-')
+	sub1++;
+      if(*sub2 == '-')
+	sub2++;
+
+      /* Check if they are both 2.4 GHz Direct Sequence compatible */
+      if( (strchr(dot11_ds, *sub1) != NULL) &&
+	  (strchr(dot11_ds, *sub2) != NULL) )
+	return(1);
+    }
+  /* Not compatible */
+  return(0);
+}
+
 /********************** FREQUENCY SUBROUTINES ***********************/
+/*
+ * Note : the two functions below are the cause of troubles on
+ * various embeeded platforms, as they are the reason we require
+ * libm (math library).
+ * In this case, please use enable BUILD_NOLIBM in the makefile
+ *
+ * FIXME : check negative mantissa and exponent
+ */
 
 /*------------------------------------------------------------------*/
 /*
@@ -439,6 +648,17 @@ void
 iw_float2freq(double	in,
 	      iwfreq *	out)
 {
+#ifdef WE_NOLIBM
+  /* Version without libm : slower */
+  out->e = 0;
+  while(in > 1e9)
+    {
+      in /= 10;
+      out->e++;
+    }
+  out->m = (long) in;
+#else	/* WE_NOLIBM */
+  /* Version with libm : faster */
   out->e = (short) (floor(log10(in)));
   if(out->e > 8)
     {
@@ -447,9 +667,10 @@ iw_float2freq(double	in,
     }
   else
     {
-      out->m = in;
+      out->m = (long) in;
       out->e = 0;
     }
+#endif	/* WE_NOLIBM */
 }
 
 /*------------------------------------------------------------------*/
@@ -459,7 +680,17 @@ iw_float2freq(double	in,
 double
 iw_freq2float(iwfreq *	in)
 {
+#ifdef WE_NOLIBM
+  /* Version without libm : slower */
+  int		i;
+  double	res = (double) in->m;
+  for(i = 0; i < in->e; i++)
+    res *= 10;
+  return(res);
+#else	/* WE_NOLIBM */
+  /* Version with libm : faster */
   return ((double) in->m) * pow(10,in->e);
+#endif	/* WE_NOLIBM */
 }
 
 /*------------------------------------------------------------------*/
@@ -468,7 +699,7 @@ iw_freq2float(iwfreq *	in)
  */
 void
 iw_print_freq(char *	buffer,
-	      float	freq)
+	      double	freq)
 {
   if(freq < KILO)
     sprintf(buffer, "Channel:%g", freq);
@@ -484,6 +715,33 @@ iw_print_freq(char *	buffer,
 	    sprintf(buffer, "Frequency:%gkHz", freq / KILO);
 	}
     }
+}
+
+/*------------------------------------------------------------------*/
+/*
+ * Convert a frequency to a channel (negative -> error)
+ */
+int
+iw_freq_to_channel(double		freq,
+		   struct iw_range *	range)
+{
+  double	ref_freq;
+  int		k;
+
+  /* Check if it's a frequency or not already a channel */
+  if(freq < KILO)
+    return(-1);
+
+  /* We compare the frequencies as double to ignore differences
+   * in encoding. Slower, but safer... */
+  for(k = 0; k < range->num_frequency; k++)
+    {
+      ref_freq = iw_freq2float(&(range->freq[k]));
+      if(freq == ref_freq)
+	return(range->freq[k].i);
+    }
+  /* Not found */
+  return(-2);
 }
 
 /*********************** BITRATE SUBROUTINES ***********************/
@@ -700,6 +958,21 @@ iw_print_key(char *		buffer,
 
 /*------------------------------------------------------------------*/
 /*
+ * Convert a passphrase into a key
+ * ### NOT IMPLEMENTED ###
+ * Return size of the key, or 0 (no key) or -1 (error)
+ */
+int
+iw_pass_key(char *		input,
+	    unsigned char *	key)
+{
+  input = input; key = key;
+  fprintf(stderr, "Error: Passphrase not implemented\n");
+  return(-1);
+}
+
+/*------------------------------------------------------------------*/
+/*
  * Parse a key from the command line.
  * Return size of the key, or 0 (no key) or -1 (error)
  */
@@ -715,38 +988,44 @@ iw_in_key(char *		input,
   /* Check the type of key */
   if(!strncmp(input, "s:", 2))
     {
-      /* First case : as an ASCII string */
+      /* First case : as an ASCII string (Lucent/Agere cards) */
       keylen = strlen(input + 2);		/* skip "s:" */
       if(keylen > IW_ENCODING_TOKEN_MAX)
 	keylen = IW_ENCODING_TOKEN_MAX;
       strncpy(key, input + 2, keylen);
     }
   else
-    {
-      /* Second case : as hexadecimal digits */
-      buff = malloc(strlen(input) + 1);
-      if(buff == NULL)
-	{
-	  fprintf(stderr, "Malloc failed (string too long ?)\n");
-	  return(-1);
-	}
-      /* Preserve original buffer */
-      strcpy(buff, input);
+    if(!strncmp(input, "p:", 2))
+      {
+	/* Second case : as a passphrase (PrismII cards) */
+	return(iw_pass_key(input + 2, key));		/* skip "p:" */
+      }
+    else
+      {
+	/* Third case : as hexadecimal digits */
+	buff = malloc(strlen(input) + 1);
+	if(buff == NULL)
+	  {
+	    fprintf(stderr, "Malloc failed (string too long ?)\n");
+	    return(-1);
+	  }
+	/* Preserve original buffer */
+	strcpy(buff, input);
 
-      /* Parse */
-      p = strtok(buff, "-:;.,");
-      while((p != (char *) NULL) && (keylen < IW_ENCODING_TOKEN_MAX))
-	{
-	  if(sscanf(p, "%2X", &temp) != 1)
-	    return(-1);		/* Error */
-	  key[keylen++] = (unsigned char) (temp & 0xFF);
-	  if(strlen(p) > 2)	/* Token not finished yet */
-	    p += 2;
-	  else
-	    p = strtok((char *) NULL, "-:;.,");
-	}
-      free(buff);
-    }
+	/* Parse */
+	p = strtok(buff, "-:;.,");
+	while((p != (char *) NULL) && (keylen < IW_ENCODING_TOKEN_MAX))
+	  {
+	    if(sscanf(p, "%2X", &temp) != 1)
+	      return(-1);		/* Error */
+	    key[keylen++] = (unsigned char) (temp & 0xFF);
+	    if(strlen(p) > 2)	/* Token not finished yet */
+	      p += 2;
+	    else
+	      p = strtok((char *) NULL, "-:;.,");
+	  }
+	free(buff);
+      }
 
   return(keylen);
 }
@@ -1094,6 +1373,7 @@ iw_in_inet(char *name, struct sockaddr *sap)
 	return(1);
   }
 
+  /* Always use the resolver (DNS name + IP addresses) */
   if ((hp = gethostbyname(name)) == (struct hostent *)NULL) {
 	errno = h_errno;
 	return(-1);
@@ -1186,23 +1466,29 @@ iw_in_addr(int		skfd,
 
 /************************* MISC SUBROUTINES **************************/
 
+/* Size (in bytes) of various events */
+static const int priv_type_size[] = {
+	0,				/* IW_PRIV_TYPE_NONE */
+	1,				/* IW_PRIV_TYPE_BYTE */
+	1,				/* IW_PRIV_TYPE_CHAR */
+	0,				/* Not defined */
+	sizeof(__u32),			/* IW_PRIV_TYPE_INT */
+	sizeof(struct iw_freq),		/* IW_PRIV_TYPE_FLOAT */
+	sizeof(struct sockaddr),	/* IW_PRIV_TYPE_ADDR */
+	0,				/* Not defined */
+};
+
 /*------------------------------------------------------------------*/
 /*
  * Max size in bytes of an private argument.
  */
 int
-iw_byte_size(int	args)
+iw_get_priv_size(int	args)
 {
-  int	ret = args & IW_PRIV_SIZE_MASK;
+  int	num = args & IW_PRIV_SIZE_MASK;
+  int	type = (args & IW_PRIV_TYPE_MASK) >> 12;
 
-  if(((args & IW_PRIV_TYPE_MASK) == IW_PRIV_TYPE_INT) ||
-     ((args & IW_PRIV_TYPE_MASK) == IW_PRIV_TYPE_FLOAT))
-    ret <<= 2;
-
-  if((args & IW_PRIV_TYPE_MASK) == IW_PRIV_TYPE_NONE)
-    return 0;
-
-  return ret;
+  return(num * priv_type_size[type]);
 }
 
 /************************ EVENT SUBROUTINES ************************/
@@ -1219,10 +1505,10 @@ iw_byte_size(int	args)
 #define IW_HEADER_TYPE_CHAR	2	/* char [IFNAMSIZ] */
 #define IW_HEADER_TYPE_UINT	4	/* __u32 */
 #define IW_HEADER_TYPE_FREQ	5	/* struct iw_freq */
-#define IW_HEADER_TYPE_POINT	6	/* struct iw_point */
-#define IW_HEADER_TYPE_PARAM	7	/* struct iw_param */
-#define IW_HEADER_TYPE_ADDR	8	/* struct sockaddr */
-#define IW_HEADER_TYPE_QUAL	9	/* struct iw_quality */
+#define IW_HEADER_TYPE_ADDR	6	/* struct sockaddr */
+#define IW_HEADER_TYPE_POINT	8	/* struct iw_point */
+#define IW_HEADER_TYPE_PARAM	9	/* struct iw_param */
+#define IW_HEADER_TYPE_QUAL	10	/* struct iw_quality */
 
 /* Headers for the various requests */
 static const char standard_ioctl_hdr[] = {
@@ -1282,21 +1568,25 @@ static const unsigned int standard_ioctl_num = sizeof(standard_ioctl_hdr);
 static const char	standard_event_hdr[] = {
 	IW_HEADER_TYPE_ADDR,	/* IWEVTXDROP */
 	IW_HEADER_TYPE_QUAL,	/* IWEVQUAL */
+	IW_HEADER_TYPE_POINT,	/* IWEVCUSTOM */
+	IW_HEADER_TYPE_ADDR,	/* IWEVREGISTERED */
+	IW_HEADER_TYPE_ADDR,	/* IWEVEXPIRED */
 };
 static const unsigned int standard_event_num = sizeof(standard_event_hdr);
 
 /* Size (in bytes) of various events */
 static const int event_type_size[] = {
-	IW_EV_LCP_LEN,
+	IW_EV_LCP_LEN,		/* IW_HEADER_TYPE_NULL */
 	0,
-	IW_EV_CHAR_LEN,
+	IW_EV_CHAR_LEN,		/* IW_HEADER_TYPE_CHAR */
 	0,
-	IW_EV_UINT_LEN,
-	IW_EV_FREQ_LEN,
-	IW_EV_POINT_LEN,		/* Without variable payload */
-	IW_EV_PARAM_LEN,
-	IW_EV_ADDR_LEN,
-	IW_EV_QUAL_LEN,
+	IW_EV_UINT_LEN,		/* IW_HEADER_TYPE_UINT */
+	IW_EV_FREQ_LEN,		/* IW_HEADER_TYPE_FREQ */
+	IW_EV_ADDR_LEN,		/* IW_HEADER_TYPE_ADDR */
+	0,
+	IW_EV_POINT_LEN,	/* Without variable payload */
+	IW_EV_PARAM_LEN,	/* IW_HEADER_TYPE_PARAM */
+	IW_EV_QUAL_LEN,		/* IW_HEADER_TYPE_QUAL */
 };
 
 /*------------------------------------------------------------------*/
@@ -1326,7 +1616,7 @@ iw_extract_event_stream(struct stream_descr *	stream,	/* Stream of events */
 			struct iw_event *	iwe)	/* Extracted event */
 {
   int		event_type = 0;
-  int		event_len = 1;		/* Invalid */
+  unsigned int	event_len = 1;		/* Invalid */
   char *	pointer;
   /* Don't "optimise" the following variable, it will crash */
   unsigned	cmd_index;		/* *MUST* be unsigned */
@@ -1349,7 +1639,11 @@ iw_extract_event_stream(struct stream_descr *	stream,	/* Stream of events */
 	 iwe->cmd, iwe->len);
 #endif
 
-   /* Get the type and length of that event */
+  /* Check invalid events */
+  if(iwe->len <= IW_EV_LCP_LEN)
+    return(-1);
+
+  /* Get the type and length of that event */
   if(iwe->cmd <= SIOCIWLAST)
     {
       cmd_index = iwe->cmd - SIOCIWFIRST;
@@ -1362,11 +1656,16 @@ iw_extract_event_stream(struct stream_descr *	stream,	/* Stream of events */
       if(cmd_index < standard_event_num)
 	event_type = standard_event_hdr[cmd_index];
     }
+  /* Unknown events -> event_type=0 => IW_EV_LCP_LEN */
   event_len = event_type_size[event_type];
 
   /* Check if we know about this event */
-  if((event_len == 0) || (iwe->len == 0))
-    return(-1);
+  if(event_len <= IW_EV_LCP_LEN)
+    {
+      /* Skip to next event */
+      stream->current += iwe->len;
+      return(2);
+    }
   event_len -= IW_EV_LCP_LEN;
 
   /* Set pointer on data */
@@ -1382,7 +1681,11 @@ iw_extract_event_stream(struct stream_descr *	stream,	/* Stream of events */
 
   /* Copy the rest of the event (at least, fixed part) */
   if((pointer + event_len) > stream->end)
-    return(-2);
+    {
+      /* Go to next event */
+      stream->current += iwe->len;
+      return(-2);
+    }
   memcpy((char *) iwe + IW_EV_LCP_LEN, pointer, event_len);
 
   /* Skip event in the stream */
@@ -1399,7 +1702,7 @@ iw_extract_event_stream(struct stream_descr *	stream,	/* Stream of events */
 	/* No data */
 	iwe->u.data.pointer = NULL;
 
-       /* Go to next event */
+      /* Go to next event */
       stream->current += iwe->len;
     }
   else

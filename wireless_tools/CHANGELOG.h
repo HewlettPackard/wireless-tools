@@ -91,7 +91,7 @@
  *	o Use proper macros for compilation directives [Makefile]
  *		(From Jean Tourrilhes)
  *	o Put licensing info everywhere (almost). Yes, it's GPL !
- *	o Document the use of /etc/pcmcia/wireless.opts
+ *	o Document the use of /etc/pcmcia/wireless.opts [PCMCIA]
  *	o Add min/max modifiers to power management parameters [iwconfig]
  *		-> requested by Lee Keyser-Allen for the Spectrum24 driver
  *	o Optionally output a second power management parameter [iwconfig]
@@ -228,6 +228,82 @@
  *	o Always send TxPower flags to the driver [iwconfig]
  *		(From John M. Choi <johnchoi@its.caltech.edu>)
  *	o Header definition for Slackware (kernel 2.2/glibc 2.2) [iwlib]
+ *
+ * wireless 25 :
+ * -----------
+ *	o Remove library symbolic link before creating it [Makefile]
+ *	o Display error and exit if WE < 14 [iwevent]
+ *		(From Sander Jonkers <sander@grachtzicht.cjb.net>)
+ *	o Fix iwconfig usage display to show "enc off" [iwconfig]
+ *		(From Pavel Roskin <proski@gnu.org>)
+ *	o Formating : add spaces after cell/ap addr [iwconfig]
+ *	---
+ *	o Do driver WE source version verification [iwlib]
+ *		(From Pavel Roskin <proski@gnu.org>)
+ *	o Cleanup user configurable options [Makefile]
+ *	o add FORCE_WEXT_VERSION [Makefile]
+ *	o Add uninstall directived [Makefile]
+ *	o Cleanup version warnings [iwlib]
+ *	o Fix iwconfig usage display to show "mode MODE" [iwconfig]
+ *	o Replace "rm -f + ln -s" with "ln -sfn" in install [Makefile]
+ *	---
+ *	o Add various documentation in source code of [iwpriv]
+ *	o Allow to get more than 16 private ioctl description [iwlib]
+ *	o Ignore ioctl descriptions with null name [iwpriv]
+ *	o Implement sub-ioctls (simple/iw_point) [iwpriv]
+ *	---
+ *	o Add DISTRIBUTIONS file with call for help [README]
+ *	o Change iw_byte_size in iw_get_priv_size [iwlib]
+ *	o Document various bugs of new driver API with priv ioctls [iwpriv]
+ *	o Implement float/addr priv data types [iwpriv]
+ *	o Fix off-by-one bug (priv_size <= IFNAMSIZ) [iwpriv]
+ *	o Reformat/beautify ioctl list display [iwpriv]
+ *	o Add "-a" command line to dump all read-only priv ioctls [iwpriv]
+ *	o Add a sample showing new priv features [sample_priv_addr.c]
+ *	o Update other samples with new driver API [sample_enc.c/sample_pm.c]
+ *	---
+ *	o Fix "iwpriv -a" to not call ioctls not returning anything [iwpriv]
+ *	o Use IW_MAX_GET_SPY in increase number of addresses read [iwspy]
+ *	o Finish fixing the mess of off-by-one on IW_ESSID_MAX_SIZE [iwconfig]
+ *	o Do interface enumeration using /proc/net/dev [iwlib]
+ *	---
+ *	o Display various --version information [iwlib, iwconfig, iwlist]
+ *	o Filled in Debian 2.3 & Red-Hat 7.3 sections in [DISTRIBUTIONS]
+ *	o Filled in Red-Hat 7.2, Mandrake 8.2 and SuSE 8.0 in [DISTRIBUTIONS]
+ *	o Display current freq/channel after the iwrange list [iwlist]
+ *	o Display current rate after the iwrange list [iwlist]
+ *	o Display current txpower after the iwrange list [iwlist]
+ *	o Add BUILD_NOLIBM to build without libm [Makefile]
+ *	o Fix infinite loop on unknown events/scan elements [iwlib]
+ *	o Add IWEVCUSTOM support [iwevent, iwlist]
+ *	o Add IWEVREGISTERED & IWEVEXPIRED support [iwevent]
+ *		(From Pavel Roskin <proski@gnu.org>)
+ *	o Make $(DYNAMIC_LINK) relative (and not absolute) [Makefile]
+ *	---
+ *	o Replace all float occurence with double [iwlib, iwlist]
+ *	o Implement iwgetid --mode [iwgetid]
+ *	o Convert frequency to channel [iwlist, iwlib]
+ *		(Suggested by Pavel Roskin <proski@gnu.org> - always him !)
+ *	o Implement --version across the board [iwspy, iwevent, iwpriv]
+ *	o Implement iwgetid --freq [iwgetid]
+ *	o Display "Access Point/Cell" [iwgetid]
+ *	---
+ *	o New manpage about configuration (placeholder) [wireless.7]
+ *	o Catch properly invalid arg to "iwconfig ethX key" [iwconfig]
+ *	o Put placeholder for Passphrase to key conversion [iwlib]
+ *	o Allow args of "iwconfig ethX key" in any order [iwconfig]
+ *	o Implement token index for private commands [iwpriv]
+ *	o Add IW_MODE_MONITOR for passive monitoring [iwlib]
+ *		I wonder why nobody bothered to ask for it before ;-)
+ *	o Mention distribution specific document in [PCMCIA]
+ *	o Create directories before installing stuff in it [Makefile]
+ *	---
+ *	o Add Debian 3.0 and PCMCIA in [wireless.7]
+ *	o Add iw_protocol_compare() in [iwlib]
+ *	---
+ *	o Complain about version mistmatch at runtime only once [iwlib]
+ *	o Fix IWNAME null termination [iwconfig, iwlib]
+ *	o "iwgetid -p" to display protocol name and check WE support [iwgetid]
  */
 
 /* ----------------------------- TODO ----------------------------- */

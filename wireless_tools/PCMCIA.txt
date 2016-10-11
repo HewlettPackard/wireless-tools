@@ -1,3 +1,6 @@
+	Pcmcia Wireless configuration
+	-----------------------------
+
 	One of the most exciting thing having happen after release 20
 is the addition of Wireless Extension support in the Pcmcia init
 scripts. Here is a quick intro on the subject...
@@ -14,14 +17,22 @@ Raylink driver :
 	The Raylink driver as of 1.70 doesn't support yet writable
 Wireless Extensions, so enabling wireless.opts on this driver will
 make thing worse.
+	On the other hand, the latest version of the Raylink driver
+accept Wireless Extensions at boot time, so the procedure described
+below will work.
 
-Pcmcia precompiled package :
---------------------------
-	The Pcmcia package part of many distributions, especially
-those from Red-Hat, include some weird init scripts. Because of this,
-the present feature won't work.
-	On the other hand, the Pcmcia package in source form from the
-official Linux-Pcmcia web site will install the proper init scripts.
+Distribution specific notes :
+---------------------------
+	Most modern distributions don't use wireless.opts and have
+their own procedure for wireless configuration, which is usually
+compatible with their configuration tools and work for non-Pcmcia
+devices. This is documented in DISTRIBUTIONS.txt.
+	The procedure described here will work only with the original
+Pcmcia configuration scripts. If you use a precompiled package part of
+a distributions, this is usually not the case (see above).
+	On the other hand, if you install the Pcmcia package in source
+form from the official Linux-Pcmcia web site, it will install the
+proper init scripts and those instructions will apply.
 
 Basic support :
 -------------
@@ -131,5 +142,19 @@ home,*,*,00:60:1D:*|home,*,*,00:02:2D:*)
 > cardctl scheme home
 
 	I guess you get the idea ;-)
+
+More elaborated configurations :
+------------------------------
+	Some people may need some more complex configurations. For
+example, you might want to do one of the following thing :
+		o cycle through a set of schemes
+		o autodetect the proper scheme
+	There is currently no support to do that. However, the
+Wireless Tools package contains a tool called "iwgetid" that can help
+in this job. The source code contains some hints on how to achieve the
+above thing.
+	If you ever write such a package, please send me the URL.
+	Good luck !
+
 
 	Jean <jt@hpl.hp.com>

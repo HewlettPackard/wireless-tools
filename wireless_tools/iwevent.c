@@ -190,8 +190,27 @@ print_event_token(struct iw_event *	event,	/* Extracted token */
       break;
     case IWEVTXDROP:
       printf("Tx packet dropped:%s\n",
-	     iw_pr_ether(buffer, event->u.ap_addr.sa_data));
+	     iw_pr_ether(buffer, event->u.addr.sa_data));
       break;
+#if WIRELESS_EXT > 14
+    case IWEVCUSTOM:
+      {
+	char custom[IW_CUSTOM_MAX+1];
+	if((event->u.data.pointer) && (event->u.data.length))
+	  memcpy(custom, event->u.data.pointer, event->u.data.length);
+	custom[event->u.data.length] = '\0';
+	printf("Custom driver event:%s\n", custom);
+      }
+      break;
+    case IWEVREGISTERED:
+      printf("Registered node:%s\n",
+	     iw_pr_ether(buffer, event->u.addr.sa_data));
+      break;
+    case IWEVEXPIRED:
+      printf("Expired node:%s\n",
+	     iw_pr_ether(buffer, event->u.addr.sa_data));
+      break;
+#endif /* WIRELESS_EXT > 14 */
       /* ----- junk ----- */
       /* other junk not currently in use */
     case SIOCGIWRATE:
@@ -481,13 +500,15 @@ iw_usage(int status)
   fputs("Usage: iwevent [OPTIONS]\n"
 	"   Monitors and displays Wireless Events.\n"
 	"   Options are:\n"
-	"     -h,--help  Print this message.\n",
+	"     -h,--help     Print this message.\n"
+	"     -v,--version  Show version of this program.\n",
 	status ? stderr : stdout);
   exit(status);
 }
 /* Command line options */
 static const struct option long_opts[] = {
   { "help", no_argument, NULL, 'h' },
+  { "version", no_argument, NULL, 'v' },
   { NULL, 0, NULL, 0 }
 };
 
@@ -503,12 +524,16 @@ main(int	argc,
   int opt;
 
   /* Check command line options */
-  while((opt = getopt_long(argc, argv, "h", long_opts, NULL)) > 0)
+  while((opt = getopt_long(argc, argv, "hv", long_opts, NULL)) > 0)
     {
       switch(opt)
 	{
 	case 'h':
 	  iw_usage(0);
+	  break;
+
+	case 'v':
+	  return(iw_print_version_info("iwevent"));
 	  break;
 
 	default:
@@ -528,6 +553,13 @@ main(int	argc,
       perror("Can't initialize rtnetlink socket");
       return(1);
     }
+
+#if WIRELESS_EXT > 13
+  fprintf(stderr, "Waiting for Wireless Events...\n");
+#else	/* WIRELESS_EXT > 13 */
+  fprintf(stderr, "Unsupported in Wireless Extensions <= 14 :-(\n");
+  return(-1);
+#endif	/* WIRELESS_EXT > 13 */
 
   /* Do what we have to do */
   wait_for_event(&rth);

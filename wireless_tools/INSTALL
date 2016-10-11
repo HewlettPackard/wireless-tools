@@ -21,19 +21,6 @@ You need :
 	Note : more recent kernels and drivers are likely to support
 		more wireless extension features...
 
-Recommended versions :
---------------------
-	This are the latest updates of the Wireless Extensions :
-	o Kernel (wireless extension definition) :
-		-> Kernel 2.2.14 onward
-		-> Kernel 2.3.24 onward
-		-> Kernel 2.4.0 onward
-	o Pcmcia package :
-		-> Pcmcia 3.1.15 onward
-	o Drivers with wireless extension support :
-		-> Check my web pages for latest list of drivers,
-			otherwise patch your favourite driver...
-
 Compile wireless tools :
 ----------------------
 	In theory, a "make" should suffice to create the tools.
@@ -46,7 +33,9 @@ tools but to recompile your own.
 Installation :
 ------------
 	If I were you, I would not trust a "make install". If you feel
-courageous, just do "make install". It may even do the right thing.
+courageous, just do "make install". It may even do the right
+thing. Actually, with the various bugfixes that happened over the
+time, it nowadays tend to do the right thing.
 	I advise to copy the executable (iwconfig, iwspy and iwpriv)
 in /usr/local/sbin or /usr/sbin. The man pages (iwconfig.8, iwspy.8
 and iwpriv.8) should be copied in /usr/local/man/man8 or
@@ -72,8 +61,5 @@ the latest Wireless Extensions. Even worse, it can sometimes prevent
 the tools from compiling.
 	The trick is to copy the file .../include/linux/wireless.h
 from the kernel to the /usr/include headers.
-	A similar procedure may be used to update Wireless Extensions
-in an older kernel, but you may want to be careful because from time
-to time changes are required in the kernel as well...
 
 	Jean <jt@hpl.hp.com>

@@ -14,7 +14,11 @@ network interface
 .SH SYNOPSIS
 .BI "iwpriv [" interface ]
 .br
-.BI "iwpriv " interface " " private-command " [" private-parameters ]
+.BI "iwpriv " "interface private-command " "[" private-parameters ]
+.br
+.BI "iwpriv " "interface private-command [I] " "[" private-parameters ]
+.br
+.BI "iwpriv " interface " --all"
 .br
 .BI "iwpriv " interface " roam " {on,off}
 .br
@@ -29,9 +33,7 @@ is the companion tool to
 .B Iwpriv
 deals with parameters and setting specific to each driver (as opposed to
 .I iwconfig
-which deals with generic ones) and a few commands that doesn't fit well in
-.I iwconfig
-(like listing the available frequencies).
+which deals with generic ones).
 .PP
 Without any argument,
 .B iwpriv
@@ -46,6 +48,34 @@ to use those interface specific commands and their effect.
 .\"
 .SH PARAMETERS
 .TP
+.IR private-command " [" private-parameters ]
+Execute the specified
+.I private-command
+on the interface.
+.br
+The command may optionally take or require arguments, and may display
+information. Therefore, the command line parameters may or may not be
+needed and should match the command expectations. The list of commands
+that
+.B iwpriv
+displays (when called without argument) should give you some hints
+about those parameters.
+.br
+However you should refer to the device driver documentation for
+information on how to properly use the command and the effect.
+.TP
+.I "private-command [I]" "[" private-parameters ]
+Idem, except that
+.I I
+(an integer) is passed to the command as a
+.IR "Token Index" .
+Only some command will use the Token Index (most will ignore it), and
+the driver documentation should tell you when it's needed.
+.TP
+.BR -a / --all
+Execute and display all the private commands that don't take any
+arguments (i.e.  read only).
+.TP
 .B roam
 Enable or disable roaming, if supported. Call the private command
 .IR setroam .
@@ -58,13 +88,6 @@ Read or configure the port type. Call the private commands
 .IR gport_type ", " sport_type ", " get_port " or " set_port
 found in the
 .IR wavelan2_cs " and " wvlan_cs " drivers."
-.TP
-.I private-command
-Execute the specified
-.I private-command
-on the interface. The command may take or require arguments, and may
-display information. Refer to the device driver documentation for
-information on how to use and the effect.
 .\"
 .\" DISPLAY part
 .\"

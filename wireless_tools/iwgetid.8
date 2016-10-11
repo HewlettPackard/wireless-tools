@@ -12,7 +12,9 @@ iwgetid \- Report ESSID, NWID or AP/Cell Address of wireless network
 .\" SYNOPSIS part
 .\"
 .SH SYNOPSIS
-.BI "iwgetid " [interface] " [--scheme] [--ap]"
+.BI "iwgetid " [interface] " [--scheme] [--ap] [--freq] [--mode]"
+.br
+.BI "                   [--protocol]
 .br
 .\"
 .\" DESCRIPTION part
@@ -43,7 +45,8 @@ ESSID (or NWID, or AP Address) is printed. Also, characters that are
 not alphanumerics (like space, punctuation and control characters) are
 skipped.
 .br
-The resulting output is a valid Pcmcia scheme identifier (that may be used as an argument of the command
+The resulting output is a valid Pcmcia scheme identifier (that may be
+used as an argument of the command
 .BR "cardctl scheme" ).
 This format is also ideal when using the result of iwgetid as a
 variable in
@@ -57,6 +60,30 @@ Display the MAC address of the Wireless
 .I Access Point
 or the
 .IR Cell .
+.TP
+.B --freq
+Display the current
+.I frequency
+or
+.I channel
+used by the interface.
+.TP
+.B --mode
+Display the current
+.I mode
+of the interface.
+.TP
+.B --protocol
+Display the
+.I protocol name
+of the interface. This allow to identify all the cards that are
+compatible with each other and accept the same type of
+configuration.
+.br
+This can also be used to
+.I check Wireless Extension support
+on the interface, as this is the only attribute that all drivers
+supporting Wireless Extension are mandated to support.
 .\"
 .\" SEE ALSO part
 .\"

@@ -12,6 +12,11 @@
 
 #include "iwlib.h"		/* Header */
 
+/* Backward compatibility */
+#ifndef IW_MAX_GET_SPY
+#define IW_MAX_GET_SPY	64
+#endif	/* IW_MAX_GET_SPY */
+
 /************************* DISPLAY ROUTINES **************************/
 
 /*------------------------------------------------------------------*/
@@ -26,10 +31,10 @@ print_spy_info(int	skfd,
 {
   struct iwreq		wrq;
   char		buffer[(sizeof(struct iw_quality) +
-			sizeof(struct sockaddr)) * IW_MAX_SPY];
+			sizeof(struct sockaddr)) * IW_MAX_GET_SPY];
   char		temp[128];
-  struct sockaddr 	hwa[IW_MAX_SPY];
-  struct iw_quality 	qual[IW_MAX_SPY];
+  struct sockaddr *	hwa;
+  struct iw_quality *	qual;
   iwrange	range;
   int		has_range = 0;
   int		n;
@@ -40,7 +45,7 @@ print_spy_info(int	skfd,
 
   /* Collect stats */
   wrq.u.data.pointer = (caddr_t) buffer;
-  wrq.u.data.length = IW_MAX_SPY;
+  wrq.u.data.length = IW_MAX_GET_SPY;
   wrq.u.data.flags = 0;
   if(iw_get_ext(skfd, ifname, SIOCGIWSPY, &wrq) < 0)
     {
@@ -69,9 +74,8 @@ print_spy_info(int	skfd,
     printf("%-8.8s  Statistics collected:\n", ifname);
  
   /* The two lists */
-
-  memcpy(hwa, buffer, n * sizeof(struct sockaddr));
-  memcpy(qual, buffer + n*sizeof(struct sockaddr), n*sizeof(struct iw_quality));
+  hwa = (struct sockaddr *) buffer;
+  qual = (struct iw_quality *) (buffer + (sizeof(struct sockaddr) * n));
 
   for(i = 0; i < n; i++)
     {
@@ -211,17 +215,20 @@ main(int	argc,
   else
     /* Special cases take one... */
     /* Help */
-    if((!strncmp(argv[1], "-h", 9)) ||
-       (!strcmp(argv[1], "--help")))
+    if((!strcmp(argv[1], "-h")) || (!strcmp(argv[1], "--help")))
       fprintf(stderr, "Usage: iwspy interface [+] [MAC address] [IP address]\n");
     else
-      /* The device name must be the first argument */
-      /* Name only : show spy list for that device only */
-      if(argc == 2)
-	print_spy_info(skfd, argv[1], NULL, 0);
+      /* Version */
+      if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version"))
+	goterr = iw_print_version_info("iwspy");
       else
-	/* Otherwise, it's a list of address to set in the spy list */
-	goterr = set_spy_info(skfd, argv + 2, argc - 2, argv[1]);
+	/* The device name must be the first argument */
+	/* Name only : show spy list for that device only */
+	if(argc == 2)
+	  print_spy_info(skfd, argv[1], NULL, 0);
+	else
+	  /* Otherwise, it's a list of address to set in the spy list */
+	  goterr = set_spy_info(skfd, argv + 2, argc - 2, argv[1]);
 
   /* Close the socket. */
   close(skfd);

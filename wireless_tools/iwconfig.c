@@ -24,6 +24,7 @@ iw_usage(void)
 {
   fprintf(stderr, "Usage: iwconfig interface [essid {NN|on|off}]\n");
   fprintf(stderr, "                          [nwid {NN|on|off}]\n");
+  fprintf(stderr, "                          [mode {managed|ad-hoc|...}\n");
   fprintf(stderr, "                          [freq N.NNNN[k|M|G]]\n");
   fprintf(stderr, "                          [channel N]\n");
   fprintf(stderr, "                          [sens N]\n");
@@ -31,10 +32,11 @@ iw_usage(void)
   fprintf(stderr, "                          [rate {N|auto|fixed}]\n");
   fprintf(stderr, "                          [rts {N|auto|fixed|off}]\n");
   fprintf(stderr, "                          [frag {N|auto|fixed|off}]\n");
-  fprintf(stderr, "                          [enc NNNN-NNNN]\n");
-  fprintf(stderr, "                          [power { period N|timeout N}]\n");
+  fprintf(stderr, "                          [enc {NNNN-NNNN|off}]\n");
+  fprintf(stderr, "                          [power {period N|timeout N}]\n");
   fprintf(stderr, "                          [txpower N {mW|dBm}]\n");
   fprintf(stderr, "                          [commit]\n");
+  fprintf(stderr, "       Check man pages for more details.\n\n");
 }
 
 
@@ -69,7 +71,10 @@ get_info(int			skfd,
 	return(-ENOTSUP);
     }
   else
-    strcpy(info->name, wrq.u.name);
+    {
+      strncpy(info->name, wrq.u.name, IFNAMSIZ);
+      info->name[IFNAMSIZ] = '\0';
+    }
 
   /* Get ranges */
   if(iw_get_range_info(skfd, ifname, &(info->range)) >= 0)
@@ -109,7 +114,7 @@ get_info(int			skfd,
 
   /* Get ESSID */
   wrq.u.essid.pointer = (caddr_t) info->essid;
-  wrq.u.essid.length = IW_ESSID_MAX_SIZE;
+  wrq.u.essid.length = IW_ESSID_MAX_SIZE + 1;
   wrq.u.essid.flags = 0;
   if(iw_get_ext(skfd, ifname, SIOCGIWESSID, &wrq) >= 0)
     {
@@ -126,7 +131,7 @@ get_info(int			skfd,
 
   /* Get NickName */
   wrq.u.essid.pointer = (caddr_t) info->nickname;
-  wrq.u.essid.length = IW_ESSID_MAX_SIZE;
+  wrq.u.essid.length = IW_ESSID_MAX_SIZE + 1;
   wrq.u.essid.flags = 0;
   if(iw_get_ext(skfd, ifname, SIOCGIWNICKN, &wrq) >= 0)
     if(wrq.u.data.length > 1)
@@ -283,7 +288,7 @@ display_info(struct wireless_info *	info,
 	printf("Cell:");
       else
 	printf("Access Point:");
-      printf(" %s", iw_pr_ether(buffer, info->ap_addr.sa_data));
+      printf(" %s  ", iw_pr_ether(buffer, info->ap_addr.sa_data));
     }
 
   /* Display the currently used/set bit-rate */
@@ -744,7 +749,8 @@ set_info(int		skfd,		/* The socket */
 	    }
 	  else
 	    {
-	      int	gotone = 1;
+	      int	gotone = 0;
+	      int	oldone;
 	      int	keylen;
 	      int	temp;
 
@@ -752,47 +758,64 @@ set_info(int		skfd,		/* The socket */
 	      wrq.u.data.flags = 0;
 	      wrq.u.data.length = 0;
 
-	      /* -- Check for the key -- */
-	      keylen = iw_in_key(args[i], key);
-	      if(keylen > 0)
+	      /* Allow arguments in any order (it's safe) */
+	      do
 		{
-		  wrq.u.data.length = keylen;
-		  wrq.u.data.pointer = (caddr_t) key;
-		  ++i;
-		  gotone = 1;
-		}
+		  oldone = gotone;
 
-	      /* -- Check for token index -- */
-	      if((i < count) &&
-		 (sscanf(args[i], "[%d]", &temp) == 1) &&
-		 (temp > 0) && (temp < IW_ENCODE_INDEX))
-		{
-		  wrq.u.encoding.flags |= temp;
-		  ++i;
-		  gotone = 1;
-		}
-
-	      /* -- Check the various flags -- */
-	      if(i < count)
-		{
-		  if(!strcasecmp(args[i], "off"))
-		    wrq.u.data.flags |= IW_ENCODE_DISABLED;
-		  if(!strcasecmp(args[i], "open"))
-		    wrq.u.data.flags |= IW_ENCODE_OPEN;
-		  if(!strncasecmp(args[i], "restricted", 5))
-		    wrq.u.data.flags |= IW_ENCODE_RESTRICTED;
-		  if(wrq.u.data.flags & IW_ENCODE_FLAGS)
+		  /* -- Check for the key -- */
+		  if(i < count)
 		    {
+		      keylen = iw_in_key(args[i], key);
+		      if(keylen > 0)
+			{
+			  wrq.u.data.length = keylen;
+			  wrq.u.data.pointer = (caddr_t) key;
+			  ++i;
+			  gotone++;
+			}
+		    }
+
+		  /* -- Check for token index -- */
+		  if((i < count) &&
+		     (sscanf(args[i], "[%d]", &temp) == 1) &&
+		     (temp > 0) && (temp < IW_ENCODE_INDEX))
+		    {
+		      wrq.u.encoding.flags |= temp;
 		      ++i;
-		      gotone = 1;
+		      gotone++;
+		    }
+
+		  /* -- Check the various flags -- */
+		  if((i < count) && (!strcasecmp(args[i], "off")))
+		    {
+		      wrq.u.data.flags |= IW_ENCODE_DISABLED;
+		      ++i;
+		      gotone++;
+		    }
+		  if((i < count) && (!strcasecmp(args[i], "open")))
+		    {
+		      wrq.u.data.flags |= IW_ENCODE_OPEN;
+		      ++i;
+		      gotone++;
+		    }
+		  if((i < count) && (!strncasecmp(args[i], "restricted", 5)))
+		    {
+		      wrq.u.data.flags |= IW_ENCODE_RESTRICTED;
+		      ++i;
+		      gotone++;
 		    }
 		}
+	      while(gotone != oldone);
+
 	      /* Pointer is absent in new API */
 	      if(wrq.u.data.pointer == NULL)
 		wrq.u.data.flags |= IW_ENCODE_NOKEY;
 
+	      /* Check if we have any invalid argument */
 	      if(!gotone)
 		ABORT_ARG_TYPE("Set Encode", SIOCSIWENCODE, args[i]);
+	      /* Get back to last processed argument */
 	      --i;
 	    }
 
@@ -1335,16 +1358,19 @@ main(int	argc,
     iw_enum_devices(skfd, &print_info, NULL, 0);
   else
     /* Special case for help... */
-    if((!strncmp(argv[1], "-h", 9)) ||
-       (!strcmp(argv[1], "--help")))
+    if((!strcmp(argv[1], "-h")) || (!strcmp(argv[1], "--help")))
       iw_usage();
     else
-      /* The device name must be the first argument */
-      if(argc == 2)
-	print_info(skfd, argv[1], NULL, 0);
+      /* Special case for version... */
+      if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version"))
+	goterr = iw_print_version_info("iwconfig");
       else
-	/* The other args on the line specify options to be set... */
-	goterr = set_info(skfd, argv + 2, argc - 2, argv[1]);
+	/* The device name must be the first argument */
+	if(argc == 2)
+	  print_info(skfd, argv[1], NULL, 0);
+	else
+	  /* The other args on the line specify options to be set... */
+	  goterr = set_info(skfd, argv + 2, argc - 2, argv[1]);
 
   /* Close the socket. */
   close(skfd);

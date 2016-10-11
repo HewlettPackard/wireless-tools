@@ -22,6 +22,12 @@ PCMCIA.txt
 	This file describes how to use Pcmcia init script to configure
 Wireless Extensions and how to use Pcmcia schemes.
 
+DISTRIBUTION
+------------
+	This file will document the specifics of Wireless Extensions
+with a few different distributions. I need your help to complete this
+file.
+
 man pages (iwconfig.8, iwlist.8, iwpriv.8, iwspy.8)
 ---------
 	VERY IMPORTANT : I try to keep the man page up to date, so
@@ -70,16 +76,34 @@ iwevent.c
 	Display Wireless Events. This is new, so there is not much support
 in drivers for it yet...
 
+iwlib.c
+-------
+	The Wireless Tools helper library. May be usefull if you want
+to create your own applications using Wireless Extensions.
+
 Changelog, contributions
 ------------------------
 	See CHANGELOG.h
 
 wireless.h
 ----------
-	Definition of the Wireless Extensions. You may drop this file
-in your kernel headers to update the Wireless Extensions.
+	Definition of the Wireless Extensions. Remember that the
+definition used by the drivers and the tools must match, otherwise
+funny things may happen. The tools try to check for that.
+	Since Wireless Extensions v12, you can no longer drop this
+file in your kernel headers to update the Wireless Extensions, you
+need to use the full patches available on my web page. So, the use is
+more if you plan to do some cross compile or something similar.
 	Just for your enjoyement, there is various release of it. If
 your kernel/drivers are old, you may want to try the older releases...
+
+sample_xxx.c :
+------------
+	Various samples of code showing how to implement some of the
+more tricky feature of Wireless Extensions in your driver.
+	Note that there is no guarantee that this code compile, let
+alone work, but it should point you in the proper direction.
+	Also, have a look at existing drivers in the Linux kernel.
 
 Other tools :
 -----------

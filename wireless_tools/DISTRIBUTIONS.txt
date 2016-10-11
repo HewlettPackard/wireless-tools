@@ -1,0 +1,282 @@
+	Distribution specific notes on Wireless Configuration
+	-----------------------------------------------------
+
+***** HELP *****
+	If people send me information about the specifics of each
+distribution, I'll try to collect that here. Don't forget to mention
+to which distribution those instructions apply, the tool used (if any)
+and the files modified.
+	Actually, the people packaging my tools for a specific
+distribution have a moral obligation to send me the exact detailed
+instructions of what they have done. I will list in the wireless.7
+man page only distributions that give me an official answer.
+***** HELP *****
+
+				-----
+
+INTRODUCTION
+------------
+	The tools enable users to change the card settings at run time
+(when running iwconfig, for example). However, most users want the
+card to be configured either at boot time or when the card is
+activated in the system.
+	Each distribution has its own configuration scripts, and
+therefore is slightly different. Some distributions even add some
+graphical setup tool (nice). This file describe the procedure for a
+few of them.
+	Note : if you install the Pcmcia package in source form from
+the official Linux-Pcmcia web site (as opposed to precompiled by a
+distribution, please use the PCMCIA method).
+
+	Please remember : I don't use your distribution, and I have
+absolutely no clue about how your distribution works. I'm just
+collecting random information here without beeing able to verify it.
+
+---------------------------------------------------------------------
+
+PCMCIA METHOD
+-------------
+		(Contributed by Jean Tourrilhes <jt@hpl.hp.com>)
+	This method work for *all* distributions.
+	For Pcmcia cards, it is possible to overwrite the Pcmcia
+configuration files of the distribution with the original Pcmcia
+configuration files from the Pcmcia package (/etc/pcmcia/*). If you
+install the Pcmcia package in source form from the official
+Linux-Pcmcia web site, this will be done automatically.
+	Once this is done, you can no longer use the specific tools
+and configuration files of the distribution, and are required to use
+Pcmcia style of configuration (see Pcmcia Howto).
+	In such a case, Wireless configuration is done through
+wireless.opts, and documented in the file PCMCIA.txt.
+
+---------------------------------------------------------------------
+
+DEBIAN 2.2 (and earlier)
+----------
+		(Contributed by Jean Tourrilhes <jt@hpl.hp.com>)
+	Debian 2.2 (and earlier) doesn't support any Wireless
+Configuration. You are required to use the Pcmcia method. Also, the
+Wireless Tools package is not part of the standard packages.
+
+---------------------------------------------------------------------
+
+DEBIAN 3.0 (and later)
+----------
+		(Contributed by Guus Sliepen <guus@sliepen.eu.org>)
+	Debian also has another way of configuring network devices,
+controlled by /etc/network/interfaces. Users can add a wireless
+interface to /etc/network/interfaces, using the standard options to
+set the address and such, but the wireless-tools package adds new
+option statements that can be used to configure keys, channel,
+etcetera.
+	From the README.Debian script that comes with wireless-tools:
+
+	/etc/network/interfaces
+	-----------------------
+
+You can now add extra statements to the iface sections of the files in
+/etc/network/interfaces that are specific for wireless interfaces. They
+are of the form:
+
+    wireless_<function> <value>
+
+Before the interface is brought up, such a statement will result in the
+execution of the following command:
+
+    iwconfig <interface> <function> <value>
+
+Example:
+
+iface eth0 inet static
+    address 192.168.1.2
+    network 192.168.1.0
+    netmask 255.255.255.0
+    broadcast 192.168.1.255
+    wireless_essid Home
+    wireless_mode ad_hoc
+
+	The current Debian script support all arguments present in
+wireless.opts apart from Nickname. You can check this in the script
+/etc/network/if-pre-up.d/wireless-tool.
+	You will need of course to install the Wireless Tools package
+if it's not already done, which is part of the standard package list
+(use dselect, dpkg, apt or anything you like to get it).
+
+				-----
+
+		(Contributed by Joey Hess <joey@dragon.kitenet.net>)
+/etc/network/interfaces is much more flexible than it appears. It can probably
+do everything pcmcia schemes can do, and more. Here is part of mine:
+
+auto wlan0
+mapping wlan0
+        script /usr/local/bin/ifscheme
+
+iface wlan0-home inet static
+        address 192.168.1.5
+        gateway 192.168.1.1
+        netmask 255.255.255.0
+        wireless_mode ad_hoc
+        wireless_essid wortroot
+        wireless_nick dragon
+        wireless_channel 1
+
+iface wlan0-away inet dhcp
+        wireless_mode managed
+
+Now I can type 'ifscheme -s away' when I leave home, rather like
+cardctl scheme.
+
+The ifscheme script is at http://bugs.debian.org/154444. If the request in
+bug #154442 is implemented, it will become very flexible indeed..
+
+Debian will hopefully be using this same file eventually for pcmcia network
+devices too. It's already doable but takes a little work. This is all rather
+rough and badly documented so far.
+
+You can also do mapping based on the MAC address, if you want specific
+configuration on specific card.  See
+/usr/share/doc/ifupdown/examples/get-mac-address.sh and the stanza in
+/usr/share/doc/ifupdown/examples/network-interfaces.gz that uses it.
+This comes back to the problem I alluded to with mapping scripts not
+being "nestable" yet, and bug #154442. You can do what you want today,
+but you may need to write your own mapping script which uses a
+combination of MAC address and scheme info to return a stanza name to
+ifupdown.
+
+---------------------------------------------------------------------
+
+RED-HAT 7.2
+-----------
+		(Grabbed from various source - Google is your friend)
+	Configuration is done in the file :
+		/etc/sysconfig/network-scripts/ifcfg-ethN
+	Where 'ethN' is the name of the wireless interface (such as
+eth0, eth1, ...).
+	The following lines may be added in this file :
+		MODE=<mode>
+		ESSID="<essid>"
+		RATE=<rate>
+		TXPOWER=<txpower>
+		KEY="<key>"
+	The full list of configuration can be found in the file :
+		/etc/sysconfig/network-scripts/ifup-wireless
+
+	Note that Brad Allison has other tips for 7.2 :
+	http://jackal.dnsalias.com:8080/public/misc/wireless/wireless.html
+
+---------------------------------------------------------------------
+
+RED-HAT 7.3 and later
+-----------
+		(Cut'n'pasted from Brad Allison web page)
+	http://jackal.dnsalias.com:8080/public/misc/wireless/wireless.html
+
+	If you are running RedHat 7.3, I would tell you to simply run
+/usr/bin/redhat-config-network and click "Devices", Click "Add", then
+select "Wireless Connection". You can find the full instructions in
+RedHat's Customization Guide for RH7.3 in Chapter 6, Network
+Configuration: Wireless Connection.
+		http://www.redhat.com/docs/manuals/linux/
+		http://www.redhat.com/docs/manuals/linux/RHL-7.3-Manual/custom-guide/s1-network-config-wireless.html
+
+	However, according to the Errata: The version of the Red Hat
+Network Administration Tool that shipped with Red Hat Linux 7.3 did
+not include wireless connection in the configuration wizard. An
+enhancement errata will be released soon with this feature. You can
+download the newest version of redhat-config-network from rpmfind.net.
+		http://www.redhat.com/docs/errata/RHL-7.3-Manual/
+		http://www.rpmfind.net/linux/rpm2html/search.php?query=redhat-config-network&submit=Search+...
+
+				-----
+
+		(Grabbed from various source - Google is your friend)
+	The current graphical user interface support :
+		ESSID, Mode, Freq, Channel, Rate, Key
+
+	Compared to Red-Hat 7.2, the Wireless Setting in the
+configuration file have change to include the WIRELESS_ prefix :
+		WIRELESS_MODE=<mode>
+		WIRELESS_ESSID='<essid>'
+		WIRELESS_ENC_KEY='<key>'
+	The underlying configuration files and configurations options
+seems to be indentical to what is done in Mandrake 8.2 (or vice
+versa), so please check the section below. This allow configuration of
+additional wireless settings not available in the GUI.
+
+				-----
+
+		(Extrapolated from web page of Martin Pot <m.t.pot@ieee.org>)
+		http://ii.net/~mpot/wireless/router.cgi
+	Red-Hat 7.3 also seem to support configuration in
+wireless.opts to some extent. But for compatibility with the network
+admin tools, I would still recommend to use the above method.
+	Red-Hat 7.3 seems to load wvlan_cs for Orinoco cards and
+friends. The above web page explain how to switch it to orinoco_cs.
+
+---------------------------------------------------------------------
+
+MANDRAKE 8.2 and later
+------------
+		(Grabbed from various source - Google is your friend)
+	Configuration is done in the file :
+		/etc/sysconfig/network-scripts/ifcfg-ethN
+	Where 'ethN' is the name of the wireless interface (such as
+eth0, eth1, ...).
+	The following lines may be added in this file :
+		WIRELESS_MODE=<mode>
+		WIRELESS_ESSID=<essid>
+		WIRELESS_NWID=<nwid>
+		WIRELESS_FREQ=<freq/channel>
+		WIRELESS_SENS=<sensitivity>
+		WIRELESS_RATE=<rate>
+		WIRELESS_ENC_KEY=<keys>
+		WIRELESS_RTS=<rts>
+		WIRELESS_FRAG=<frag>
+		WIRELESS_IWCONFIG=<iwconfig command>
+		WIRELESS_IWSPY=<iwspy command>
+		WIRELESS_IWPRIV=<iwpriv command>
+	Most likely, you only need to add a few of those lines and not
+all of them. The script doing the configuration and where you can
+check the details is :
+		/etc/network/network-scripts/ifup-wireless
+	You will of course need the Wireless Extension package :
+		rpm -Uvh wireless-tools-XX-Xmdk.XXX.rpm
+
+	Mandrake can also have wireless setting added to its
+Auto-Install procedure :
+	http://members.shaw.ca/mandrake/drakx/8.2/HTML/section4-13.html
+
+---------------------------------------------------------------------
+
+SuSE 8.0 and later
+--------
+		(Cut'n'pasted from Unofficial SuSE FAQ, by Keith Winston)
+	http://www.smaug42.com/susefaq/ethernetproblems.html#AEN768
+	The old PCMCIA network scripts used to read
+/etc/pcmcia/wireless.opts to get the wireless options like mode,
+ESSID, encryption key, etc. Well, the wireless.opts file is still
+there but it is NOT used. It would have been nice if there was some
+documentation about it. Instead, the new scripts read this info from
+another brand new file called /etc/sysconfig/network/wireless. You can
+edit this file to store your wireless options. If you don't use key 1,
+you may have to put the other key in the WIRELESS_IWCONFIG_OPTIONS
+variable.
+
+				-----
+
+		<Need confirmation :>
+	Configuration of wireless settings looks like :
+		WIRELESS_ESSID="<essid>"
+	It also seem that the same directives can be added to the file :
+		/etc/sysconfig/network/ifcfg-ethX
+	Note that there seems to be other problems with SuSE, such as
+the Pcmcia scripts binding the linux-wlan-ng driver to Orinoco cards
+(which of course won't work - see link in FAQ above).
+
+---------------------------------------------------------------------
+
+
+	Have fun...
+
+	Jean

@@ -122,23 +122,13 @@
 #include <linux/in.h>		/* For struct sockaddr_in */
 #endif	/* LIBC5_HEADERS */
 
-#ifdef PRIVATE_WE_HEADER
+#ifdef WEXT_HEADER
 /* Private copy of Wireless extensions */
-#include "wireless.h"
-#else	/* PRIVATE_WE_HEADER */
+#include WEXT_HEADER
+#else	/* !WEXT_HEADER */
 /* System wide Wireless extensions */
 #include <linux/wireless.h>
-#endif	/* PRIVATE_WE_HEADER */
-
-#if WIRELESS_EXT < 9
-#error "Wireless Extension v9 or newer required :-( - \
-Use Wireless Tools v19 or update your kernel headers"
-#endif
-#if WIRELESS_EXT < 14
-#warning "Wireless Extension v14 recommended (but not mandatory)... - \
-You may update your kernel and/or system headers to get the new features, \
-or you may just ignore this message"
-#endif
+#endif	/* !WEXT_HEADER */
 
 /****************************** DEBUG ******************************/
 
@@ -147,6 +137,7 @@ or you may just ignore this message"
 
 /* Paths */
 #define PROC_NET_WIRELESS	"/proc/net/wireless"
+#define PROC_NET_DEV		"/proc/net/dev"
 
 /* Some usefull constants */
 #define KILO	1e3
@@ -186,11 +177,11 @@ typedef struct sockaddr		sockaddr;
  * This is pretty exhaustive... */
 typedef struct wireless_info
 {
-  char		name[IFNAMSIZ];		/* Wireless/protocol name */
+  char		name[IFNAMSIZ + 1];	/* Wireless/protocol name */
   int		has_nwid;
   iwparam	nwid;			/* Network ID */
   int		has_freq;
-  float		freq;			/* Frequency/channel */
+  double	freq;			/* Frequency/channel */
   int		has_sens;
   iwparam	sens;			/* sensitivity */
   int		has_key;
@@ -232,11 +223,11 @@ typedef struct wireless_info
  * Don't add other junk, I'll remove it... */
 typedef struct wireless_config
 {
-  char		name[IFNAMSIZ];		/* Wireless/protocol name */
+  char		name[IFNAMSIZ + 1];	/* Wireless/protocol name */
   int		has_nwid;
   iwparam	nwid;			/* Network ID */
   int		has_freq;
-  float		freq;			/* Frequency/channel */
+  double	freq;			/* Frequency/channel */
   int		has_key;
   unsigned char	key[IW_ENCODING_TOKEN_MAX];	/* Encoding key used */
   int		key_size;		/* Number of bytes */
@@ -280,9 +271,12 @@ int
 			  char *	ifname,
 			  iwrange *	range);
 int
+	iw_print_version_info(char *	toolname);
+int
 	iw_get_priv_info(int		skfd,
 			 char *		ifname,
-			 iwprivargs *	priv);
+			 iwprivargs *	priv,
+			 int		maxpriv);
 int
 	iw_get_basic_config(int			skfd,
 			    char *		ifname,
@@ -291,6 +285,10 @@ int
 	iw_set_basic_config(int			skfd,
 			    char *		ifname,
 			    wireless_config *	info);
+/* --------------------- PROTOCOL SUBROUTINES --------------------- */
+int
+	iw_protocol_compare(char *	protocol1,
+			    char *	protocol2);
 /* -------------------- FREQUENCY SUBROUTINES --------------------- */
 void
 	iw_float2freq(double	in,
@@ -299,7 +297,10 @@ double
 	iw_freq2float(iwfreq *	in);
 void
 	iw_print_freq(char *	buffer,
-		      float	freq);
+		      double	freq);
+int
+	iw_freq_to_channel(double		freq,
+			   struct iw_range *	range);
 void
 	iw_print_bitrate(char *	buffer,
 			 int	bitrate);
@@ -373,7 +374,7 @@ int
 		   struct sockaddr *	sap);
 /* ----------------------- MISC SUBROUTINES ------------------------ */
 int
-	iw_byte_size(int		args);
+	iw_get_priv_size(int		args);
 
 #if WIRELESS_EXT > 13
 /* ---------------------- EVENT SUBROUTINES ---------------------- */
@@ -389,7 +390,7 @@ int
 /**************************** VARIABLES ****************************/
 
 extern const char * const	iw_operation_mode[];
-#define IW_NUM_OPER_MODE	6
+#define IW_NUM_OPER_MODE	7
 
 /************************* INLINE FUNTIONS *************************/
 /*

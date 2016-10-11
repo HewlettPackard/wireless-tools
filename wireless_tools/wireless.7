@@ -1,0 +1,100 @@
+.\" Jean Tourrilhes - HPL - 2002
+.\" wireless.7
+.\"
+.TH WIRELESS 7 "12 July 2002" "net-tools" "Linux Programmer's Manual"
+.\"
+.\" NAME part
+.\"
+.SH NAME
+wireless \- Wireless Tools and Wireless Extensions
+.\"
+.\" SYNOPSIS part
+.\"
+.SH SYNOPSIS
+.B iwconfig
+.br
+.B iwpriv -a
+.br
+.\"
+.\" DESCRIPTION part
+.\"
+.SH DESCRIPTION
+The
+.B Wireless Extensions
+is an API allowing you manipulate Wireless LAN networking interfaces.
+It is composed of a variety of tools and configuration files. It is
+documented in more details in the Linux Wireless LAN Howto.
+.br
+The
+.B Wireless Tools
+are use to change configuration on the fly, to get statistics and
+diagnose those interfaces. They are described in their own man page
+(see below).
+.br
+.B Wireless configuration
+is specific to each Linux distribution. This man page will contain in
+the future the configuration procedure for a few common distributions
+(when I get the necessary info from them). For the time being, check
+the various files included with the Wireless Tools package.
+.\"
+.\" DEBIAN 3.0 part
+.\"
+.SH DEBIAN 3.0
+Debian 3.0 (and later) has integrated wireless configuration in their
+network scripts.
+.TP
+.B File :
+.I /etc/network/interfaces
+.TP
+.B Form :
+.RI wireless_ "<function> <value>"
+.br
+wireless_essid Home
+.br
+wireless_mode ad_hoc
+.TP
+.B See also :
+.I /etc/network/if-pre-up.d/wireless-tool
+.br
+.I /usr/share/doc/wireless.##/README.Debian
+.\"
+.\" PCMCIA part
+.\"
+.SH ORIGINAL PCMCIA SCRIPTS
+If you are using the original configuration scripts from the Pcmcia
+package, you can use this method.
+.TP
+.B File :
+.I /etc/pcmcia/wireless.opts
+.TP
+.B Form :
+*,*,*,*)
+.br
+    ESSID="MY_ESSID"
+.br
+    MODE="Managed"
+.br
+    ;;
+.TP
+.B See also :
+.I /etc/pcmcia/wireless
+.br
+File
+.I PCMCIA.txt
+part of Wireless Tools package
+.\"
+.\" AUTHOR part
+.\"
+.SH AUTHOR
+Jean Tourrilhes \- jt@hpl.hp.com
+.br
+.I http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/
+.\"
+.\" SEE ALSO part
+.\"
+.SH SEE ALSO
+.BR iwconfig (8),
+.BR iwlist (8),
+.BR iwspy (8),
+.BR iwpriv (8),
+.BR iwevent (8).

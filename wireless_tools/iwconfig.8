@@ -22,6 +22,10 @@ iwconfig \- configure a wireless network interface
 .BI "                   [enc " E "] [key " K "] [power " P "] [retry " R ]
 .br
 .BI "                   [commit]
+.br
+.BI "iwconfig --help"
+.br
+.BI "iwconfig --version"
 .\"
 .\" DESCRIPTION part
 .\"
@@ -121,18 +125,22 @@ topology. The mode can be
 .I Ad-hoc
 (network composed of only one cell and without Access Point),
 .I Managed
-(network composed of many cells, with roaming or with an Access Point),
+(node connects to a network composed of many Access Points, with roaming),
 .I Master
 (the node is the synchronisation master or act as an Access Point),
 .I Repeater
-(the node forward packets on the air),
+(the node forward packets between other wireless nodes),
 .I Secondary
-(the node act as a backup master/repeater) or
+(the node act as a backup master/repeater),
+.I Monitor
+(the node act as a passive monitor and only receives packets) or
 .IR Auto .
 .br
 .B Example :
 .br
 .I "	iwconfig eth0 mode Managed"
+.br
+.I "	iwconfig eth0 mode Ad-Hoc"
 .TP
 .B ap
 Force the card to register to the Access Point given by the address,
@@ -226,12 +234,12 @@ Used to manipulate encryption or scrambling keys and encryption mode.
 .br
 To set the current encryption key, just enter the key in hex digits as
 .IR XXXX-XXXX-XXXX-XXXX " or " XXXXXXXX .
-To set a key other than the current key, append
+To set a key other than the current key, prepend or append
 .I [index]
-to the key itself. You can also enter the key as an ASCII string by
-using the
+to the key itself (this won't change which is the active key). You can
+also enter the key as an ASCII string by using the
 .I s:
-prefix.
+prefix. Passphrase is currently not supported.
 .br
 To change which key is the current active key, just enter
 .I [index]
@@ -244,6 +252,12 @@ set the system in open mode (accept non-encrypted packets) and
 .I restricted
 discard non-encrypted packets.
 .br
+If you need to set multiple keys, or set a key and change the active
+key, you need to use multiple
+.B key
+directives. Arguments can be put in any order, the last one will take
+precendence.
+.br
 .B Examples :
 .br
 .I "	iwconfig eth0 key 0123-4567-89"
@@ -253,6 +267,10 @@ discard non-encrypted packets.
 .I "	iwconfig eth0 key [2] open"
 .br
 .I "	iwconfig eth0 key off"
+.br
+.I "	iwconfig eth0 key restricted [3] 0123456789"
+.br
+.I "	iwconfig eth0 key 01-23 key 45-67 [4] key [4]"
 .TP
 .BR power
 Used to manipulate power management scheme parameters and mode.

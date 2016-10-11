@@ -26,13 +26,17 @@ print_freq_info(int		skfd,
 		char *		args[],		/* Command line args */
 		int		count)		/* Args count */
 {
-  float			freq;
+  struct iwreq		wrq;
   struct iw_range	range;
+  double		freq;
   int			k;
+  int			channel;
+  char			buffer[128];	/* Temporary buffer */
 
   /* Avoid "Unused parameter" warning */
   args = args; count = count;
 
+  /* Get list of frequencies / channels */
   if(iw_get_range_info(skfd, ifname, &range) < 0)
       fprintf(stderr, "%-8.8s  no frequency information.\n\n",
 		      ifname);
@@ -45,7 +49,7 @@ print_freq_info(int		skfd,
 	  /* Print them all */
 	  for(k = 0; k < range.num_frequency; k++)
 	    {
-	      printf("\t  Channel %.2d : ", range.freq[k].i);
+	      printf("          Channel %.2d : ", range.freq[k].i);
 	      freq = iw_freq2float(&(range.freq[k]));
 	      if(freq >= GIGA)
 		printf("%g GHz\n", freq / GIGA);
@@ -55,16 +59,31 @@ print_freq_info(int		skfd,
 		else
 		  printf("%g kHz\n", freq / KILO);
 	    }
-	  printf("\n\n");
 	}
       else
-	printf("%-8.8s  %d channels\n\n",
+	printf("%-8.8s  %d channels\n",
 	       ifname, range.num_channels);
+
+      /* Get current frequency / channel and display it */
+      if(iw_get_ext(skfd, ifname, SIOCGIWFREQ, &wrq) >= 0)
+	{
+	  freq = iw_freq2float(&(wrq.u.freq));
+	  iw_print_freq(buffer, freq);
+	  channel = iw_freq_to_channel(freq, &range);
+	  if(channel >= 0)
+	    printf("          Current %s (channel %.2d)\n\n", buffer, channel);
+	  else
+	    printf("          Current %s\n\n", buffer);
+	}
     }
   return(0);
 }
 
 /************************ ACCESS POINT LIST ************************/
+/*
+ * Note : now that we have scanning support, this is depracted and
+ * won't survive long. Actually, next version it's out !
+ */
 
 /*------------------------------------------------------------------*/
 /*
@@ -155,6 +174,7 @@ print_bitrate_info(int		skfd,
 		   char *	args[],		/* Command line args */
 		   int		count)		/* Args count */
 {
+  struct iwreq		wrq;
   struct iw_range	range;
   int			k;
   char			buffer[128];
@@ -179,10 +199,17 @@ print_bitrate_info(int		skfd,
 	      /* Maybe this should be %10s */
 	      printf("\t  %s\n", buffer);
 	    }
-	  printf("\n\n");
 	}
       else
-	printf("%-8.8s  No bit-rates ? Please update driver...\n\n", ifname);
+	printf("%-8.8s  No bit-rates ? Please update driver...\n", ifname);
+
+      /* Get current bit rate */
+      if(iw_get_ext(skfd, ifname, SIOCGIWRATE, &wrq) >= 0)
+	{
+	  iw_print_bitrate(buffer, wrq.u.bitrate.value);
+	  printf("          Current Bit Rate%c%s\n\n",
+		 (wrq.u.bitrate.fixed ? '=' : ':'), buffer);
+	}
     }
   return(0);
 }
@@ -454,6 +481,7 @@ print_txpower_info(int		skfd,
 		   char *	args[],		/* Command line args */
 		   int		count)		/* Args count */
 {
+  struct iwreq		wrq;
   struct iw_range	range;
   int			dbm;
   int			mwatt;
@@ -469,7 +497,9 @@ print_txpower_info(int		skfd,
 		      ifname);
   else
     {
-      if((range.num_txpower > 0) && (range.num_txpower < IW_MAX_TXPOWER))
+      if((range.num_txpower <= 0) || (range.num_txpower > IW_MAX_TXPOWER))
+	printf("%-8.8s  No transmit-powers ? Please update driver...\n\n", ifname);
+      else
 	{
 	  printf("%-8.8s  %d available transmit-powers :\n",
 		 ifname, range.num_txpower);
@@ -488,10 +518,35 @@ print_txpower_info(int		skfd,
 		}
 	      printf("\t  %d dBm  \t(%d mW)\n", dbm, mwatt);
 	    }
-	  printf("\n\n");
+
+	  /* Get current Transmit Power */
+	  if(iw_get_ext(skfd, ifname, SIOCGIWTXPOW, &wrq) >= 0)
+	    {
+	      printf("          Current Tx-Power");
+	      /* Disabled ? */
+	      if(wrq.u.txpower.disabled)
+		printf(":off\n\n");
+	      else
+		{
+		  /* Fixed ? */
+		  if(wrq.u.txpower.fixed)
+		    printf("=");
+		  else
+		    printf(":");
+		  if(wrq.u.txpower.flags & IW_TXPOW_MWATT)
+		    {
+		      dbm = iw_mwatt2dbm(wrq.u.txpower.value);
+		      mwatt = wrq.u.txpower.value;
+		    }
+		  else
+		    {
+		      dbm = wrq.u.txpower.value;
+		      mwatt = iw_dbm2mwatt(wrq.u.txpower.value);
+		    }
+		  printf("%d dBm  \t(%d mW)\n\n", dbm, mwatt);
+		}
+	    }
 	}
-      else
-	printf("%-8.8s  No transmit-powers ? Please update driver...\n\n", ifname);
     }
 #endif /* WIRELESS_EXT > 9 */
   return(0);
@@ -680,7 +735,7 @@ print_scanning_token(struct iw_event *	event,	/* Extracted token */
       break;
     case SIOCGIWFREQ:
       {
-	float		freq;			/* Frequency/channel */
+	double		freq;			/* Frequency/channel */
 	freq = iw_freq2float(&(event->u.freq));
 	iw_print_freq(buffer, freq);
 	printf("                    %s\n", buffer);
@@ -748,6 +803,17 @@ print_scanning_token(struct iw_event *	event,	/* Extracted token */
 	printf("                    %s\n", buffer);
 	break;
       }
+#if WIRELESS_EXT > 14
+    case IWEVCUSTOM:
+      {
+	char custom[IW_CUSTOM_MAX+1];
+	if((event->u.data.pointer) && (event->u.data.length))
+	  memcpy(custom, event->u.data.pointer, event->u.data.length);
+	custom[event->u.data.length] = '\0';
+	printf("                    Extra:%s\n", custom);
+      }
+      break;
+#endif /* WIRELESS_EXT > 14 */
     default:
       printf("                    (Unknown Wireless Token 0x%04X)\n",
 	     event->cmd);
@@ -1020,6 +1086,10 @@ main(int	argc,
 
   if (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))
     iw_usage(0);
+
+  /* This is also handled slightly differently */
+  if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version"))
+    return(iw_print_version_info("iwlist"));
 
   if (argc == 2)
     {
