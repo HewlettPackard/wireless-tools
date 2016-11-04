@@ -1,0 +1,22 @@
+diff -u -p linux/drivers/net/wireless/wl3501_cs.20.c linux/drivers/net/wireless/wl3501_cs.c
+--- linux/drivers/net/wireless/wl3501_cs.20.c	2006-04-03 17:07:38.000000000 -0700
++++ linux/drivers/net/wireless/wl3501_cs.c	2006-04-03 17:07:48.000000000 -0700
+@@ -1803,15 +1803,15 @@ static int wl3501_get_retry(struct net_d
+ 				      &retry, sizeof(retry));
+ 	if (rc)
+ 		goto out;
+-	if (wrqu->retry.flags & IW_RETRY_MAX) {
+-		wrqu->retry.flags = IW_RETRY_LIMIT | IW_RETRY_MAX;
++	if (wrqu->retry.flags & IW_RETRY_LONG) {
++		wrqu->retry.flags = IW_RETRY_LIMIT | IW_RETRY_LONG;
+ 		goto set_value;
+ 	}
+ 	rc = wl3501_get_mib_value(this, WL3501_MIB_ATTR_SHORT_RETRY_LIMIT,
+ 				  &retry, sizeof(retry));
+ 	if (rc)
+ 		goto out;
+-	wrqu->retry.flags = IW_RETRY_LIMIT | IW_RETRY_MIN;
++	wrqu->retry.flags = IW_RETRY_LIMIT | IW_RETRY_SHORT;
+ set_value:
+ 	wrqu->retry.value = retry;
+ 	wrqu->retry.disabled = 0;

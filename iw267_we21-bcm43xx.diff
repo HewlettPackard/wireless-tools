@@ -1,0 +1,26 @@
+diff -u -p linux/net/ieee80211/softmac/ieee80211softmac_wx.20.c linux/net/ieee80211/softmac/ieee80211softmac_wx.c
+--- linux/net/ieee80211/softmac/ieee80211softmac_wx.20.c	2006-04-03 17:55:10.000000000 -0700
++++ linux/net/ieee80211/softmac/ieee80211softmac_wx.c	2006-04-03 18:06:52.000000000 -0700
+@@ -66,8 +66,8 @@ ieee80211softmac_wx_set_essid(struct net
+ 	
+ 	sm->associnfo.static_essid = 0;
+ 
+-	if (data->essid.flags && data->essid.length && extra /*required?*/) {
+-		length = min(data->essid.length - 1, IW_ESSID_MAX_SIZE);
++	if (data->essid.flags && data->essid.length) {
++		length = min((int) data->essid.length, IW_ESSID_MAX_SIZE);
+ 		if (length) {
+ 			memcpy(sm->associnfo.req_essid.data, extra, length);
+ 			sm->associnfo.static_essid = 1;
+diff -u -p linux/drivers/net/wireless/bcm43xx/bcm43xx_wx.20.c linux/drivers/net/wireless/bcm43xx/bcm43xx_wx.c
+--- linux/drivers/net/wireless/bcm43xx/bcm43xx_wx.20.c	2006-04-03 17:58:47.000000000 -0700
++++ linux/drivers/net/wireless/bcm43xx/bcm43xx_wx.c	2006-04-03 18:00:24.000000000 -0700
+@@ -332,7 +332,7 @@ static int bcm43xx_wx_get_nick(struct ne
+ 	size_t len;
+ 
+ 	bcm43xx_lock(bcm, flags);
+-	len = strlen(bcm->nick) + 1;
++	len = strlen(bcm->nick);
+ 	memcpy(extra, bcm->nick, len);
+ 	data->data.length = (__u16)len;
+ 	data->data.flags = 1;

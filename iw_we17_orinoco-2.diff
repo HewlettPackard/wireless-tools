@@ -1,0 +1,173 @@
+diff -u -p orinoco-0.15rc1.we16/orinoco.c orinoco-0.15rc1/orinoco.c
+--- orinoco-0.15rc1.we16/orinoco.c	Sun Apr 18 22:08:24 2004
++++ orinoco-0.15rc1/orinoco.c	Mon Jun 28 18:19:18 2004
+@@ -521,7 +521,11 @@ MODULE_PARM_DESC(ignore_disconnect, "Don
+ 
+ /* We do this this way to avoid ifdefs in the actual code */
+ #ifdef WIRELESS_SPY
++#if WIRELESS_EXT > 16
++#define SPY_NUMBER(priv)	(priv->spy_data.spy_number)
++#else /* WIRELESS_EXT <= 16 */
+ #define SPY_NUMBER(priv)	(priv->spy_number)
++#endif /* WIRELESS_EXT <= 16 */
+ #else
+ #define SPY_NUMBER(priv)	0
+ #endif /* WIRELESS_SPY */
+@@ -781,10 +785,17 @@ static struct iw_statistics *orinoco_get
+ 		/* If a spy address is defined, we report stats of the
+ 		 * first spy address - Jean II */
+ 		if (SPY_NUMBER(priv)) {
++#if WIRELESS_EXT > 16
++			wstats->qual.qual = priv->spy_data.spy_stat[0].qual;
++			wstats->qual.level = priv->spy_data.spy_stat[0].level;
++			wstats->qual.noise = priv->spy_data.spy_stat[0].noise;
++			wstats->qual.updated = priv->spy_data.spy_stat[0].updated;
++#else /* WIRELESS_EXT <= 16 */
+ 			wstats->qual.qual = priv->spy_stat[0].qual;
+ 			wstats->qual.level = priv->spy_stat[0].level;
+ 			wstats->qual.noise = priv->spy_stat[0].noise;
+ 			wstats->qual.updated = priv->spy_stat[0].updated;
++#endif /* WIRELESS_EXT <= 16 */
+ 		}
+ 	} else {
+ 		struct {
+@@ -1107,6 +1118,15 @@ static inline int is_ethersnap(void *_hd
+ static inline void orinoco_spy_gather(struct net_device *dev, u_char *mac,
+ 				    int level, int noise)
+ {
++#if WIRELESS_EXT > 16
++	struct iw_quality wstats;
++	wstats.level = level - 0x95;
++	wstats.noise = noise - 0x95;
++	wstats.qual = (level > noise) ? (level - noise) : 0;
++	wstats.updated = 7;
++	/* Update spy records */
++	wireless_spy_update(dev, mac, &wstats);
++#else /* WIRELESS_EXT <= 16 */
+ 	struct orinoco_private *priv = (struct orinoco_private *)dev->priv;
+ 	int i;
+ 
+@@ -1119,6 +1139,7 @@ static inline void orinoco_spy_gather(st
+ 			priv->spy_stat[i].qual = (level > noise) ? (level - noise) : 0;
+ 			priv->spy_stat[i].updated = 7;
+ 		}
++#endif /* WIRELESS_EXT <= 16 */
+ }
+ 
+ static void orinoco_stat_gather(struct net_device *dev,
+@@ -2766,9 +2787,15 @@ struct net_device *alloc_orinocodev(int 
+ 	dev->tx_timeout = orinoco_tx_timeout;
+ 	dev->watchdog_timeo = HZ; /* 1 second timeout */
+ 	dev->get_stats = orinoco_get_stats;
++#if WIRELESS_EXT <= 16
+ 	dev->get_wireless_stats = orinoco_get_wireless_stats;
++#endif /* WIRELESS_EXT <= 16 */
+ #if WIRELESS_EXT > 12
+ 	dev->wireless_handlers = (struct iw_handler_def *)&orinoco_handler_def;
++#if WIRELESS_EXT > 16
++	priv->wireless_data.spy_data = &priv->spy_data;
++	dev->wireless_data = &priv->wireless_data;
++#endif /* WIRELESS_EXT > 16 */
+ #endif
+ 	dev->do_ioctl = orinoco_ioctl;
+ 	dev->change_mtu = orinoco_change_mtu;
+@@ -3069,7 +3096,7 @@ static int orinoco_ioctl_getiwrange(stru
+ 		}
+ 	}
+ 
+-	if ((priv->iw_mode == IW_MODE_ADHOC) && (priv->spy_number == 0)){
++	if ((priv->iw_mode == IW_MODE_ADHOC) && (!SPY_NUMBER(priv))){
+ 		/* Quality stats meaningless in ad-hoc mode */
+ 	} else {
+ 		range->max_qual.qual = 0x8b - 0x2f;
+@@ -3122,6 +3149,16 @@ static int orinoco_ioctl_getiwrange(stru
+ 	range->min_r_time = 0;
+ 	range->max_r_time = 65535 * 1000;	/* ??? */
+ 
++#if WIRELESS_EXT > 16
++	/* Event capability (kernel) */
++	IW_EVENT_CAPA_SET_KERNEL(range->event_capa);
++	/* Event capability (driver) */
++	IW_EVENT_CAPA_SET(range->event_capa, SIOCGIWTHRSPY);
++	IW_EVENT_CAPA_SET(range->event_capa, SIOCGIWAP);
++	IW_EVENT_CAPA_SET(range->event_capa, SIOCGIWSCAN);
++	IW_EVENT_CAPA_SET(range->event_capa, IWEVTXDROP);
++#endif /* WIRELESS_EXT > 16 */
++
+ 	TRACE_EXIT(dev->name);
+ 
+ 	return 0;
+@@ -4103,6 +4140,7 @@ static int orinoco_ioctl_getrid(struct n
+ 	return err;
+ }
+ 
++#if WIRELESS_EXT <= 16
+ /* Spy is used for link quality/strength measurements in Ad-Hoc mode
+  * Jean II */
+ static int orinoco_ioctl_setspy(struct net_device *dev,
+@@ -4188,6 +4226,7 @@ static int orinoco_ioctl_getspy(struct n
+ 
+ 	return 0;
+ }
++#endif /* WIRELESS_EXT <= 16 */
+ 
+ #if WIRELESS_EXT > 13
+ /* Trigger a scan (look for other cells in the vicinity */
+@@ -4658,10 +4697,17 @@ static const iw_handler		orinoco_handler
+ 	(iw_handler) NULL,				/* SIOCGIWPRIV */
+ 	(iw_handler) NULL,				/* SIOCSIWSTATS */
+ 	(iw_handler) NULL,				/* SIOCGIWSTATS */
++#if WIRELESS_EXT > 16
++	iw_handler_set_spy,				/* SIOCSIWSPY */
++	iw_handler_get_spy,				/* SIOCGIWSPY */
++	iw_handler_set_thrspy,				/* SIOCSIWTHRSPY */
++	iw_handler_get_thrspy,				/* SIOCGIWTHRSPY */
++#else /* WIRELESS_EXT <= 16 */
+ 	(iw_handler) orinoco_ioctl_setspy,		/* SIOCSIWSPY */
+ 	(iw_handler) orinoco_ioctl_getspy,		/* SIOCGIWSPY */
+ 	(iw_handler) NULL,				/* -- hole -- */
+ 	(iw_handler) NULL,				/* -- hole -- */
++#endif /* WIRELESS_EXT <= 16 */
+ 	(iw_handler) NULL,				/* SIOCSIWAP */
+ 	(iw_handler) orinoco_ioctl_getwap,		/* SIOCGIWAP */
+ 	(iw_handler) NULL,				/* -- hole -- */
+@@ -4720,6 +4766,9 @@ static const struct iw_handler_def	orino
+ 	standard:	(iw_handler *) orinoco_handler,
+ 	private:	(iw_handler *) orinoco_private_handler,
+ 	private_args:	(struct iw_priv_args *) orinoco_privtab,
++#if WIRELESS_EXT > 16
++	.get_wireless_stats = orinoco_get_wireless_stats,
++#endif /* WIRELESS_EXT > 16 */
+ };
+ #endif /* WIRELESS_EXT > 12 */
+ 
+diff -u -p orinoco-0.15rc1.we16/orinoco.h orinoco-0.15rc1/orinoco.h
+--- orinoco-0.15rc1.we16/orinoco.h	Sun Apr 18 22:08:24 2004
++++ orinoco-0.15rc1/orinoco.h	Wed Jun 23 16:12:47 2004
+@@ -11,6 +11,9 @@
+ #include <linux/spinlock.h>
+ #include <linux/netdevice.h>
+ #include <linux/wireless.h>
++#if WIRELESS_EXT > 12
++#include <net/iw_handler.h>
++#endif	/* WIRELESS_EXT > 12 */
+ #include <linux/version.h>
+ #include "hermes.h"
+ 
+@@ -89,11 +92,16 @@ struct orinoco_private {
+ 	u16 ap_density, rts_thresh;
+ 	u16 pm_on, pm_mcast, pm_period, pm_timeout;
+ 	u16 preamble;
++#if WIRELESS_EXT > 16
++ 	struct iw_spy_data spy_data; /* iwspy support */
++	struct iw_public_data	wireless_data;
++#else /* WIRELESS_EXT <= 16 */
+ #ifdef WIRELESS_SPY
+ 	int			spy_number;
+ 	u_char			spy_address[IW_MAX_SPY][ETH_ALEN];
+ 	struct iw_quality	spy_stat[IW_MAX_SPY];
+ #endif
++#endif /* WIRELESS_EXT <= 16 */
+ 
+ 	/* Configuration dependent variables */
+ 	int port_type, createibss;

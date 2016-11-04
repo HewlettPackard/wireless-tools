@@ -1,0 +1,112 @@
+--- linux/drivers/net/wireless/airo.15.c	Wed Dec  4 10:05:14 2002
++++ linux/drivers/net/wireless/airo.c	Fri Dec  6 17:52:07 2002
+@@ -1010,11 +1010,15 @@ struct airo_info {
+ 	struct iw_statistics	wstats;		// wireless stats
+ 	unsigned long		scan_timestamp;	/* Time started to scan */
+ 	struct work_struct	event_task;
++#if WIRELESS_EXT > 15
++	struct iw_spy_data	spy_data;
++#else /* WIRELESS_EXT > 15 */
+ #ifdef WIRELESS_SPY
+ 	int			spy_number;
+ 	u_char			spy_address[IW_MAX_SPY][ETH_ALEN];
+ 	struct iw_quality	spy_stat[IW_MAX_SPY];
+ #endif /* WIRELESS_SPY */
++#endif /* WIRELESS_EXT > 15 */
+ #endif /* WIRELESS_EXT */
+ 	/* MIC stuff */
+ 	mic_module		mod[2];
+@@ -2054,6 +2058,28 @@ static void airo_interrupt ( int irq, vo
+ 				}
+ 			}
+ 			if (len) {
++#if WIRELESS_EXT > 15
++#ifdef IW_WIRELESS_SPY		/* defined in iw_handler.h */
++				if (apriv->spy_data.spy_number > 0) {
++					char *sa;
++					struct iw_quality wstats;
++					/* Prepare spy data : addr + qual */
++					sa = (char*)buffer + ((apriv->flags & FLAG_802_11) ? 10 : 6);
++					if (!(apriv->flags & FLAG_802_11)) {
++						bap_setup (apriv, fid, 8, BAP0);
++						bap_read (apriv, (u16*)hdr.rssi, 2, BAP0);
++					}
++					wstats.qual = hdr.rssi[0];
++					if (apriv->rssi)
++						wstats.level = 0x100 - apriv->rssi[hdr.rssi[1]].rssidBm;
++					else
++						wstats.level = (hdr.rssi[1] + 321) / 2;
++					wstats.updated = 3;	
++					/* Update spy records */
++					wireless_spy_update(dev, sa, &wstats);
++				}
++#endif /* IW_WIRELESS_SPY */
++#else /* WIRELESS_EXT > 15 */
+ #ifdef WIRELESS_SPY
+ 				if (apriv->spy_number > 0) {
+ 					int i;
+@@ -2079,6 +2105,7 @@ static void airo_interrupt ( int irq, vo
+ 						}
+ 				}
+ #endif /* WIRELESS_SPY  */
++#endif /* WIRELESS_EXT > 15 */
+ 				OUT4500( apriv, EVACK, EV_RX);
+ 
+ 				if (apriv->flags & FLAG_802_11) {
+@@ -5179,7 +5206,7 @@ static inline char *airo_translate_scan(
+ 	capabilities = le16_to_cpu(list->cap);
+ 	if(capabilities & (CAP_ESS | CAP_IBSS)) {
+ 		if(capabilities & CAP_ESS)
+-			iwe.u.mode = IW_MODE_INFRA;
++			iwe.u.mode = IW_MODE_MASTER;
+ 		else
+ 			iwe.u.mode = IW_MODE_ADHOC;
+ 		current_ev = iwe_stream_add_event(current_ev, end_buf, &iwe, IW_EV_UINT_LEN);
+@@ -5297,6 +5324,7 @@ static int airo_get_scan(struct net_devi
+ }
+ #endif	/* WIRELESS_EXT > 13 */
+ 
++#if WIRELESS_EXT <= 15
+ #ifdef WIRELESS_SPY
+ /*------------------------------------------------------------------*/
+ /*
+@@ -5359,6 +5387,7 @@ static int airo_get_spy(struct net_devic
+ 	return 0;
+ }
+ #endif			/* WIRELESS_SPY */
++#endif /* WIRELESS_EXT <= 15 */
+ 
+ /*------------------------------------------------------------------*/
+ /*
+@@ -5416,6 +5445,12 @@ static const iw_handler		airo_handler[] 
+ 	(iw_handler) NULL,			/* SIOCGIWPRIV */
+ 	(iw_handler) NULL,			/* SIOCSIWSTATS */
+ 	(iw_handler) NULL,			/* SIOCGIWSTATS */
++#if WIRELESS_EXT > 15
++	iw_handler_set_spy,			/* SIOCSIWSPY */
++	iw_handler_get_spy,			/* SIOCGIWSPY */
++	iw_handler_set_thrspy,			/* SIOCSIWTHRSPY */
++	iw_handler_get_thrspy,			/* SIOCGIWTHRSPY */
++#else /* WIRELESS_EXT > 15 */
+ #ifdef WIRELESS_SPY
+ 	(iw_handler) airo_set_spy,		/* SIOCSIWSPY */
+ 	(iw_handler) airo_get_spy,		/* SIOCGIWSPY */
+@@ -5425,6 +5460,7 @@ static const iw_handler		airo_handler[] 
+ #endif	/* WIRELESS_SPY */
+ 	(iw_handler) NULL,			/* -- hole -- */
+ 	(iw_handler) NULL,			/* -- hole -- */
++#endif /* WIRELESS_EXT > 15 */
+ 	(iw_handler) airo_set_wap,		/* SIOCSIWAP */
+ 	(iw_handler) airo_get_wap,		/* SIOCGIWAP */
+ 	(iw_handler) NULL,			/* -- hole -- */
+@@ -5478,6 +5514,10 @@ static const struct iw_handler_def	airo_
+ 	.standard	= (iw_handler *) airo_handler,
+ 	.private	= (iw_handler *) airo_private_handler,
+ 	.private_args	= (struct iw_priv_args *) airo_private_args,
++#if WIRELESS_EXT > 15
++	.spy_offset	= ((void *) (&((struct airo_info *) NULL)->spy_data) -
++			   (void *) NULL),
++#endif /* WIRELESS_EXT > 15 */
+ };
+ 
+ #endif /* WIRELESS_EXT > 12 */

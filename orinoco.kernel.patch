@@ -1,0 +1,106 @@
+diff -rNu ./linux-orig/net/ipv4/arp.c ./linux/net/ipv4/arp.c
+--- ./linux-orig/net/ipv4/arp.c	Sun Apr 14 17:26:14 2002
++++ ./linux/net/ipv4/arp.c	Sun Apr 14 17:11:36 2002
+@@ -196,6 +196,7 @@
+ 	case ARPHRD_ETHER:
+ 	case ARPHRD_FDDI:
+ 	case ARPHRD_IEEE802:
++	case ARPHRD_IEEE80211:
+ 		ip_eth_mc_map(addr, haddr);
+ 		return 0; 
+ 	case ARPHRD_IEEE802_TR:
+@@ -542,6 +543,11 @@
+ 		arp->ar_pro = __constant_htons(ETH_P_IP);
+ 		break;
+ 
++	case ARPHRD_IEEE80211:
++		arp->ar_hrd = htons(ARPHRD_ETHER);
++		arp->ar_pro = __constant_htons(ETH_P_IP);
++		break;
++
+ #if defined(CONFIG_AX25) || defined(CONFIG_AX25_MODULE)
+ 	case ARPHRD_AX25:
+ 		arp->ar_hrd = __constant_htons(ARPHRD_AX25);
+@@ -635,6 +641,7 @@
+ 			goto out;
+ 		break;
+ #ifdef CONFIG_NET_ETHERNET
++	case ARPHRD_IEEE80211:
+ 	case ARPHRD_ETHER:
+ 		/*
+ 		 * ETHERNET devices will accept ARP hardware types of either
+@@ -682,7 +689,8 @@
+ 		 * and 1 (Ethernet).
+ 		 */
+ 		if (arp->ar_hrd != __constant_htons(ARPHRD_ETHER) &&
+-		    arp->ar_hrd != __constant_htons(ARPHRD_IEEE802))
++		    arp->ar_hrd != __constant_htons(ARPHRD_IEEE802) &&
++		    arp->ar_hrd != __constant_htons(ARPHRD_IEEE80211))
+ 			goto out;
+ 		if (arp->ar_pro != __constant_htons(ETH_P_IP))
+ 			goto out;
+@@ -926,8 +934,11 @@
+ 		if (!dev)
+ 			return -EINVAL;
+ 	}
+-	if (r->arp_ha.sa_family != dev->type)	
++	if (r->arp_ha.sa_family != dev->type)
++{
++printk (KERN_INFO "%s: ---- ARP PROBLEM\n", __FUNCTION__);
+ 		return -EINVAL;
++}
+ 
+ 	neigh = __neigh_lookup_errno(&arp_tbl, &ip, dev);
+ 	err = PTR_ERR(neigh);
+diff -rNu ./linux-orig/net/ipv4/ipconfig.c ./linux/net/ipv4/ipconfig.c
+--- ./linux-orig/net/ipv4/ipconfig.c	Sun Apr 14 17:26:15 2002
++++ ./linux/net/ipv4/ipconfig.c	Sun Apr 14 17:11:36 2002
+@@ -679,6 +679,8 @@
+ 		b->htype = dev->type;
+ 	else if (dev->type == ARPHRD_IEEE802_TR) /* fix for token ring */
+ 		b->htype = ARPHRD_IEEE802;
++	else if (dev->type == ARPHRD_IEEE80211) /* fix for wireless lan */
++		b->htype = ARPHRD_ETHER;
+ 	else {
+ 		printk("Unknown ARP type 0x%04x for device %s\n", dev->type, dev->name);
+ 		b->htype = dev->type; /* can cause undefined behavior */
+diff -rNu ./linux-orig/net/ipv6/addrconf.c ./linux/net/ipv6/addrconf.c
+--- ./linux-orig/net/ipv6/addrconf.c	Sun Apr 14 17:26:17 2002
++++ ./linux/net/ipv6/addrconf.c	Sun Apr 14 17:11:40 2002
+@@ -686,6 +686,7 @@
+ 	case ARPHRD_ETHER:
+ 	case ARPHRD_FDDI:
+ 	case ARPHRD_IEEE802_TR:
++	case ARPHRD_IEEE80211:
+ 		if (dev->addr_len != ETH_ALEN)
+ 			return -1;
+ 		memcpy(eui, dev->dev_addr, 3);
+@@ -1224,7 +1225,8 @@
+ 
+ 	if ((dev->type != ARPHRD_ETHER) && 
+ 	    (dev->type != ARPHRD_FDDI) &&
+-	    (dev->type != ARPHRD_IEEE802_TR)) {
++	    (dev->type != ARPHRD_IEEE802_TR) &&
++	    (dev->type != ARPHRD_IEEE80211)) {
+ 		/* Alas, we support only Ethernet autoconfiguration. */
+ 		return;
+ 	}
+@@ -2020,6 +2022,7 @@
+ 		case ARPHRD_ETHER:
+ 		case ARPHRD_FDDI:
+ 		case ARPHRD_IEEE802_TR:	
++		case ARPHRD_IEEE80211:	
+ 			addrconf_dev_config(dev);
+ 			break;
+ 		default:;
+diff -rNu ./linux-orig/net/ipv6/ndisc.c ./linux/net/ipv6/ndisc.c
+--- ./linux-orig/net/ipv6/ndisc.c	Sun Apr 14 17:26:17 2002
++++ ./linux/net/ipv6/ndisc.c	Sun Apr 14 17:11:40 2002
+@@ -165,6 +165,7 @@
+ 	case ARPHRD_ETHER:
+ 	case ARPHRD_IEEE802:	/* Not sure. Check it later. --ANK */
+ 	case ARPHRD_FDDI:
++	case ARPHRD_IEEE80211:
+ 		ipv6_eth_mc_map(addr, buf);
+ 		return 0;
+ 	case ARPHRD_IEEE802_TR:

@@ -1,0 +1,27 @@
+diff -u -p linux/drivers/net/wavelan.p.25.h linux/drivers/net/wavelan.p.h
+--- linux/drivers/net/wavelan.p.25.h	Mon Aug  5 14:56:35 2002
++++ linux/drivers/net/wavelan.p.h	Mon Aug  5 15:11:59 2002
+@@ -345,6 +345,10 @@
+  *	- Fix spinlock stupid bugs that I left in. The driver is now SMP
+  *		compliant and doesn't lockup at startup.
+  *
++ * Changes made for release in 2.4.20 :
++ * ----------------------------------
++ *	- Set dev->trans_start to avoid filling the logs
++ *
+  * Wishes & dreams:
+  * ----------------
+  *	- roaming (see Pcmcia driver)
+diff -u -p linux/drivers/net/wavelan.25.c linux/drivers/net/wavelan.c
+--- linux/drivers/net/wavelan.25.c	Mon Aug  5 14:56:44 2002
++++ linux/drivers/net/wavelan.c	Mon Aug  5 14:57:36 2002
+@@ -2782,6 +2782,9 @@ static inline int wv_packet_write(device
+ 		    (unsigned char *) &nop.nop_h.ac_link,
+ 		    sizeof(nop.nop_h.ac_link));
+ 
++	/* Make sure the watchdog will keep quiet for a while */
++	dev->trans_start = jiffies;
++
+ 	/* Keep stats up to date. */
+ 	lp->stats.tx_bytes += length;
+ 

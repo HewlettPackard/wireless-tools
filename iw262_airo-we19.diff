@@ -1,0 +1,114 @@
+diff -u -p linux/drivers/net/wireless/airo.18.c linux/drivers/net/wireless/airo.c
+--- linux/drivers/net/wireless/airo.18.c	Fri Mar 18 17:45:57 2005
++++ linux/drivers/net/wireless/airo.c	Fri Mar 18 18:03:57 2005
+@@ -1713,6 +1713,7 @@ static int readBSSListRid(struct airo_in
+ 	list->fh.dwell = le16_to_cpu(list->fh.dwell);
+ 	list->dsChannel = le16_to_cpu(list->dsChannel);
+ 	list->atimWindow = le16_to_cpu(list->atimWindow);
++	list->rssi = le16_to_cpu(list->rssi);
+ 	return rc;
+ }
+ 
+@@ -3245,7 +3246,8 @@ badrx:
+ 					wstats.level = 0x100 - apriv->rssi[hdr.rssi[1]].rssidBm;
+ 				else
+ 					wstats.level = (hdr.rssi[1] + 321) / 2;
+-				wstats.updated = 3;	
++				wstats.noise = apriv->wstats.qual.noise;
++				wstats.updated = IW_QUAL_ALL_UPDATED | IW_QUAL_DBM;
+ 				/* Update spy records */
+ 				wireless_spy_update(dev, sa, &wstats);
+ 			}
+@@ -3588,7 +3590,8 @@ void mpi_receive_802_11 (struct airo_inf
+ 			wstats.level = 0x100 - ai->rssi[hdr.rssi[1]].rssidBm;
+ 		else
+ 			wstats.level = (hdr.rssi[1] + 321) / 2;
+-		wstats.updated = 3;
++		wstats.noise = ai->wstats.qual.noise;
++		wstats.updated = IW_QUAL_ALL_UPDATED | IW_QUAL_DBM;
+ 		/* Update spy records */
+ 		wireless_spy_update(ai->dev, sa, &wstats);
+ 	}
+@@ -6446,9 +6449,19 @@ static int airo_get_range(struct net_dev
+ 	/* Hum... Should put the right values there */
+ 	range->max_qual.qual = airo_get_max_quality(&cap_rid);
+ 	range->max_qual.level = 0x100 - 120;	/* -120 dBm */
+-	range->max_qual.noise = 0;
++	range->max_qual.noise = 0x100 - 120;	/* -120 dBm */
+ 	range->sensitivity = 65535;
+ 
++	/* Experimental measurements - boundary 11/5.5 Mb/s */
++	/* Note : with or without the (local->rssi), results
++	 * are somewhat different. - Jean II */
++	range->avg_qual.qual = airo_get_avg_quality(&cap_rid);
++	if (local->rssi)
++		range->avg_qual.level = 0x100 - 70;	/* -70 dBm */
++	else
++		range->avg_qual.level = 0x100 - 80;	/* -80 dBm */
++	range->avg_qual.noise = 0x100 - 85;		/* -85 dBm */
++
+ 	for(i = 0 ; i < 8 ; i++) {
+ 		range->bitrate[i] = cap_rid.supportedRates[i] * 500000;
+ 		if(range->bitrate[i] == 0)
+@@ -6508,15 +6521,6 @@ static int airo_get_range(struct net_dev
+ 	range->max_retry = 65535;
+ 	range->min_r_time = 1024;
+ 	range->max_r_time = 65535 * 1024;
+-	/* Experimental measurements - boundary 11/5.5 Mb/s */
+-	/* Note : with or without the (local->rssi), results
+-	 * are somewhat different. - Jean II */
+-	range->avg_qual.qual = airo_get_avg_quality(&cap_rid);
+-	if (local->rssi)
+-		range->avg_qual.level = 186;	/* -70 dBm */
+-	else
+-		range->avg_qual.level = 176;	/* -80 dBm */
+-	range->avg_qual.noise = 0;
+ 
+ 	/* Event capability (kernel + driver) */
+ 	range->event_capa[0] = (IW_EVENT_CAPA_K_0 |
+@@ -6680,8 +6684,9 @@ static int airo_get_aplist(struct net_de
+ 			qual[i].level = 0x100 - local->rssi[BSSList.rssi].rssidBm;
+ 		else
+ 			qual[i].level = (BSSList.rssi + 321) / 2;
+-		qual[i].qual = qual[i].noise = 0;
+-		qual[i].updated = 2;
++		qual[i].noise = local->wstats.qual.noise;
++		qual[i].updated = IW_QUAL_LEVEL_UPDATED
++				| IW_QUAL_NOISE_UPDATED | IW_QUAL_DBM;
+ 		if (BSSList.index == 0xffff)
+ 			break;
+ 	}
+@@ -6808,8 +6813,10 @@ static inline char *airo_translate_scan(
+ 		iwe.u.qual.level = 0x100 - ai->rssi[list->rssi].rssidBm;
+ 	else
+ 		iwe.u.qual.level = (list->rssi + 321) / 2;
+-	iwe.u.qual.noise = 0;
+ 	iwe.u.qual.qual = 0;
++	iwe.u.qual.noise = ai->wstats.qual.noise;
++	iwe.u.qual.updated = IW_QUAL_LEVEL_UPDATED
++			| IW_QUAL_NOISE_UPDATED | IW_QUAL_DBM;
+ 	current_ev = iwe_stream_add_event(current_ev, end_buf, &iwe, IW_EV_QUAL_LEN);
+ 
+ 	/* Add encryption capability */
+@@ -7153,7 +7160,7 @@ static void airo_read_wireless_stats(str
+ 	/* The status */
+ 	local->wstats.status = status_rid.mode;
+ 
+-	/* Signal quality and co. But where is the noise level ??? */
++	/* Signal quality and co. */
+ 	local->wstats.qual.qual = airo_get_quality(&status_rid, &cap_rid);
+ 	if (local->rssi)
+ 		local->wstats.qual.level = 0x100 - local->rssi[status_rid.sigQuality].rssidBm;
+@@ -7161,10 +7168,10 @@ static void airo_read_wireless_stats(str
+ 		local->wstats.qual.level = (status_rid.normalizedSignalStrength + 321) / 2;
+ 	if (status_rid.len >= 124) {
+ 		local->wstats.qual.noise = 256 - status_rid.noisedBm;
+-		local->wstats.qual.updated = 7;
++		local->wstats.qual.updated = IW_QUAL_ALL_UPDATED | IW_QUAL_DBM;
+ 	} else {
+ 		local->wstats.qual.noise = 0;
+-		local->wstats.qual.updated = 3;
++		local->wstats.qual.updated = IW_QUAL_QUAL_UPDATED | IW_QUAL_LEVEL_UPDATED | IW_QUAL_NOISE_INVALID | IW_QUAL_DBM;
+ 	}
+ 
+ 	/* Packets discarded in the wireless adapter due to wireless

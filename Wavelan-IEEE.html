@@ -1,0 +1,253 @@
+<HTML>
+<HEAD>
+<TITLE>The Wavelan IEEE</TITLE>
+</HEAD>
+
+<BODY>
+
+<H1 ALIGN=center>GPL driver for the Wavelan IEEE/Orinoco</H1>
+
+<br>
+
+<HR>
+<CENTER>
+<TABLE>
+<TR>
+<TD><A HREF="Wireless.html">Linux & Wireless LANs</A></TD>
+<TD><A HREF="Orinoco.html">Linux Orinoco driver</A></TD>
+<TD><A HREF="Wavelan.html">Linux Wavelan drivers</A></TD>
+<TD><A HREF="Tools.html">Wireless Tools</A></TD>
+<TD><A HREF="../Papers/papers.html">Papers</A></TD>
+<TD><A HREF="../index.html">Main page</A></TD>
+</TR>
+</TABLE>
+
+<HR>
+
+<TABLE>
+<TR>
+<TD><I><A HREF="#drivers">Wavelan IEEE drivers</A></I></TD>
+<TD><I><A HREF="#patches">Wavelan IEEE patches</A></I></TD>
+<TD><I><A HREF="#issues">Wavelan IEEE issues</A></I></TD>
+</TR>
+</TABLE>
+</CENTER>
+<HR>
+
+<br>
+
+<A NAME="intro">
+<H2>Introduction</H2>
+</A>
+
+The Linux Wavelan IEEE driver is an <B>Open Source project</B> that
+had <B>many contributors</B> through its turbulent life. I did
+contribute to it since 1999 thanks to Hewlett Packard sponsoring my
+work. My main contribution was the Wireless Extensions support (of
+course), multi-firmware support and a few bug fixes.
+<p>
+The Wavelan IEEE is the current generation of Wireless LAN hardware
+offered by Lucent (and others). A more detailed description is
+available <A HREF="Linux.Wireless.drivers.html#WavelanIEEE">in the
+Wireless Howto</A>. This page describe the state of the old Linux GPL
+driver for this hardware. This driver is now <B>discontinued</B>.
+<p>
+I've put up a page for the <A HREF="Orinoco.html">new Linux MPL/GPL
+driver</A>, called orinoco_cs.
+<p>
+For the good old Wavelan, which was not IEEE compliant (a few
+generations back), go <A HREF="Wavelan.html">here</A>. For other
+wireless LANs, please read the <A HREF="Wireless.html">Linux Wireless
+Howto</A>.
+
+<A NAME="drivers">
+<H2>Wavelan IEEE drivers&nbsp;: One hardware, 3 drivers...</H2>
+</A>
+
+It's all explained <A HREF="Orinoco.html#drivers">here</A>.
+<p>
+
+<A NAME="patches">
+<H2>Patches for wvlan_cs</H2>
+</A>
+
+Here are a few more patches for the driver&nbsp;:
+
+<UL>
+<LI><A HREF="wvlan-snap.diff">LinkSys AP decapsulation
+patch</A>&nbsp;: Workaround for the latest wvlan_cs to properly
+decapsulate frame sent by LinkSys Access Points. Henry Goffin did
+backport my orinoco_cs fix (itself based on the patch from Dong Liu).
+
+</UL>
+<p>
+
+<A NAME="issues">
+<H2>Issues and release notes for wvlan_cs</H2>
+</A>
+
+Too many for my taste&nbsp;;-(
+
+<UL>
+<LI><B>Maintainance</B>&nbsp;: David is maintaining the
+<U>orinoco_cs</U> driver. <U>wvlan_cs</U> is no longer
+maintained. Please think about upgrading...
+
+<LI><B>Firmware revisions</B>&nbsp;: The latest driver should work
+across all firmware revisions, it has been tested with 1.16, 4.08,
+4.52, 6.04, 6.06 and 6.16. However, some feature might not work well
+in all firmwares (promiscuous in 6.X) or are even not available at all
+(fragmentation for 6.X, Microwave Oven for 4.X). Ad-Hoc mode is also
+different in firmware 4.X and 6.X (see below).
+
+<LI><B>Firmware update</B>&nbsp;: available on <A
+HREF="http://www.wavelan.com/">Lucent web site</A>, not available for
+Linux. Note that most firmware updater require a specific version of
+the Windows driver to work.
+
+<LI><B>Driver versions</B>&nbsp;: Most up to date is in Pcmcia package
+3.1.25 (version 1.0.7).
+
+<LI><B>Kernel 2.4.X</B>&nbsp;: Works fine. Disable all Pcmcia support
+from the kernel, recompile the kernel, recompile the Pcmcia package,
+and then configure normally.
+
+<LI><B>PCI adapter</B>&nbsp;: may be the cause of configuration
+troubles, and does not work on most older PCs. Not really wvlan_cs
+related.
+
+<LI><B>Multi-setup (profiles)</B>&nbsp;: use the Pcmcia scheme
+mechanism (see <A
+HREF="http://pcmcia-cs.sourceforge.net/ftp/doc/PCMCIA-HOWTO-5.html#ss5.3">Pcmcia
+Howto</A>) with <U>network.opts</U> and <A
+HREF="PCMCIA.txt">wireless.opts</A>. Better than in Windows, because
+both IP config and Wavelan config are changed synchronously.
+
+<LI><B>Multi-card</B>&nbsp;: The driver supports it (2 cards in a box)
+and it has been tested successfully. Radio link quality will be
+impacted.
+
+<LI><B>SMP</B>&nbsp;: The driver is fully SMP safe and has been
+successfully tested on a SMP box, including Wireless Extensions.
+
+<LI><B>Configuration</B>&nbsp;: The prefered way to configure the
+wvlan_cs driver is through the <A HREF="PCMCIA.txt">wireless.opts</A>
+pcmcia config file (in <U>/etc/pcmcia</U>), which uses <A
+HREF="Tools.html">iwconfig</A>. Modules parameters (in
+<U>config.opts</U>) are provided only for backward
+compatibility. Settings in <A HREF="PCMCIA.txt">wireless.opts</A>
+always override module parameters, so if you want to use a specific
+module parameters, don't specify the equivalent option in <A
+HREF="PCMCIA.txt">wireless.opts</A>.
+
+<LI><B>Ad-hoc modes</B>&nbsp;: firmware 4.X only supports Lucent
+proprietary Ad-hoc demo mode, whereas firmware 6.X adds supports for
+802.11 compliant IBSS Ad-Hoc mode. Those two Ad-Hoc mode are totally
+incompatible and do not interoperate between each other. It works like
+this in the latest driver&nbsp;:
+<UL>
+<LI><I>MODE="Ad-Hoc"</I> (in <A
+HREF="PCMCIA.txt">wireless.opts</A>)&nbsp;: set the proper Ad-Hoc mode
+depending on firmware revision&nbsp;: up to 6.04, use old Ad-Hoc,
+after 6.06, use IBSS Ad-Hoc (same as Windows driver).
+<LI><I>iwconfig ethX mode Ad-Hoc</I>&nbsp;: same as above.
+<LI><I>port_mode=3</I> (in <U>config.opts</U>)&nbsp;: Set old Ad-Hoc
+demo mode.
+<LI><I>allow_ibss=1</I> (in <U>config.opts</U>)&nbsp;: Set 802.11
+compliant IBSS Ad-Hoc mode if available.
+</UL>
+
+<LI><B>Debugging Ad-Hoc mode</B>&nbsp;: the field "Access Point" or
+"Cell" shown by <A HREF="Tools.html">iwconfig</A> is usefull to know
+what's happening. If it's all zeros, you are using Ad-Hoc demo
+mode. In IBSS Ad-Hoc mode it indicates the cell the node has
+joined. It should be the MAC address of the first node started and all
+node should have the same value (apart if they are out of range).
+
+<LI><B>Encryption keys</B>&nbsp;: Encryption setting is fully
+functional and available in <A
+HREF="PCMCIA.txt">wireless.opts</A>. Note that the driver doesn't
+complain if you set a 128 bits key on a 40 bits only card (Silver),
+which won't work...
+
+<LI><B>Fragmentation setting</B>&nbsp;: firmware 6.X and later removed
+direct fragmentation threshold setting in favor of microwave oven
+robustness (automatic fragmentation). For those firmware, the
+fragmentation setting in the driver enable or disable MWO robustness.
+
+<LI><B>Signal strength in ad-hoc mode</B>&nbsp;: set a MAC address in
+the spy list using <B>iwspy</B>, first address in the list will appear
+in <U>/proc/net/wireless</U> as well as with iwspy.
+
+<LI><B>Promiscuous mode</B>&nbsp;: does work with firmware 4.X and
+open network (no encryption). Doesn't seem to work with encryption
+enabled. May lock-up the card with firmware 6.X. More investigation
+needed.
+
+<LI><B>Driver switching</B>&nbsp;: If you want to switch between the 2
+Wavelan-IEEE drivers, everything is controlled in
+<U>/etc/pcmcia</U>. <B>wvlan_cs</B> is bound in <U>config</U>,
+<B>wavelan2_cs</B> is bound in <U>wavelan2_cs.conf</U>. Comment those
+files as needed.
+
+<LI><B>Ethernet Bridging</B>&nbsp;: doesn't work due to 802.11
+protocol restriction. You may want to try IP bridging (with ARP proxy)
+or routing.
+
+<LI><B>Tx Timeout</B>&nbsp;: various things can produce Tx
+Timeout. It depend on when the happen and how frequent they are&nbsp;:
+<UL>
+<LI><I>As soon as the card is inserted</I>&nbsp;: interrupts are not
+delivered to the driver (not a driver problem, more a Pcmcia
+problem). If you have a PCI adapter, try to play with "PCIC_OPTS"
+setting. Also try to exclude the irq currently used in
+<U>config.opts</U>..
+
+<LI><I>Under load, many of them</I>&nbsp;: a potential driver
+problem. Cause unknown, various conflicting report. Some people have
+claimed that upgrading the firware to <B>6.16</B> solve this problem.
+
+<LI><I>Under heavy load or interferences, few of them</I>&nbsp;: this
+is normal. You may want to tune to watchdog timer in the driver to get
+optimal performance.
+</UL>
+
+</UL>
+
+
+<HR>
+<CENTER><TABLE BORDER=0 CELLPADDING=0><TR><TD valign="top" align="center">
+<ADDRESS>
+<A HREF="Wireless.html">Wireless LANs</A> and
+<A HREF="Tools.html">Wireless Tools</A> -
+jt&#064;hpl.hp.com
+<br>Updated 3 April 01
+<br>Copyright &#169; 1996-2004 Jean Tourrilhes
+</ADDRESS>
+</TD><TD>
+&nbsp;&nbsp;&nbsp;
+</TD><TD valign="top" align="center">
+Project hosted and sponsored by :
+<br>
+<A HREF="http://www.hpl.hp.com"><IMG SRC="../hplogo.png" HEIGHT=34
+WIDTH=141 ALT="HP home page"></A>
+</TD></TR></TABLE></CENTER>
+
+<!-- Keep Webmaster happy -->
+<script type="text/javascript" language="JavaScript">
+var s_prop7="us"
+var s_prop8="eng"
+var s_prop9="corp"
+var s_prop10="us|eng|corp"
+var s_prop13="hphqglobal,hphqwwhplabs"
+</script>
+
+<!-- Begin METRICS JavaScript -->
+<!-- <script type="text/javascript" language="JavaScript"
+src="http://welcome.hp-ww.com/country/us/eng/js/metrics.js"></script> -->
+<script type="text/javascript" language="JavaScript"
+src="http://www.hpl.hp.com/dev/hplabsmetrics.js"></script>
+<!-- End METRICS JavaScript -->
+
+</BODY>
+</HTML>

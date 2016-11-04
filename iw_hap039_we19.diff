@@ -1,0 +1,96 @@
+diff -u -p driver/modules/hostap_compat.18.h driver/modules/hostap_compat.h
+--- driver/modules/hostap_compat.18.h	2005-08-30 18:08:49.000000000 -0700
++++ driver/modules/hostap_compat.h	2005-08-30 18:11:46.000000000 -0700
+@@ -75,6 +75,17 @@ typedef void irqreturn_t;
+ #define offset_in_page(p) ((unsigned long) (p) & ~PAGE_MASK)
+ #endif
+ 
++#ifndef IW_QUAL_LEVEL_UPDATED
++#define IW_QUAL_LEVEL_UPDATED	0x02	/* Value was updated since last read */
++#define IW_QUAL_NOISE_UPDATED	0x04
++#define IW_QUAL_QUAL_INVALID	0x10	/* Driver doesn't provide value */
++#endif
++#ifndef IW_QUAL_ALL_UPDATED
++#define IW_QUAL_ALL_UPDATED	0x07	/* Value was updated since last read */
++#define IW_QUAL_DBM		0x08	/* Level + Noise are dBm */
++#define IW_QUAL_ALL_INVALID	0x70	/* Driver doesn't provide values */
++#endif
++
+ #ifdef __IN_PCMCIA_PACKAGE__
+ #undef pcmcia_access_configuration_register
+ #define pcmcia_access_configuration_register(handle, reg) \
+diff -u -p driver/modules/hostap_ioctl.18.c driver/modules/hostap_ioctl.c
+--- driver/modules/hostap_ioctl.18.c	2005-08-30 17:54:55.000000000 -0700
++++ driver/modules/hostap_ioctl.c	2005-08-30 18:13:24.000000000 -0700
+@@ -49,7 +49,7 @@ static struct iw_statistics *hostap_get_
+ #endif /* in_atomic */
+ 
+ 		if (update && prism2_update_comms_qual(dev) == 0)
+-			wstats->qual.updated = 7;
++			wstats->qual.updated = IW_QUAL_ALL_UPDATED | IW_QUAL_DBM;
+ 
+ 		wstats->qual.qual = local->comms_qual;
+ 		wstats->qual.level = local->avg_signal;
+@@ -58,7 +58,7 @@ static struct iw_statistics *hostap_get_
+ 		wstats->qual.qual = 0;
+ 		wstats->qual.level = 0;
+ 		wstats->qual.noise = 0;
+-		wstats->qual.updated = 0;
++		wstats->qual.updated = IW_QUAL_ALL_INVALID;
+ 	}
+ 
+ 	return wstats;
+@@ -1867,6 +1867,10 @@ static char * __prism2_translate_scan(lo
+ 			iwe.u.qual.noise =
+ 				HFA384X_LEVEL_TO_dBm(le16_to_cpu(scan->anl));
+ 		}
++		iwe.u.qual.updated = IW_QUAL_LEVEL_UPDATED
++			| IW_QUAL_NOISE_UPDATED
++			| IW_QUAL_QUAL_INVALID
++			| IW_QUAL_DBM;
+ 		iwe.len = IW_EV_QUAL_LEN;
+ 		current_ev = iwe_stream_add_event(current_ev, end_buf, &iwe,
+ 						  IW_EV_QUAL_LEN);
+diff -u -p driver/modules/hostap_80211_rx.18.c driver/modules/hostap_80211_rx.c
+--- driver/modules/hostap_80211_rx.18.c	2005-08-30 17:54:34.000000000 -0700
++++ driver/modules/hostap_80211_rx.c	2005-08-30 18:12:11.000000000 -0700
+@@ -730,7 +730,8 @@ void hostap_80211_rx(struct net_device *
+ 		struct iw_quality wstats;
+ 		wstats.level = rx_stats->signal;
+ 		wstats.noise = rx_stats->noise;
+-		wstats.updated = 6;	/* No qual value */
++		wstats.updated = IW_QUAL_LEVEL_UPDATED | IW_QUAL_NOISE_UPDATED
++			| IW_QUAL_QUAL_INVALID | IW_QUAL_DBM;
+ 		/* Update spy records */
+ 		wireless_spy_update(dev, hdr->addr2, &wstats);
+ 	}
+diff -u -p driver/modules/hostap_ap.18.c  driver/modules/hostap_ap.c
+--- driver/modules/hostap_ap.18.c	2005-08-30 17:54:47.000000000 -0700
++++ driver/modules/hostap_ap.c	2005-08-30 18:07:41.000000000 -0700
+@@ -2355,7 +2355,7 @@ static int prism2_ap_get_sta_qual(local_
+ 		qual[count].noise = HFA384X_LEVEL_TO_dBm(sta->last_rx_silence);
+ 		qual[count].updated = sta->last_rx_updated;
+ 
+-		sta->last_rx_updated = 0;
++		sta->last_rx_updated = IW_QUAL_DBM;
+ 
+ 		count++;
+ 		if (count >= buf_size)
+@@ -2471,7 +2471,7 @@ static int prism2_ap_translate_scan(stru
+ 		}
+ #endif /* PRISM2_NO_KERNEL_IEEE80211_MGMT */
+ 
+-		sta->last_rx_updated = 0;
++		sta->last_rx_updated = IW_QUAL_DBM;
+ 
+ 		/* To be continued, we should make good use of IWEVCUSTOM */
+ 	}
+@@ -3174,7 +3174,7 @@ int hostap_update_rx_stats(struct ap_dat
+ 		sta->last_rx_silence = rx_stats->noise;
+ 		sta->last_rx_signal = rx_stats->signal;
+ 		sta->last_rx_rate = rx_stats->rate;
+-		sta->last_rx_updated = 7;
++		sta->last_rx_updated = IW_QUAL_ALL_UPDATED | IW_QUAL_DBM;
+ 		if (rx_stats->rate == 10)
+ 			sta->rx_count[0]++;
+ 		else if (rx_stats->rate == 20)

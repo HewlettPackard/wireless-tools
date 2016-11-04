@@ -1,0 +1,1405 @@
+<HTML>
+<HEAD>
+<TITLE>Linux & Wireless LANs</TITLE>
+<LINK rel="Next"  href="Linux.Wireless.intro.html" title="Introduction">
+<LINK rel="Top"  href="../index.html" title="Main page">
+
+<LINK rel="chapter" href="#word" title="Foreword">
+<LINK rel="chapter" href="#howto" title="The Linux Wireless LAN Howto">
+<LINK rel="chapter" href="#wdrivers" title="Wireless LAN drivers web pages">
+<LINK rel="chapter" href="#wlinux" title="Wireless Linux software">
+<LINK rel="chapter" href="#security" title="Security software">
+<LINK rel="chapter" href="#whowtos" title="Other Linux Wireless Howtos">
+<LINK rel="chapter" href="#wnets" title="Public Wireless Linux networks">
+<LINK rel="chapter" href="#wlinks" title="Other wireless web sites">
+<LINK rel="chapter" href="#whard" title="Wireless LAN Hardware">
+<LINK rel="chapter" href="#olinks" title="Linux and other links">
+
+<LINK rel="section" href="Linux.Wireless.intro.html" title="Introduction">
+<LINK rel="section" href="Linux.Wireless.drivers.html" title="The devices, the drivers">
+<LINK rel="section" href="Linux.Wireless.usage.html" title="Wireless LANs in use">
+<LINK rel="section" href="Linux.Wireless.Extensions.html" title="Wireless Extensions for Linux">
+<LINK rel="section" href="Linux.Wireless.Overview.html" title="Wireless LAN technology overview">
+
+<LINK rel="Related" href="Tools.html" title="Wireless Tools for Linux">
+<LINK rel="Related" href="Orinoco.html" title="Linux Orinoco driver">
+<LINK rel="Related" href="Wavelan.html" title="Linux Wavelan drivers">
+<LINK rel="Related" href="Wavelan-IEEE.html" title="Linux Wavelan-IEEE driver">
+<LINK rel="Related" href="../IrDA/IrDA.html" title="Linux-IrDA stack">
+<LINK rel="Related" href="../IrDA/IrNET.html" title="IrNET for Linux">
+<LINK rel="Related" href="../IrDA/squirt.html" title="e-Squirt for Linux">
+<LINK rel="Related" href="../IrDA/Java.html" title="Java-IrDA API for Linux">
+<LINK rel="Related" href="../bt/" title="BlueTooth notes">
+<LINK rel="Related" href="../Papers/papers.html" title="Papers & Publications">
+
+</HEAD>
+
+<BODY>
+
+<H1 ALIGN=center>Wireless LAN resources for Linux</H1>
+
+<br>
+
+<HR>
+<CENTER>
+<TABLE>
+<TR>
+<TD><A HREF="Tools.html">Wireless Tools</A></TD>
+<TD><A HREF="Orinoco.html">Orinoco driver</A></TD>
+<TD><A HREF="Wavelan.html">Wavelan drivers</A></TD>
+<TD><A HREF="../IrDA/IrDA.html">Linux-IrDA</A></TD>
+<TD><A HREF="../bt/">BlueTooth</A></TD>
+<TD><A HREF="../Papers/papers.html">Papers</A></TD>
+<TD><A HREF="../index.html">Main page</A></TD>
+</TR>
+</TABLE>
+
+<HR>
+
+<TABLE>
+<TR>
+<TD><I><A HREF="#howto">Linux Wireless LAN Howto</A></I></TD>
+<TD><I><A HREF="#wlinux">Wireless+Linux links</A></I></TD>
+<TD><I><A HREF="#whowtos">Other Howtos</A></I></TD>
+<TD><I><A HREF="#whard">Wireless hardware</A></I></TD>
+<TD><I><A HREF="#olinks">Linux links</A></I></TD>
+</TR>
+</TABLE>
+</CENTER>
+<HR>
+
+<br>
+
+<A NAME="word">
+<H2>Foreword</H2>
+</A>
+
+The Linux Wireless LAN Howto is an <B>Open Source project</B>
+sponsored by <A HREF="http://www.hpl.hp.com">Hewlett Packard</A>
+(through my contribution) since 1996, and built with the
+<B>contribution of many Linux users</B> all over the world.
+<p>
+I first got involved in the Wireless LAN world by hacking the Wavelan
+drivers for Linux. I'm quite curious, so I start gathering information
+to know how the damn beasty was working.
+<p>
+Then, I realised that there was no central point where you could find
+all this information, links to the drivers and issues with Linux. So,
+I start stuffing it on my web pages, and it slowly evolved to what you
+see now.
+<p>
+I'm no longer active on the Wavelan drivers, but I'm also still
+following the work of Wireless LAN (called as well WLAN or Radio
+Ethernet), especially in relation with Linux. So, once every century,
+I update my <B>Linux Wireless LAN Howto</B> (html and pdf available
+below) and the <B>collection of URLs</B> (after the howto). I hope
+that it is usefull to someone...
+<p>
+
+<HR width=25%>
+
+<A NAME="howto">
+<H2>The Linux Wireless LAN Howto</H2>
+</A>
+
+I've decided to collect all the information about Wireless LANs and
+Linux that I was able to find. The goal was also to document my work
+and to become famous :-) You will find all that information in the
+<B>Linux Wireless LAN Howto</B>, available in <I>PostScript</I>,
+<I>PDF</I> and <I>HTML</I> (see below).
+<p>
+The original <B>Linux Wireless LAN Howto</B> is available as 3
+postscript or acrobat (PDF) documents, which contains the same
+material but with the original presentation. So if you wish to enjoy a
+better reading experience or to print it, use those documents&nbsp;:
+
+<TABLE>
+<TR>
+<TD><B><I>PostScript :</I></B></TD>
+<TD><B><I>Acrobat (pdf) :</I></B></TD>
+</TR><TR>
+<TD><UL>
+<LI><A HREF="Linux.Wireless.ps">Sections 1, 2, 3, 4 and 5</A>
+<LI><A HREF="Linux.Wireless.Extensions.ps">Section 6</A>
+<LI><A HREF="Linux.Wireless.Overview.ps">Section 7</A>
+</TD></UL>
+<TD><UL>
+<LI><A HREF="Linux.Wireless.pdf">Sections 1, 2, 3, 4 and 5</A>
+<LI><A HREF="Linux.Wireless.Extensions.pdf">Section 6</A>
+<LI><A HREF="Linux.Wireless.Overview.pdf">Section 7</A>
+</TD></UL>
+</TR>
+</TABLE>
+
+<p>
+The translation of the Howto to HTML lack the presentation but is more
+browser friendly, with cross references, external web links and
+support of <A HREF="http://www.subotnik.net/html/link">HTML
+navigation</A>. It is composed of the following documents&nbsp;:
+<UL>
+
+<LI><A HREF="Linux.Wireless.intro.html">Introduction</A>
+
+<LI><A HREF="Linux.Wireless.drivers.html">The devices, the
+drivers - pre-802.11, early 802.11</A>
+
+<UL>
+<LI><A HREF="Linux.Wireless.drivers.html#Wavelan">Lucent Wavelan &amp;
+DEC RoamAbout DS</A> (wavelan, wavelan_cs)
+<LI><A HREF="Linux.Wireless.drivers.html#Netwave">Netwave AirSurfer
+&amp; Xircom Netwave</A> (netwave_cs)
+<LI><A HREF="Linux.Wireless.drivers.html#AirSurferPlus">Netwave
+AirSurfer plus</A>
+<LI><A HREF="Linux.Wireless.drivers.html#Prism">Harris Prism based cards :
+BayStack 660, ZoomAir, YDI and other...</A>
+<LI><A HREF="Linux.Wireless.drivers.html#ZCom">Z-Com LANEscape, ELSA MC2,
+Siemens I-Gate</A>
+<LI><A HREF="Linux.Wireless.drivers.html#RangeLan2">Proxim RangeLan2,
+Proxim Symphony &amp; DEC RoamAbout FH</A>
+<LI><A HREF="Linux.Wireless.drivers.html#Spectrum24">Symbol Spectrum24 (FH)</A>
+(spectrum24_cs)
+<LI><A HREF="Linux.Wireless.drivers.html#Arlan">Aironet ARLAN</A> (arlan)
+<LI><A HREF="Linux.Wireless.drivers.html#Raylink">Raytheon Raylink,
+WebGear Aviator2.4 & Aviator Pro and BUSlink wireless LAN</A>
+<LI><A HREF="Linux.Wireless.drivers.html#HomeFree">Diamond Multimedia
+HomeFree</A>
+<LI><A HREF="Linux.Wireless.drivers.html#BreezeNetPC">BreezeCom BreezeNet
+Pcmcia</A>
+<LI><A HREF="Linux.Wireless.drivers.html#BreezeNetOther">BreezeCom BreezeNet
+(not Pcmcia)</A>
+</UL>
+
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html">The devices, the
+drivers - 802.11b</A>
+
+<UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#WavelanIEEE">Lucent Wavelan
+IEEE, Lucent Orinoco, Apple Airport Enterasys RoamAbout 802, Elsa
+AirLancer 11 &amp; Melco/Buffalo 802.11b</A>
+<UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#WavelanIEEE">Obsolete GPL
+driver in Pcmcia package</A> (wvlan_cs)
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#Orinoco">MPL/GPL driver in
+Kernel</A> (orinoco_cs)
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#WavelanIEEEbin">binary
+library driver from Lucent, Enterasys & Agere</A> (wavelan2_cs, roamabout_cs,
+wlags49_cs)
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#OrinocoUSB">MPL/GPL USB
+driver</A> (orinoco_usb)
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#Airport">GPL Airport
+driver</A> (airport)
+</UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#Prism2">Intersil PrismII based
+cards (the most common 802.11b cards)</A>
+<UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#Prism2">MPL driver
+(linux-wlan-ng)</A> (prism2_cs)
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#Orinoco-Prism2">PrismII
+support in the Orinoco driver</A> (orinoco_cs)
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#Prism2-hostAP">GPL driver
+with HostAP mode</A> (hostap_cs)
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#MagicLAN">Samsung binary
+library driver</A> (swld11_cs)
+</UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#Spectrum24t">Symbol Spectrum24
+High Rate (802.11b), 3Com AirConnect, Intel PRO/Wireless and Socket
+Communication</A>
+<UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#Spectrum24t">Symbol GPL
+driver</A> (spectrum24t_cs)
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#eriwlan">Ericsson GPL
+driver</A> (eriwlan_cs)
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#Orinoco-Symbol">Symbol High
+Rate support in the Orinoco driver</A> (orinoco_cs)
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#SpectrumCF">Symbol CF driver
+based on the Orinoco driver</A> (spectrum_cs)
+</UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#Arlan802">Aironet ARLAN 4500,
+4800, Cisco 340 and Cisco 350 series</A>
+<UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#Arlan802">MPL driver</A>
+(airo/airo_cs)
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#Arlan802alt">Alternate GPL
+driver</A> (aironet4500_card/aironet4500_cs)
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#ArlanCisco">Cisco OpenSource
+driver</A> (airo/airo_cs)
+</UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#Swallow">No Wires Needed
+Swallow (and BreezeCom DS11)</A> (swallow_cs)
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#Poldhu">No Wires Needed 1148,
+old 3Com XJack</A> (poldhu_cs)
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#Nokia">Nokia C110/C111</A>
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#Atmel">Atmel
+AT76C502A/AT76C503A cards (802.11b USB and Pcmcia)</A>
+<UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#Atmel">Atmel USB/Pcmcia
+GPL driver</A> (vnetusb)
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#AtmelUSB">Alternate USB
+GPL driver</A> (at76c503)
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#AtmelPcmcia">Alternate Pcmcia
+GPL driver</A> (atmel_cs)
+</UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#ADMtek">ADMtek ADM8211 based
+cards</A>
+<UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#ADMtek">ADMtek binary
+driver</A> (8211)
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#ADMtekGPL">Alternate GPL
+driver</A> (adm8211)
+</UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#Realtek">Realtek RTL8180L
+cards</A>
+<UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#Realtek">Realtek binary
+driver</A> (rtl8180_24x)
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#RealtekGPL">Alternate GPL
+driver</A> (r8180)
+</UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#Ralink">Ralink RT2400
+cards</A>
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#Centrino">Intel PRO/Wireless
+2100 card (Centrino MiniPCI)</A>
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#ZyDAS">ZyDAS ZD1201 (USB dongles)</A>
+<LI><A HREF="Linux.Wireless.drivers.802.11b.html#SiS162">SiS 160/162</A>
+</UL>
+
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html">The devices, the
+drivers - 802.11a, 802.11g, 802.11n</A>
+
+<UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#acx100">TI ACX100 OpenSource
+driver (All 802.11b+ cards)</A>
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#AtherosMADWiFi">Atheros
+AR5210/AR5211/AR5212 cards (most cards with 802.11a)</A>
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#Prism54">Intersil
+PrismIndigo, PrismGT and PrismDuette cards</A> (prism54)
+<UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#Prism54">FullMAC driver</A> (Prism54)
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#Prism54softmac">SoftMAC driver</A> (islsm)
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#Prism54mac80211">mac80211 driver</A> (p54)
+</UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#Centrino2200">Intel
+PRO/Wireless 2200/2915 cards (Centrino AG MiniPCI)</A>
+<UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#Centrino2200">standard
+driver</A> (ipw2200)
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#CentrinoHostAP">HostAP
+driver</A> (ipw2200-ap)
+</UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#Centrino3945i">Intel
+PRO/Wireless 3945 cards (Centrino ABG MiniPCI)</A>
+<UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#Centrino3945i">Intel stack
+driver</A> (ipw3945)
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#Centrino3945mac80211">mac80211 driver</A> (iwlwifi)
+</UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#Centrino4965">Intel
+PRO/Wireless 4965 cards (Centrino AGN MiniPCI)</A>
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#Ralink2500">Ralink
+RT2500 cards</A>
+<UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#Ralink2500">Ralink driver</A>
+(rt2x00)
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#RalinkBSD">BSD driver</A>
+(ural-linux)
+</UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#Broadcom">Broadcom 43xx</A>
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#ZD1211">ZyDAS ZD1211</A>
+<UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#ZD1211">Zydas driver</A>
+(zd1211)
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#ZD1211">SoftMAC driver</A>
+(zd1211rw)
+</UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#RealTek80211g">Realtek
+RTL8185L & RTL8187L</A>
+<UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#RealTek80211g">Original
+PCI/Cardbus/USB driver</A> (r8180/r8187)
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#RealTekMac80211">mac80211
+USB driver</A> (rtl8187)
+</UL>
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#Libertas">Marvel Libertas</A>
+<LI><A HREF="Linux.Wireless.drivers.802.11ag.html#AirgoNetworks">AirgoNetworks
+AGNX00 (TrueMIMO)</A>
+</UL>
+
+<LI><A HREF="Linux.Wireless.drivers.other.html">The devices, the
+drivers - other</A>
+
+<UL>
+<LI><A HREF="Linux.Wireless.drivers.other.html#notsup">Unsupported devices</A>
+<LI><A HREF="Linux.Wireless.drivers.other.html#Win32">Using Win32 drivers</A>
+<LI><A HREF="Linux.Wireless.drivers.other.html#other">Other technologies
+(Wireless bridge, HAM, IrDA, BlueTooth, Cellular)</A>
+</UL>
+
+<LI><A HREF="Linux.Wireless.usage.html">Wireless LANs in use</A>
+
+<UL>
+<LI><A HREF="Linux.Wireless.usage.html#choice">Choice, features &amp;
+interoperability</A>
+<LI><A HREF="Linux.Wireless.usage.html#vendor">Which vendor&nbsp;; How to
+identify a card</A>
+<LI><A HREF="Linux.Wireless.usage.html#install">Installation, configuration
+&amp; documentation</A>
+<LI><A HREF="Linux.Wireless.usage.html#deploy">Deployement issues</A> (topology, performance, reliability, coverage, security...)
+</UL>
+
+<LI><A HREF="Linux.Wireless.Extensions.html">Wireless Extensions for
+Linux</A>
+
+<LI><A HREF="Linux.Wireless.Overview.html">Wireless LAN technology
+overview</A>
+
+<UL>
+<LI><A HREF="Linux.Wireless.lexicon.html">MAC, LAN, Layer and other strange words...</A>
+<LI><A HREF="Linux.Wireless.wlan.html">Anatomy of a radio LAN</A>
+<LI><A HREF="Linux.Wireless.modem.html">The radio modem (physical layer)</A>
+<LI><A HREF="Linux.Wireless.mac.html">The MAC level (link layer)</A>
+<LI><A HREF="Linux.Wireless.std.html">Some Wireless LAN standards</A>
+</UL>
+
+</UL>
+
+<br>
+<HR>
+My Howto finishes here, below is a huge collection of links ;-)
+<br>
+If you want to add links there, send me a nice e-mail...
+<br>
+
+<HR width=25%>
+
+<A NAME="wdrivers">
+<H2>Wireless LAN drivers web pages</H2>
+</A>
+
+Lot's of people are working to make Linux better in supporting
+Wireless LANs, you will find down here some link to their web
+pages. This is only some shortcuts, you will find the complete list of
+drivers and all the details <A HREF="Linux.Wireless.drivers.html">in
+the Howto</A>.
+
+<UL>
+<LI><A HREF="Wavelan.html">Release notes</A> for the Linux
+<B>Wavelan</B> drivers, that support only the <B>very old Wavelan</B>
+cards (now obsolete).
+
+<LI><A HREF="Orinoco.html">Release notes</A> for the Linux
+<B>Orinoco</B> driver, that support most <B>Orinoco</B> cards,
+<B>Symbol HR</B> cards and <B>PrismII</B> cards.
+
+</UL><UL>
+
+<LI>Some drivers authors are adding information to the <A
+HREF="http://www.linuxwireless.org/">Linux Wireless wiki</A>. They
+have set up a central <A
+HREF="http://marc.info/?l=linux-wireless&r=1&w=2"> linux-Wireless
+mailing list</A> that only some drivers use.
+
+<LI><A HREF="http://ozlabs.org/people/dgibson/dldwd/">David Gibson</A>
+is the author and maintainer of the <B>Orinoco</B> Linux driver. He
+has a <A HREF="http://sourceforge.net/mail/?group_id=44338">mailing
+list</A> about it.
+
+<LI><A HREF="http://www.red-bean.com/~proski/symbol/">Pavel Roskin</A>
+maintains the <B>Symbol-CF</B> version of the Orinoco driver.
+
+<LI><A HREF="http://www.nongnu.org/orinoco/">Manuel Estrada Sainz</A>
+was maintaining the <B>Orinoco-USB</B> version of the Orinoco driver.
+
+<!-- http://ranty.ddts.net/~ranty/orinoco/ -->
+
+<LI><A HREF="http://www.linux-wlan.com/linux-wlan/">Mark
+S. Mathews</A> is the maintainer of the <B>Prism</B> and
+<B>Prism&nbsp;II</B> based cards Linux drivers and is doing lot's or
+work on implementing a <B>802.11</B> layer for Linux. He has a couple
+of <A HREF="http://lists.linux-wlan.com/">mailing list</A> about it.
+
+<!-- He has a <A
+HREF="http://www.lifix.fi/extarchive/lwlan/">mailing list</A>
+about it.
+-->
+
+<LI><A HREF="http://sourceforge.net/projects/airo-linux/">Benjamin
+Reed and Javier Achirica</A> have developed a driver for the new
+<B>Aironet 802.11</B> wireless LAN cards, and they have a <A
+HREF="http://sourceforge.net/mail/?group_id=24926">mailing list</A>
+about it.
+
+<LI><A HREF="http://hostap.epitest.fi/">Jouni Malinen</A> has
+developed a driver for the PrismII cards supporting <B>Host AP</B>
+mode and bridging. He has a <A
+HREF="http://lists.shmoo.com/pipermail/hostap/">mailing list</A> about
+it.
+
+<LI><A HREF="http://atmelwlandriver.sourceforge.net/">Atmel</A> has a
+SourceForge projects for their <B>Atmel USB and Pcmcia</B> drivers,
+with some <A
+HREF="http://sourceforge.net/mail/?group_id=59001">mailing
+lists</A>.
+
+<LI><A HREF="http://at76c503a.berlios.de/">J&ouml;rg Albert</A> is
+maintaining the alternate driver for <B>Atmel USB</B> devices
+originally written by <A
+HREF="http://innominate.org/kurth/at76c503/">Oliver Kurth</A>. He has a
+<A HREF="http://lists.berlios.de/pipermail/at76c503a-user/">mailing
+list</A> about it.
+
+<LI><A HREF="http://sourceforge.net/projects/madwifi">Sam Leffler and
+Michael Renzmann</A> are maintaining the <B>binary Atheros</B> driver,
+and have a <A
+HREF="http://sourceforge.net/mail/?group_id=82936">mailing list</A>
+about it.
+
+<LI><A HREF="http://acx100.sourceforge.net/">Andreas Mohr and his
+team</A> are working on the <B>TI ACX100</B> OpenSource driver, and
+they have a <A
+HREF="http://sourceforge.net/mail/?group_id=75380">mailing list</A>
+about it.
+
+<LI><A HREF="http://prism54.org/">The Prism54 project</A> are
+maintaining the driver for <B>Intersil 802.11g</B> cards, and they
+have some <A
+HREF="http://prism54.org/mailman/listinfo/prism54-devel">mailing
+lists</A> about it.
+
+<LI><A HREF="http://ipw2100.sourceforge.net/">James Ketrenos and many
+people</A> are working on the <B>Intel PRO/Wireless 2100</B> driver
+(the infamous Centrino MiniPCI card), they also maintain web pages for
+the <A HREF="http://ipw2200.sourceforge.net/">Intel PRO/Wireless
+2200</A>, the <A HREF="http://ipw3945.sourceforge.net/">Intel
+PRO/Wireless 3945</A> and the <A
+HREF="http://intellinuxwireless.org/?p=iwlwifi">Intel PRO/Wireless
+4965</A>. They have a <A
+HREF="http://lists.sourceforge.net/lists/listinfo/ipw2100-devel/">mailing
+list for the 2100/2200</A>, and another <A
+HREF="https://lists.sourceforge.net/lists/listinfo/ipw3945-devel">mailing
+list for the 3945/4965</A>.
+
+<LI><A HREF="http://rt2x00.serialmonkey.com/">Mark Wallis and Ivo van
+Doorn</A> are maintaining the <B>Ralink RT2400 and RT2500</B>
+OpenSource drivers, and they have a <A
+HREF="http://sourceforge.net/mail/?group_id=107832">mailing list</A>
+about it.
+
+<LI><A HREF="http://bcm43xx.berlios.de/">Michael Buesch and many
+people</A> are maintaining the <B>Broadcom 43xx</B> OpenSource
+drivers, and they have a <A
+HREF="https://lists.berlios.de/mailman/listinfo/bcm43xx-dev">mailing
+list</A> about it.
+
+<LI><A HREF="http://rtl8180-sa2400.sourceforge.net/">Andrea
+Merello</A> is maintaining the <B>RealTek</B> OpenSource drivers.
+
+<LI><A HREF="http://zd1211.wiki.sourceforge.net/">Daniel Drake and
+others</A> are maintaining the <B>ZyDAS ZD1211</B> OpenSource drivers,
+and they have a <A HREF="
+http://sourceforge.net/mail/?group_id=129083">mailing list</A> about
+it.
+
+
+</UL><UL>
+
+<LI><A HREF="http://www.cs.uit.no/~johnm/">John Markus
+Bj&oslash;rndalen</A> was the maintainer of the <B>Xircom Netwave</B>
+Linux driver.
+
+<LI><A HREF="http://www.cs.uit.no/~dagb/">Dag Brattli</A> was the
+maintainer of the <B>Xircom Netwave</B> Linux driver and the <B>Linux
+IrDA Project</B>.
+
+<LI><A HREF="http://ipoint.vlsi.uiuc.edu/wireless/asplus.html">Jay
+Moorman</A> was the maintainer of the <B>Netwave AirSurfer plus</B>
+driver (only in Netwave mode).
+
+<LI><A HREF="http://www.komacke.com/">Dave Koberstein</A> was the
+maintainer of the <B>Proxim RangeLan2</B> Linux driver, and he had a <A
+HREF="http://www.komacke.com/archive/rl2-library/">mailing list</A>
+about it.
+
+<LI><A HREF="http://www.csee.uq.edu.au/~leonard/rl2/">David Leonard
+</A> was working on a public domain <B>Proxim RangeLan2 Pcmcia</B>
+driver for OpenBSD and needs help.
+
+<LI><A HREF="http://www.crisp.demon.co.uk/wireless.html">Paul Fox</A>
+was working on a driver for the <B>IBM Wireless LAN Entry</B> card (a
+product which is now discontinued).
+
+<LI><A
+HREF="http://www.fasta.fh-dortmund.de/users/andy/wvlan/">Andreas
+Neuhaus</A> was the maintainer of the <B>Wavelan IEEE</B> Linux
+driver.
+
+<LI><A
+HREF="http://www.cs.umd.edu/~moustafa/mwvlan/mwvlan.html">Moustafa
+Youssef</A> is the maintainer of the <B>mwvlan</B> driver, a modified
+version of wvlan_cs with scanning support.
+
+<LI><A HREF="http://ppclinux.apple.com/~benh/">Benjamin
+Herrenschmidt</A> has modified the Wavelan IEEE driver to make it work
+with the <B>Apple Airport card</B>.
+
+<LI><A HREF="http://sourceforge.net/projects/spectrum24">Lee John
+Keyser-Allen</A> was the maintainer the <B>Symbol</B> drivers, and he
+had some <A
+HREF="http://sourceforge.net/forum/?group_id=11099">discussion
+forums</A> about it.
+
+<LI><A HREF="http://www.cs.ubc.ca/spider/jennings/">Cullen
+Jennings</A> and <A HREF="http://www.ylenurme.ee/~elmer/655/">Elmer
+Joandi</A> were the maintainers of the <B>Aironet Arlan</B> Linux
+driver.
+
+<!-- Dead
+<LI><A HREF="http://www.cse.ogi.edu/~omega/wireless/aviator/">Erik
+Walthinsen</A> was working on a driver for the <B>old WebGear
+Aviator</B>.
+-->
+
+<LI><A HREF="http://webpages.charter.net/corey/index.html">Thomas
+Corey</A> has developed a driver for the <B>Raytheon Raylink</B>
+802.11 wireless LAN (his <A
+HREF="http://world.std.com/~corey/raylink.html">old homepage</A>).
+
+<LI><A HREF="http://team.vantronix.net/ar5k/">Reyk Floeter</A> was
+working on a GPL driver for the various cards based on the <B>ATHEROS
+802.11a</B> chipset, and had preliminary source code available (not
+yet functional).
+
+<LI><A HREF="http://developer.berlios.de/projects/mc2drv/">J&ouml;rg
+Albert</A> is maintaining the old driver for the <B>Elsa MC2 and ZCOM
+WL24</B> devices originally written by ZCOM and Elsa. He has a <A
+HREF="http://lists.berlios.de/pipermail/mc2drv-users/">mailing
+list</A> about it.
+
+<LI><A HREF="http://www.xs4all.nl/~bvermeul/swallow/">Bas Vermeulen</A>
+has developed a driver for the <B>No Wires Needed</B> 802.11 wireless
+LAN.
+
+</UL>
+
+<HR width=25%>
+
+<A NAME="wlinux">
+<H2>Wireless Linux software on the Internet</H2>
+</A>
+
+Linux Wireless support is not limited to Wireless LAN drivers, you can
+find tools, distributions and support for other wireless technologies.
+
+<H4><I>Wireless Tools and Applications</I></H4>
+
+<UL>
+
+<LI>I've got a list of <A HREF="Tools.html#links">Wireless
+Applications for Linux</A>, including my own <A
+HREF="Tools.html">Wireless Tools</A>, different <B>quality monitor</B>
+applets, a <B>Wireless Aware</B> Mobile IP and <B>Wireless Access
+Point tools</B>.
+
+</UL>
+
+<H4><I>Wireless LAN Protocol stacks</I></H4>
+
+<UL>
+
+<LI><A HREF="http://www.linux-wlan.com/linux-wlan/">Mark
+S. Mathews</A> has developped the <B>linux-wlan 802.11 stack</B>, used
+by the linux-wlan driver.
+
+<LI><A HREF="http://sourceforge.net/projects/madwifi">Sam Leffler and
+Michael Renzmann</A> are maintaining the <B>net80211 stack</B>, which
+is used by the <A
+HREF="http://sourceforge.net/projects/madwifi">MadWifi</A> driver and
+by <B>FreeBSD</B>.
+
+<LI><A HREF="http://ieee80211.sourceforge.net/">James Ketrenos and
+many people</A> are working on the <B>Intel ieee80211 stack</B>. This
+stack is currently in the Linux kernel 2.6.14+, is used by various
+Intel Centrino drivers and is derived from the <A
+HREF="http://hostap.epitest.fi/">HostAP driver</A>.
+
+<LI><A HREF="http://softmac.sipsolutions.net/">Michael Buesch and
+Larry Finger</A> are working on the <B>SoftMAC layer</B> for the
+<B>Intel ieee80211 stack</B>. This layer is currently in the Linux
+kernel 2.6.17+ and used by various drivers (Broadcom, Zydas...).
+
+<LI><A HREF="http://hostap.epitest.fi/">Jouni Malinen</A> has
+developed the <B>ieee80211 devicescape stack</B>, which is derived
+from the <A HREF="http://hostap.epitest.fi/">HostAP driver</A>.
+
+<LI><A HREF="http://kernel.org/pub/linux/kernel/people/jbenc/">Jiri
+Benc and Jirka Bohac</A> are working on the <B>mac80211 kernel
+stack</B> (formerly ieee80211 DeviceScape stack). This stack is
+currently in the Linux kernel 2.6.22+ and used by a few drivers
+(RealTek...).
+
+<LI><A HREF="http://intellinuxwireless.org/?p=mac80211">James
+P. Ketrenos and Intel</A> have their own branch of the <B>mac80211
+stack</B> for their newer Centrino drivers.
+
+<LI>A very long time ago <A
+HREF="ftp://ftp.infotechsrl.it/pub/">InfoTech</A> was developing a
+<B>802.11</B> software stack for Linux, including the Access Point
+functionality.
+
+</UL>
+
+<H4><I>Wireless Linux Distributions</I></H4>
+
+Most distributions support some Wireless cards out of the box, and
+have the infrastructure to support other cards when the proper driver
+is installed. Those distributions have a specific focus on Wireless
+LAN.
+
+<UL>
+
+<LI>IT-University KTH has released <A
+HREF="http://www.flyinglinux.net/">Flying Linux</A>, a Linux
+distribution with <B>native support for wireless LANs</B> (mostly
+Wavelan IEEE & Mobile IP).
+
+<LI>The <A HREF="http://www.linuxrouter.org/">Linux Router Project
+(LRP)</A> has also some support for some Wireless Lans, for example
+there is a <A
+HREF="http://www.iop.com/~intutor/lrprg/index.html#Images">Aviator2.4
+LRP image</A> and some <A HREF="http://lachniet.com/lrp/">Wavelan
+LRP images</A>. Also, there is an <A
+HREF="http://www.wirelessmutants.com/linuxwireless.shtml">LRP Aironet
+Howto</A>.
+
+<LI><A HREF="http://www.hazard.maks.net/">Vladimir Ivaschenko</A> has
+created <B>parprouted</B>, a daemon for transparent IP (Layer 3)
+<B>proxy ARP bridging</B>. This allow to do "IP bridging" on any
+802.11 card (instead of MAC bridging).
+
+<LI><A
+HREF="http://www-hft.ee.tu-berlin.de/~strauman/airport/airport.html">Till
+Straumann</A> has created a <B>Linux distribution for Airport</B> (to
+run Linux directly on the Airport or RG-1000 Access Point).
+
+<LI><A HREF="http://www.instant802.com">Instant 802 Networks, Inc</A>
+have created <A HREF="http://opensource.instant802.com">OpenAP</A>, a
+Linux distribution which directly on Prism II Access Points (such as
+the US Robotics, SMC or Addtron Access Points). This is based on the
+HostAP driver.
+
+<LI><A HREF="http://openwrt.org/">OpenWRT</A> is a wireless
+distribution targetting various <B>Home Wireless Routers</B>, such as
+the famous <B>Linksys WRT54G Access Points</B>.
+
+<LI><A HREF="http://www.dd-wrt.com/">DD-WRT</A> is a derivative of
+<B>OpenWRT</B>, adding a better user interface and Radius.
+
+<LI><A HREF="http://coova.org/wiki/index.php/Main_Page">Coova</A> is
+another derivative of <B>OpenWRT</B>, adding a better user interface
+and Radius.
+
+<LI><A HREF="http://www.hazard.maks.net/wisp-dist/">WISP-Dist</A> is
+as embedded Linux distribution for <B>wireless routers</B> based on <A
+HREF="http://leaf.sourceforge.net/">LEAF Bering</A> and that support
+Orinoco/Aironet/PrismII cards.
+
+<LI><A HREF="http://sourceforge.net/projects/sputnikgateway/">Sputnik
+Gateway</A> is a distribution that turn a regular PC with a wireless
+card into a <B>Sputnik Gateway</B>.
+
+<LI><A HREF="http://rose.radionet.fi">ROSE</A> is a Linux distribution
+that Radionet use to deploy <B>WiFi HotSpots</B>. Like many others, it
+is based on the HostAP driver.
+
+</UL>
+
+<H4><I>BlueTooth support</I></H4>
+
+<UL>
+
+<LI><A HREF="http://bluez.sourceforge.net/">BlueZ</A> is the official
+<B>BlueTooth stack for Linux</B>. You may also want to consult the <A
+HREF="http://www.bluez.org/lists.html">mailing lists</A>.
+
+<LI><A HREF="http://sourceforge.net/projects/openbt/">OpenBT</A> is
+the alternative <B>BlueTooth stack for Linux</B>, which also has its
+own <A
+HREF="http://mhonarc.axis.se/bluetooth-dev/maillist.html">mailing
+list</A>.
+
+<LI>I've written a <A HREF="../bt/Brainboxes.html">quick Howto for
+Brainboxes cards</A>.
+
+</UL>
+
+<H4><I>IrDA support</I></H4>
+
+<UL>
+
+<LI><A HREF="http://irda.sourceforge.net/">Linux-IrDA</A> is the
+official <B>IrDA stack for Linux</B>. You may also want to consult the
+<A HREF="http://sourceforge.net/mail/?group_id=5616">Linux-IrDA
+mailing list</A>, or its <A
+HREF="http://news.gmane.org/gmane.linux.irda.general">alternative
+archive</A>.
+
+<LI>I've written a <A HREF="../IrDA/IrDA.html">short tutorial on
+Linux-IrDA</A>.
+
+<LI><A HREF="../IrDA/Java.html">Java-IrDA</A> is an API allowing to
+access IrDA sockets in Java programs.
+
+<LI><A HREF="../IrDA/IrNET.html">IrNET</A> is a IrDA protocol allowing
+to transport TCP/IP traffic between 2 IrDA nodes efficiently.
+
+<LI><A HREF="../IrDA/squirt.html">e-Squirt</A> is a IrDA sensing and
+controlling protocol based on URLs.
+
+</UL>
+
+<H4><I>Other Wireless Technologies</I></H4>
+
+<UL>
+
+<LI>Linux can also be used for <B>Wireless WANs</B>, such as <A
+HREF="http://users.footprints.net/~kaz/mobitex.html">Mobitex</A>.
+
+</UL>
+
+<HR width=25%>
+
+<A NAME="security">
+<H2>Security software for your Wireless LAN</H2>
+</A>
+
+The security included in all Wireless LAN is <I>cost effective</I>, so
+if you want security over your Wireless LAN, you may want to check
+those packages.
+
+<H4><I>Generic security solutions</I></H4>
+
+Generic security protocols are totally independant of the underlying
+technology, so will work on any kind of wired or wireless
+connection. Those solutions are often classical, well defined and
+proven.
+
+<UL>
+
+<LI><A HREF="http://www.xs4all.nl/~freeswan/">FreeS/WAN</A> is the
+popular <B>IPsec</B> package for Linux. Only available with 3DES
+encryption.
+
+<LI><A HREF="http://www.wavesec.org/">WaveSec</A> is a part of the
+FreeS/WAN project looking at how it <B>FreeS/WAN applies to Wireless
+LANs</B>. They provide tools, documentations and sample
+configurations.
+
+<LI><A HREF="http://www.antd.nist.gov/cerberus/">Cerberus</A>, an
+<B>IPsec</B> implementation from NIST. This implementation contain
+many different encryption cypher (including all the AES finalists),
+but is subject to US export controls.
+
+</UL><UL>
+
+<LI><A HREF="http://www.openssh.org/">OpenSSH</A>, an Open Source
+implementation of the <B>SSH</B> protocol. A favorite for Unix users.
+
+<LI><A HREF="http://poptop.lineo.com/">PoPTop</A>, a <B>PPTP
+server</B> for Linux.
+
+<LI><A HREF="http://www.scooter.cx/alpha/pptp.html">PPTP-Linux</A>, a
+<B>PPTP client</B> for Linux.
+
+<!-- hum...
+http://sourceforge.net/projects/slan/	-> VPN Tunnel for 802.11
+http://vtun.sourceforge.net/		-> Claim to do encryption
+-->
+
+
+</UL>
+
+<H4><I>802.11 specific security solutions</I></H4>
+
+<p>
+802.11 specific solutions are more complex and depend on hardware
+support. They come in two parts, the first part runs between the card
+and the Access Point (802.1x, WPA), the second part runs between the
+Access Point and an authentication server (Radius).
+
+<UL>
+
+<LI><A HREF="http://www.open1x.org/">Open1x xsupplicant</A> is an Open
+Source implementation of the <B>802.1x protocol</B> (capable of using
+EAP/TLS to authenticate) for Linux and BSD. Recent version add support
+for the <B>WPA and WPA2 protocols</B>.
+
+<LI><A
+HREF="http://www.missl.cs.umd.edu/wireless/eaptls/?tag=missl-802-1">Adam
+Sulmicki</A> has written a FAQ on <B>how to setup 802.1x with
+Radius</B> under Linux.
+
+<!-- http://www.missl.cs.umd.edu/~adam/802/ -->
+
+<LI><A HREF="http://hostap.epitest.fi/">wpa_supplicant</A> is complete
+implementation of the <B>WPA and WPA2 protocols</B>, providing
+enhanced privacy and security.
+
+</UL><UL>
+
+<LI><A HREF="http://www.linuxrouter.org/portslave">PortSlave</A> is
+the default <B>Radius server</B> of the LRP (Linux Router Project).
+
+<LI><A HREF="http://www.freeradius.org/">FreeRADIUS</A>, a <B>Radius
+server</B> with LDAP and SQL support, the official descendant of <A
+HREF="http://www.radius.cistron.nl/">Cistron RADIUS</A>.
+
+<LI><A HREF="http://radius.innercite.com/">IC-RADIUS</A>, another
+clone of <A HREF="http://www.radius.cistron.nl/">Cistron RADIUS</A>
+with MySQL and CGI support.
+
+</UL>
+
+<H4><I>Public wireless LAN solutions</I></H4>
+
+If you are deploying public wireless LAN access, you often don't want
+all those complication and can use a simple captive portal.
+
+<UL>
+
+<LI><A HREF="http://nocat.net/">NoCat</A> is a <B>captive portal</B>
+based on HTTPS authentication and firewall filtering for Linux
+currently in development.
+
+<LI><A HREF="http://www.chillispot.org/">Chillispot</A> is a
+<B>captive portal</B> that support a Radius authentication server. It
+also works with WPA instead of the HTTP authentication.
+
+</UL>
+
+<HR width=25%>
+
+<A NAME="whowtos">
+<H2>Other Linux Wireless Howtos and help</H2>
+</A>
+
+There is a lot of good documentation out there&nbsp;;-)
+
+<UL>
+
+<LI><A HREF="http://en.tldp.org/HOWTO/Wireless-HOWTO.html">Roberto
+Arcomano</A> has written a good detailed Wireless Howto covering in
+depth the <B>setup of some Wireless LANs</B>.
+
+<!-- http://linux.grmbl.be/wlan/ -->
+
+<LI><A HREF="http://www.linux-wlan.org/docs/linux-wlan-FAQ.html">Dries
+Buytaert</A> has written an excellent <B>Linux-wlan FAQ</B>, answering
+common question mostly related to the <B>linux-wlan-ng</B> Linux
+driver for Intersil PrismII based cards.
+
+<LI><A HREF="http://www.goonda.org/wireless/">Anindya</A> has done a
+complete installation Howto for the <B>PrismII and Aironet cards</B>.
+
+<LI><A HREF="http://www.houseofcraig.net/indx.php">Craig</A> has done
+some technical installation Howto for the <B>TI, Atmel and ADMtek
+cards</B>.
+
+<LI><A
+HREF="http://www.personaltelco.net/index.cgi/WirelessFaq">Personal
+Telco</A> has a short <B>Wireless FAQ</B>.
+
+<LI><A HREF="http://www.holtmann.org/linux/wlan/">Marcel Holtmann</A>
+has a good page on Wireless LAN, <B>in German</B>.
+
+<LI>The <A HREF="http://www.linuxwireless.org/">Linux Wireless
+wiki</A> has some good information on more <B>technical details</B>.
+
+</UL><UL>
+
+
+<LI>The <A
+HREF="http://www.rage.net/wireless/wireless-howto.html">Arlan Wireless
+Router Howto</A> explain how to use any wireless LAN as a <B>point to
+point</B> data link between distant houses.
+
+<LI>Another excellent <A HREF="http://www.qsl.net/n9zia/">Wireless
+link Howto</A>, where they describe in details all the step by step
+operations (theory, hardware, software...) of using the Symphony (or
+other Wireless LAN) as a <B>point to point</B> connection between
+distant houses. And they have a comprehensive list of links...
+
+<LI>The <A HREF="http://www.gbonline.com/~multiplx/wireless/">Low Cost
+Wireless Network Howto</A> explain how to use the Proxim card to
+create <B>point to point</B> links.
+
+<LI><A
+HREF="http://oob.freeshell.org/nzwireless/LWAP-HOWTO.html">Simon
+Anderson</A> has a <B>Linux Wireless Access Point HOWTO</B>, which
+include lot's of good information on various AP topics (HostAP, DHCP,
+DNS, routing, firewalling, NoCat...).
+
+<LI><A
+HREF="http://web.bii.a-star.edu.sg/~tanyh/projects.html">Yang-Hwee
+TAN</A> has a quick Howto about <B>Building a Secure Wireless Access
+Point</B> using the HostAP driver and FreeS/WAN.
+<!-- student.bii.a-star.edu.sg -->
+
+<LI><A
+HREF="http://trekweb.com/~jasonb/articles/hostap_20030727.shtml">Jason
+Boxman</A> has a pretty extensive Howto on how to use the <B>HostAP
+driver</B>, especially to set up an <B>Access Point</B>.
+
+<LI><A HREF="http://www.live.com/wireless/unix-base-station.html">Ross
+Finlayson</A> explain in details how to use Linux as a <B>Wireless
+router</B> for their wireless ISP (LIVE.COM).
+
+<LI><A HREF="http://www.howtoforge.com/wireless_hotspot_howto">Yunus
+Bookwala</A> explain how to set-up a <B>Wireless HotSpot</B>, using
+<B>OpenWrt</B> and focusing mostly on the <B>accounting/security
+back-end</B>.
+
+</UL><UL>
+
+<LI><A HREF="http://www.faughnan.com/wirelesshome.html">John
+G. Faughnan</A> has a page on <B>home networking</B>, including
+Wireless LANs and Linux.
+
+<LI><A HREF="http://www.msrl.com/airport-gold/">Mad Science Research
+labs</A> explain you how to upgrade the <B>Airport UFO to RC4
+128&nbsp;bits</B>.
+
+<LI><A HREF="http://www.roelle.com/wvlanPPC/index.html">Harald
+Roelle</A> has a page on how to set up a <B>Wavelan IEEE under
+Linux-PPC</B> and how to connect it to the "UFO" (the Apple Airport
+base station).
+
+<LI><A HREF="http://www.pccard.co.uk/support/pfaq/plinux.php">Elan
+Digital Systems</A> has a very complete FAQ on how to <B>setup
+PCI-Pcmcia bridges</B> under Linux.
+
+<LI><A HREF="http://linux.junsun.net/intersil-prism/">Jun Sun's</A>
+has a howto on how to <B>flash PrismII firmwares</B> under Linux or
+Windows.
+
+</UL>
+
+If after reading all the documentation above you still can't find the
+info you are looking, here are a couple of source of help to get in
+touch with <B>other Linux users</B>.
+
+<UL>
+<LI>The <A HREF="http://pcmcia-cs.sourceforge.net/">Linux Pcmcia</A>
+web site has the <B>Pcmcia FAQ</B> and some <A
+HREF="http://sourceforge.net/forum/forum.php?forum_id=33428">Pcmcia
+Wireless forums</A> for all questions regarding drivers included in
+the <B>Linux Pcmcia package</B> and the <B>Linux kernel</B>.
+
+<LI>For questions regarding <B>point to point links</B>, the Wavelan
+users in Autralia have set up a very useful <A
+HREF="http://lists.samba.org/pipermail/wireless/">mailing list</A>...
+
+<LI>Some individual drivers have specific mailing lists associated
+with them, those are listed in <I><A HREF="#howto">the
+Howto</A></I>...
+
+</UL>
+
+<HR width=25%>
+
+<A NAME="wnets">
+<H2>Public Wireless Linux networks</H2>
+</A>
+
+If you don't want to play alone with your wireless equipement, there
+are lots of people setting up public wireless networks using Linux. I
+just picked a few of those with interesting info on their pages.
+
+<UL>
+
+<LI><A HREF="http://www.wifimaps.com/">WiFiMaps</A> has some
+<B>maps</B> of public wireless connectivity, and allow you to
+<B>locate</B> those public wireless Access Points.
+
+<LI><A HREF="http://www.air.net.au">Linux users in Australia</A> are
+using the good old <B>Wavelan</B> or the <B>Wavelan IEEE</B> to create
+<B>point to point</B> data link between distant houses. They have set
+up a <A HREF="http://lists.samba.org/pipermail/wireless/">mailing
+list</A>, which is not Wavelan specific and very useful.
+
+<LI><A HREF="http://205.159.169.11/">Guerilla Net</A> aim to setup a
+<B>free</B> network in the area of Boston.
+
+<LI><A HREF="http://www.consume.net/consume.html">Consume the net</A>
+want to do the same in the area of London. Many mailing lists.
+
+<LI><A HREF="http://www.elektrosmog.nu/#en">Elektrosmog</A> wants
+<B>fast Internet everywhere</B>, starting in Sweeden.
+
+<LI><A HREF="http://seattlewireless.net/">Seattle Wireless</A> wants
+to build a next-generation community wireless network.
+
+<LI><A HREF="http://www.personaltelco.net/">Personal Telco</A> want to
+build alternative communication networks in the area of
+Portland. Their web site contains a mountain of information, such as
+this <A
+HREF="http://www.personaltelco.net/index.cgi/WirelessFaq">Wireless
+FAQ</A>.
+
+<LI><A HREF="http://www.nycwireless.net/">NYCwireless</A> wants Free
+Public Wireless Internet for <B>New York City</B>. They have some <A
+HREF="http://lists.nycwireless.net/pipermail/nycwireless/">mailing
+lists</A>.
+
+<LI><A HREF="http://www.bawug.org/">BAWUG</A>, the <B>Bay Area</B>
+(California) Wireless User group is pretty active and has some <A
+HREF="http://lists.bawug.org/pipermail/wireless/">mailing lists</A>.
+
+<LI><A HREF="http://reseaucitoyen.be/">Reseau Citoyen</A> is deploying
+their wireless network in <B>Bruxelles</B>, Belgium, and has an
+extensive amount of information in french.
+
+</UL><UL>
+
+<LI><A HREF="http://www.live.com/danastreet/">LIVE.COM</A> want you to
+enjoy <B>wireless coffee</B> in Mountain View, California.
+
+<LI><A HREF="http://www.shmoo.com/gawd/">The Shmoo Group</A> has setup
+a <B>database</B> of public Wireless LAN networks.
+
+</UL>
+
+<HR width=25%>
+
+<A NAME="whard">
+<H2>Wireless LAN Hardware (surveys and reviews)</H2>
+</A>
+
+Various people maintain some approximate list of the hardware that is
+compatible with Linux&nbsp;:
+
+<UL>
+
+<LI>Of course, I list a number of vendors in the various sections of
+<I><A HREF="#howto">the Howto</A></I>...
+
+<!-- Grr... Keep changing the filename. Let's hope no more... -->
+
+<LI><A
+HREF="http://www.linux-wlan.org/docs/wlan_adapters.html.gz">Absoval</A>
+has one of the most <B>exaustive</B> list of wireless cards, and list
+compatibility of PrismII cards with their own <B>linux-wlan</B>
+driver.
+
+<LI><A HREF="http://linux-wless.passys.nl">Hendrik-Jan Heins</A> is
+now maintaining an updated version of the <B>exaustive list from
+Absoval</B>. This is very difficult task, so don't be surprised if you
+find minor errors.
+
+<LI><A
+HREF="http://www.personaltelco.net/index.cgi/Prism2Card">Personal
+Telco</A> has a short list of <B>PrismII cards</B> (for which many
+Linux drivers are available).
+
+<LI><A
+HREF="http://www.seattlewireless.net/index.cgi/HardwareComparison">Seattle
+Wireless</A> has a pretty <B>long list</B> of cards, but the
+information on this page is not always correct, so double check.
+
+<LI><A HREF="http://www.kismetwireless.net/cards.shtml">Kismet
+Wireless</A> list card <B>compatible with Kismet</B>, and the
+corresponding driver.
+
+<LI><A HREF="http://users.linpro.no/janl/hardware/wifi.html">Nicolai
+Langfeldt</A> has a short list of <B>802.11g</B> cards comaptible with
+Linux.
+
+<LI><A HREF="http://www.fuw.edu.pl/~pliszka/hints/wireless.html">Jacek
+Pliszka</A> has many tips on how to <B>identify</B> the various card,
+especially <B>USB devices</B>.
+
+<LI><A
+HREF="http://www.wireless.org.au/~jhecker/atmeldrv/usbtable.html">Jason
+Hecker</A> maintains a list of all <B>Atmel USB</B> devices.
+
+<LI><A HREF="http://intel.rapla.net/">Tarmo J&auml;rvalt</A> has long lists
+of cards containing <B>various chipsets</B>, one page per chipset,
+including some Google Ads.
+
+<LI>The <A HREF="http://www.linuxwireless.org/">Linux Wireless
+wiki</A> has some limited hardware surveys.
+
+<LI><A HREF="http://live.gnome.org/NetworkManagerHardware">The
+NetworkManager team</A> has a complete list of hardware and drivers
+that <B>works properly with NetworkManager</B>.
+
+</UL>
+
+
+Just a few reviews and guides here, not Linux specific.
+
+<UL>
+
+<LI>Most manufacturer web sites are listed in <I><A HREF="#howto">the
+Howto</A></I>...
+
+<LI><A HREF="http://www.smallnetbuilder.com/">Tim Higgins</A> has a
+<B>huge amount of 802.11 information</B> on his web site (FAQ,
+articles, reviews, links), which is acurate, detailed and up to date.
+
+<LI><A
+HREF="http://www.practicallynetworked.com/networking/wireless_chart.htm">Practically
+Networked</A> lists and compares the main <B>Wireless LAN products</B>
+available on the market. Their list is long and they have reviewed in
+details a lot of products.
+
+<LI>I've found a really good <A
+HREF="http://hydra.carleton.ca/info/wlan.html">web page</A> on the
+different <B>radio products</B> available (now quite outdated).
+
+<LI><B>Network Computing</B> has a long and complete article <A
+HREF="http://www.networkcomputing.com/1006/1006r2.html">comparing
+various 802.11 products</A>. Definitely worth a read, even if they
+don't mention Linux support ;-)
+
+<LI><B>PC Magazine/ZDnet</B> has done a <A
+HREF="http://www.zdnet.com/products/stories/reviews/0,4161,2472697,00.html">short review
+of 802.11-b products</A>. They have tested the latest products from
+the big names.
+
+<LI><A HREF="http://www.tomsnetworking.com/">Toms Networking</A> has
+frequent <B>detailed reviews</B> of various wireless hardware.
+
+<LI><B>Synack Communications</B> has done some testing of the <A
+HREF="http://www.synack.net/wireless/consumption.html">Power
+Consumptions</A> of some common Wireless LANs.
+
+</UL>
+
+
+<HR width=25%>
+
+<A NAME="wlinks">
+<H2>Other web sites of interest (Wireless LAN related)</H2>
+</A>
+
+A random collection of links. I welcome your suggestions...
+
+<UL>
+
+<LI>The web site of <A
+HREF="http://grouper.ieee.org/groups/802/11/main.html">IEEE
+802.11</A>, one of the major standard in Wireless LANs. Nowadays, you
+can get the <A HREF="http://standards.ieee.org/getieee802/">IEEE
+802.11 standard for free</A>&nbsp;!.
+
+<LI>The <A HREF="http://www.wlana.com/">Wireless LAN Alliance</A> for
+marketing buzz around 802.11.
+
+<LI>The <A HREF="http://www.wirelessethernet.org/">WECA</A> is the
+organisation managing the <B>WiFi certification</B>.
+
+<LI>The <A HREF="http://www.wlif.com/">Wireless LAN Interoperability
+Forum</A> is promoting <B>Proxim's OpenAir</B> standard.
+
+<LI>The <A HREF="http://www.hiperlan.com/">HIPERLAN Alliance</A> has a
+nice white-paper on HiperLan-1.
+
+<LI>I've developed the SWAP MAC protocol for <A
+HREF="http://www.palowireless.com/homerf/homerfspec.asp">Home RF</A>
+before they decided to change course due to political pressures...
+
+</UL><UL>
+
+<LI><A HREF="http://www.cplus.org/rmw/english1.html">Roger Coud&eacute;</A>
+has developped an impressive package to predict the performance and
+<B>coverage of a radio system</B> based on the characteristic of the
+environment.
+
+<LI>The State University of Ohio has a basic <A
+HREF="http://www.cis.ohio-state.edu/~jain/cis788-97/wireless_lans/">Overview
+of 802.11</A>.
+
+<LI>Mark S. Mathews has a nice <A
+HREF="http://www.linux-wlan.com/writings/std-wlan-linux/stdwlan-whitepaper.html"
+>white paper on 802.11</A>.
+
+<LI>Intersil (formerly Harris) has a lot of <A
+HREF="http://www.intersil.com/prism/papers/index.asp">white
+papers</A>, but they tend to have a very strong bias towards what they
+are offering.
+
+<LI>Lot's of <A
+HREF="http://www.cs.tamu.edu/faculty/vaidya/mobile/resources.html">links
+about Wireless</A> (no longer updated).
+
+<LI><A HREF="http://bengross.com/wireless.html">Ben Gross</A> has more
+<B>links about Wireless</B> (mostly Linux related, and quite up to
+date).
+
+<LI><A HREF="http://www.wardrive.net/">Jacco Tunnissen</A> has lot's
+of links about <B>Wardriving</B> and <B>Wireless Security</B>.
+
+<LI><A HREF="http://www.drizzle.com/~aboba/IEEE/index.html">Bernard
+Adoba</A> has created <B>The Unofficial 802.11 Security Web Page</B>,
+with many links about security issues in wireless networks and
+<B>802.1x</B>.
+
+<LI><A HREF="http://delbert.matlock.com/linux-bluetooth.htm">Delbert
+K. Matlock</A> used to have a very complete page on <B>Linux BlueTooth
+support</B>, linking to all information available on the net on this
+subject, but hasn't updated it in since <I>2001</I>.
+
+<LI><A
+HREF="http://opensource.nus.edu.sg/projects/bluetooth/external.html">Foo
+Chun Choong</A> has a web page that link to <B>various BlueTooth
+research projects and papers</B>.
+
+<!-- dead
+<LI>The University of Washington maintain a <A
+HREF="http://snapple.cs.washington.edu/mobile/mobile_www.html">big
+list</A> of research projects.
+-->
+
+<LI>The NTIA maintain a <A
+HREF="http://www.ntia.doc.gov/osmhome/allochrt.html">chart of the
+frequencies</A> in use in the US. Try to find the unlicensed
+bands&nbsp;;-)
+
+<LI>You may also want to check <A HREF="../Papers/papers.html">my
+paper page</A>, especially if you look for either <B>my
+publications</B> or <B>SWAP information</B>.
+
+</UL>
+
+<A NAME="olinks">
+<H2>Linux and other links</H2>
+</A>
+
+Some personal recommendations on the web...
+
+<UL>
+
+<LI>The project I'm currently officially working on for HP is called
+<A HREF="http://www.cooltown.hp.com/">CoolTown</A>.
+
+</UL><UL>
+
+<LI>The <A HREF="http://www.kernel.org/pub/">Linux Kernel
+Archive</A>. Looking for Linux, that's the place... Want to flame
+Linus&nbsp;? Check <A
+HREF="http://marc.theaimsgroup.com/?l=linux-kernel&r=1&w=2">the
+linux-kernel mailing list archive</A>.
+
+<LI>The <A HREF="http://pcmcia-cs.sourceforge.net/">Linux Pcmcia
+package</A>. Most Wireless LAN cards are nowadays comming in Pcmcia
+form, and that's what you need. <I>David</I> maintains a very neat and
+useful package. Note that Pcmcia development has migrated to the
+kernel, you can follow this on the <A
+HREF="http://lists.infradead.org/pipermail/linux-pcmcia/">new Pcmcia
+mailing list</A>.
+
+<LI>John Linville wants all the Linux Wireless bug reports to go to
+the <A HREF="http://marc.info/?l=linux-wireless&r=1&w=2">
+linux-Wireless mailing list archive</A>, but you will usually have
+better luck with the individual driver mailing lists (listed
+above). He maintains the <A
+HREF="http://git.kernel.org/?p=linux/kernel/git/linville/wireless-dev.git;a=summary">wireless-dev
+GIT repository</A>.
+
+<LI>David Miller wants all the TCP/IP bug reports to go to the <A
+HREF="http://marc.theaimsgroup.com/?l=linux-net&r=1&w=2">
+linux-Networking mailing list archive</A> or the <A
+HREF="http://marc.theaimsgroup.com/?l=linux-netdev&r=1&w=2">
+linux-NetDevice mailing list archive</A>. The is also a <A
+HREF="http://marc.theaimsgroup.com/?l=linux-ppp&r=1&w=2">linux-PPP
+mailing list archive</A>.
+
+<LI>Some outdated user level <A HREF="../MobileIP/index.html">Mobile
+IP implementation</A> for Linux and equally outdated <A
+HREF="../MobileIP/mip.html">Linux Mobile IP information</A>.
+
+</UL><UL>
+
+<LI>The <A HREF="http://www.linuxdoc.org/">Linux Documentation
+Project</A>. Lots' of info about Linux, all the docs and Howto (how to
+set up networking on you Linux box) and tons of links.
+
+<LI>The <A HREF="http://linux-ip.net/html/index.html">Guide to IP
+Layer Network Administration with Linux</A>. Advanced, exhaustive,
+accurate and up to date (that's quite a feat).
+
+<LI>Laptops are always more problematic. Werner, alongside the <A
+HREF="http://www.tuxmobil.com/howtos.html">Linux-Mobile-Guide</A>,
+keeps a long list of <A
+HREF="http://www.tuxmobil.com/mylaptops.html">laptop specific
+pages</A>. You can also check the classical <A
+HREF="http://www.linux-laptop.net/">Linux on Laptops</A> web site.
+
+<LI>The <A HREF="http://www.kernelnotes.org/">Kernel Notes</A> web
+site, with kernel changes and more kernel hacking info.
+
+<LI>The web page of <A HREF="http://www.uk.linux.org">Alan Cox</A>
+(who process my patches before they go in the kernel) has some info
+about Linux and Networking.
+
+<LI>The web page of <A HREF="http://www.scyld.com/network/">
+Donald Becker</A> who has authored most Linux Ethernet drivers (but
+not the HP 100vg driver I use on my PCs).
+
+<!-- Dead
+<LI>The <A HREF="http://linuxkb.cheek.com/page.php?network">Linux
+Knowledge Base</A> is planning to distribute my howto on their CDs if
+I put a link to their site&nbsp;!
+-->
+
+</UL><UL>
+
+<LI>The <A HREF="http://www.debian.org">Debian
+distribution</A>. That's the one I use, your mileage may vary...
+
+
+<LI>The <A HREF="http://www.netperf.org/netperf/NetperfPage.html">
+NerPerf benchmark</A>. That's the one I use, and I love it&nbsp;!
+
+<LI><A HREF="http://www.hp.com/desktops/">Hewlett Packard
+computers</A>. That's the ones I use, you probably guessed why, but at
+least I never cut my hands plugging cards in their cases...
+
+</UL>
+
+<HR>
+<CENTER><TABLE BORDER=0 CELLPADDING=0><TR><TD valign="top" align="center">
+<ADDRESS>
+<A HREF="Wavelan.html">Wavelan</A>,
+<A HREF="Orinoco.html">Orinoco</A> and
+<A HREF="Tools.html">Wireless Tools</A> -
+jt&#064;hpl.hp.com
+<br>Updated 25 July 07
+<br>Copyright &#169; 1996-2007 Jean Tourrilhes
+</ADDRESS>
+</TD><TD>
+&nbsp;&nbsp;&nbsp;
+</TD><TD valign="top" align="center">
+Project hosted and sponsored by :
+<br>
+<A HREF="http://www.hpl.hp.com"><IMG SRC="../hplogo.png" HEIGHT=34
+WIDTH=141 ALT="HP home page"></A>
+</TD></TR></TABLE></CENTER>
+
+<!-- Keep Webmaster happy -->
+<script type="text/javascript" language="JavaScript">
+var s_prop7="us"
+var s_prop8="eng"
+var s_prop9="corp"
+var s_prop10="us|eng|corp"
+var s_prop13="hphqglobal,hphqwwhplabs"
+</script>
+
+<!-- Begin METRICS JavaScript -->
+<!-- <script type="text/javascript" language="JavaScript"
+src="http://welcome.hp-ww.com/country/us/eng/js/metrics.js"></script> -->
+<script type="text/javascript" language="JavaScript"
+src="http://www.hpl.hp.com/dev/hplabsmetrics.js"></script>
+<!-- End METRICS JavaScript -->
+
+</BODY>
+</HTML>

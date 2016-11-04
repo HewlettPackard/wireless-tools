@@ -1,0 +1,1609 @@
+<HTML>
+<HEAD>
+<TITLE>Wireless Tools for Linux</TITLE>
+<LINK rel="up" href="Wireless.html" title="Linux Wireless LAN Howto">
+
+<LINK rel="chapter" href="#present" title="Presentation">
+<LINK rel="chapter" href="#docu" title="Documentation">
+<LINK rel="chapter" href="#latest" title="Latest version">
+<LINK rel="chapter" href="#debug" title="Common Problems">
+<LINK rel="chapter" href="#wext" title="Wireless Extensions">
+<LINK rel="chapter" href="#drivers" title="Drivers support">
+<LINK rel="chapter" href="#links" title="Other Wireless Apps">
+
+<LINK rel="Related" href="Wireless.html" title="Linux Wireless LAN Howto">
+<LINK rel="Related" href="Orinoco.html" title="Linux Orinoco driver">
+<LINK rel="Related" href="Wavelan.html" title="Linux Wavelan drivers">
+<LINK rel="Related" href="Wavelan-IEEE.html" title="Linux Wavelan-IEEE driver">
+<LINK rel="Related" href="../IrDA/IrDA.html" title="Linux-IrDA stack">
+<LINK rel="Related" href="../bt/" title="BlueTooth notes">
+<LINK rel="Related" href="../Papers/papers.html" title="Papers & Publications">
+</HEAD>
+
+<BODY>
+
+<H1 ALIGN=center>Wireless Tools for Linux</h1>
+
+<br>
+
+<HR>
+<CENTER>
+<TABLE>
+<TR>
+<TD><A HREF="Wireless.html">Linux & Wireless LANs</A></TD>
+<TD><A HREF="Wavelan.html">Wavelan driver</A></TD>
+<TD><A HREF="Orinoco.html">Linux Orinoco driver</A></TD>
+<TD><A HREF="../Papers/papers.html">Papers</A></TD>
+<TD><A HREF="../index.html">Main page</A></TD>
+</TR>
+</TABLE>
+
+<HR>
+
+<TABLE>
+<TR>
+<TD><I><A HREF="#docu">Documentation</A></I></TD>
+<TD><I><A HREF="#latest">Latest version</A></I></TD>
+<TD><I><A HREF="#debug">Common Problems</A></I></TD>
+<TD><I><A HREF="#wext">Wireless Extensions</A></I></TD>
+<TD><I><A HREF="#links">Other Wireless Apps</A></I></TD>
+</TR>
+</TABLE>
+</CENTER>
+<HR>
+
+<br>
+
+<A NAME="present">
+<H2>Presentation</H2>
+</A>
+
+The Linux Wireless Extension and the Wireless Tools are an <B>Open
+Source project</B> sponsored by <A
+HREF="http://www.hpl.hp.com">Hewlett Packard</A> (through my
+contribution) since 1996, and build with the <B>contribution of many
+Linux users</B> all over the world.
+<p>
+The <B>Wireless Extension (WE)</B> is a generic API allowing a driver
+to expose to the user space configuration and statistics specific to
+common Wireless LANs. The beauty of it is that a single set of tool
+can support all the variations of Wireless LANs, regardless of their
+type (as long as the driver support Wireless Extension). Another
+advantage is these parameters may be changed on the fly without
+restarting the driver (or Linux).
+<p>
+The <B>Wireless Tools (WT)</B> is a set of tools allowing to
+manipulate the Wireless Extensions. They use a textual interface and
+are rather crude, but aim to support the full Wireless
+Extension. There are <I><A HREF="#links">many other tools</A></I> you
+can use with Wireless Extensions, however Wireless Tools is the
+reference implementation.
+
+<UL>
+<LI><B>iwconfig</B> manipulate the basic wireless parameters
+<LI><B>iwlist</B> allow to initiate scanning and list frequencies,
+bit-rates, encryption keys...
+<LI><B>iwspy</B> allow to get per node link quality
+<LI><B>iwpriv</B> allow to manipulate the Wireless Extensions specific
+to a driver (private)
+<LI><B>ifrename</B> allow to name interfaces based on various static criteria
+</UL>
+
+<p>
+Most <B>Linux distributions</B> also have <A
+HREF="DISTRIBUTIONS.txt">integrated Wireless Extensions support</A> in
+their networking initialisation scripts, for easier <B>boot-time</B>
+configuration of wireless interfaces. They also include Wireless Tools
+as part of their standard packages.
+<p>
+Wireless configuration can also be done <A
+HREF="HOTPLUG-UDEV.txt">using the Hotplug or uDev scripts</A> and
+distribution specific support, this enable the proper support of any
+<B>removable wireless interface</B> (Pcmcia, CardBus, USB...).
+<p>
+Any versions of the <A HREF="http://pcmcia-cs.sourceforge.net/">Pcmcia
+package</A> offer the possibility to do wireless configuration of
+Pcmcia and Cardbus card through the<A HREF="PCMCIA.txt">file
+wireless.opts</A>. This allow to fully integrate wireless settings in
+the Pcmcia scheme mechansism. However, this method is now deprecated
+in favor of distribution specific methods.
+<p>
+Please note that the Wireless Tools (starting with version 19)
+supports fully <B>IEEE 802.11</B> parameters and devices, support
+older style of devices and most proprietary protocols, and are
+prepared to handle HiperLan as well. More recent versions of course
+adds <B>more 802.11 support</B>.
+<br>
+But, unfortunately not all <I><A HREF="#drivers">drivers</A></I>
+support all these features...
+
+<p>
+<HR width=25%>
+
+<A NAME="docu">
+<H2>Documentation & errata</H2>
+</A>
+
+The Wireless Tools package include extensive <B>man pages</B> for each
+of the tools, which are the most up to date and most detailed
+documentation on the capability of these tools.
+<p>
+The Wireless Tools package also includes two text documents on the
+usage of Wireless Tools to configure wireless cards
+automatically&nbsp;:
+
+<UL>
+<LI><A HREF="DISTRIBUTIONS.txt">DISTRIBUTIONS.txt</A> describes how
+various <B>Linux distributions</B> implement Wireless Extensions in
+their specific <B>configuration scripts</B>. Please read this, as most
+distributions <I>no longer use wireless.opts</I>. I need your help
+making this document better.
+
+<LI><A HREF="HOTPLUG-UDEV.txt">HOTPLUG-UDEV.txt</A> describes how to
+manage wireless interfaces using the <B>HotPlug subsystem</B> and the
+distribution specific support for wireless, and includes some more
+advanced material. This is a complement to <A
+HREF="DISTRIBUTIONS.txt">DISTRIBUTIONS.txt</A>.
+
+<LI><A HREF="PCMCIA.txt">PCMCIA.txt</A> describes the use of <B>Pcmcia
+schemes and wireless.opts</B> (i.e. configuration with the default
+Pcmcia scripts). This method is deprecated, but still work and has
+some advantages.
+</UL>
+
+<p>
+Some <B>driver documentations</B> (man page, web, README) describe
+what the driver support in term of Wireless Extension and how the
+various Wireless Extension parameters map to the capability of the
+card.
+<p>
+The <A HREF="Wireless.html">Linux Wireless LAN Howto</A> contains a
+section about the <A HREF="Linux.Wireless.Extensions.html">Wireless
+Extensions</A>, but it's a bit out of date for the details...
+<p>
+
+<HR width=25%>
+
+<p>
+I have also the following errata and comments :
+
+<UL>
+
+<LI>In the rare cases where your kernel isn't compiled with Wireless
+Extensions (/proc/net/wireless non-existent), you need to recompile
+it with Wireless Extensions (<B>CONFIG_NET_RADIO</B> enabled).
+
+<LI>After recompiling a kernel with Wireless Extension, you have to
+recompile your driver or the Pcmcia package as well (and restart it).
+
+<LI>All versions of Wireless Tools up to version <B>26</B> need to be
+<B>compiled</B> for the precise version of Wireless Extension present
+on the system. Starting with Wireless Tools <B>27</B>, Wireless Tools
+can handle <B>multiple versions of Wireless Extension</B> without
+recompile.
+
+<LI>The Wireless Extensions and Wireless Tools <B>version numbers will
+not match</B> with each other. The Wireless Tools and the Wireless
+Extensions (the underlying API) evolve independantly of each
+other. The command <I>iwconfig --version</I> gives you the detail of
+your setup.
+
+<LI>Compilation of the Wireless Tools used to be tricky, especially in
+the header area. I believe this has been fixed for good.
+
+<LI>For kernels <B>before 2.2.14/2.3.30</B>, use Wireless Tools version
+<B>19</B>.
+
+<LI>For kernel <B>after 2.2.14/2.3.30</B> use Wireless Tools version
+<B>20</B> or greater.
+
+<LI>For kernel <B>after 2.6.13</B> use Wireless Tools version
+<B>27</B> or greater.
+
+<LI>The tools and the wireless library are <B>GPL</B>.
+
+<LI>In the old time, you could upgrade Wireless Extensions by just
+changing <U>wireless.h</U>. Starting with <B>Wireless Extensions
+v12</B>, this is no longer true, you need to apply the full patch to
+the kernel. See below for the patches.
+
+<LI>Further down, you will find a <I><A HREF="#debug">FAQ about common
+problems</A></I>.
+
+</UL>
+
+<p>
+<HR width=25%>
+
+<A NAME="latest">
+<H2>Wireless Tools latest versions</H2>
+</A>
+
+The latest stable version of Wireless Tools is <B>version 29</B>, it
+is stable, most of the stupid bugs have been removed and it supports
+all Wireless Extensions (from version v11 to v21).
+<p>
+You can download Wireless Tools on <B>this server</B>&nbsp;:
+
+<UL>
+<LI><A HREF="wireless_tools.29.tar.gz">Download</A> the latest
+wireless tools package </UL>
+<p>
+
+For historical purpose, you can get earlier version
+here&nbsp;: <A HREF="wireless_tools.19.tar.gz">version 19</A>, <A
+HREF="wireless_tools.20.tar.gz">version 20</A>, <A
+HREF="wireless_tools.21.tar.gz">version 21</A>, <A
+HREF="wireless_tools.22.tar.gz">version 22</A>, <A
+HREF="wireless_tools.23.tar.gz">version 23</A>, <A
+HREF="wireless_tools.24.tar.gz">version 24</A>, <A
+HREF="wireless_tools.25.tar.gz">version 25</A>, <A
+HREF="wireless_tools.26.tar.gz">version 26</A>, <A
+HREF="wireless_tools.27.tar.gz">version 27</A>, <A
+HREF="wireless_tools.28.tar.gz">version 28</A> and <A
+HREF="wireless_tools.29.tar.gz">version 29</A>. There is no point in
+using an old version, as the latest version can support all versions of
+Wireless Extensions.
+
+<p>
+
+<!--
+There is <B>no beta</B> version pending. This mean that I've processed
+all my bug report and all my feature list.
+-->
+
+The main features of the <B>latest beta</B> is support for non-ASCII
+ESSIDs (such as localised ESSID), support for displaying Scanning
+Capabilities, slightly bigger scan buffer, fixing minor bug iwconfig
+parser and minor enhancement to ifrename&nbsp;:
+
+<UL>
+<LI>Wireless Tools <A HREF="wireless_tools.30.pre9.tar.gz">version
+30-pre9</A> (beta)
+</UL>
+
+<p>
+Experimental version of Wireless Tools (at your own risk)&nbsp;:
+<UL>
+<LI>Wireless Tools 28 <A
+HREF="wireless_tools.28-rtnl.3.tar.gz">with Wireless-RtNetlink
+support (WE-20)</A> (alpha)
+</UL>
+
+<p>
+The detailed changelog of the Wireless Tools is in the package, what
+follows is a human readable version of it&nbsp;;-).
+<p>
+Version 29 adds&nbsp;:
+<UL>
+<LI>Support for <B>long/short retry</B> (WE-21).
+<LI>Support power saving level, modulation (WE-21 - not in kernel).
+<LI>Scanning options.
+<LI>Better WPA support.
+<LI>Enhanced command line parser in iwconfig.
+<LI>sysfs symlinks and <B>udev integration</B> in ifrename.
+<LI>More footprint reduction tricks.
+<LI>Support for 32 bit Wireless Tools on 64 bits kernels.
+<LI>Change dBm range to support positive dBm.
+</UL>
+<p>
+Version 28 adds&nbsp;:
+<UL>
+<LI>Add preliminary <B>display-only WPA support</B> (WE-18).
+<LI>Display AP-Address as 'Not-Associated' instead of a number.
+<LI>Add <B>sysfs selector</B> to ifrename.
+<LI>Make <B>mac selector</B> of ifrename accept any length MAC
+addresses, such as Firewire addresses.
+<LI>Longer scanning timeout for driver having slow scanning, such as MadWifi.
+<LI>Add <I>iwmulticall</I> and stripping option to reduce footprint of
+the tools for memory starved systems.
+<LI>Use glibc header instead of kernel header to ease <I>iwlib</I> use.
+<LI>Better integrity check of scan results.
+<LI>Forward compatibility to WE-21 (essid length)
+</UL>
+<p>
+Version 27 adds&nbsp;:
+<UL>
+<LI>Ability to run with <B>multiple version of Wireless
+Extensions</B>. It means that all WE version mismatch are gone, and
+you don't need to recompile when changing between kernels with
+different WE version. The tool redirector is obsolete and removed.
+<LI>Make <I>libiw</I> really usable by third party tools. This include
+the removal of the WE version dependancy, the stabilisation of the API
+and the addition of the easy Scanning API.
+<LI>Add <I>ifrename</I>, to <B>rename network interfaces</B> based on
+various static criteria, and associated documentation
+<LI>Add advanced documentation about network Hotplug and
+related stuff in <A HREF="HOTPLUG-UDEV.txt">HOTPLUG.txt</A>
+<LI>Support auto/fixed frequencies and relative tx-power (WE-17)
+<LI>Support very <B>large scan results</B> and private definition lists (WE-17)
+<LI>Optionally disable individual quality statistics (WE-17)
+<LI>Support <B>event capability</B> in <I>iwlist event</I> (WE-17)
+<LI>Display channel alongside frequencies in <I>iwlist</I> and <I>iwevent</I>
+<LI>Display updated quality statistics with '=' instead of '(updated)'
+<LI>Implement <I>iwconfig XXX txpower on</I> and <I>fixed</I>
+<LI>Fix redirection of <I>iwevent</I> output to file/pipe
+<LI>Add raw display and channel support in <I>iwgetid</I>
+<LI>Various bugfixes, optimisations and cleanup
+</UL>
+<p>
+Version 26 adds&nbsp;:
+<UL>
+<LI>Fix bugs in <B>parsing encryption keys</B> and setting encryption
+<I>on</I> in <I>iwconfig</I>.
+<LI>Update distribitions specific documentation
+in <A HREF="DISTRIBUTIONS.txt">DISTRIBUTIONS.txt</A>
+<LI>Really allow compile without maths library for embeeded platforms
+<LI>Support new <I>iwspy</I> features (setthr and related event) (WE-16)
+<LI>Add tool redirector for people having multiple kernels with
+different Wireless Extension versions (WE-16)
+<LI>Various trivial bugfixes and cleanup
+<LI>Various Makefile and and iwlib improvements
+</UL>
+<p>
+Version 25 adds&nbsp;:
+<UL>
+<LI>Start document distribitions specific wireless configuration scripts
+in <A HREF="DISTRIBUTIONS.txt">DISTRIBUTIONS.txt</A>
+<LI>Enumerate *all* network interfaces (fix problem with NWN drivers)
+<LI>Improve <B>private extension</B> support : new types, sub-ioctls,
+<I>iwpriv -a</I>, handle more than 16 extensions... (WE-15)
+<LI>Fix infinite loop with unknown Wireless Events (bad bug)
+<LI>Add new Wireless Events : <I>IWEVCUSTOM</I>, <I>IWEVREGISTERED</I> and
+<I>IWEVEXPIRED</I> (WE-15)
+<LI>Show current settings in <I>iwlist</I> for <I>freq</I>, <I>rate</I> and
+<I>txpower</I>
+<LI>New <I>iwgetid</I> options : <I>mode</I>, <I>freq</I>, <I>protocol</I>
+<LI>Implement <I>--version</I> to show tools and WE versions
+<LI>Improve version warning messages to be hopefully less confusing
+<LI>Allow compile without maths library for embeeded platforms
+<LI>Makefile fixes, various other cleanups
+</UL>
+<p>
+Version 24 adds&nbsp;:
+<UL>
+<LI>Fix a bug that prevents disabling encryption and setting authentication
+(introduced in version 23)
+<LI>Change the way tools enumerate wireless interfaces. Tools no
+longer lists interfaces not supporting <U>/proc/net/wireless</U>, but
+lists interfaces which are down.
+<LI><B>Wireless Event</B> support (WE-14)
+<LI><B>Scanning</B> support (WE-14 - replaces now obsolete <I>iwlist
+aplist</I>)
+<LI>Support <I>iwconfig ethX ap auto/any/off</I>
+<LI>Man pages for <I>iwevent</I> and <I>iwgetid</I>
+<LI>Improved system header definitions, more complete <I>libiw</I>,
+cleanups...
+</UL>
+<p>
+Version 23 adds&nbsp;:
+<UL>
+<LI>Fix a problem when trying to use <I>iwspy</I> before the interface
+is configured
+<LI>Add missing commands in the <I>iwlist</I> man page
+<LI>Fix "make install" and install man pages
+<LI>Automatic glibc/kernel header configuration
+<LI>Nicer iwconfig error messages
+<LI>Add <I>iwconfig ethX commit</I> (WE-13)
+</UL>
+<p>
+Version 22 adds&nbsp;:
+<UL>
+<LI>Fix minor bugs in parsing command line
+<LI>Most basic functions of the tools available as a <B>library</B>
+(<I>libiw</I>)
+<LI>Add a few extra wireless statistics (WE-12)
+</UL>
+<p>
+Version 21 adds&nbsp;:
+<UL>
+<LI>Improved power management support (WE-10)
+<LI>Transmit Power parameter (WE-10)
+<LI>Document <A HREF="PCMCIA.txt">wireless.opts</A> and Pcmcia
+scheme usage (multi cards, multi setups)
+<LI>Better Makefile, header options can be set there
+<LI>Support for GLibc2.2
+<LI>Check Wireless Extension version mismatch (WE-11)
+<LI>Retry settings (WE-11)
+<LI>Split <I>iwspy</I> into <I>iwspy</I> and <I>iwlist</I>
+</UL>
+<p>
+Version 20 was already adding&nbsp;:
+<UL>
+<LI>Operation mode support (managed/ad-hoc) (WE-9)
+<LI>Power saving support (WE-9)
+<LI>New encryption support (WE-9)
+</UL>
+<p>
+However, the <B>version 20 and later</B> don't work for older kernels
+(prior to <B>2.2.14</B> and <B>2.3.30</B>), for those kernel I
+recommend to use <B>version 19</B>, which is also very stable (but
+with less features). Note that most 802.11b drivers require Wireless
+Extension v9 or later, so won't work with those ancient kernels.
+
+<p>
+<HR width=25%>
+
+<A NAME="debug">
+<H2>Debugging Wireless Extensions (common problems)</H2>
+</A>
+
+Usually, people don't have much trouble with Wireless
+Extensions. There are a few gotchas, here are the most common
+ones&nbsp;:
+
+<UL>
+<LI><B><I>iwconfig</I> doesn't list my card</B>
+<OL type=1>
+<LI>Make sure your card is plugged in the PC, and check its led.
+<LI>Make sure the system <A
+HREF="Linux.Wireless.usage.html#identify">can identify your card</A>.
+<LI>Make sure the proper driver for your card is loaded using <I>lsmod</I>.
+<LI>Check if the driver did recognise the card using <I>dmesg</I>.
+</OL>
+
+<LI><B><I>iwconfig</I> says "no wireless extensions." for my card</B>
+<OL type=1>
+<LI>Enable the config option <B>CONFIG_NET_RADIO</B> in your kernel
+setup.
+<LI>Recompile and reinstall this kernel.
+<LI>Recompile and reinstall the kernel modules.
+<LI>Do <I>cat /proc/net/wireless</I>. If the command returns an error,
+you are using the wrong kernel. Try again.
+<LI>If you are using driver from the external Pcmcia package (kernel
+2.2 and earlier), go into the Pcmcia package, do a <I>make config</I>
+<LI>Check that the following line appears : "<B>Radio network interface
+support is enabled.</B>".
+<LI>Recompile and install the Pcmcia package.
+</OL>
+
+<LI><B><I>iwconfig</I> still says "no wireless extensions.", displays
+garbage or crashes before displaying anything.</B>
+<OL type=1>
+<LI>Make sure you have fully checked <B>all</B> the steps of the second
+question.
+<LI>The driver or driver version you are using probably does not
+support Wireless Extension.
+<LI>Check status of Wireless Extension support for your driver in the
+<A HREF="Wireless.html#howto">Wireless LAN Howto</A>.
+<LI>If your driver is listed, try a more recent version.
+<LI>If your hardware is listed, try the driver mentionned (there may
+be multiple of them).
+<LI>Make sure that Pcmcia is loading the driver you think it is
+loading. Hack the various files in <U>/etc/pcmcia/</U> until it loads
+the correct driver (<I>grep</I> is your friend).
+<LI>If you still can't get it, or if you find no suitable driver,
+complain to the driver maintainer.
+</OL>
+
+<LI><B>I try to change a specific parameter with <I>iwconfig</I>, it
+just returns an error message</B>
+<OL type=1>
+<LI>Check reading parameters and setting other parameters.
+<LI>If setting all parameters fail, see first two questions.
+<LI>No card support the full range of Wireless Extension, so your
+hardware or firmware may not have this feature.
+<LI>Check the Windows driver and card documentation to see if the
+feature exist.
+<LI>Then, your driver or your driver version may not export this
+particular feature. Try the latest version.
+<LI>For driver with otherwise rich support, it's more likely a
+hardware limitation. For driver with limited support, it might be a
+driver limitation.
+<LI>Check the driver documentation to see if the feature is supported.
+<LI>Lastly, ask the maintainer if it is a hardware, software or
+documentation limitation and what to do about it.
+</OL>
+
+<LI><B><I>iwconfig</I> crashes after displaying valid info...</B>
+<OL type=1>
+<LI>Use Wireless Tools version 27 or later, which fixes this issue.
+</OL>
+
+<LI><B><I>iwlist scan</I> crashes while <I>iwconfig</I> and other
+<I>iwlist</I> commands work fine</B>
+<OL type=1>
+<LI>Use Wireless Tools version 27 or later, which fixes this issue.
+</OL>
+
+<LI><B><I>iwconfig</I> says&nbsp;: "Warning: Driver for device XXXX
+has been compiled with version XX, while this program is <I>using</I>
+version XX"</B>
+<OL type=1>
+<LI>Use Wireless Tools version 27 or later, which fixes this issue.
+</OL>
+
+<LI><B><I>iwconfig</I> says&nbsp;: "Warning: Driver for device XXXX
+has been compiled with version XX, while this program <I>supports</I>
+up to version XX"</B>
+<OL type=1>
+<LI>Upgrade to the latest stable version of Wireless Tools.
+<LI>If this doesn't fix that issue, you may&nbsp;
+<UL>
+<LI>If nothing bad happens, just ignore the message.
+<LI>Install a pre-release version of the Wireless Tools (see <A
+HREF="Tools.html#latest">above</A>).
+</UL>
+</OL>
+
+<LI><B><I>iwconfig</I> says&nbsp;: "Warning: Driver for device XXXX
+recommend version XX of Wireless Extension"</B>
+<UL>
+<LI>Ignore, unless you can't configure your card.
+<LI>Upgrade your kernel, and recompile/reinstall kernel/modules/tools.
+</UL>
+
+<LI><B>When <I>compiling</I> the Wireless Tools, it says "Wireless
+Extension earlier than XX detected"</B>
+<OL type=1>
+<LI>Ignore, unless you find a bug.
+</OL>
+
+<LI><B>When <I>compiling</I> the Wireless Tools, it says "Wireless
+Extension later than XX detected"</B>
+<OL type=1>
+<LI>This is not problematic, but think of getting a newer version of the tools.
+</OL>
+
+<LI><B>When <I>compiling</I> the Wireless Tools, it complains that
+<I>IFLA_WIRELESS is undeclared</I></B>
+<OL type=1>
+<LI>Use Wireless Tools version 27 or later, which fixes this issue.
+</OL>
+
+<LI><B>In the <I>kernel log</I>, it says "wlan0 (WE) : Buffer for request
+XXXX too small (0&lt;XX)"</B>
+<OL type=1>
+<LI>Find the wireless application that generates it
+<LI>Upgrade this application it to the latest version
+<LI>If the problem persist, file a bug on the application
+</OL>
+
+<LI><B>In the <I>kernel log</I>, it says "wlan0 (WE) : Invalid/Unknown
+Wireless Event"</B>
+<OL type=1>
+<LI>Your kernel and your driver are out of sync
+<LI>Recompile/reinstall your kernel, kernel modules, pcmcia modules
+and external driver modules
+</OL>
+
+<LI><B>I change stuff in <U>wireless.opts</U>, nothing happens</B>
+<OL type=1>
+<LI>Check that the MAC address prefix of the definition matches the MAC
+address of your card (with <I>ifconfig</I>).
+<LI>Check that no other previous definition would match your card (the
+first matching section is used, "<B>*</B>" matches everything).
+<LI>In particular, make sure that you have either commented or removed
+the "<B>*,*,*,*)</B>" at the top of <U>wireless.opts</U>.
+<LI>Check the scheme matching and the scheme you are currently using
+(with <I>cardctl scheme</I>).
+<LI>Restart the Pcmcia card manager.
+<LI>Check you system logs for error messages.
+<LI>See next question
+</OL>
+
+<LI><B>My config in <U>wireless.opts</U> is still ignored, and I have
+no error message in the system log</B>
+<OL type=1>
+<LI>If your card is <B>not</B> a Pcmcia card, it's normal, because
+<U>wireless.opts</U> is part of the Pcmcia specific configuration. The
+workaround is to use a distribution with integrated support for
+Wireless Extensions.
+<LI>Most distributions don't use standard Pcmcia configuration but
+their own network configuration scripts. In this case, they will
+ignore <U>wireless.opts</U>.
+<LI>Most modern distributions have <A
+HREF="DISTRIBUTIONS.txt">integrated support for Wireless
+Extensions</A>. When this is available, this is the easiest option, as
+you just need to add your settings the network configuration file of
+the distribution. Sometime you can even do wireless configuration in
+the graphical tools.
+<LI>For distributions that don't have integrated support for Wireless
+Extensions, file a bug report with the distribution and reinstall
+standard Pcmcia scripts, especially <U>/etc/pcmcia/network</U>.
+</OL>
+
+<LI><B>When I set my configuration in <U>wireless.opts</U>, it
+complains in the system log that it can't find <I>iwconfig</I></B>
+<OL type=1>
+<LI>Install Wireless Tools somewhere on the system, like in
+<U>/usr/local/sbin</U>
+</OL>
+
+<LI><B>When I set my configuration in <U>wireless.opts</U>, I've got
+weird errors in the system logs</B>
+<OL type=1>
+<LI>Run <I>iwconfig</I>. See first two questions.
+<LI>Try to set the equivalent parameters directly using
+<I>iwconfig</I> to make sure that you get the syntax right and that
+the card support those.
+</OL>
+
+</UL>
+
+<p>
+<HR width=25%>
+
+<A NAME="history">
+<H2>Wireless Tools oldest version</H2>
+</A>
+
+A few bits of history for your amusement...
+
+<p>
+The oldest version of <B>wireless tools</B> that was made is v10, its
+release date is 08 december 1996. Obviously it does not have Copyright
+notice, Makefile, README or any kind of instructions.
+
+<UL>
+<LI><A HREF="wireless_tools.10.tar.gz">Wireless Tools v10</A>
+</UL>
+
+<p>
+
+Prior to that date, <B>iwconfig</B> was bundled with my version of the
+wavelan driver. The oldest version on my hard drive is v6, from 05
+september 1996, and was not publically distributed (it is clearly not
+finished).
+
+<UL>
+<LI><A HREF="iwconfig.v6.c">iwconfig v6</A>
+</UL>
+
+<p>
+<HR width=25%>
+
+<A NAME="ifscheme">
+<H2>ifscheme for Debian users</H2>
+</A>
+
+Users of the Debian distribution may want to use the <B>ifscheme</B>
+scripts to <I>manually</I> manage multiple configuration per wireless
+interface. Note that a Debian package exist, and is usually up to
+date, so you probably don't have much reason to pick the version
+here...
+
+<UL>
+<LI><A HREF="ifscheme.1.7.tar.gz">ifscheme scripts for Debian</A> (version 1.7)
+</UL>
+
+<p>
+For <I>automatic</I> management, please check for various tools in the
+later section.
+
+<p>
+<HR width=25%>
+
+<A NAME="wext"><A NAME="newapi">
+<H2>Wireless Extensions patches (for kernel and drivers)</H2>
+</A></A>
+
+<p>
+The <B>Wireless Extensions support</B> come as 3 parts :
+<OL type=1>
+<LI>The Wireless Extension (the core API), part of the Linux kernel
+(mostly defined in <U>wireless.h</U>).
+<LI>Driver support, implementing some of those extensions for the
+specific hardware.
+<LI>Wireless Tools and other wireless applications, that the users
+manipulate.
+</OL>
+<p>
+Wireless Extension versions&nbsp;:
+<CENTER>
+<TABLE BORDER="1">
+<TR>
+<TH><B><I>Version</I></B>
+<TH><I>Kernel</I>
+<TH><I>Features</I>
+</TR><TR>
+<TD>WE-9
+<TD>2.2.14, 2.3.30
+<TD>Basic 802.11b support
+</TR><TR>
+<TD>WE-10
+<TD>2.2.19, 2.4.0
+<TD>Add TxPower setting
+</TR><TR>
+<TD>WE-11
+<TD>2.4.4
+<TD>Driver version check, retry setting
+</TR><TR>
+<TD>WE-12
+<TD>2.4.13
+<TD>Additional statistics
+</TR><TR>
+<TD>WE-13
+<TD>2.4.19, 2.5.3
+<TD>New driver API
+</TR><TR>
+<TD>WE-14
+<TD>2.4.20, 2.5.7
+<TD>Wireless Scanning, Wireless Events
+</TR><TR>
+<TD>WE-15
+<TD>2.4.21, 2.5.37
+<TD>Enhanced iwpriv support
+</TR><TR>
+<TD>WE-16
+<TD>2.4.23, 2.5.70
+<TD>802.11a/802.11g fixes, Enhanced iwspy support
+</TR><TR>
+<TD>WE-17
+<TD>2.6.10
+<TD>Event capability, large scan results
+</TR><TR>
+<TD>WE-18
+<TD>2.6.13
+<TD>WPA/WPA2/802.11i support
+</TR><TR>
+<TD>WE-19
+<TD>2.6.14
+<TD>Improved dBm reporting
+</TR><TR>
+<TD>WE-20
+<TD>2.6.17
+<TD>RtNetlink Wireless Extensions (dropped in 2.6.20)
+</TR><TR>
+<TD>WE-21
+<TD>2.6.19
+<TD>(partial WE-21) Full ESSID support, not just string
+</TR><TR>
+<TD>WE-22
+<TD>2.6.21
+<TD>Fix information leak on 64 bits
+</TR>
+</TABLE>
+</CENTER>
+<p>
+
+The core API is strongly versioned, so that application can detect
+changes in the API. The <B>version number</B> of Wireless Extensions
+specify which feature are available through the API, and is completely
+independant of the version of the tool using it, for example, each
+version of the Wireless Tools can support a wide range Wireless
+Extension versions. You can use <B>iwconfig --version</B> to get all
+the details on your current setup.
+<p>
+One common issue is that Wireless Extensions offers only source level
+backward/forward compatibility, not binary compatibility. Therefore,
+every time the core API is updated or changed on the system (kernel
+upgrade), both drivers and tools need to be <B>recompiled</B>. Version
+27 and later of Wireless Tools can support multiple versions of
+Wireless Extensions without the need of a recompile.
+<p>
+Some wireless drivers require a minimum level of Wireless Extensions,
+and most often newer version of Wireless Extensions enable additional
+features in the driver. Usually, the simplest way to upgrade the
+Wireless Extensions is to <B>upgrade your kernel</B> (see table
+above).  Most driver support the newer Wireless Extension only in
+their most recent version, so most often to get the benefit of the
+additional features you might need to <B>upgrade your
+driver</B>.
+<p>
+Alternatively, you can use the patches below. Those patches may not
+always apply properly to your kernel, they may crash or eat your hard
+drive, use at your own risks and don't expect much help, because I
+would rather have you upgrading your kernel. When upgrading from over
+version of Wireless Extensions to another, you need to apply all the
+patches for the versions in between in the proper order, otherwise the
+patches will reject. After patching the kernel, don't forget to
+recompile and reinstall the kernel itself, the kernel modules, the
+Pcmcia package modules and the various external driver modules.
+
+<UL>
+<LI><B><I>Kernel 2.2.X patches</I></B>
+<UL>
+<LI><A HREF="iw225_we15-2.diff">Wireless Extensions v15</A> for kernel
+2.2.25&nbsp;: cummulative patch to upgrade directly from WE-10 to
+WE-15. Wireless Event is not available, the rest seems to work.
+</UL>
+
+<LI><B><I>Kernel 2.4.X patches</I></B>
+<UL>
+<LI><A HREF="wireless.v11.diff">Wireless Extensions v11</A> for kernel
+2.4.2, including various wireless drivers. Adds driver version check,
+retry setting. <B>[Already in 2.4.3]</B>
+
+<LI><A HREF="wireless.v12.diff">Wireless Extensions v12</A> for kernel
+2.4.12. Adds more statistics, move iwpriv ioctls to a private
+space. <B>[Already in 2.4.13]</B>
+
+<LI><A HREF="iw_handlers.w13-5.diff">Wireless Extensions v13</A> for
+kernel 2.4.18. Add the new driver API based on iw-handlers (to replace
+ioctl handler). <B>[Already in 2.4.19-pre5]</B>
+
+<LI><A HREF="iw_handlers.w14-5.diff">Wireless Extensions v14 + WE-13
+ESSID bug fix</A> for kernel 2.4.19.  Add a Wireless Event dispatcher
+through <I>rtnetlink</I> (driver and set events) and support for
+Wireless Scanning (<I>iwlist ethX scan</I>). Also fix a stupid bug in
+WE-13 patch above (of by one). <B>[Already in 2.4.20-pre2]</B>
+
+<LI><A HREF="iw240_we15-6.diff">Wireless Extensions v15</A> for kernel
+2.4.20. Fix and enhance private extensions support, mostly for HostAP
+driver. Define additional Wireless Events. Get strict on buffer size
+for GET requests (this may break old applications using Wireless
+Extensions). <B>[Already in 2.4.21-pre2]</B>
+
+<LI><A HREF="iw241_we16-6.diff">Wireless Extensions v16</A> for kernel
+2.4.21. Rework iwspy support&nbsp;: simplify driver side iwspy support
+and add iwspy Wireless Event. Also increase the number of bit-rates in
+iwrange for complete 802.11a/802.11g support. <B>[Already in
+2.4.23]</B>
+
+<LI><A HREF="iw249_we16-6.diff">Wireless Extensions v16</A> for kernel
+2.4.19 and earlier. Same as patch above, but apply to kernel 2.4.19
+and earlier. Not a cumulative patch, you will need to apply after the
+v15 patch (and previous patches as needed). <B>[Already in
+2.4.23]</B>
+
+<LI><A HREF="iw249_we17-13.diff">Wireless Extensions v17</A> for
+kernel 2.4.29. Export driver event capacities, allow large scan
+requests and various minor fixes.
+
+<LI><A HREF="iw240_we18-5.diff">Wireless Extensions v18</A> for kernel
+2.4.30. WPA support, from Jouni Malinen. You will need WT-27-pre25 or
+later.
+
+</UL>
+
+<LI><B><I>Kernel 2.5.X patches</I></B>
+<UL>
+
+<LI><A HREF="iw_handlers.w13-5.diff">Wireless Extensions v13</A> for
+kernel 2.5.2. Add the new driver API based on iw-handlers (to replace
+ioctl handler). <B>[Already in 2.5.3-pre3]</B>
+
+<LI><A HREF="iw_handlers.w14-4.diff">Wireless Extensions v14</A> for
+kernel 2.5.6. Add a Wireless Event dispatcher through <I>rtnetlink</I>
+(driver and set events) and support for Wireless Scanning (<I>iwlist
+ethX scan</I>). <B>[Already in 2.5.7-pre1]</B>
+
+<LI><A HREF="iw_handlers.essid_fix-2.diff">WE-13 ESSID bug fix</A> for
+2.5.15, fix a stupid bug in WE-13 patch above (of by one). <B>[Already
+in 2.5.16]</B>
+
+<LI><A HREF="iw252_we15-5.diff">Wireless Extensions v15</A> for kernel
+2.5.32. Fix and enhance private extensions support, mostly for HostAP
+driver. Define additional Wireless Events. Get strict on buffer size
+for GET requests (this may break old applications using Wireless
+Extensions). <B>[Already in 2.5.37]</B>
+
+<LI><A HREF="iw254_we16-6.diff">Wireless Extensions v16</A> for kernel
+2.5.64. Rework iwspy support&nbsp;: simplify driver side iwspy support
+and add iwspy Wireless Event. Also increase the number of bit-rates in
+iwrange for complete 802.11a/802.11g support. <B>[Already in 2.5.70]</B>
+</UL>
+
+<LI><B><I>Kernel 2.6.X patches</I></B>
+<UL>
+
+<LI><A HREF="iw269_we17-12.diff">Wireless Extensions v17</A> for kernel
+2.6.9. Export driver event capacities, allow large scan requests and
+various minor fixes. <B>[Already in 2.6.10-rc2]</B>
+
+<LI><A HREF="iw_we18-5.diff">Wireless Extensions v18</A> for kernel
+2.6.11. WPA support, from Jouni Malinen. You will need WT-27-pre25 or
+later. <B>[Already in 2.6.13-rc1]</B>
+
+<LI><A HREF="iw263_we19-10.diff">Wireless Extensions v19</A> for
+kernel 2.6.13. Misc updates and cleanups. You will need WT-27-pre25 or
+later. <B>[Already in 2.6.14-rc1]</B>
+
+<LI><A HREF="iw266_we20-6.diff">Wireless Extensions v20</A> for kernel
+2.6.16. Wireless-RtNetlink support : Allow to Set/Get Wireless
+Extensions through the RtNetlink socket. Final version, feature tested
+and complete.
+
+<LI><A HREF="iw267_we21-5.diff">Wireless Extensions v21</A> for kernel
+2.6.17-rc1. Add modulation, generic power saving, short/long
+retries. This is experimental and require both drivers and userspace
+modification (WT-28-pre14), especially around ESSID.
+
+</UL>
+
+<LI><B><I>Aironet driver patches</I></B>
+<UL>
+
+<LI>The <A HREF="Linux.Wireless.drivers.html#Arlan802">Aironet
+driver</A> has already been converted to the new driver API (WE-13)
+and has scanning and event support (WE-14). <B>[Already in 2.5.20 ;
+2.4.20-pre1 and CVS]</B>
+
+<LI>Use new iwspy support (WE-16) in the <A
+HREF="airo.we16-2.diff">Aironet driver</A>. <B>[Already in 2.6.0-test2
+and CVS]</B>
+
+<LI>WE-17 support for the <A HREF="iw268_we17_drivers-6.diff">Aironet
+and old Wavelan drivers</A>. For kernel 2.6.8. <B>[Already in 2.6.10-rc1]</B>
+
+<LI>iwstats cleanups (WE-19) in the <A
+HREF="iw262_airo-we19-2.diff">Aironet driver</A>.
+
+<LI>WE-19 support for the <A HREF="iw263_airo_we19.diff">Aironet
+driver</A>. For kernel 2.6.13. <B>[Already in 2.6.14-rc1]</B>
+
+<LI><A HREF="iw267_we21-airo.diff">Aironet WE-21 minimal
+support</A>&nbsp;: fix ESSID size, use short/long retry. For kernel
+2.6.17-rc1.
+
+</UL>
+
+<LI><B><I>HostAP driver patches</I></B>
+<UL>
+
+<LI>The <A HREF="Linux.Wireless.drivers.html#Prism2-hostAP">Prism2
+HostAP driver</A> has already been converted to the new driver API
+(WE-13), has scanning and event support (WE-14) and take advantage of
+the improved iwpriv support (WE-15). <B>[Already in 2002-09-12]</B>
+
+<LI>Add support for "iwlist scan" in master mode in the <A
+HREF="hostap.scanmaster-2.diff">HostAP driver</A>. <B>[Already in
+v0.0.1]</B>
+
+<LI>Add new iwspy support (WE-16) in the <A
+HREF="hostap.we16-1.diff">HostAP driver</A>. <B>[Already in
+v0.0.2]</B>
+
+<LI><A HREF="iw_we17_hostap-2.diff">HostAP WE-17
+support</A>&nbsp;: allow large scan requests, export event
+capability. For hostap-driver-0.2.3. <B>[Already in
+v0.3.0]</B>
+
+<LI><A HREF="iw_hap039_we19.diff">HostAP WE-19 support</A>&nbsp;:
+better statistics. For hostap-driver-0.3.9. <B>[Already in v0.4.5]</B>
+
+<LI><A HREF="iw267_we21-hostap.diff">HostAP WE-21 support</A>&nbsp;:
+use short/long retry. For kernel 2.6.17-rc1.
+
+</UL>
+
+<LI><B><I>Orinoco driver patches</I></B>
+<UL>
+
+<LI>Conversion of the <A HREF="ori.9b.we13-2.diff">Orinoco driver
+version 0.9b</A> to the new driver API (WE-13).
+
+<LI>Add some Wireless Events and Scanning (WE-14) to the <A
+HREF="ori.9b.we14-4.diff">Orinoco driver version 0.9b</A>.
+
+<LI><A
+HREF="http://www.cs.umd.edu/~moustafa/morinoco/morinoco.html">Moustafa
+A. Youssef</A> has updated my patches to the <B>Orinoco driver
+v0.11b</B> (both WE-13 and WE-14 support&nbsp;: convert to new API and
+add Wireless Events and Scanning).
+
+<LI><A HREF="ori.13a.we14.jim.diff">Orinoco v0.13a patch</A>&nbsp;:
+convert the Orinoco to the new API (WE-13), and add Wireless Events
+and Scanning (WE-14). Contributed by <A
+HREF="http://www.math.ucla.edu/~jimc/">Jim Carter</A>, based on the
+patch from Moustafa (see above). I didn't yet test that patch.
+
+<LI><A HREF="scanning-0.13d-v3.diff">Orinoco v0.13d patch</A>&nbsp;:
+convert the Orinoco to the new API (WE-13), and add Wireless Events
+and Scanning (WE-14). Contributed by <A
+HREF="http://www.red-bean.com/~proski/">Pavel Roskin</A>, based on the
+patch from Moustafa (see above). Also include scanning support for
+Symbol firmwares (from Jesus Molina). <B>[Already in
+v0.15rc1 and kernel 2.6.13-rc1]</B>
+
+<LI><A HREF="iw_we17_orinoco-2.diff">Orinoco WE-16 & WE-17
+support</A>&nbsp;: use the new iwspy support, export event
+capability. For orinoco-0.15rc1.
+
+<LI><A HREF="iw263_orinoco_we17.diff">Orinoco WE-16 & WE-17
+support</A>&nbsp;: use the new iwspy support, export event
+capability. For kernel 2.6.13.
+
+<LI><A HREF="iw267_we21-orinoco.diff">Orinoco WE-21 minimal
+support</A>&nbsp;: fix ESSID size, use short/long retry. For kernel
+2.6.17-rc1.
+
+</UL>
+
+<LI><B><I>Other current driver patches</I></B> (Prism54, IPW...)
+<UL>
+
+<LI><A HREF="iw268_we17_prism54-2.diff">Prism54 WE-17
+support</A>&nbsp;: allow large scan requests, export event
+capability. For kernel 2.6.8. <B>[Already in 2.6.10-rc1]</B>
+
+<LI><A HREF="iw263_prism54_we17.diff">Prism54 WE-17 support (missing
+bit from above)</A>. For kernel 2.6.13. <B>[Already in 2.6.14-rc1]</B>
+
+<LI>WE-17 support for the <A HREF="iw263_atmel_we17.diff">Atmel
+driver</A>. For kernel 2.6.13. <B>[Already in 2.6.14-rc1]</B>
+
+<LI>WE-17 support for the <A HREF="iw263_wl3501_we17.diff">wl3501
+driver</A>. For kernel 2.6.13. <B>[Already in 2.6.14-rc1]</B>
+
+<LI><A HREF="iw267_prism54_scanrate.diff">Prism54 Bitrate in Scan
+support</A>. For kernel 2.6.17-rc1.
+
+<LI><A HREF="iw267_we21-prism54.diff">Prism54 WE-21 minimal
+support</A>&nbsp;: fix ESSID size, use short/long retry. For kernel
+2.6.17-rc1.
+
+<LI><A HREF="iw267_we21-atmel.diff">Atmel WE-21 minimal support</A>&nbsp;:
+fix ESSID size, use short/long retry. For kernel 2.6.17-rc1.
+
+<LI><A HREF="iw267_we21-wl3501.diff">wl3501 WE-21 minimal
+support</A>&nbsp;: fix ESSID size, use short/long retry. For kernel
+2.6.17-rc1.
+
+<LI><A HREF="iw267_we21-ipw2100.diff">ipw2100 WE-21 minimal
+support</A>&nbsp;: fix ESSID size, use short/long retry. For kernel
+2.6.17-rc1.
+
+<LI><A HREF="iw267_we21-ipw2200.diff">ipw2200 WE-21 minimal
+support</A>&nbsp;: fix ESSID size, use short/long retry. For kernel
+2.6.17-rc1.
+
+<LI><A HREF="iw267_ipw2200-we21-3.diff">ipw2200 WE-21 additional
+support</A>&nbsp;: modulation, generic power saving. For kernel
+2.6.17-rc1.
+
+</UL>
+
+<LI><B><I>Obsolete wireless driver patches</I></B> (wavelan,
+wavelan_cs, netwave_cs, ray_cs...)
+<UL>
+<LI><A HREF="wav_pc.v23.diff">Update wavelan_cs to v23</A> : backport
+Pcmcia package fixes in the kernel. <B>[Already in 2.5.3-pre2]</B>
+
+<LI><A HREF="wav_mov-4.sh">Shell script</A> and <A
+HREF="wav_mov-4.diff">Patch</A> to move old wireless drivers : move
+<I>wavelan.c</I>, <I>wavelan_cs.c</I> and <I>netwave_cs.c</I> to
+<U>driver/net/wireless</U>. <B>[Already in 2.5.3-pre3]</B>
+
+<LI><A HREF="wav_pc.jeff.diff">Additional fixed for wavelan_cs</A> :
+fix trigraph warnings. <B>[Already in 2.5.3-pre6]</B>
+
+<LI><A HREF="wav_pc.v23-4.diff">Update wavelan_cs to v23 + extra</A> :
+backport Pcmcia package fixes in the kernel, fix trigraph warnings and
+fix watchdog message. <B>[Already in 2.4.20-pre2]</B>
+
+<LI>Conversion of the <A HREF="wav.we13-2.diff">old Wavelan driver
+version 23</A> to the new driver API (WE-13). <B>[Already in
+2.5.6-pre1]</B>
+
+<LI>Conversion of the <A HREF="wav_pc.we13-2.diff">old Wavelan_cs
+driver version 23</A> to the new driver API (WE-13). <B>[Already in
+2.5.6-pre1]</B>
+
+<LI>Conversion of the <A HREF="netw.we13-2.diff">Netwave_cs</A> to the
+new driver API (WE-13).  <B>[Already in 2.5.6-pre1]</B>
+
+<LI>The <A HREF="Linux.Wireless.drivers.html#Poldhu">No Wires Needed
+driver</A> has already been converted to the new driver API (WE-13)
+and has scanning support (WE-14).
+
+<LI><A HREF="wav.v25.diff">Trivial fix in wavelan</A> : fix the
+watchdog message in the wavelan (ISA) driver. <B>[Already in
+2.4.20-pre2 and 2.5.37]</B>
+
+<LI>Use new iwspy support (WE-16) in the <A HREF="wav.we16-1.diff">old
+Wavelan ISA driver</A>. <B>[Already in 2.5.70]</B>
+
+<LI>Use new iwspy support (WE-16) in the <A
+HREF="wav_cs.we16-2.diff">old Wavelan Pcmcia driver</A>, plus cleanup
+backward compatibility stuff (which didn't work anyway). <B>[Already
+in 2.5.70]</B>
+
+<LI>WE-17 support for the <A HREF="iw263_netwave_we17.diff">Netwave
+driver</A>. For kernel 2.6.13. <B>[Already in 2.6.14-rc1]</B>
+
+<LI>WE-13/WE-17 support for the <A HREF="iw263_ray_we17.diff">Raylink
+driver</A>. For kernel 2.6.13. <B>[Already in 2.6.14-rc1]</B>
+
+<LI><A HREF="iw267_we21-ray.diff">Raylink WE-21 minimal
+support</A>&nbsp;: fix ESSID size. For kernel 2.6.17-rc1.
+
+</UL>
+
+</UL>
+
+<p>
+
+<HR width=25%>
+
+<A NAME="drivers">
+<H2>Driver support</H2>
+</A>
+
+All the drivers for Wireless LANs are listed in the <A
+HREF="Wireless.html">Linux Wireless LAN Howto</A>, and each section detail the level of Wireless Extension support.
+<p>
+If you are developping Wireless Extension support in your wireless
+driver, those few drivers are worth a look at&nbsp;:
+
+<UL>
+
+<LI>The <A HREF="Linux.Wireless.drivers.html#Wavelan">Wavelan
+driver</A> is the reference implementation of Wireless Extensions for
+pre-802.11 devices. It supports NWID, Channel, Sensitivity, Encryption
+key, stats and spy.
+
+<LI> The <A
+HREF="Linux.Wireless.drivers.802.11b.html#Prism2-hostAP">HostAP</A>
+driver is the reference implementation of Wireless Extensions for
+802.11b devices, and is the reference implementation for
+<B>iwpriv</B> functionality.
+
+<LI>The <A HREF="Linux.Wireless.drivers.802.11b.html#Arlan802">Aironet
+driver</A> (version 1.4 and later from Ben) is an alternate reference
+implementation of Wireless Extensions for 802.11b devices. It
+implements fully WE-14 (Wireless Scanning and Wireless Events), and is
+different than HostAP.
+
+<LI>The <A HREF="Linux.Wireless.drivers.802.11b.html#Orinoco">Orinoco
+MPL/GPL driver</A> version v0.14 or later is also an alternate
+reference implementation of Wireless Extensions for 802.11b
+devices. On the other hand, version v0.13 and earlier found in most
+places only support WE-12 (so no scanning and no events). The Orinoco
+driver tend to be easier to study than both the HostAP and the Aironet
+drivers.
+
+</UL>
+
+<p>
+
+<HR width=25%>
+
+<A NAME="links">
+<H2>Wireless Applications for Linux</H2>
+</A>
+
+I need your help to make this section larger ;-)
+<p>
+The folowoing sections are applications that make use of
+<B>Wireless Extensions</B>&nbsp;:
+
+<H4><I>Wireless Tools I personally maintain</I></H4>
+
+<UL>
+
+<LI><A HREF="#latest">Download</A> my wireless tools package
+(iwconfig, iwspy, iwpriv).
+
+<LI>The <A HREF="http://pcmcia-cs.sourceforge.net/">Pcmcia package</A>
+uses wireless tools for integrated wireless setting in <A
+HREF="PCMCIA.txt">wireless.opts</A>.
+
+</UL>
+
+<H4><I>Security and Association daemons</I></H4>
+
+<UL>
+
+<LI><A HREF="http://hostap.epitest.fi/">Jouni Malinen</A> has
+developped <B>wpa_supplicant</B>, a complete implementation of the
+<B>WPA protocol</B>, providing enhanced privacy and security. This
+tools also provide complete management to the wireless interface, with
+automatic association to Access Points.
+
+<LI><A HREF="http://www.open1x.org/">Open1x</A> is an Open Source
+implementation of the <B>802.1x protocol</B>, providing enhanced
+privacy and security. Recent version add support for the <B>WPA and
+WPA2 protocols</B>.
+
+<LI><A HREF="http://0pointer.de/lennart/projects/waproamd/">Lennart
+Poettering</A> has written <B>IfPlugd/WapRoamd</B>, a pair of deamons
+that automatically roam between Access Points. It can use <I>wireless
+event support</I> to detect AP handoff and can then automatically
+select an new AP and configure the link.
+
+<LI><A HREF="http://getwifi.sourceforge.net/">Joshua D. Abraham</A>
+has written <B>Getwifi</B>, a <B>bash script</B> that automatically
+connect to the best network, including WEP.
+
+</UL>
+
+<H4><I>GUI configuration and management tools</I></H4>
+
+<UL>
+
+<LI><A HREF="http://www.gnome.org/projects/NetworkManager/">Dan
+Williams</A> has developped <B>NetworkManager</B>, a complete network
+configuration and autodiscovery package used in <I>RedHat</I> and
+<I>Fedora</I>, which fully support Wireless Extensions including
+<I>Scanning</I>.
+
+<LI><A HREF="http://kwifimanager.sourceforge.net/">Stefan Winter</A>
+has developped <B>KWiFiManager</B>, a very complete set of <I>KDE</I>
+tools using Wireless Extensions (configurator, link monitor) and
+compatible with many drivers/cards. It is the successor to the famous
+<A HREF="http://korinoco.sourceforge.net/">KOrinoco</A>. The <A
+HREF="http://websvn.kde.org/trunk/KDE/kdenetwork/wifi/">
+latest version</A> has <I>scanning support</I>.
+
+<LI><A
+HREF="http://qa.mandriva.com/twiki/bin/view/Main/EasyWifi">Olivier
+Blin</A> has written <B>netapplet</B>, the network manager and
+configurator for the <B>Mandrake</B> distribution.
+
+<LI><A HREF="http://primates.ximian.com/~rml/netapplet/">Robert Love &
+Joe Shaw</A> have written <B>netapplet</B>, a <B>network switcher</B>
+application integrated in the SuSE distribution.
+
+<LI><A HREF="http://www.bitbuilder.com/wifi_radar/">Ahmad
+Baitalmal</A> is writting <B>Wifi Radar</B>, an Python/PyGTK2
+application that scan for network, edit wireless configuration and
+allow you to connect to one network.
+
+<LI><A HREF="http://netswitch.tuxfamily.org/en/index.html">Olivier
+Rossiny</A> is developping <B>NetSwitch</B>, a set of tools (command
+line, GTK) that allow you to manage wireless profiles and scan for
+networks.
+
+<LI><A HREF="http://apradar.sourceforge.net/">Don Park</A> is writting
+<B>ApRadar</B>, a GTK application that use <I>scanning support</I> to
+show a graphical list of reachable Access Point and to allow the user
+to easily connect to one wireless network at the click of a button.
+
+<LI><A HREF="http://websvn.kde.org/trunk/kdenonbeta/kifi/">Christopher
+TenHarmsel</A> and his friends have developped <B>Kifi</B>, another
+<I>KDE</I> wireless configuration tool, that use <I>scanning
+support</I> to show a graphical list of reachable Access Point and to
+allow the user to easily connect to one wireless network at the click
+of a button.
+
+<!--
+<LI><A
+HREF="http://csx.calvin.edu/~tenharmsel/index.shtml">Christopher
+TenHarmsel</A> has written a <B>KDE wireless monitor</B> that will
+eventually evolve into a profile manager.
+-->
+
+<LI><A HREF="http://www.kde-apps.org/content/show.php?content=19152">
+Helge Oyvind</A> wrote <B>WaveSelect</B>, a KDE wrapper around iwlist
+and iwconfig.
+
+<LI><A HREF="http://www.plutospin.com/netchoose.html">Eugene Berta</A>
+wrote <B>Netchoose</B>, a GUI (QT based) wrapper for helping users who
+need to connect to multiple wireless network.
+
+</UL><UL>
+
+<LI><A HREF="http://netcfg.sourceforge.net/">Edward A. Falk</A> has
+developped a new version of <B>Netcfg</B>, which main features are the
+support of wireless configuration and network profiles (implemented
+through Pcmcia schemes). Very nice&nbsp;!
+
+<LI><A HREF="http://gwifiapplet.sourceforge.net/">Sujal Shah</A> has
+developped <B>GWireless</B>, a <I>Gnome</I> link monitor and
+configurator for 802.11b cards using Wireless Extensions.
+
+<LI><A HREF="http://www.random-works.co.uk/xwconfig/">Tom Waters</A>
+has written <B>xwconfig</B>, a GTK version of iwconfig.
+
+<LI><A HREF="http://www.mobydik.it">Paolo Cavone</A> has written
+<B>Mobydik.tk</B>, a TCL wrapper around Wireless Tools.
+
+<LI><A HREF="http://spisa.act.uji.es/~peralta/wvlan/">Luis Peralta</A>
+has written a <B>web based Wireless Configurator</B> and a <B>Link
+Quality Checker</B>, which are perl wrappers around my Wireless Tools.
+
+</UL>
+
+<H4><I>Wireless monitor tools</I></H4>
+
+<UL>
+
+<LI><A HREF="http://www.uv-ac.de/qwireless/">Werner Schulte</A> has
+developped <B>QWireless</B>, a program for the X86 and ipaq allowing
+to analyse wireless lans.
+
+<LI><A HREF="http://www.janmorgenstern.de/projects-software.html">Jan
+Morgenstern</A> has written <B>wavemon</B>, a very nice <I>curses</I>
+application to monitor your card using Wireless Extensions.
+
+<LI><A
+HREF="http://www.qsl.net/n9zia/wireless/symphony_tools/index.html">Green
+Bay Professional Packet Radio</A> has a modified version of my
+Wireless Tools for the Symphony, with nice colors and bar graphs, to
+allow better setup of Wireless Links.
+
+<!-- http://www.gbonline.com/~multiplx/wireless/symphony_tools/index.html -->
+
+<LI><A
+HREF="http://www.math.ucla.edu/~jimc/mathnet_d/download.html">Jim
+Carter</A> has written a <B>APHunter</B>, a Perl wrapper around my
+Wireless Tools using <I>curses</I> to shows the result of <B>Wireless
+Scans</B>.
+
+<LI><A HREF="http://kwavecontrol.sourceforge.net/">Matthias Reif</A>
+has written <B>KWaveControl</B>, a KDE application that display
+current setting and statistics of Wireless cards.
+
+</UL><UL>
+
+<LI><A HREF="http://tobi.tildesoftware.net/index/projects/wvlanmon/">
+Tobias Rundstr&ouml;m</A> did <B>wvlanmon</B>, a link monitor for
+<I>Gnome</I> using Wireless Extensions.
+
+<!-- Also http://www.tobi.nu/index/projects/wvlanmon/ -->
+
+<LI><A HREF="http://www.bitshift.org/wireless.shtml">Mark
+C. Langston</A> has developed a very nice <I>Enlightenment</I> epplet,
+<B>E-Wireless</B>, that monitor link quality, of course using Wireless
+Extensions...
+
+<LI><A HREF="http://www.schuermann.org/~dockapps/">Carsten
+Schuermann</A> has developed a very nice <I>Window Maker</I> dockapp,
+<B>WMWave</B>, that monitor link quality, signal strength and noise
+level.
+
+<LI><A HREF="http://gkrellm.luon.net/gkrellmwireless.phtml">Gtnx
+Sjoerd</A> has developped a signal strength plug-in that fits into the
+<A HREF="http://gkrellm.luon.net/">GKrellM monitoring system</A>.
+
+<LI><A HREF="http://freshmeat.net/projects/wirestat/">Trent
+Trautman</A> has developped a signal strength plug-in that fits into
+the <A HREF="http://entity.evilplan.org">Entity XML framework</A>.
+
+<LI><A HREF="http://open-linux.de/">Tim Ehlers</A> has modified
+<B>xosview</B> to monitor the wireless link.
+
+<!-- ftp://ftp.gwdg.de/ftp/pub/linux/people/tehlers/xosview -->
+
+<LI><A HREF="http://www.cs.pdx.edu/research/SMN/">Jim Binkley</A> has
+developped a <B>wireless signal strength</B> monitor. The Linux
+version uses the Wireless Extensions and has been designed for the
+<B>iPaq</B>.
+
+<LI><A HREF="http://kosmosisland.com/island/david/wireless.html">David
+Koski</A> has written a <B>Java Applet</B> to monitor the Wireless
+Link.
+
+<LI><A HREF="http://gabriel.bigdam.net/home/xnetstrength/">Gabriel
+Cain</A> made a <B>compact X11</B> wireless monitor.
+
+<LI><A HREF="http://nocat.net/download/wpm/">Rob Flickenger</A> made a
+Perl script that display link quality <B>in color on your teminal</B>.
+
+<LI><A HREF="http://www.zevv.nl/wmifinfo/">Ico Doornekamp</A> has
+written a <B>simple applet</B> that show basic network info and also
+wireless signal strength.
+
+<LI><A HREF="http://www.zevv.nl/wmifinfo/">Ico Doornekamp</A> has
+written a <B>simple applet</B> that show basic network info and also
+wireless signal strength.
+
+<LI><A HREF="http://www.larsen-b.com/Article/174.html">Jerome
+Kerdreux</A> has written <B>Gtk-Womitor</B>, an applet that show
+graphs of signal strength.
+
+<LI><A
+HREF="http://www.arachnoid.com/NetworkControl/index.html">P. Lutus</A>
+has written <B>NetworkControl</B>, an utility to monitor network
+interfaces statistics and signal strenght.
+
+<LI><A HREF="http://wmwifi.digitalssg.net/?sec=1">Jess Mahan</A> wrote
+<B>WM WiFi</B>, a small <I>Window Maker</I> dockapp that monitor link
+quality, bit rate and current access point.
+
+</UL><UL>
+
+<LI><A HREF="http://wibble.net/~sjh/wireless/">Steven Hanley</A> has
+developed a small package using Wireless Extensions to get the
+statistics at the <B>other end of the wireless link</B> (remote
+stats), with a nice graphical user interface, and which can be docked
+in your window manager.
+
+</UL>
+
+<H4><I>Stumbler/Wardriving tools</I></H4>
+
+This section is far from exhaustive, as most stumber application
+directly use monitor mode (some are listed later on...).
+
+<UL>
+
+<LI><A HREF="http://sourceforge.net/projects/wavelan-tools/">Eric
+Maland and friends</A> have developped a package to <B>log discovered
+ESSID</B> (and related info) of wireless networks in range.
+
+<LI><A HREF="http://aphopper.sourceforge.net/">Jeffrey Strube</A> has
+written <B>AP Hopper</B>, a program that automatically hops between
+access point, check DHCP and log the result.
+
+<LI><A HREF="http://www.foxharp.boston.ma.us/shtumble">Paul Fox</A>
+has developped a <B>shtumble</B>, tiny shell script stumbler.
+
+<LI><A HREF="http://www.swscanner.org">Iv&aacute;n Forcada Atienza</A>
+has developped a <B>graphical stumbling package</B> which generates
+files compatible with <B>NetStumbler</B>.
+
+</UL>
+
+<H4><I>Other packages using Wireless Extensions</I></H4>
+
+</UL><UL>
+
+<LI><A HREF="http://pasky.ji.cz/~pasky/dev/ifrename/">Petr Baudis</A>
+has modified the Hotplug scripts to better integrate <B>ifrename with
+ifplugd</B>.
+
+</UL><UL>
+
+<LI><A
+HREF="http://www.cs.umd.edu/users/moustafa/Downloads.htm">Moustafa
+Youssef</A> has developped a <B>general API for interfacing with
+Wireless Extensions</B>.
+
+<LI><A HREF="http://www.cs.pdx.edu/research/SMN/">Jim Binkley</A> has
+developed a version of <B>Mobile IP</B> which is <B>wireless
+aware</B>. His Linux implementation uses the Wireless Extensions...
+
+<LI><A HREF="http://www.avantcom.com/snmp80211.asp">AvantCom</A> has
+created a <B>802.11 SNMP MIB</B> which expose Wireless Extension
+information through SNMP.
+
+</UL>
+
+<H4><I>Application specific to a driver</I></H4>
+
+
+Those applications are partially using Wireless Extension, but also
+require specific driver APIs, making them only useful if you use the
+specific wireless driver (HostAP in this case)&nbsp;:
+
+<UL>
+
+<LI><A
+HREF="http://www.mobilnews.cz/honza/en_prog_linux_wewimo.php">WeWimo</A>
+monitor the <B>HostAP driver</B> and clients associated to it in a <B>web
+interface</B>.
+
+<LI><A
+HREF="http://www.simandl.cz/stranky/linux/wifimon/wifimon_a.htm">wifimon</A>
+monitor the <B>HostAP driver</B> and clients associated to it in a
+<B>text terminal</B>.
+
+<LI><A HREF="http://wifiadmin.sourceforge.net">Thanos Panousis and
+Thimios Dimopoulos</A> have developped <B>WiFiAdmin</B>, a web front
+end to configure the <B>HostAP driver</B> and some other drivers.
+
+</UL>
+
+
+<H4><I>Useful applications not using Wireless Extensions</I></H4>
+
+
+Now, a few other applications that don't use Wireless Extensions but
+are useful anyway&nbsp;:
+
+<UL>
+
+<LI><A HREF="http://gicl.mcs.drexel.edu/sevy/airport">Jon Sevy</A> has
+developped a Java-based <B>AirPort/RG1000 Base Station
+configurator</B>, that should please some people not owning a
+Mac... He has also done <B>Wireless Link Test Utility</B> and a
+<B>Wireless Host Monitoring Utility</B> for the Airport/RG1000.
+
+<LI><A HREF="http://sourceforge.net/projects/dwl-1000ap-conf/">Johan
+Almqvist</A> has developed a perl script to configure a <B>D-Link
+DWL-1000AP</B> Access Point via SNMP.
+
+<LI><A HREF="http://gwap11.sourceforge.net/">Sujal Shah</A> is
+writting a <I>Gnome</I> application to configure a <B>Linksys
+WAP11</B> Access Point via SNMP.
+
+<LI><A HREF="http://wap11gui.sourceforge.net/">Ori Pessach</A> has
+done a <I>Gnome</I> application to configure a <B>Linksys WAP11</B>
+Access Point via SNMP, which really works.
+
+<LI><A HREF="http://ap-utils.polesye.net/">Roman Festchook</A> has
+writen a set of ncurses based utilities to configure via SNMP protocol
+<B>Access Points based on Atmel chipset</B> (the case for most
+Intersil clone vendors), and also <B>Access Points based on NWN
+chipset</B>.
+
+<!-- http://www.polesye.net/roma/ -->
+
+</UL><UL>
+
+<LI><A HREF="http://www.bitshift.org/wireless.shtml">Mark
+C. Langston</A> has written some Perl script to <B>check the status of
+the Airport Base Station</B>.
+
+<LI><A HREF="http://znouza.cl.anet.cz/projects/wavelan">Tom
+Z. Meinlschmidt</A> has developped an impressive package allowing to
+<B>monitor a Wavelan Access Point</B> using SNMP.
+
+<LI><A HREF="http://www.twoguys.org/~gregh/software/">Greg Hankins</A>
+has done a similar monitor for the <B>RoamAbout Access Points</B>.
+
+<LI><A HREF="http://snr.sourceforge.net/">V.Melnik</A> has developped
+a package to <B>monitor a Wavelan Access Point</B> using SNMP and
+store the result in a mySQL database.
+
+<LI><A HREF="http://wavewatcher.sourceforge.net/">Dominic Kilbride</A>
+has developped a package to <B>monitor various Access Points</B> using
+SNMP and store the result in a mySQL database and show graphical
+results.
+
+</UL><UL>
+
+<!-- http://aptools.sourceforge.net/ -->
+
+http://winfingerprint.sourceforge.net/aptools.php
+
+<LI><A HREF="http://winfingerprint.sourceforge.net/aptools.php">Kirby
+Kuehl</A> has developped a package <B>discovering Wireless Access
+points from their wired side</B>. It basically check MAC address that
+match known Access Point manufacturers.
+
+<LI><A
+HREF="http://prismstumbler.sourceforge.net/">Jan.B.Fernquist</A> has
+developped <B>PrismStumbler</B>, discovering networks in ranges with
+PrismII cards.
+
+<LI><A HREF="http://airsnort.shmoo.com/">AirSnort</A> is the very
+famous tools that allow you to <B>crack WEP encryption</B> and snoop
+802.11 traffic. Use only on your own network...
+
+<LI><A HREF="http://www.grymoire.com/Unix/Wireless.html">Bruce
+Barnett</A> has some tool to <B>decode 802.11 frames</B>.
+
+<LI><A HREF="http://www.kismetwireless.net/">Mike Kershaw and
+friends</A> have developped <B>Kismet</B>, a complete package for
+finding 802.11 cells and their characteristics and 802.11 traffic
+analysis (using the "monitor" mode of various cards).
+
+</UL><UL>
+
+<LI>The <A
+HREF="http://linux-net.osdl.org/index.php/Iproute2">iproute2
+package</A>, which allow to configure part of the Linux TCP/IP stack
+that ifconfig just can't reach (<A
+HREF="ftp://ftp.inr.ac.ru/ip-routing/">original archive</A>).
+
+<LI>The <A HREF="http://www.netperf.org/netperf/NetperfPage.html">
+NetPerf benchmark</A>. That's the one I use, and I love it&nbsp;!
+
+<LI><A
+HREF="http://ee-staff.ethz.ch/~oetiker/webtools/mrtg/mrtg.html">MRTG</A>
+seems an interesting tool to monitor the <B>quality of TCP links</B>
+(I need to try it...).
+
+</UL>
+
+<HR>
+<CENTER><TABLE BORDER=0 CELLPADDING=0><TR><TD valign="top" align="center">
+<ADDRESS>
+<A HREF="Wavelan.html">Wavelan</A>,
+<A HREF="Orinoco.html">Orinoco</A> and
+<A HREF="Wireless.html">Wireless LANs</A> -
+jt&#064;hpl.hp.com
+<br>Updated 29 August 08
+<br>Copyright &#169; 1996-2008 Jean Tourrilhes
+</ADDRESS>
+</TD><TD>
+&nbsp;&nbsp;&nbsp;
+</TD><TD valign="top" align="center">
+Project hosted and sponsored by :
+<br>
+<A HREF="http://www.hpl.hp.com"><IMG SRC="../hplogo.png" HEIGHT=34
+WIDTH=141 ALT="HP home page"></A>
+</TD></TR></TABLE></CENTER>
+
+<!-- Keep Webmaster happy -->
+<script type="text/javascript" language="JavaScript">
+var s_prop7="us"
+var s_prop8="eng"
+var s_prop9="corp"
+var s_prop10="us|eng|corp"
+var s_prop13="hphqglobal,hphqwwhplabs"
+</script>
+
+<!-- Begin METRICS JavaScript -->
+<!-- <script type="text/javascript" language="JavaScript"
+src="http://welcome.hp-ww.com/country/us/eng/js/metrics.js"></script> -->
+<script type="text/javascript" language="JavaScript"
+src="http://www.hpl.hp.com/dev/hplabsmetrics.js"></script>
+<!-- End METRICS JavaScript -->
+
+</BODY>
+</HTML>

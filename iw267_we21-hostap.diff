@@ -1,0 +1,33 @@
+diff -u -p linux/drivers/net/wireless/hostap/hostap_ioctl.20.c linux/drivers/net/wireless/hostap/hostap_ioctl.c
+--- linux/drivers/net/wireless/hostap/hostap_ioctl.20.c	2006-04-03 16:49:55.000000000 -0700
++++ linux/drivers/net/wireless/hostap/hostap_ioctl.c	2006-04-03 16:50:04.000000000 -0700
+@@ -1412,9 +1412,9 @@ static int prism2_ioctl_siwretry(struct 
+ 	/* what could be done, if firmware would support this.. */
+ 
+ 	if (rrq->flags & IW_RETRY_LIMIT) {
+-		if (rrq->flags & IW_RETRY_MAX)
++		if (rrq->flags & IW_RETRY_LONG)
+ 			HFA384X_RID_LONGRETRYLIMIT = rrq->value;
+-		else if (rrq->flags & IW_RETRY_MIN)
++		else if (rrq->flags & IW_RETRY_SHORT)
+ 			HFA384X_RID_SHORTRETRYLIMIT = rrq->value;
+ 		else {
+ 			HFA384X_RID_LONGRETRYLIMIT = rrq->value;
+@@ -1468,14 +1468,14 @@ static int prism2_ioctl_giwretry(struct 
+ 				rrq->value = le16_to_cpu(altretry);
+ 			else
+ 				rrq->value = local->manual_retry_count;
+-		} else if ((rrq->flags & IW_RETRY_MAX)) {
+-			rrq->flags = IW_RETRY_LIMIT | IW_RETRY_MAX;
++		} else if ((rrq->flags & IW_RETRY_LONG)) {
++			rrq->flags = IW_RETRY_LIMIT | IW_RETRY_LONG;
+ 			rrq->value = longretry;
+ 		} else {
+ 			rrq->flags = IW_RETRY_LIMIT;
+ 			rrq->value = shortretry;
+ 			if (shortretry != longretry)
+-				rrq->flags |= IW_RETRY_MIN;
++				rrq->flags |= IW_RETRY_SHORT;
+ 		}
+ 	}
+ 	return 0;

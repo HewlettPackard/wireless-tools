@@ -1,0 +1,1247 @@
+<HTML>
+<HEAD>
+<TITLE>Wireless Overview</TITLE>
+</HEAD>
+
+<BODY>
+
+<H1 ALIGN=center>A bit more about the technologies involved...</H1>
+<HR width=25%>
+<H3 ALIGN=center>Jean Tourrilhes</H3>
+<H3 ALIGN=center>29 July 98</H3>
+<br><br>
+<BLOCKQUOTE><I>
+La culture c'est comme la confiture, moins on en a, plus on l'&eacute;tale...
+</I></BLOCKQUOTE>
+
+<H2>1	Introduction</H2>
+I don't pretend to make a course on <B>Wireless LAN</B>. I guess that
+many books explain the subject in more details and accuracy than me
+(anyway, I hope). It just seems to me that many users of Wireless LANs
+don't really know what is inside their magic piece of kit and are
+curious about it. I hope that this document will help them to
+understand a bit more the different technological aspects and compare
+the different Wireless LANs functionalities.
+<p>
+I'm not really a professional of radio communications. While working
+on the Wavelan driver, I've gathered many information trying to
+understand how it was working. The vendors documentation and web sites
+were also very helpful, many of them really try to explain the
+technologies behind their products and provide <I>white
+papers</I>. The Net contains also a lot of papers and reports on the
+subject of wireless LANs and radio communications.
+<p>
+I have still a limited knowledge and understanding of all this, so I
+hope that it is mostly accurate, complete and that it will help
+you. If some knowledgeable person could help me to improve this
+document, or if anybody could give me some suggestions or corrections,
+I would be glad...
+<p>
+This document is a part of the <A HREF="Linux.Wireless.html">Linux
+Wireless LAN Howto</A>. Please refer to it for details.
+
+<H2>2 MAC, LAN, Layer and other strange words...</H2>
+<UL>
+<LI><B>Bandwidth</B>&nbsp;: commonly it is the size of the channel
+used by the radio (the amount of frequency available to the
+system). By extension, it can also sometimes refer to the speed of the
+system (the bit rate).
+
+<LI><B>Carrier Sense</B>&nbsp;: checking the medium to assess if it is
+free or if there is a transmission going on. Usually measure of the
+received power.
+
+<LI><B>Cell</B>&nbsp;: radio neighbourhood, area where all nodes can
+communicate with each other. As the range over radio is limited, the
+network is split into independent cells and a cell to cell
+communication is provided (via access point or internal routing).
+
+<LI><B>Channel</B> &nbsp;: On the radio, this is usually synonym of a
+specific frequency, and by extension the communication medium.
+
+<LI><B>dB</B> (decibel)&nbsp;: logarithmic way to express a
+value. Usually the signal strength (transmitted and received power) is
+expressed in dBm (the reference is 1&nbsp;mW - 0&nbsp;dBm). A
+difference between two values in dBm is without unit, in dB (in fact,
+this is a factor between the two values).
+
+<LI><B>Ethernet</B>&nbsp;: standard wired LAN protocol. Includes
+physical and link layers.
+
+<LI><B>Frequency band</B>&nbsp;: portion of the radio spectrum
+delimited for a particular use. For example, most wireless LANs use
+the 2.4 to 2.48&nbsp;GHz band. A frequency band is usually divided in
+channels.
+
+<LI><B>Header</B>&nbsp;: informations added by the protocol in front
+of the payload in the packet for its own use (addresses, packet type,
+sequence number, CRC...). Each protocol adds a different header, so in
+a typical TCP/IP packet we have a MAC header, an IP header and a TCP
+header, followed by the payload.
+
+<LI><B>IP</B>&nbsp;: see TCP/IP.
+
+<LI><B>IPX</B>&nbsp;: network protocol used in Netware, usually with SPX.
+
+<LI><B>LAN (Local Area Network)</B>&nbsp;: network on a short
+distance, as opposed to WAN (typically inside a building).
+
+<LI><B>Latency</B>&nbsp;: measure of the performance of a network for
+short requests and multimedia traffic. There is no real standard
+measurement, it might be the time to send and transmit a packet, or
+the time spent in the transmit queue, or the time for an answer to
+come back, or a number of requests per second...
+
+<LI><B>Layer</B>&nbsp;: this terminology comes from the OSI
+specification. It divides any communicating system into 7 layers, each
+having a different functionality. Layer 1 is the physical layer, and
+layer 2 is the link layer. IP could be assimilated as layer 3 (network
+layer), and TCP as layer 4 (transport layer).
+
+<LI><B>Link layer</B>&nbsp;: This is the part of the protocol managing
+the direct delivery between two devices on a specific link layer
+(coaxial bus, point to point link, radio...). This includes
+packetisation and addressing. Most of this is implemented in the MAC.
+
+<LI><B>MAC (Medium Access Control)</B>&nbsp;: this is the part of the
+radio device managing the protocol and the usage of the link. It
+decides when to transmit and when to receive, creates the packets
+headers and filters the received packets.
+
+<LI><B>Medium</B>&nbsp;: name to describe the mean used to transfer
+information. This could be a wire (twisted pairs, coax...), an optic
+fibber, the radio waves (the air), infrared light...
+
+<LI><B>Modem</B>&nbsp;: in a radio device, this is the part converting
+the bits to transmit into a modulation of the radio waves and the
+reverse at the reception. It does the analog to digital conversion,
+the generation of the frequency, the modulation and the amplification.
+
+<LI><B>Modulation</B>&nbsp;: specific way of coding information on a
+radio frequency. Basically, there is amplitude modulation (AM) and
+frequency/phase modulation (FM), but there exist many variations and
+combinations.
+
+<LI><B>NetBeui</B>&nbsp;: network protocol used in Lan Manager.
+
+<LI><B>Node</B>&nbsp;: a device part of the network, source or
+destination of the data. For us, a computer with a radio card in it.
+
+<LI><B>Noise</B>&nbsp;: any unwanted signal. Background noise,
+interferences, transmissions from nodes not belonging to the
+network...
+
+<LI><B>Packet</B>&nbsp;: Unit of transmission over the network. The
+data to be transmitted is split into packets, which are sent
+individually over the network.
+
+<LI><B>Protocol</B>&nbsp;: specification of the interactions between
+systems and the data manipulated. This describes what to do and when
+(the rules), and the format of the data exchanged on the lower
+communication layer.
+
+<LI><B>Physical layer</B>&nbsp;: this is the part of the device
+interacting with the medium. For a radio LAN, the physical layer is
+also called modem.
+
+<LI><B>TCP/IP</B>&nbsp;: network protocol used by Unix and
+Internet. Better in some respects than NetBeui and IPX (allows
+routing, for example).
+
+<LI><B>SNR (Signal to Noise Ratio)</B>&nbsp;: difference in strength
+between the signal we want to receive and the background noise (or any
+unwanted signal).
+
+<LI><B>Throughput</B>&nbsp;: measure of the performance of a network
+for large data transfer (such as FTP, NFS, HTTP 1.1). This speed is
+expressed in bits per seconds or a multiple.
+
+<LI><B>WAN (Wide Area Network)</B>&nbsp;: network on a large
+scale&nbsp;: a town, a country or the world. Definitely not a LAN.
+
+<LI><B>Wired</B>&nbsp;: using a wire.
+
+<LI><B>Wireless</B>&nbsp;: not using a wire. For networks, it might be radio or infrared.
+
+</UL>
+
+<H2>3 Anatomy of a radio LAN</H2>
+A <B>radio network</B> is a collection of nodes communicating together
+through radio devices. It is sometime called a <I>radio Ethernet</I>,
+by analogy of the wired technology. Most <B>radio devices</B> are a
+card (ISA, Pcmcia) to plug in a PC (or workstation), and interact
+directly with the standard networking stack on it (no need of PPP or
+any specific protocol stack).
+<p>
+A radio device is composed of two main parts. The first is the
+<B>radio modem</B>. This is the part transmitting (modulating) the
+data onto the frequency and receiving other transmissions. It is
+composed of <I>antenna(s)</I>, <I>amplificators</I>, <I>frequency
+synthesisers</I>, <I>filters</I> and other bits of magic. These are
+mainly analog parts, and a bit of digital.
+<p>
+The modem main characteristics are the <I> frequency band</I> , the
+<I>signalling rate</I> , the <I>modulation</I> and the <I>transmitted
+power</I> . People building modems are also talking a lot of SNR and
+dB...
+<p>
+The second part of the radio device is the <B>MAC controller</B>,
+responsible to run the MAC protocol. This is implemented mainly in an
+ASIC or a microcontroler on the card, but some functionalities of the
+MAC may be as well in the driver on the PC. The card also includes
+some memory for the MAC controller to store incoming and outgoing
+packets (buffers) and other data (configuration, statistics).
+<p>
+The main characteristics of the MAC are the <I>packet format</I>
+(size, headers), the <I>channel access mechanisms</I> and the
+<I>network management</I> features. The amount of on-board memory is
+also important, because the MAC may need a significant number of
+buffers to compensate the PC and interface latencies.
+<p>
+The card <B>interface</B> to the PC through one of its buses (<I>ISA,
+PCI, Pcmcia</I>...) or communication ports (<I>serial, parallel,
+USB</I> or <I>Ethernet</I>). This interface allows the software to
+communicate with the MAC controller and most of the time directly to
+the on board memory (the software writes packets to a specific
+location of it, then the controller reads them and sends them).
+<p>
+The main characteristic of the interface is mainly the speed (i/o,
+shared memory or DMA). The flexibility and functionality of it are
+usually more a concern for the person writing the driver&nbsp;:-)
+<p>
+With all modern operating systems, the end application doesn't access
+directly the hardware but use a standard API. The operating system
+needs a <B>driver</B> to interface the hardware to the network stack
+(<I>TCP/IP, NetBeui, IPX</I>...). The main function of the driver is
+to manage the hardware and to answer its request (to service
+interrupts). In most of the Wireless LANs, the driver also implements
+some parts of the MAC protocol.
+<p>
+The main characteristic of the driver is the bugs&nbsp;:-(
+<p>
+There is also some other technologies (sometimes calling themselves
+incorrectly wireless networks) like wireless bridges and cable
+replacement, but they are very different from networking. They are
+very limited in features (no broadcasting) and only allow a set of
+point to point links (so, no native TCP/IP). Those are based mostly on
+the same techniques, but with a much more crude MAC protocol (no
+multiple access) and interface to the serial link (cable replacement)
+or ethernet port (wireless bridges). We restrict ourselves to true
+wireless LANs, because what doesn't run natively TCP/IP is not
+&quot;fun&quot;&nbsp;:-)
+
+<H2>4 Physical layer</H2>
+This section of the document deals with all the issues related to the
+physical layer (bottom of the pile, OSI wise&nbsp;:-), or in our case
+the radio modem.
+
+<H3>4.1 ISM frequency bands (900&nbsp;MHz &amp; 2.4&nbsp;GHz)</H3>
+In every country, the use of the radio spectrum is <B>regulated</B> by
+some organisations. This is the <I>FCC</I> for North America and the
+<I>ETSI</I> for Europe. These regulators define the allocation of each
+radio frequency bandwidth&nbsp;: for TV and radio broadcasting, for
+the telecommunication operators, for the army... Usually, to use a
+bandwidth, you must negotiate with these bodies, register your
+architecture and buy the right to use the frequency.
+<p>
+These organisations, aware of the prospects of local radio
+communications for individual users, have allocated some specific
+frequency bands to be used in a more flexible way. The oldest and most
+commonly used ones are located at 900&nbsp;MHz and 2.4&nbsp;GHz and
+called the <B>ISM bands</B> (<I>Industrial, Scientific</I> and
+<I>Medical</I>). The main characteristic of these bands is that they
+are <B>unlicensed</B>, this means that the user is free to use them
+without having to register or to pay anything (apart from the radio
+hardware).
+<p>
+
+Of course, to avoid abuses, these organisations have imposed a set of
+rules for these bandwidths and only the products conforming to those
+rules are allowed to emit in them. These rules specify at least the
+maximum power transmitted in the band and the out of band emissions
+(to not pollute adjacent bands). The ISM bands rules specify as well
+that <B>Spread Spectrum</B> has to be used (either <I>Direct
+Sequence</I> or <I>Frequency Hopping</I>, see <A
+HREF="#spreadspectrum"><I>Chapter 4.3</I></A>), and how the channels
+are defined, to allow the peaceful cohabitation of different systems
+(that's the theory).
+<p>
+These rules may vary depending on the country&nbsp;: the FCC allocates
+both the 900&nbsp;MHz and 2.4&nbsp;GHz band with 1&nbsp;W maximum
+power, whereas the ETSI allocates only the 2.4&nbsp;GHz band with
+100&nbsp;mW maximum power. The 2.4&nbsp;GHz band is available
+worldwide and the regulations are mostly compatible between the
+different authorities (usually 80&nbsp;MHz of bandwidth between
+2.4&nbsp;GHz and 2.48&nbsp;GHz). The main exception is Japan which has
+some additional constraints.
+<p>
+Because these bands are &quot;free&quot;, they may be heavily
+<B>polluted</B> by other unlicensed systems. The 2.4&nbsp;GHz band
+also suffers from the microwave oven radiation (this explains why it
+was given for free).
+
+<H3>4.2	5 GHz frequency bands</H3>
+The <B>5&nbsp;GHz unlicensed bands</B> are another very complicated
+story, and I prefer to wait until the mess is sorted out to talk in
+details about it. In Europe, so far, the 5.2&nbsp;GHz band is
+dedicated to <I>HiperLan</I>, and nothing else (apart for HiperLan II,
+but it is still in the early stages of specification). In the States,
+there is some chunks in the 5&nbsp;GHz band (<I>UNII band</I>)
+available with very liberal rules (Spread Spectrum is not mandated, no
+channels allocated, different power maximums depending on the chunk).
+<p>
+In the 5&nbsp;GHz band, because of the availability of more bandwidth,
+higher speed are possible (10 to 40&nbsp;Mb/s - note that it is also
+theoretically possible to get such speeds in the 2.4&nbsp;GHz band by
+cheating a bit with the rules). But, a higher band means also a
+reduced range and more sensitivity to obstacles, which is bad news.
+
+<A NAME="spreadspectrum">
+<H3>4.3 Spread Spectrum techniques</H3>
+</A>
+<B>Spread spectrum</B> is a technique (mainly pioneered by the army)
+trading bandwidth for reliability. The goal is to use more bandwidth
+than the system really needs for transmission to reduce the impact of
+localised interferences (bad frequencies) on the system. Spread
+spectrum, as it prevents one system to use the full bandwidth
+capacity, allows systems to share the bandwidth. In the 2.4&nbsp;GHz
+band, the regulation specifies that systems have to use one of the two
+main spread spectrum technique&nbsp;: <I>Direct Sequence</I> or
+<I>Frequency Hopping</I>.
+<p>
+Which one is better&nbsp;? This is the main technical war between the
+radio LAN vendors. Everybody, of course, argue that its own technology
+is better. For now, no one has come with some decisive arguments about
+the comparative performance and robustness of these two technologies
+(estimating performance of radio systems is a tricky job). Of course,
+comparing products doesn't make sense because the performance of a
+system depend on many other components (the MAC protocol, the
+signalling rate), the optimisation chosen (performance versus
+reliability) and the actual implementation (hum, hum...).
+
+<H4>4.3.1 Direct Sequence</H4>
+The principle of <B>Direct Sequence</B> is to <I>spread</I> the signal
+on a larger band, to minimise localised interference and background
+noise.
+<p>
+The system works over a fixed large channel. To spread the signal,
+each bit of the packet to transmit is sur-modulated by a <I>code</I>
+(a fast repetitive pattern). In the receiver, the original signal is
+recovered by receiving the whole spread channel (averaging effect) and
+demodulating by the same code. For a 2&nbsp;Mb/s signalling rate
+modulated by a 11 chips code (like the Wavelan), the result is a
+signal spread over 22&nbsp;MHz of bandwidth.
+<p>
+Any narrowband interferer, because it uses only a small part of the
+spread bandwidth, will appear much weaker to the Direct Sequence
+system (I think it will be much clearer if you look at the picture
+below).
+<p>
+This is also the principle used by <I>CDMA</I> (one of the cellular
+phone technique), but in CDMA each individual phone is given a
+different code on the same channel. Because of this fast modulation, a
+DS modem is quite complicated. One the other hand, the fact of having
+one single fixed channel eases the task of the higher layers (MAC).
+<p>
+
+<CENTER><I>Direct Sequence&nbsp;:</I>
+<TABLE BORDER=2 CELLPADDING=5>
+<TR>
+<TD><CENTER><I>Original signal</I></CENTER>
+<TD><CENTER><I>Spread signal</I></CENTER>
+<TD><CENTER><I>Decoded signal</I></CENTER>
+</TR><TR>
+<TD><CENTER><IMG SRC="DS.orig.gif"></CENTER>
+<TD><CENTER><IMG SRC="DS.spread.gif"></CENTER>
+<TD><CENTER><IMG SRC="DS.orig.gif"></CENTER>
+</TR><TR>
+<TD><CENTER><IMG SRC="DS.transmit.gif"></CENTER>
+<TD><CENTER><IMG SRC="DS.receive.gif"></CENTER>
+<TD><CENTER><IMG SRC="DS.decode.gif"></CENTER>
+</TR>
+</TABLE>
+</CENTER>
+
+<p>
+Because it uses a large channel, a Direct Sequence system has only a
+few channels available in the bandwidth (3 for the <I>Wavelan</I> - on
+different frequencies). Those channels are totally separate (they
+don't generate interferences on each other). Direct Sequence also
+offers the possibility to use partially overlapping channels for
+systems in adjacent areas, increasing slightly the number of
+channels. But this last solution tends to increase the noise and
+decrease the performance of the system.
+
+<H4>4.3.2 Frequency Hopping</H4>
+<B>Frequency Hopping</B> uses a set of narrow channels and walk
+through all of them in sequence. For example, the 2.4&nbsp;GHz ISM
+band is divided in 79 channels of 1&nbsp;MHz. Periodically (every 20
+to 400&nbsp;ms usually), the system <I>hop</I> to a new channel,
+following a predetermined cyclic <I>hopping pattern</I>.
+<p>
+
+The system avoids interferences by never staying on the same
+channel&nbsp;: if a channel is bad, the system might not be able to
+use it and just waits for the next good channel. As the pattern makes
+the whole network hop through all the bandwidth available, the system
+average the effect of bad channels over the time.
+<p>
+
+<CENTER><I>Frequency Hopping&nbsp;:</I>
+<p>
+<IMG SRC="FH.gif"></CENTER>
+
+<p>
+On the other hand, Frequency Hopping introduces more complications at
+the MAC level&nbsp;: scanning to find the network at the
+initialisation (a moving target), keeping the synchronisation of the
+nodes, managing the hops.
+<p>
+This complexity of the MAC has a price in term of performance, and the
+Frequency Hopping mechanism has some overhead. There is management
+overhead to manage the synchronisation, and there is some dead time in
+the transmission when the system hop. In theory, this can be kept to a
+minimum.
+<p>
+Also, the Frequency Hopping system have to include a process called
+whitening, to conform to radio transmission constraints, adding some
+regular stuff bits in each packets, adding more overhead (a Direct
+Sequence signal is withened by the Direct Sequence process).
+<p>
+The Frequency Hopping technique can accommodate much more independent
+systems collocated in the same area than the Direct Sequence technique
+by using different hopping pattern (up to 15 for the
+<I>RangeLan2</I>). On the other hand, the different hopping patterns
+of Frequency Hopping will &quot;collide&quot; on the same (or
+adjacent) frequency from time to time. The collision of the Frequency
+Hopping pattern may reduce the throughput significantly&nbsp;: the
+systems &quot;colliding&quot; on the same (or an adjacent) frequency
+will have to share the bandwidth between them (see discussions on
+aggregate throughput in <A HREF="#aggregate"><I>chapter
+5.9.4</I></A>).
+
+<H4>4.3.3 Comparison...</H4>
+In term of complexity, the Direct Sequence modem is more complicated
+than the Frequency Hopping one, and the Direct Sequence has a simpler
+MAC protocol. With the increasing integration of digital hardware, it
+doesn't cost much more to implement the specific MAC functionalities
+required for the Frequency Hopping system, and as the price of the
+modem is a big portion of a radio LAN and doesn't follow the same cost
+reduction trends, Frequency Hopping systems will tend to be cheaper.
+<p>
+In term of bandwidth sharing, the two technologies perform really
+differently. The same is true in term of resistance to
+interferences. Direct Sequence systems tend also to have a lower
+overhead on the air.
+<p>
+In summary, most vendors are going to Frequency Hopping because of the
+lower cost and try to convince people that it is better, and vendors
+having heavily invested in Direct Sequence try to push their raw
+performance advantage, so it is still a kind of religion war.
+
+<A NAME="multirate">
+<H3>4.4 Multi-rate systems</H3>
+</A>
+If you want a better throughput, the most simple way is to use more
+bandwidth. The problem is that the ISM spread spectrum regulations
+limits the amount of bandwidth usable (1&nbsp;MHz for Frequency
+Hopping). This limit the rate of symbols that you can use
+(1&nbsp;Mbauds for Frequency Hopping).
+<p>
+So, how could some Frequency Hopping systems offer 3&nbsp;Mb/s in
+1&nbsp;MHz channels&nbsp;? The use of more complex <B>modulation</B>
+schemes allows to overcome this limitation. For example, the standard
+2FSK allows to put 1 bit per symbol, whereas 4FSK allows 2 bits per
+symbols, doubling the signalling rate.
+<p>
+Of course, there is a drawback&nbsp;: a more complex modulation scheme
+is less robust and will require a higher received signal to noise
+ratio to work (SNR - see <A HREF="#snr"><I>chapter
+4.7.4</I></A>). This is because each time the receiver reads a symbol,
+instead of having to distinguish two fairly separated values, now it
+has to distinguish 4 closer to each other. So, we have the choice
+between a high speed modulation which requires strong received signal
+and a slower modulation which works even on weak signals. In other
+words, the higher the signalling rate, the shorter the range.
+<p>
+Because users want both range and speed, some vendors have build some
+systems using multiple levels of modulations, changing automatically
+from the fast modulation to the robust one depending on the channel
+conditions. This introduces a bit of overhead and complexity, but the
+system offer a much better performance characteristic (range or
+speed).
+
+<H3>4.5 Diversity</H3>
+<B>Diversity</B> is a generic concept of introducing redundancy in the
+system to overcome noise and to increase the reliability of the
+system. For example, <I>spread spectrum</I> is a type of frequency
+diversity, using more bandwidth than necessary to avoid bad parts of
+the spectrum. <I>Retransmission</I> is a very usual temporal
+diversity. <I>FEC</I> (Forward Error Correction) is another kind of
+temporal diversity. Very often, &quot;diversity&quot; is associated
+with <I>antenna diversity</I> only. Antenna diversity is only one form
+of diversity (a spacial diversity).
+<p>
+<B>Antenna diversity</B> means that the radio device has two (or more)
+antennas. The transmission conditions on the channel vary a lot over
+the time. The channel tends to fade in and fade out, so the device has
+moment of good reception and moment of bad reception. But, these
+conditions are also dependant on the spacial position. By having two
+antennas, even quite close, the condition at each antenna is very
+often totally different. So, before receiving each packet, the
+receiver chooses the best antenna of the two by comparing the signal
+strengths, and so avoids most of the fade out periods.
+
+<H3>4.6 Directional antennas</H3>
+Most wireless LANs use omnidirectional antennas, but may offer
+<B>directional antennas</B> in option. Instead of receiving in every
+directions, the directional antenna favour reception in a more or less
+narrow angle. The narrower the angle is, the higher the gain is (and
+the range), because you get rid of more unwanted emissions and
+background noise in the other directions.
+<p>
+With directional antennas, it is quite common to have a few kilometres
+of range in line of sight with products in the ISM band. The first
+problem is that you must of course point each antenna towards the node
+you intend to communicate with (depending on the angle this needs to
+be more or less precise). The second problem is that very directional
+antennas tend to be quite big.
+<p>
+This is why directional antennas are only suited for fixed point to
+point links (products like <B>Wireless Bridges</B>). For most networks
+where nodes need to talk to different other nodes in different
+directions and might need to move, omnidirectional antennas are much
+more practical.
+
+<A NAME="range">
+<H3>4.7 Range issues</H3>
+</A>
+The <B>propagation</B> of radio transmissions is influenced by many
+factors. Walls and floors tend to decrease and reflect the signal, and
+background noise makes it more difficult to demodulate. In a typical
+environment, all the shadows due to obstacles and reflections on the
+walls create a very unpredictable quality of transmission for each
+specific location. The channel quality also vary quite a lot over the
+time (<I>fading</I>) because the environment is not static.
+<p>
+Because of the way radio transmissions are affected by the environment
+in such a complex way, it is quite difficult to predict the
+comportment of the system and to define a <B>range</B>. You will have
+some good, fair and bad area/period, the closer the two devices are
+the more likely they are to be in a good one.
+<p>
+Most vendors attempt to define a range for their products, which is
+the average maximum distance in usual operating conditions between two
+nodes (diameter of a <B>cell</B> - radio neighbourhood). Some even
+give different ranges for different typical environments. For
+example&nbsp;: open environment (no obstacles), semi-open (cubicles)
+and closed (real walls).
+<p>
+But there is no standard and common operating procedure to measure a
+range (except in free space, but this is useless), so we can't really
+compare the different products from the ranges as indicated in their
+data-sheets, and you must take these values with a bit of caution.
+<p>
+If you want to compare products in term of range performance, you must
+look closely at the <I>transmitted power</I> and <I>sensitivity</I>
+values. These are some measurable characteristics of the hardware
+which indicate the performance of the product in that respect.
+
+<H4>4.7.1 Transmitted power</H4>
+The <B>transmitted power</B> is the strength of the emissions measured
+in Watts (or milliWatts). We have already seen that the regulations
+limit this power. Products having a high transmit power will also be
+likely to drain the batteries faster. But, having a high transmit
+power will help to emit signals stronger than the interferers in the
+band (and other systems).
+<p>
+Having a strong transmitted power has some drawback for <I>frequency
+reuse</I>. This means that if you want to put many different networks
+in areas close to each other, they will tend to pollute each
+other. With less transmitted power you can make smaller cells. This is
+why some product may allow to select different transmitted powers.
+
+<H4>4.7.2 Sensitivity</H4>
+The <B>sensitivity</B> is the measure of the weakest signal that may
+be reliably heard on the channel by the receiver (it is able to read
+the bits from the antenna with a low error probability). This
+indicates the performance of the receiver, and the lower the value the
+better the hardware (higher in absolute value). The figure is given in
+dBm, the magic formula to transform power in Watts to dBm is&nbsp;:
+<I>P dBm = 30 + 10.log(P W)</I>. Usual values are around -80&nbsp;dBm.
+
+<H4>4.7.3 Attenuation</H4>
+Knowing those two values, you may calculate the maximum possible
+<B>attenuation</B> of the packets (this is the difference between the
+two values, in dB). The larger the maximum possible attenuation, the
+larger the range. For a 100&nbsp;mW system with a -80&nbsp;dBm
+sensitivity, we have 100&nbsp;dB maximum attenuation.
+<p>
+The attenuation is the decrease of signal strength between the
+transmitter and the receiver. If you know exactly the composition of
+the signal paths between the two (distance in the air, type of
+obstacles, reflections...), you may calculate the attenuation, but
+usually it is quite tricky to determine the attenuation as a function
+of the distance.
+<p>
+Because of this non straightforward relationship, knowing the maximum
+possible attenuation won't give you the maximum range, but just a
+feeling. The only safe thing is that products with a greater maximum
+possible attenuation are very likely to have a larger range.
+
+<A NAME="snr">
+<H4>4.7.4 Signal to noise ratio (SNR)</H4>
+</A>
+In the case of multirate systems, I've been talking of <B>Signal to
+Noise ratio</B> (SNR). The sensitivity is in fact closely linked to
+the minimum SNR of the modem. The SNR defines the difference of power
+in the receiver between a valid signal and a noise. To be able to
+decode successfully the received signal, the receiver needs a minimum
+SNR (i.e. the signal not too much polluted by the noise). This minimum
+SNR depends on the quality of the receiver hardware and the modulation
+chosen (see <A HREF="#multirate"><I>chapter 4.4</I></A> on multi rate
+systems).
+<p>
+So, the link between sensitivity and minimum SNR is quite obvious. If
+you add the minimum SNR to the background noise in the receiver
+(hardware noise and background noise on the channel), you will find
+the sensitivity. So, having a low sensitivity means also a low minimum
+SNR, so the ability to receive reliably packets with potentially
+higher interference strength, which explain why the sensitivity is
+such an important performance characteristic.
+<p>
+
+<CENTER><I>Propagation and Range&nbsp;:</I>
+<p>
+<IMG SRC="Attenuation.gif"></CENTER>
+
+<H2>5 The MAC level</H2>
+This section of the document focus on the next layer up, the link
+layer. This mostly comprise the <B>MAC</B> (Medium Access Control)
+protocol. Different MAC protocols and techniques are presented.
+
+<A NAME="tdma">
+<H3>5.1 TDMA</H3>
+</A>
+In this chapter, we discuss <B>TDMA</B> (Time Division Multiplex
+Access) as a channel access mechanism and not its applications and
+protocols based on it. A <I>channel access mechanism</I> is a way to
+divide the main resource, the radio channel, by regulating the use of
+it. The channel access mechanism is the core of the <I>MAC
+protocol</I>.
+<p>
+TDMA is very simple. A specific node, the base station, has the
+responsibility to coordinate the nodes of the network. The time on the
+channel is divided into <I>time slots</I>, which are generally of
+fixed size. Each node of the network is allocated a certain number of
+slots where it can transmit. Slots are usually organised in a frame,
+which is repeated on a regular basis.
+<p>
+
+<CENTER><I>TDMA channel access mechanism&nbsp;:</I>
+<p>
+<IMG SRC="TDMA.gif"></CENTER>
+
+<p>
+The base station specify in the beacon (a management frame) the
+organisation of the frame. Each node just needs to follow blindly the
+instruction of the base station. Very often, the frame is organised as
+downlink (base station to node) and uplink (node to base station)
+slots, and all the communications goes through the base station. A
+service slot allows a node to request the allocation of a slot, by
+sending a connection request message in it.
+<p>
+TDMA suits very well phone applications, because those application
+have very predictable needs (fixed and identical bit rate). Each
+handset is allocated a downlink and a uplink slot of a fixed size (the
+size of the voice data for the duration of the frame). This is no
+surprise why TDMA is used into all cellular phone (GSM in Europe, TDMA
+and CDMA in the USA) and cordless phone (DECT in Europe)
+standards. TDMA is also very good to achieve low latency and guarantee
+of bandwidth (where CSMA/CA is quite bad).
+<p>
+TDMA is not well suited for data networking applications, because it
+is very strict and inflexible. IP is connectionless and generates
+bursty traffic which is very unpredictable by nature, while TDMA is
+connection oriented (so it has to suffer the overhead of creating
+connections for single IP packets). TDMA use fixed size packets and
+usually symmetrical link, which doesn't suit IP that well.
+<p>
+TDMA is very much dependant of the quality of the frequency band. In a
+dedicated clean band, as it is the case for cellular phone standard,
+TDMA is fine. But, because of it's inflexibility, and because it
+doesn't really take care of what's happening on the channel, TDMA
+can't cope and adapt to the bursty interference sources found in the
+unlicensed bands.
+
+<A NAME="csma">
+<H3>5.2 CSMA/CA</H3>
+</A>
+<B>CSMA/CA</B> (Carrier Sense Multiple Access/Collision Avoidance) is
+the <I>channel access</I> mechanism used by most wireless LANs in the
+ISM bands. A channel access mechanism is the part of the
+<I>protocol</I> which specifies how the node uses the medium&nbsp;:
+when to listen, when to transmit...
+<p>
+The basic principles of CSMA/CA are <I>listen before talk</I> and
+<I>contention</I>. This is an <I>asynchronous</I> message passing
+mechanism (connectionless), delivering a best effort service, but no
+bandwidth and latency guarantee (you are still following&nbsp;?). It's
+main advantages are that it is suited for network protocols such as
+TCP/IP, adapts quite well with the variable condition of traffic and
+is quite robust against interferences.
+<p>
+CSMA/CA is fundamentally different from the channel access mechanism
+used by cellular phone systems (see <I>TDMA</I> in <A
+HREF="#tdma"><I>chapter 5.1</I></A>).
+<p>
+CSMA/CA is derived from CSMA/CD (Collision Detection), which is the
+base of <I>Ethernet</I>. The main difference is the <I>carrier
+sense</I>&nbsp;: on a wire, the transceiver has the ability to listen
+while transmitting and so to detect collisions. But, if with a wire
+all transmissions have approximately the same strength, even if a
+radio node could listen on the channel while transmitting, the
+strength of its transmissions would mask all other signals on the
+air. So, the protocol can't directly detect collisions like with
+<I>Ethernet</I> and only tries to avoid them.
+<p>
+The protocol starts by listening on the channel (this is called
+carrier sense), and if it is found to be idle, it sends the first
+packet in the transmit queue. If it is busy (either another node
+transmission or interference), the node waits the end of the current
+transmission and then starts the <B>contention</B> (wait a random
+amount of time). When its contention timer expires, if the channel is
+still idle, the node sends the packet. The node having chosen the
+shortest contention delay wins and transmits its packet. Because the
+contention is a random number and done for every packets, each node is
+given an equal chance to access the channel (on average - it is
+statistic).
+<p>
+As we have mentioned, we can't detect collisions on the radio, and
+because the radio needs time to switch from receive to transmit, this
+contention is usually <B>slotted</B> (a transmission may start only at
+the beginning of a slot&nbsp;: 50&nbsp;ms in 802.11). This makes the
+average contention delay larger, but reduces greatly the collisions
+(we can't totally avoid them).
+<p>
+
+<CENTER><I>CSMA/CA channel Access Mechanisms&nbsp;:</I>
+<p>
+<IMG SRC="Contention.gif"></CENTER>
+
+<A NAME="retry">
+<H3>5.3 MAC retransmissions</H3>
+</A>
+As we have seen in the previous chapter, the main problem of the
+<I>CSMA/CA protocol</I> is that it can't detect collisions in the
+transmitter. There is also a higher error rate on the air than on a
+wire, so a higher chance of packets being corrupted. TCP doesn't like
+very much packet losses at the <I>MAC layer</I> (see TCP and packet
+losses problem - <A HREF="#tcp"><I>chapter 5.9.3</I></A>). Because of
+that, most MAC protocols also implement <B>positive
+acknowledgement</B> and <B>MAC level retransmissions</B> to avoid
+losing packets on the air.
+<p>
+The principle is quite simple&nbsp;: each time a node receives a
+packet, it sends back immediately a short message (an ack) to the
+transmitter to indicate that it has successfully received the packet
+without errors. If after sending a packet the transmitter doesn't
+receive an ack, it knows that the packet was lost, so it will
+retransmit the packet (after contending again for the medium).
+<p>
+The acks are &quot;embedded&quot; in the MAC protocol, so they are
+guaranteed not to collide (the contention starts after the ack). These
+acks are very different from the TCP acks, which work at a different
+level (and on a different time frame). Of course, broadcast and
+multicast packets are not acknowledged, so they are more likely to
+fail...
+<p>
+If all modern Wireless LAN protocols implement this essential feature,
+some old products may lack it. Wireless WAN protocols don't implement
+that either, because the round trip delay in their case is so long
+that by the time they would receive the ack they could have sent
+another packet. If your Wireless LAN doesn't implement MAC level
+retransmissions, all is not lost&nbsp;: students of Berkeley have
+created a protocol called <I>snoop</I> (see at <A
+HREF="ftp://daedalus.cs.berkeley.edu/pub/snoop/">
+ftp://daedalus.cs.berkeley.edu/pub/snoop/</A>) which filters the TCP
+acks and retransmits the lost packets before TCP even notices that
+they are lost (this is still a link level retransmission, but done
+just over the MAC).
+
+<A NAME="frags">
+<H3>5.4 Fragmentation</H3>
+</A>
+The radio medium has a higher <I>error rate</I> than a wire. We have
+explained in the previous chapter that it was why most products were
+including MAC level retransmissions to avoid losing packets.
+<p>
+MAC level retransmissions solve this problem, but is not really
+performant. If the packet to transmit is long and contains only one
+error, the node needs to retransmit it entirely. If the error rate is
+significantly high, we could come to some situation were the
+probability of error in large packet is dangerously close to 1, so we
+can't get packet through.
+<p>
+This is why some products use <B>fragmentation</B>. Fragmentation is
+sending the big packets in small pieces over the medium. Of course,
+this adds some overhead, because it duplicates packet headers in every
+fragments. Each fragment is individually checked and retransmitted if
+necessary. The first advantage is that in case of error, the node
+needs only to retransmit one small fragment, so it is faster. The
+second advantage is that if the medium is very noisy, a small packet
+has a higher probability to get through without errors, so the node
+increases its chance of success in bad conditions.
+
+<H3>5.5 RTS/CTS</H3>
+In the chapter about range (<A HREF="#range"><I>chater 4.7</I></A>),
+we have seen that the main effect of transmission on radio waves is
+the attenuation of the signal. Because of this attenuation, we have
+very commonly a problem of <I>hidden nodes</I>.
+<p>
+The hidden node problem comes from the fact that all nodes may not
+hear each other because the attenuation is too strong between
+them. Because transmissions are based on the carrier sense mechanism,
+those nodes ignore each other and may transmit at the same time (they
+are effectively in different cells). Usually, this is a good thing
+because it allows <I>frequency reuse</I>.
+<p>
+But, for a node placed in between, these simultaneous transmissions
+have a comparable strength and so collide (in its receiver). This node
+could be impossible to reach because of these collisions.
+<p>
+The fundamental problem with carrier sense only is that the
+transmitter tries to estimate if the channel is free at the receiver
+with only local information. The situation might be quite different
+between those two nodes.
+<p>
+An simple and elegant solution to this problem (proposed by <A
+HREF="http://people.qualcomm.com/karn/">Phil Karn</A> in his MACA
+protocol for AX.25) is to use <B>RTS/CTS</B> (Request To Send/Clear To
+Send). RTS/CTS is a <I>handshaking</I>&nbsp;: before sending a packet,
+the transmitter sends a RTS and wait for a CTS from the receiver. The
+reception of a CTS indicates that the receiver is able to receive the
+RTS, so the packet (the channel is clear in its area).
+<p>
+At the same time, every node in the range of the receiver hears the
+CTS (even if it doesn't hear the RTS), so understands that a
+transmission is going on. The nodes hearing the CTS are the nodes that
+could potentially create collisions in the receiver (assuming a
+symmetric channel). Because these nodes may not hear the data
+transmission, the RTS and CTS messages contain the size of the
+expected transmission (to know how long the transmission will
+last). This is the <I>collision avoidance</I> feature of the RTS/CTS
+mechanism (also called <I>virtual carrier sense</I>)&nbsp;: all nodes
+avoid accessing the channel after hearing the CTS even if their
+carrier sense indicate that the medium is free.
+<p>
+RTS/CTS has another advantage&nbsp;: it lowers the overhead of a
+collision on the medium (collisions are much shorter in time). If two
+nodes attempt to transmit in the same slot of the contention window,
+their RTS collide and they don't receive any CTS, so they loose only a
+RTS, whereas in the normal scenario they would have lost a whole
+packet.
+<p>
+Because the RTS/CTS handshaking adds a significant overhead, usually
+it is not used for small packets.
+
+<H3>5.6 Polling MAC</H3>
+<B>Polling</B> is the third major channel access mechanism, after
+<I>TDMA</I> and <I>CSMA/CA </I>(see <A HREF="#tdma"><I>chapter
+5.1</I></A> and <A HREF="#csma"><I>chapter 5.2</I></A> respectively -
+There exist also Token Ring, but I guess that nobody would be crazy
+enough to implement it on a radio link). The most successful
+networking standard using polling is 100vg (IEEE 802.12), but some
+wireless standard are also using it. For example, <I>802.11</I> offers
+a polling channel access mechanism (Point Coordination Function) in
+addition to the CSMA/CA one.
+<p>
+Polling is in fact in between TDMA and CSMA/CA. The base station
+retains total control over the channel, but the frame content is no
+more fixed, allowing variable size packets to be sent. The base
+station sends a specific packet (a poll packet) to trigger the
+transmission by the node. The node just wait to receive a poll packet,
+and upon reception sends what it has to transmit.
+<p>
+
+<CENTER><I>Polling channel Access Mechanisms&nbsp;:</I>
+<p>
+<IMG SRC="Polling.gif"></CENTER>
+
+<p>
+Polling can be implemented as a connection oriented service (very much
+like TDMA, but with higher flexibility in packet size) or connection
+less service (in this case, there is the overhead of polling nodes
+just to check if they have something to transmit).
+<p>
+In the case of 100vg, the polling mechanism doesn't use any bandwidth,
+leading to a very efficient use of the channel (over 96&nbsp;% user
+throughput). For 802.11 and wireless LAN, all the polling packets have
+to be transmitted over the air, generating much more overhead.
+<p>
+As CSMA/CA offers ad-hoc networking (no need of a base station) and
+similar performance, it is usually preferred in most wireless
+LANs. For example, most 802.11 vendors prefer to use the distributed
+mode (CSMA/CA) over the coordinated mode (polling).
+
+<A NAME="ap">
+<H3>5.7 Access Points and Roaming</H3>
+</A>
+Wireless networks are sometime isolated networks (called ad-hoc), but
+most of the time they need to be connected to the rest of the world
+(and the Internet&nbsp;:-). This is usually done through <B>Access
+Points</B>.
+<p>
+In fact, an Access Point is simply a <B>bridge</B>, connected on one
+side to the radio network and on the other side to <I>Ethernet</I>
+(usually), forwarding packets between the two networks. A bridge works
+at the MAC level, just looking through the MAC headers to make its
+decisions (filtering) and changing MAC headers according to the MAC
+protocol used. This means that <I>NetBeui</I> and <I>IPX</I> work
+across the access point, and that the nodes connected to the radio
+must use the same <I>TCP/IP subnet</I> as the Ethernet segment the
+access point is connected to.
+<p>
+Because of the interactions with MAC level acknowledgement, most of
+the time bridging on Wireless LAN is not as simple and transparent as
+on Ethernet, and a specific scheme is designed in the MAC
+protocol. But, most of the time this is transparent to the higher
+layers (if the MAC and the driver do correctly their job), and you
+might just configure a Linux box with a bridge software as a cheap
+access point...
+<p>
+In fact, most radio access points provide more than this simple
+bridging functionality. Most of them provide <I>access control</I> (to
+prevent any unwanted radio node to access the network), <I>roaming</I>
+and <I>out of range forwarding</I>.
+<p>
+The use of the last two features requires that all the access points
+that are used to cover the desired area are connected on the same
+wired segment (IP subnet). Each node needs to register to one of the
+access point (to avoid confusion between the AP), the nearest one,
+usually. If the node moves, it will automatically switch from one
+access point to another to retain its access to the wired network
+(that is <B>roaming</B>). If a node wants to communicate with a node
+which is not in its reach, its access point forwards the packets
+through the wired network and via the access point where the
+destination is registered (that is <B>out of range forwarding</B>).
+<p>
+A few systems use as well the access point as a network central
+coordinator of the channel access mechanism (TDMA and polling
+mode). This is a bad idea, because it decreases the overall
+reliability and flexibility of the system&nbsp;: every node must be
+able to communicate at any time the access point in order to work,
+even if it wants to communicate with a close neighbour.
+
+<H3>5.8 MAC forwarding</H3>
+The forwarding mechanism designed around <I>Access Points</I> (see <A
+HREF="#ap"><I>chapter 5.7</I></A>) requires a fixed wired
+infrastructure to link the Access Point. This might be satisfactory
+for most usages, but is not adequate for ad-hoc networks.
+<p>
+Some MAC protocol (such as HiperLan - see <A
+HREF="#hiperlan"><I>chapter 6.2</I></A>) provide a MAC level
+forwarding, where every node of the network can be used to relay the
+message on the air to the destination. The protocol doesn't rely any
+more on a fixed infrastructure, but on all the wireless nodes on the
+path.
+<p>
+This forwarding mechanism use management message to propagate network
+changes and the new optimal routes. Nodes must implement the
+forwarding capability and propagate message based on those routing
+tables. In fact, each node of the network acts as a ad-hoc wireless
+bridge.
+
+<H3>5.9 Some throughput considerations</H3>
+If the physical layer people are mostly talking range and dB, MAC
+layer people are (or should be) concerned about the throughput of the
+system.
+
+<H4>5.9.1 Signalling rate versus maximum user throughput</H4>
+Like for wired products, most radio LAN vendors indicate only the
+<B>signalling rate</B> of their products. For example, <I>Ethernet</I>
+is 10&nbsp;Mb/s, 100&nbsp;Mb/s or 1 Gb/s, and most radio LAN products
+between 0.5 and 3&nbsp;Mb/s (higher rate like 10&nbsp;Mb/s are slowly
+coming to the market). The signalling rate is the speed at which bits
+are transmitted over the medium, but, because of the many overheads of
+the protocols used to communicate, the user throughput is usually less
+(note also that for them 1&nbsp;Mb/s is
+10<SUP>6</SUP>&nbsp;b/s&nbsp;!). The Wireless LANs protocols have
+usually a <B>higher overhead</B> than their wired counterpart (such as
+Ethernet). This is due to different factors&nbsp;:
+<p>
+The first is the <I>radio technology</I>&nbsp;: radio receivers
+require large synchronisation fields (receiver training, antenna
+selection...)&nbsp;; the radio itself is slow to react (switch from
+receive to transmit), so needs large slots in the contention window
+and between packets.
+<p>
+The second is the addition of the <I>features</I> necessary for the
+radio protocol which makes the packet MAC headers larger (fields for
+network id, encryption parameters...) or introduces new management
+packets (synchronisation, authentication, access point
+registration). For multirate systems, even when using the fast
+modulation scheme, quite often the packet headers are transmitted with
+the robust and slower one, so adding more overhead.
+<p>
+The third is that some <I>trade-offs</I> are made to improve the
+reliability. For example, we might split big packets into small
+independent fragments to decrease the error probability (see <A
+HREF="#frags"><I>chapter 5.4</I></A> on fragmentation). Acks and
+RTS/CTS add also some overhead. Having a slotted contention decreases
+the collisions but makes the average contention delay larger as well.
+<p>
+When you add all this, it starts to make a significant difference. If
+in the case of Ethernet you may hope to reach 80-95&nbsp;% of the
+signalling rate, for most radio products, despite being slower, the
+user throughput is usually between 50 and 70&nbsp;% of the signalling
+rate (or even less...).
+
+<H4>5.9.2 Shared throughput versus individual throughput</H4>
+In the previous chapter, we have examined the overhead added by the
+protocol and talked about the maximum user throughput usable by the
+Wireless LAN. But, sometimes, even in a clear channel, the maximum
+<B>node to node throughput</B> may be even less than that. This is
+usually caused by implementation problems.
+<p>
+The most obvious is for example a slow interface between the PC and
+the Wireless device. A serial or parallel interface is slower than an
+ISA or Pcmcia bus and may be a bottleneck.
+<p>
+The second example is devices implementing only one transmit
+buffer. This saves some cost (memory, complexity), but, as the buffer
+may be either written by the driver or transmitted over the air but
+not both at the same time, this creates dead time over the air while
+the driver refills the buffer and reduces the available
+throughput. This was one of the performance gain between the first and
+the second generation of Ethernet cards in the old days.
+<p>
+The protocol might also performs better when many node are active than
+when only one of them transmits. For example, a polling protocol which
+uses a round robin scheduling mechanism and asks each node in turn if
+it has a packet to transmit performs better is every node has
+something to send than only one node (in this case, between each
+packet of this node the protocol has to pool all the other nodes of
+the network for nothing).
+
+<A NAME="tcp">
+<H4>5.9.3 TCP and packet losses problem</H4>
+</A>
+TCP has been developed for wired LAN, where packet losses are
+minimal. If a packet is lost, TCP assumes that it is dropped in a
+router or a bridge because of <B>congestion</B>. To try to reduce the
+congestion, TCP slows down drastically.
+<p>
+On the radio medium, collisions can't be detected and the error rate
+is higher, so there is more packet losses. TCP sees that as congestion
+and reduces its throughput, and so doesn't use all the available
+bandwidth.
+<p>
+In modern Wireless LAN, <B>MAC level retransmissions</B> (see <A
+HREF="#retry"><I>chapter 5.3</I></A>) solve totally this problem by
+detecting and eliminating packet losses due to errors and collisions,
+TCP sees a reliable channel and has no reason to slow down (except if
+MAC level retransmissions are poorly implemented).
+
+<A NAME="aggregate">
+<H4>5.9.4 Aggregate throughput</H4>
+</A>
+It's quite common practice for vendors to advertise for their products
+something called <B>aggregate throughput</B>. This figure indicates
+the maximum throughput that it is possible to transmit in the full
+bandwidth by having different adjacent and independent networks on
+different frequencies or hopping patterns.
+<p>
+Of course, the user of the Wireless LAN will never see such a
+throughput, and it is a bit like advocating that by having 10
+<I>Ethernet 10baseT</I> cables you are able to have a 100&nbsp;Mb/s
+throughput... But, it gives an indication of how well overlapping
+cells will share the bandwidth.
+<p>
+For example, with a Frequency Hopping system having 1.6&nbsp;Mb/s user
+throughput, by putting 15 networks, each on a different hopping
+pattern, we should have in theory a 24&nbsp;Mb/s aggregate
+throughput. In fact, because the different Frequency Hopping patterns
+&quot;collide&quot; on the same frequency (and also suffer from
+co-channel interference) from time to time, the actual aggregate
+throughput is less, and is in this example only 15&nbsp;Mb/s.
+<p>
+These collisions of the hopping patterns is why Frequency Hopping
+can't offer up to 79 networks on the 79 channels (but only up to 15 in
+this case)...
+
+<H2>6 Some Wireless LAN standards</H2>
+A short gallery of the most famous Wireless LAN standard (but
+unfortunately not yes the most widespread...).
+
+<H3>6.1 IEEE 802.11</H3>
+The main problem of radio networks acceptance in the market place is
+that there is not one <B>unique standard</B> like Ethernet with a
+guaranteed compatibility between all devices, but many proprietary
+standards pushed by each independent vendor and incompatible between
+themselves. Because corporate customers require an established unique
+standard, most of the vendors have joined the IEEE in a effort to
+create a standard for radio LANs. This is <B>IEEE 802.11</B> (like
+<I>Ethernet</I> is <I>IEEE 802.3</I>, <I>Token Ring</I> is <I>IEEE
+802.5</I> and <I>100vg</I> is <I>IEEE 802.12</I>).
+<p>
+Of course, once in the 802.11 committee, each vendor has pushed its
+own technologies and specificities in the standard to try to make the
+standard closer to its product. The result is a standard which took
+too much time too complete, which is overcomplicated and bloated with
+features, and might be obsoleted before products come to market by
+newer technologies. But it is a standard based on experience,
+versatile and well designed and including all of the optimisations and
+clever techniques developed by the different vendors.
+<p>
+The 802.11 standard specifies one MAC protocol and 3 physical
+layers&nbsp;: Frequency Hopping 1&nbsp;Mb/s (only), Direct Sequence 1
+and 2&nbsp;Mb/s and diffuse infrared (can we really call it a
+&quot;standard&quot; when in includes 3 incompatible physical
+layers&nbsp;?). The MAC has two main standards of operation, a
+distributed mode (CSMA/CA), and a coordinated mode (polling
+mode). 802.11 of course uses MAC level retransmissions, and also
+RTS/CTS and fragmentation.
+<p>
+The optional power management features are quite complex. The 802.11
+MAC protocol also includes optional authentication and encryption. On
+the other hand, 802.11 lacks to defines some area (multirate, roaming,
+inter AP communication...), that might be covered by future
+developments of the standard or complementary standards.
+<p>
+The fact that 802.11 has just recently been finalised (september 97)
+and is quite complicated causes most vendors to be slow to implement
+802.11 products (and they also need to provide backward compatibility
+with their own previous line of products). The complexity of the
+specification and the tightness of the requirements make 802.11
+products expensive compared to the previous generation of wireless
+LANs.
+<p>
+Even if vendors eventually launch 802.11 products, the standard
+doesn't fully guarantee inter-operability&nbsp;: the products have to
+use at least the same physical layer, the same bit rate and the same
+mode of operation (and there is other details...).
+<p>
+After 7 years of arguing in sub-committees making 802.11, you would
+think that most people would had enough of it. In fact no, the 802.11
+committee is now busy working creating a new standard at 5&nbsp;GHz,
+and also for higher speed at 2.4&nbsp;GHz (by tweaking the Direct
+Sequence physical layer - if they can get it accepted by the FCC).
+<p>
+In fact, I believe that the 5&nbsp;GHz version of 802.11 will be
+standardised soon, before the 5&nbsp;GHz products are common place, so
+802.11 might be much more successful at 5&nbsp;GHz than it has been at
+2.4&nbsp;GHz. At 5&nbsp;GHz, the higher cost of the modem will also
+absorb most of the 802.11 MAC cost.
+
+<A NAME="hiperlan">
+<H3>6.2 HiperLan</H3>
+</A>
+<B>Hiperlan</B> is the total opposite of <I>802.11</I>. This standard
+has been designed by a committee of researcher within the <B>ETSI</B>,
+without strong vendors influence, and is quite different from existing
+products. The standard is quite simple, uses some advanced features,
+and has already been ratified a while ago (summer 96 - we are now only
+waiting for the products).
+<p>
+The first main advantage of Hiperlan is that it works in a dedicated
+bandwidth (5.1 to 5.3&nbsp;GHz, allocated only in Europe), and so
+doesn't have to include spread spectrum. The signalling rate is
+23.5&nbsp;Mb/s, and 5 fixed channels are defined. The protocol uses a
+variant of CSMA/CA based on packet time to live and priority, and MAC
+level retransmissions. The protocol includes optional encryption and
+power saving.
+<p>
+The nicest feature of Hiperlan (apart from the high speed) is the
+ad-hoc routing&nbsp;: if your destination is out of reach,
+intermediate nodes will automatically forward it through the optimal
+route within the Hiperlan network (the routes are regularly
+automatically recalculated). Hiperlan is also totally ad-hoc,
+requiring no configuration and no central controller.
+<p>
+The main deficiency of Hiperlan standard is that it doesn't provide
+real isochronous services (but comes quite close with time to live and
+priority), doesn't fully specify the access point mechanism and hasn't
+really been proved to work on a large scale in the real
+world. Overhead tend also to be quite large (really big packet
+headers).
+<p>
+HiperLan suffers from the same disease as 802.11&nbsp;: the
+requirements are tight and the protocol complex, making it very
+expensive.
+
+<H3>6.3 HomeRF &amp; SWAP</H3>
+The <B>HomeRF</B> is a group of big companies from different
+background formed to push the usage of Wireless LAN in the home and
+the small office. This group is developing and promoting a new Radio
+Lan standard&nbsp;: <B>SWAP</B>.
+<p>
+The Home is a good market for Wireless LAN because very few houses are
+nowadays cabled with Ethernet wire between the different rooms, and
+because mobility in the home is desired (browse the web on the
+sofa). The use of the 2.4&nbsp;GHz band allows a free worldwide
+deployment of the system.
+<p>
+The HomeRF has decided to tackle the main obstacle preventing the
+deployment of Wireless LAN&nbsp;: the <B>cost</B>. Most users just
+can't afford to spend the money required to buy a couple of Radio LAN
+cards to connect their PCs (without talking of the access point).
+<p>
+The main cost of a radio LAN is the modem. As this is analog and high
+power electronics, it doesn't follows <I>Moore's law</I> (the market
+trend that allow you to buy a <I>Cray</I> at the price of a calculator
+after a few years) and modems tend to be fairly stable in
+price. <I>Frequency Hopping</I> modems tend to be less expensive, but
+the <I>802.11</I> specification impose tight constraints on the modem
+(timing and filtering), making it high cost. The <B>SWAP</B>
+specification, by releasing slightly those constraints, allows for a
+much cheaper implementation, but still keeps a good performance.
+<p>
+The MAC protocol is implemented in software and digital, so doesn't
+contribute that much to the final cost of the product (except in term
+of development cost). Releasing some hardware constraints prevented
+the use of the 802.11, which anyway was much too complex and including
+too many features not necessary for the task.
+<p>
+The main killer application that the HomeRF group envisages is the
+integration of digital cordless telephony and the computing word,
+allowing the PC to reroute the phone calls in the home or to offer
+voice services to the users.
+<p>
+A new MAC protocol has been designed, much simpler, combining the best
+feature of DECT (an ETSI digital cordless phone standard) and IEEE
+802.11&nbsp;: a digital cordless phone and ad-hoc data network,
+integrated together.
+<p>
+The voice service is carried over a classical <I>TDMA</I> protocol
+(with interference protection, as the band is unlicensed) and reuse
+the standard DECT architecture and voice codec. The data part use a
+<I>CSMA/CA</I> access mechanism similar to 802.11 (with MAC level
+retransmission, fragmentation...) to offer a service very similar to
+Ethernet.
+<p>
+The 1&nbsp;Mb/s Frequency Hopping physical layer allows 6&nbsp;voice
+connections and enough data throughput for most users in the Home. The
+voice quality should be equivalent to DECT in Europe and much better
+than any current digital phone in the US. Data performance should be
+slightly lower than 802.11. The MAC protocol has also been designed in
+a very flexible way, allowing to develop very cheap handset or data
+terminals and high performance multimedia cards for PCs...
+<p>
+The <B>SWAP</B> specification is an open standard (in fact, more open
+than 802.11, because there should be no royalty or patent issues),
+quite simple and straightforward. In fact, the combination of voice
+and data gets already most marketing people drooling&nbsp;! The only
+drawback is that you will have to wait a bit before seeing SWAP
+products in your favourite supermarket...
+
+<p ALIGN=right>
+<A HREF="Wireless.html"><I>up</I></A>
+<HR>
+<ADDRESS><CENTER>
+<A HREF="Wireless.html">Linux Wireless LAN Howto</A> -
+<A HREF="mailto:jt&#064;hpl.hp.com">jt&#064;hpl.hp.com</A>
+- Converted to html from Frame Maker - 25 August 98
+</CENTER></ADDRESS>
+</BODY>
+</HTML>

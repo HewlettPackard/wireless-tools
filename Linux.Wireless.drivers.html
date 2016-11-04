@@ -1,0 +1,1633 @@
+<HTML>
+<HEAD>
+<TITLE>The devices, the drivers</TITLE>
+<LINK rel="Next"  href="Linux.Wireless.drivers.802.11b.html" title="Drivers - 802.11b">
+<LINK rel="Prev"  href="Linux.Wireless.intro.html" title="Introduction">
+<LINK rel="First" href="Linux.Wireless.intro.html" title="Introduction">
+<LINK rel="Last"  href="Linux.Wireless.std.html" title="Standards">
+<LINK rel="Up"    href="Wireless.html" title="Linux Wireless LAN Howto">
+
+<LINK rel="Contents" href="Wireless.html#howto" title="Linux Wireless LAN Howto">
+<LINK rel="section" href="#Wavelan" title="Lucent Wavelan & DEC RoamAbout DS">
+<LINK rel="section" href="#Netwave" title="Netwave AirSurfer & Xircom Netwave">
+<LINK rel="section" href="#AirSurferPlus" title="Netwave AirSurfer plus">
+<LINK rel="section" href="#Prism" title="AMD+Prism cards (linux-wlan)">
+<LINK rel="section" href="#ZCom" title="Z-Com LANEscape, ELSA & Siemens">
+<LINK rel="section" href="#RangeLan2" title="Proxim RangeLan2, Proxim Symphony & DEC RoamAbout FH">
+<LINK rel="section" href="#Spectrum24" title="Symbol Spectrum24 (FH)">
+<LINK rel="section" href="#Arlan" title="Aironet ARLAN">
+<LINK rel="section" href="#Raylink" title="Raytheon Raylink & WebGear Aviator2.4">
+<LINK rel="section" href="#HomeFree" title="Diamond Multimedia HomeFree">
+<LINK rel="section" href="#BreezeNetPC" title="BreezeCom BreezeNet Pcmcia">
+<LINK rel="section" href="#BreezeNetOther" title="BreezeCom BreezeNet (not Pcmcia)">
+</HEAD>
+
+<BODY>
+
+<H1 ALIGN=center>The devices, the drivers - pre/early 802.11</H1>
+<HR width=25%>
+<H3 ALIGN=center>Jean Tourrilhes</H3>
+<H3 ALIGN=center>29 October 03</H3>
+<br><br>
+<BLOCKQUOTE><I>
+The who's who of Wireless LANs under Linux.
+</I></BLOCKQUOTE>
+
+<br>
+The following four sections describes the most common Wireless LAN
+products available on the market and their <B>compatibility</B> with
+Linux. Except in a few case, you need a <B>driver</B> to interface you
+wireless network device to the Linux kernel. The availability of a
+driver is as usual your main concern, especially with wireless devices
+because fewer people are using such hardware, and the wireless drivers
+are complex, so few of them are willing to develop, debug and maintain
+such a piece of code.
+<p>
+I will make a short description of each product and will mainly focus
+on the drivers. For each driver, I will list its <I>status</I>
+(stable, buggy...), the <I>maintainer</I>, the <I>version</I>, how to
+<I>get it</I> and the main <I>features</I>. If you hear about
+something new or if you have developed yourself a driver, please
+notify me.
+<p>
+Because of the large number of drivers, it has been divided in
+four sections, the first cover really old devices, the second 802.11b
+devices, the third one devices faster than 802.11b and the fourth one
+other stuff.
+<p>
+This section list devices predating the IEEE 802.11 standard or based
+on the early IEEE 802.11 standards (see <A
+HREF="Linux.Wireless.std.html"><I>section 8</I></A>), either Frequency
+Hopping or Direct Sequence. Those devices are mostly obsolete and
+discontinued, so most of you want to skip directly to the next section
+(see <A HREF="Linux.Wireless.drivers.802.11b.html"><I>section
+3</I></A>).
+
+<A NAME="Wavelan">
+<H2>2.1	Lucent Wavelan &amp; DEC RoamAbout DS</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>stable
+</TR><TR valign="top">
+<TD>Driver names&nbsp;:
+<TD>ISA&nbsp;: wavelan.o
+<br>Pcmcia&nbsp;: wavelan_cs.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>v19  (20/4/99),  v20  (29/7/99) or  v23 (10/10/00)
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD>ISA&nbsp;: Linux kernel  (2.0.37, 2.2.11 &amp; 2.3.15)
+<br>Pcmcia&nbsp;: Pcmcia package  (3.0.11)
+</TR><TR>
+<TD>Creators&nbsp;:
+<TD>Bruce Janson (ISA) and Anthony D. Joseph (Pcmcia)
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>Jean Tourrilhes &lt;jt&#064;hpl.hp.com&gt;
+</TR><TR>
+<TD>Web page&nbsp;:
+<TD><A HREF="http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Wavelan.html">
+http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Wavelan.html</A>
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="http://lists.samba.org/pipermail/wireless/">
+http://lists.samba.org/pipermail/wireless/</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>man pages, headers
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>DES (only for hardware with the DES option)
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes (nwid off + tcpdump)
+</TR><TR valign="top">
+<TD>Multi-devices&nbsp;:
+<TD>isa&nbsp;: up to 4
+<br>pcmcia&nbsp;: yes
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>proprietary protocol, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>module, hardware multicast, Wireless Extensions, SMP
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>roaming
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>see release notes on web page&nbsp;:-(
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL &amp; OpenSource
+</TR><TR valign="top">
+<TD>Vendor web pages&nbsp;:
+<TD><A HREF="http://www.wavelan.com/">http://www.wavelan.com/</A>
+<br><A HREF="http://www.networks.digital.com/dr/wireless/">
+http://www.networks.digital.com/dr/wireless/</A>
+<br><A HREF="http://www.cabletron.com/dnpg/dr/npg/lanfm-mn.html">
+http://www.cabletron.com/dnpg/dr/npg/lanfm-mn.html</A>
+</TR>
+</TABLE>
+
+<H3>2.1.1	 The device</H3>
+
+The Wavelan has been around for quite a while now, and this product is
+now <B>discontinued</B> (and replaced by the Wavelan IEEE/Orinoco -
+see <A
+HREF="Linux.Wireless.drivers.802.11b.html#WavelanIEEE"><I>section
+3.1</I></A>). The Wavelan is a radio LAN, using the 900 MHz or 2.4 GHz
+ISM band (Direct Sequence). It is built by Lucent, formerly AT&amp;T,
+formerly NCR, and there is a few OEM version (for example the DEC
+RoamAbout DS). The Wavelan comes in two flavours, an ISA card and a
+PCMCIA card (plus the access point).
+<p>
+The Wavelan appears to the PC as a standard network card and
+interfaces naturally with the networking stack. The configuration
+includes setting the frequency (10 different channels), Network ID (16
+bits). Hardware encryption is optional (DES or AES - 64 bits key).
+<p>
+This product is built around a standard Ethernet controller (that may
+be found in some 3Com and Intel Ethernet cards), and the Ethernet
+physical layer is replaced by a radio modem. The ISA and Pcmcia cards
+share the same basic architecture, have the same modem, but have
+different Ethernet Controllers and bus interfaces (the pcmcia has only
+one transmit buffer). Because the Wavelan doesn't use a specific radio
+MAC (no MAC level retransmissions for example), it uses very
+efficiently the bandwidth, but is more sensitive to packet loss and
+collisions.
+<p>
+There is two versions of the modem, a 900 MHz and a 2.4 GHz
+version. Revision 2 of the 2.4 GHz modem allows the user to set the
+frequency (from a set of predefined channels - the availability of
+each channel depend on the regulation). The Wavelan is Direct Sequence
+Spread Spectrum (11 chips encoding), using a 2 Mb/s signalling rate
+(using effectively 22 MHz of bandwidth) and diversity antennas.
+
+<H3>2.1.2	  The driver</H3>
+The ISA driver has also been around for quite a while now in the
+kernel and is pretty stable. The last set of modifications were to
+solve a few remaining small problems and add Wireless Extensions and
+some other features, so the driver is fairly complete now. The only
+things remaining to do is the implementation of the roaming protocol
+(but it might come, if I'm not too lazy...).
+<p>
+The Pcmcia driver has caught up with the ISA one to offer the same
+level of functionality and reliability. The only difference are the
+pcmcia specific functions (auto loading, auto unloading, crude power
+saving).
+<p>
+The latest releases of both drivers (v23) adds SMP support.
+<p>
+The drivers use the card EEprom to save the configuration changes for
+subsequent reboots. Wireless Extensions let you configure the NWID,
+the frequency, the sensitivity and the encryption key
+(optional). Statistics include the signal quality, signal level, noise
+level and the count of packet received with an invalid NWID (see
+Wavelan documentation). Private Wireless Extensions include the
+setting of the quality threshold.
+
+<A NAME="Netwave">
+<H2>2.2	Netwave AirSurfer &amp; Xircom Netwave</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>fairly stable
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>netwave_cs.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>v 0.4.1
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD>Linux kernel (2.4.0)
+<br>Pcmcia package (2.9.12)
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>John Markus Bj&oslash;rndalen &lt;johnm&#064;staff.cs.uit.no&gt;
+<br>Dag Brattli &lt;dagb&#064;cs.uit.no&gt;
+</TR><TR valign="top">
+<TD>Web pages&nbsp;:
+<TD><A HREF="http://www.cs.uit.no/~johnm/">http://www.cs.uit.no/~johnm/</A>
+<br><A HREF="http://www.cs.uit.no/~dagb/">http://www.cs.uit.no/~dagb/</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>man page
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Module parameters &amp; Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD> Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>8 bit scrambling
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>yes  (except for module parameters setting)
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>proprietary protocol, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>hardware multicast, multiple transmit buffers
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL &amp; OpenSource
+</TR><TR>
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.netwave-wireless.com/">
+http://www.netwave-wireless.com/</A>
+</TR>
+</TABLE>
+
+<H3>2.2.1	 The device</H3>
+
+The Netwave was also a quite common product, but nowadays this product
+is <B>discontinued</B>. This is a radio LAN operating in the 2.4 GHz
+ISM band. It was built by Netwave Technologies, formerly part of
+Xircom. The Netwave is Pcmcia only, and comes in a small form factor
+(everything is included on the Pcmcia card !).
+<p>
+The Netwave use a specific MAC protocol designed for radio (a pre
+802.11 protocol, with fancy stuff such as RTS/CTS, virtual carrier
+sense and fragmentation). It uses a 9 bits domain (Network ID), the
+highest bit of it used for the type of network (set for access point
+operation and unset for ad-hoc operation). The Netwave uses also a 16
+bits scrambling key (encryption). The Modem offers a 1 Mb/s signalling
+rate and frequency hopping (100 ms hop period). On the bad side, the
+Netwave has no antenna diversity and a high overhead.
+<p>
+Note that the Netwave AirSurfer plus is a very different beast (see <A HREF="#AirSurferPlus"><I>below</I></A>).
+
+<H3>2.2.2	 The driver</H3>
+The original author of the driver (<I>John</I>) has made a very good
+job for debugging it, and his good friend (<I>Dag</I>) has joined the
+project, and is fixing the remaining bugs and adding new features. The
+driver is quite simple and don't implement yet the full Wireless
+Extensions. The driver uses only one transmit buffer, which lower
+slightly the performance. The device configuration includes the domain
+and the scrambling key which can be set through Wireless Extensions or
+as modules parameters (need to be set in
+<U>/etc/pcmcia/config.opts</U> - don't forget to restart
+<I>cardmgr</I> after a change).
+<p>
+It seems that the Netwave is quite picky with some pcmcia sockets and
+you might need to choose carefully the interrupt (try different ones)
+and set the memory speed correctly. In some cases, under high load
+(big ftp), the transmission sometime get stuck (I guess that some
+interrupt are lost) and the driver has to reset the card (you won't
+notice it, it just decreases the performance).
+
+<A NAME="AirSurferPlus">
+<H2>2.3	Netwave AirSurfer plus</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>fairly stable
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>asplus_cs.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>1.0.2
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://ipoint.vlsi.uiuc.edu/wireless/asplus.html">
+http://ipoint.vlsi.uiuc.edu/wireless/asplus.html</A>
+<br><A HREF="ftp://projects.sourceforge.net/pub/pcmcia-cs/contrib/">
+ftp://projects.sourceforge.net/pub/pcmcia-cs/contrib/</A>
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>Jay Moorman &lt;jrmoorma&#064;uiuc.edu&gt;
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme, man page
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Module parameters &amp; Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD> Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>8 bit scrambling
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>yes  (except for module parameters setting)
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>proprietary protocol (same as Netwave), interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>802.11 mode, hardware multicast, multiple transmit buffers
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>OpenSource
+</TR><TR>
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.netwave-wireless.com/">
+http://www.netwave-wireless.com/</A>
+</TR>
+</TABLE>
+
+<H3>2.3.1	 The device</H3>
+
+The Netwave AirSurfer plus is the second generation of Netwave card
+(this product is now also <B>discontinued</B>), still operate in the
+2.4 GHz ISM band and is as well a small Pcmcia card. Netwave
+Technologies has now been acquired by BayNetwork, now a part of
+Nortel. The BayStack 650 is the new name of the hardware.
+<p>
+The AirSurfer plus has two modes of operation, compatible with the old
+generation of Netwave, or 802.11 compliant. The hardware is based on
+an AMD core, and a 1 Mb/s frequency hopping modem.
+
+<H3>2.3.2 The driver</H3>
+<I>Jay</I> took the code of the original Netwave
+driver and modified it to support the new AirSurfer plus, keeping most
+of the features with it. So, you still have the Wireless Extensions,
+and modules parameters (in <U>/etc/pcmcia/config.opts</U>).
+<p>
+The current driver support the AirSurfer plus only in Netwave
+compatible mode, and doesn't support the AirSurfer plus with the
+802.11 firmware.
+
+<A NAME="Prism">
+<H2>2.4	Harris Prism based cards&nbsp;: BayStack 660, ZoomAir, YDI and other...</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>stable
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>wlan_cs.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>0.2.7, 0.2.7a  and 0.3.4 (beta version)
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://www.linux-wlan.com/linux-wlan/">
+http://www.linux-wlan.com/linux-wlan/</A>
+<br><A HREF="http://www.astro.umd.edu/~teuben/linux/wireless.html">
+http://www.astro.umd.edu/~teuben/linux/wireless.html</A>
+<br><A HREF="http://www.cs.berkeley.edu/~jhill/linuxwlan/">
+http://www.cs.berkeley.edu/~jhill/linuxwlan/</A>
+<br><A HREF="http://www.spesh.com/danny/wlan">
+http://www.spesh.com/danny/wlan</A>
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>Mark S. Mathews &lt;mark&#064;linux-wlan.com&gt;
+<br>Peter Teuben &lt;teuben&#064;astro.umd.edu&gt;
+<br>Jason Hill &lt;jhill&#064;cs.berkeley.edu&gt;
+<br>Danny O'Brien &lt;danny&#064;spesh.com&gt;
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="http://www.linux-wlan.com/linux-wlan/">
+http://www.linux-wlan.com/linux-wlan/</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme, man page
+</TR><TR>
+<TD>FAQ&nbsp;:
+<TD><A HREF="http://linux.grmbl.be/wlan/">http://linux.grmbl.be/wlan/</A>
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Module parameters &amp; configuration tool
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Statistic tool
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>yes
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Quite exhaustive 802.11 support
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>WEP
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>MPL
+</TR><TR valign="top">
+<TD>Vendor web pages&nbsp;:
+<TD><A HREF="http://www.netwave-wireless.com/">
+http://www.netwave-wireless.com/</A>
+<br><A HREF="http://www.zoomtel.com/zoomair/">
+http://www.zoomtel.com/zoomair/</A>
+<br><A HREF="http://www.ydi.com">http://www.ydi.com</A>
+<br><A HREF="http://www.intalk.com/">http://www.intalk.com/</A>
+<br><A HREF="http://www.dbtel.com.tw/english.html">
+http://www.dbtel.com.tw/english.html</A>
+<br><A HREF="http://www.gemtek.com.tw/">http://www.gemtek.com.tw/</A>
+<br><A HREF="http://www.sem.samsung.co.kr/">http://www.sem.samsung.co.kr/</A>
+<br><A HREF="http://www.intersil.com/prism/">
+http://www.intersil.com/prism/</A>
+<br><A HREF="http://www.amd.com/products/npd/npd.html">
+http://www.amd.com/products/npd/npd.html</A>
+</TR>
+</TABLE>
+
+<H3>2.4.1	 The device</H3>
+
+The Harris Prism chipset and the AMD AM930 controller are some highly
+integrated parts designed to ease the process of building 802.11
+products. Harris has done a Pcmcia reference design based on their
+chipset and the AMD core, which explain the high number of vendors
+building variants of this card (the Harris website has a longer list
+than mine ;-). A special mention for YDI (Young Design Inc) which
+openly support Linux (see below). Note that all those products are now
+<B>discontinued</B> (and replaced with PrismII design - see <A
+HREF="Linux.Wireless.drivers.802.11b.html#Prism2"><I>section
+3.6</I></A>)...
+<p>
+The AMD core integrates a generic microcontroller and the hardware
+baseband (ASIC) to do the time critical functions of 802.11. AMD has
+developed the 802.11 firmware with all the usual 802.11 features (MAC
+level ACK, RTS/CTS, Fragmentation...). The Prism chipset is a 2.4 GHz
+Direct Sequence modem offering 1 and 2&nbsp;Mb/s.  The Prism chipset
+can also be extended to supports the new 802.11&nbsp;HR standard, with
+5.5 and 11&nbsp;Mb/s bit-rate (either MBOK or CCK modulation).
+<p>
+The Pcmcia cards are mostly similar from vendor to vendor. Some
+vendors offer ISA cards, and the Access Points are where vendors are
+making their difference (ZoomTelephonics uses a software AP on a PC,
+others have hardware AP).  Each vendor also has to provide the high
+level 802.11 in their drivers (authentication, WEP, Roaming...), so
+those might be different (not that it does matter much under Linux).
+<p>
+The BayStack 650 and Netwave AirSurfer plus use the same AMD
+controller, but a different physical layer (Frequency Hopping), so are
+not compatible with this driver.
+<p>
+Harris has just become Intersil and released the Prism II chipset,
+successor of the PrismI chipset, this time including the MAC
+controller (so they won't use any more the AMD part in their reference
+design). I'll detail it in the next section (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#Prism2"><I>section
+3.6</I></A>).
+
+<H3>2.4.2 The driver</H3>
+
+<I>Mark</I> and the people at AVS have developed a full 802.11 driver
+for the Prism reference design card, and this driver work for the many
+other implementations as well. The driver is well written and very
+complete&nbsp;: it's currently the only driver where most of the
+higher layer 802.11 functionality is implemented. There is also many
+initialisation parameters and a tool to configure the card. Because
+the 802.11 standard is very complex, not everything is totally
+finished and a few features like WEP (RC4 40 bits encryption) are
+missing.
+<p>
+There is currently two branches maintained by <I>Mark</I>, 0.2.X which
+is stable and 0.3.X which is experimental.
+<p>
+<I>Peter</I> (with help from YDI) has created a alternative version of
+<I>Mark</I>'s package to add ISA support, fix a few bugs and with
+explicit support of cards from YDI. In the long run, those changes
+should find their way in <I>Mark</I>'s package...
+<p>
+<I>Jason</I> has created a version of the 0.3.1 beta driver with
+support for the BayStack 660, by porting bits from 0.2.6 (this allow
+support for both the BayStack 660 and infrastructure).
+<p>
+<I>Danny</I> has a patch to make the driver compile and work with
+kernel 2.4.X.
+<p>
+I believe that this driver doesn't support the BayStack 650 and
+Netwave AirSurfer plus cards (which don't use the Prism chipset but
+Frequency Hopping), but the changes for that might not be that hard to
+implement.
+
+<A NAME="ZCom">
+<H2>2.5	Z-Com LANEscape, ELSA MC2, Siemens I-Gate</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>?
+</TR><TR valign="top">
+<TD>Driver name&nbsp;:
+<TD>wl24_cs.o
+<br>wl3501_cs.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>1.3 (stable), 2.03 (unstable) and 1.53beta2 (Elsa full source)
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://developer.berlios.de/projects/mc2drv/">
+http://developer.berlios.de/projects/mc2drv/</A>
+<br>Linux kernel (2.6.0-test2)
+<br><A HREF="http://www.boerde.de/~matthias/airnet/zcom/">
+http://www.boerde.de/~matthias/airnet/zcom/</A>
+<br><A HREF="http://www.boerde.de/~tobias/">http://www.boerde.de/~tobias/</A>
+<br><A HREF="http://www.elsa.de">http://www.elsa.de</A>
+<br><A HREF="http://pcmcia-cs.sourceforge.net/ftp/contrib/">
+http://pcmcia-cs.sourceforge.net/ftp/contrib/</A>
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>J&ouml;rg Albert &lt;joerg dot albert at gmx dot de&gt;
+<br>Arnaldo Carvalho de Melo &lt;acme&#064;conectiva.com.br&gt;
+<br>Gustavo Niemeyer &lt;niemeyer&#064;conectiva.com&gt;
+<br>Matthias Weingart &lt;matthias&#064;penthouse.boerde.de&gt;
+<br>Alfred Arnold &lt;alfred.arnold&#064;lancom-systems.de&gt;
+<br>Heiko Kirschke &lt;Heiko.Kirschke&#064;acm.org&gt;
+<br>Tobias Hintze &lt;th&#064;hbsn.de&gt;
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>README file
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>unknown
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS (with firmware 2.0), interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>Must have the correct firmware revision (or driver version).
+</TR><TR>
+<TD>License&nbsp;:
+<TD>Binary only (1.3, 2.03) or Open source (1.20), no license info
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.zcom.com.tw/">http://www.zcom.com.tw/</A>
+<br><A HREF="http://www.elsa.de">http://www.elsa.de</A>
+</TR>
+</TABLE>
+
+<H3>2.5.1	 The device</H3>
+
+Z-Com is based in Taiwan, and the WL2400 family is based on the
+classic AMD+Prism design. The family includes the usual ISA and Pcmcia
+cards, the Access Point, and also a PC104 version (that's
+interesting)...
+<p>
+Z-Com claims that the WL2400 is firmware upgradable to 802.11, but
+I've been told that some old cards have an hardware bug preventing
+it. Anyway, the card has all the usual 802.11 features, and the modem
+is classsical Direct Sequence at 2.4&nbsp;GHz, supporting 1 and
+2&nbsp;Mb/s. Those cards are based on the classical Prism design (AMD
+controller + Prism chipset - see <A HREF="#Prism"><I>section
+2.4</I></A>), but use a <B>firmware</B> written by Z-Com which is very
+different from the regular AMD firmware. This firmware has more
+features, is more performant, but has more bugs.
+<p>
+Z-Com also offers the XI family, which support 5.5. and 11&nbsp;Mb/s
+(probably using a Prism II chipset). Those are not supported by this
+driver.
+<p>
+Elsa is a German company selling various hardware component and
+started to sell Z-Com cards as Elsa AirLancer MC2. Those cards were
+quite popular in Germany.
+<p>
+Elsa also sell a new AirLancer MC11 which has nothing to do with Z-Com
+and is the Wavelan-IEEE (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#WavelanIEEE"><I>section
+3.1</I></A>).
+
+<h3>2.5.2	 The driver</H3>
+
+The driver has been written by the manufacturer, and <I>Matthias</I>
+put it on its web site. The driver only contains the object files (no
+source) and seem to have been designed for kernel 1.3.X and working in
+2.0.X kernels (but, as the driver interfaces in the kernel have
+changed since, this driver might not work in 2.2.X). The driver only
+work with old firmware revisions (1.2/1.3), and doesn't work with the
+802.11 compliant firmware (2.0).
+<p>
+<I>Matthias</I> seems to now have access to the driver source code and
+is investigating compatibility with 2.2.X and new firmware revisions.
+<p>
+Then, <I>Elsa</I> has released the full source code of this driver
+for their card, including configuration utility. <I>Elsa</I> has made
+the setup easier and seem to have also fixed a few bugs, because it is
+now working with kernel 2.2.X... This version works with 802.11
+compliant firmware (2.0).
+<p>
+More recently, <I>Heiko</I> ported the version of the driver from Elsa
+to 2.4.X. This version works with the Pcmcia package (in the Pcmcia
+contrib directory) and with <B>firmware 2.0</B>. And then,
+<I>Tobias</I> has released a full source code version of this driver
+for kernel 2.4.X, likely based on the latest version on
+<I>Matthias</I> web page. This version is a patch to the kernel (on
+his web page) and works with <B>firmware 1.2/1.3</B>.
+<p>
+<I>J&ouml;rg</I> took over the maintenance of Elsa driver (for
+firmware 2.0) and did a partial rewrite of it. He fixed many bugs
+preventing interoperability with more modern 802.11b hardware,
+improved compatibility with kernel 2.2.X and 2.4.X, implemented
+Wireless Extensions and many other fixes and polishing.
+<p>
+<I>Arnaldo</I> and <I>Gustavo</I> took over the maintenance of the
+driver from <I>Matthias</I> (for firmware 1.2/1.3) and did a partial
+rewrite of it. They updated the driver to kernel 2.6.X, added full
+support for Wireless Extensions, and this driver is now included in
+Kernel 2.6.0-test2. This driver requires Wireless Extension v16 and
+will be soon ported to 2.4.23.
+
+<A NAME="RangeLan2">
+<H2>2.6	Proxim RangeLan2, Proxim Symphony, DEC RoamAbout FH,
+AMP Wireless, Intel AnyPoint and Compaq Symphony</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>stable
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>rlmod.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>1.7.1
+</TR><TR>
+<TD>Where&nbsp;:
+<TD><A HREF="http://www.komacke.com/distribution.html">
+http://www.komacke.com/distribution.html</A>
+</TR><TR>
+<TD>Creator&nbsp;:
+<TD>Paul Chinn &lt;loomer&#064;1000klub.com&gt;
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>Dave Koberstein &lt;davek&#064;komacke.com&gt;
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="http://www.komacke.com/archive/rl2-library/">
+http://www.komacke.com/archive/rl2-library/</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme file
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Specific tool, partial implementation of Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>None
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc, Master
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Yes (specific tool)
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>No ("insmod -o" multiple modules)
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>proprietary protocol or HomeRF, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Uses Proxim source code
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>Binary only for the core + OpenSource Linux wrapper
+</TR><TR valign="top">
+<TD>Vendor web pages&nbsp;:
+<TD><A HREF="http://www.proxim.com/">http://www.proxim.com/</A>
+<br><A HREF="http://www.wlif.com/">http://www.wlif.com/</A>
+<br><A HREF="http://www.homerf.org/">http://www.homerf.org/</A>
+<br><A HREF="http://www.networks.digital.com/dr/wireless/">
+http://www.networks.digital.com/dr/wireless/</A>
+<br><A HREF="http://www.intel.com/anypoint/">http://www.intel.com/anypoint/</A>
+</TR>
+</TABLE>
+
+<H3>2.6.1	 The device</H3>
+
+The <B>RangeLan2</B> is a classical product using the 2.4 GHz band,
+made by Proxim, a small californian company. The products are
+certified and sold in approximately 50 countries. The RangeLan2 is
+based on Proxim proprietary protocol, <B>OpenAir</B>, that Proxim is
+trying to push as an alternative to 802.11. Of course, you will find
+many OEM version (like the DEC and AMP versions). It comes as ISA
+cards, Pcmcia cards, design-in modules, and access point.
+<p>
+The RangeLan2 implements a specific MAC protocol designed for radio
+(OpenAir, another pre 802.11) implemented on a generic
+microcontroller. It uses a 4 bits domain, 4 bits channel and 4 bits
+subchannel, and also a station type (primary master, secondary, slave
+- this is used for network synchronisation). There is no encryption,
+instead it uses a technique called Security ID (which is a simple
+password used to derive the network ID). The OpenAir protocol is
+heavily based on RTS/CTS, offer a good robustness but some
+overhead. It offers as well a modulable contention window size,
+contention free access for the master, packet fragmentation and power
+saving.
+<p>
+The Modem uses frequency hopping, and 2 levels of modulations
+(2FSK/4FSK)&nbsp;: it runs a 1.6 Mb/s signalling rate for good channel
+condition (short to medium distances) and falls back to 0.8 Mb/s
+otherwise.
+<p>
+The <B>Symphony</B> line of product (home networking) offered by
+Proxim use the MAC protocol of the RangeLan2 (OpenAir) with a lower
+cost radio, and the main difference is the software bundle and the
+price. On the other hand, the Proxim <B>RangeLan802</B> line is very
+different from OpenAir products, using the 802.11-FH protocol and a
+different interface, so the Linux driver won't work with it.
+<p>
+Recently, Proxim has released its first Symphony products compatible
+with the <B>HomeRF SWAP</B> standard. These are also sold as <B>Intel
+AnyPoint</B> and <B>Compaq Symphony-HRF</B>. The ISA, PCI and Pcmcia
+versions are still offered, and a USB version has been added. Those
+products use the same physical layer as the original Symphony, but the
+MAC protocol can either operate in OpenAir mode or SWAP mode. The main
+advantage of SWAP is the support for cordless telephony.
+<p>
+Proxim has also various <B>802.11-b</B> products, named
+<I>Harmony</I>, <I>Skyline</I> or <I>RangeLan-DS</I> which are PrismII
+cards (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#Prism2"><I>section
+3.6</I></A>). Proxim has also released some <B>802.11-a</B> products
+which are Atheros cards (see <A
+HREF="Linux.Wireless.drivers.802.11ag.html#AtherosGPL"><I>section
+4.2</I></A>).
+
+<H3>2.6.2	 The driver</H3>
+<I>Dave</I> uses the Proxim driver source code to build a library
+(distributed as object only), so we should expect a good quality
+code. <I>Paul</I> wrote the part to interface with the Linux kernel
+and <I>Dave</I> maintains it. He has written as well a small utility
+to set the configuration in the driver (through ioctl). The driver
+supports the Proxim Rangelan2, the Proxim Symphony, the DEC RoamAbout
+FH and the AMP Wireless products. The driver support both ISA PnP and
+Pcmcia cards, both with the RangeLan2 and Symphony labels...
+<p>
+Starting with version 1.7.0, the driver also support the SWAP protocol
+and SWAP compliant devices from Proxim, Intel and Compaq (in both
+OpenAir and SWAP mode). Both the driver and the configuration tools
+have been extended for this support. Also, some primitive support for
+USB hardware has been added.
+<p>
+What I like about this driver is that after all those years,
+<I>Dave</I> is still strongly supporting the driver, fixing bugs,
+adding new features and adding support for the newer cards. It's
+impressive to see such consistency and dedication...
+
+<A NAME="Spectrum24">
+<H2>2.7	Symbol Spectrum24 (FH)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>Beta (Pcmcia only)
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>spectrum24_cs.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>Beta 4
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://sourceforge.net/projects/spectrum24">
+http://sourceforge.net/projects/spectrum24</A>
+<br><A HREF="ftp://projects.sourceforge.net/pub/pcmcia-cs/contrib/">
+ftp://projects.sourceforge.net/pub/pcmcia-cs/contrib/</A>
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>Lee John Keyser-Allen &lt;frozbiz&#064;hotmail.com&gt;
+</TR><TR>
+<TD>Discussion forums&nbsp;:
+<TD><A HREF="http://sourceforge.net/forum/?group_id=11099">
+http://sourceforge.net/forum/?group_id=11099</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme file
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>module parameters, partial support of Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>None
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-FH, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Support of micro-AP, multicast, statistics...
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR>
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.symbol.com/products/wireless/wireless.html">
+http://www.symbol.com/products/wireless/wireless.html</A>
+</TR>
+</TABLE>
+
+<H3>2.7.1	 The device</H3>
+
+Symbol is one of the other major player for Frequency Hopping devices
+in the 2.4&nbsp;GHz band and has been selling its Spectrum24 line of
+products for ages. Symbol sells mostly to vertical market (in their
+bar-code readers, in warehouses, in supermarket), so their products
+are not usually found in retailers. The Spectrum24 family include an
+Access Point, a ISA card, a Pcmcia card and a Pcmcia card with
+micro-AP functionality. However, the main strength of Symbol is their
+"all-in-one" products, including a Palm or a WinCE device with a bar
+code reader and a 802.11 card, all neatly integrated.
+<p>
+The Spectrum24 products were designed from the start to be compliant
+with the 802.11 standard, way before the standard was eventually
+adopted. The first generation (1&nbsp;Mb/s only) was compatible and
+interoperable with other 802.11 products (but not compliant), and the
+second generation of Spectrum24 (1 and 2&nbsp;Mb/s) is officially
+802.11 compliant.
+<p>
+Symbol is also very active in developing Voice over IP solutions for
+their wireless LANs, and that's why they are also selling some
+Spectrum24 phones. They are using the H.323 codec, compression and
+call setup (raw&nbsp;64 kb/s, compressed 10 times) and a 30&nbsp;ms
+packet rate (but I fail to see what they have done to overcome
+overhead and latency issues at the MAC level).
+<p>
+The MAC has all the usual features of the 802.11 standard, like MAC
+level retransmission, RTS/CTS, fragmentation, auto bit-rate selection,
+power saving and roaming. A nice feature of the MAC is the support of
+the micro-AP functionality, which allows to turn a PC into an Access
+Point (I would like more vendors to start doing that). However, their
+products don't seem to support ad-hoc mode.
+<p>
+The physical layer is Frequency Hopping supporting 1 and 2&nbsp;Mb/s,
+with 100&nbsp;mW or 500&nbsp;mW output power and 100&nbsp;ms dwell
+size.
+
+<H3>2.7.2	 The driver</H3>
+
+<I>Lee</I> has written the driver as a student project for Symbol, so
+with active help from Symbol. He plans to continue supporting it, and
+Symbol may get more active in distributing the driver.
+<p>
+The driver is designed for the Pcmcia card (LA2400 and micro-AP
+version), and the new 2&nbsp;Mb/s version of the card. It is possible
+to use older cards (1&nbsp;Mb/s) by updating the firmware for 802.11
+compliance, and to use ISA card by configuring properly the Pcmcia
+package (those cards use a regular ISA to Pcmcia bridge).
+<p>
+Despite being beta, the driver is stable, well written and supports
+most features of the card (like micro-AP, shared memory access...).
+
+<A NAME="Arlan">
+<H2>2.8	Aironet ARLAN</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>stable (ISA only)
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>arlan.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>2.0 & 2.1b
+</TR><TR>
+<TD>Where&nbsp;:
+<TD>Linux kernel (2.3.10 & 2.2.7-acX), web-page for 2.0.X version
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>Elmer Joandi &lt;Elmer.Joandi&#064;ut.ee&gt;
+<br>Cullen Jennings &lt;c.jennings&#064;ieee.org&gt;
+</TR><TR valign="top">
+<TD>Web pages&nbsp;:
+<TD><A HREF="http://www.ylenurme.ee/~elmer/655/">
+http://www.ylenurme.ee/~elmer/655/</A>
+<br><A HREF="http://www.cs.ubc.ca/spider/jennings/">
+http://www.cs.ubc.ca/spider/jennings/</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>README file + web page
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>/proc interface (2.1.X kernels and up only)
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>proprietary protocol, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>Multicast (driver is point to point ?)
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR>
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.aironet.com/products/2200fam/2200fams.html">
+http://www.aironet.com/products/2200fam/2200fams.html</A>
+</TR>
+</TABLE>
+
+<H3>2.8.1	 The device</H3>
+
+The Arlan was a radio LAN, built by Aironet, using the 900MHz or
+2.4GHz ISM band (Direct Sequence). This product has been
+<B>discontinued</B> and replaced by the 4500 series (see <A
+HREF="#Arlan802"><I>section 3.14</I></A>). The Arlan comes in 3
+flavour, an ISA (655), an MCA (670) and a pcmcia (690) card (plus the
+access point). Later, they renamed the ISA card IC2200 and the Pcmcia
+card PC2200 (still the same hardware).
+<p>
+The configuration include setting the frequency and Network ID (24
+bits ?). The MAC protocol is implemented on a generic
+microcontroler. There is two versions of the modem, a 900 MHz and a
+2.4 GHz version. Both use Direct Sequence Spread Spectrum. The 900 MHz
+modem allow signalling rate up to 860 kb/s (fall back to 215 kb/s) and
+12 channels. The 2.4 GHz version allow signalling rate up to 2 Mb/s
+(fall back to 1 Mb/s) and 5 channels.
+
+<H3>2.8.2	 The driver</H3>
+<I>Russell Nelson</I> told me a while ago that he was trying to
+convince Aironet to release the specifications of the Arlan to develop
+a Linux driver. <I>Cullen Jennings</I> started the development of a
+point to point driver, <I>Elmer Joandi</I> rewrote some parts and
+added a lot of features to be compatible with the Access Point,
+released the whole under GPL, and here is the result.
+<p>
+The driver support only the ISA version of the card (655 or IC
+2200). The driver have been fully tested and optimised by <I>Elmer
+Joandi</I>, includes a complete /proc interface and should be soon
+included in the kernel.
+
+<A NAME="Raylink">
+<H2>2.9	Raytheon Raylink, WebGear Aviator2.4 & Aviator Pro and BUSlink wireless LAN</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>stable
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>ray_cs.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>1.67 (stable) and 1.70 (experimental)
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD>Pcmcia package (3.1.33)
+<br>Linux kernel (2.4.19)
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>Corey Thomas &lt;coreythomas&#064;charter.net&gt;
+</TR><TR valign="top">
+<TD>Web page&nbsp;:
+<TD><A HREF="http://webpages.charter.net/corey/index.html">
+http://webpages.charter.net/corey/index.html</A>
+<br><A HREF="http://world.std.com/~corey/raylink.html">
+http://world.std.com/~corey/raylink.html</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>README file + headers
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Modules parameters and Wireless Extension (init only)
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>yes  (configuration via Wireless Extensions)
+</TR><TR valign="top">
+<TD>Interoperability&nbsp;:
+<TD>802.11-FH (need updated firmware), interoperate with Windows (need
+to set the correct parameters)
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>hardware multicast, MTU selection
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>A few high level 802.11 functionalities.
+</TR><TR valign="top">
+<TD>Bugs&nbsp;:
+<TD>SMP not fully tested, changing parameters through Wireless
+Extensions doesn't work right yet.
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.raylink.com/micro/raylink/">
+http://www.raylink.com/micro/raylink/</A>
+<br><A HREF="http://www.webgear.com/">http://www.webgear.com/</A>
+<br><A HREF="http://www.buslink.com/Net1.htm">
+http://www.buslink.com/Net1.htm</A>
+</TR>
+</TABLE>
+
+<H3>2.9.1	 The device</H3>
+
+The Raylink is a IEEE 802.11 FH device build by Raytheon for the 2.4
+GHz ISM band. Raytheon build only a Pcmcia card and an Access
+Point. I've been told that some version of the BreezeCom BreezeNet Pro
+Pcmcia card was an OEM version of the Raylink.
+<p>
+You are more likely to buy the Raylink as a WebGear product, either as
+Aviator2.4 or Aviator2.4 pro (which have nothing in common with their
+old Aviator 900 MHz line). The Aviator2.4 and Aviator2.4 pro are in
+fact the same product as the Raylink, the Aviator2.4 driver comes
+pre-configured in ad-hoc mode and offer only the Pcmcia card, whereas
+the Aviator2.4 pro driver comes preconfigured in managed mode and
+offer both the Pcmcia card and the Access Point (translation seems
+also to be different in each driver). Of course, it is possible to
+change the mode in the driver and all these products are fully
+interoperable. WebGear also offers a ISA to Pcmcia bridge to install
+the Pcmcia card in desktops.
+<p>
+Lately, WebGear has stop selling those cards, but recently BUSlink has
+started selling them again (same card, different sticker).
+<p>
+The Raylink delivers all the features expected from a 802.11 compliant
+device, with ad-hoc networking, access point operation, authentication
+and roaming. The MAC protocol is as defined in 802.11&nbsp;: CSMA/CA with
+MAC level retransmissions. Configuration includes mostly the ESSID
+(network name).
+<p>
+The modem is 2.4 GHz Frequency Hopping, with 1 Mb/s and 2 Mb/s bit
+rate, and includes antenna diversity.
+
+<h3>2.9.2	 The driver</H3>
+
+<I>Corey</I> has implemented a very complete driver supporting most of
+the feature of the hardware and some 802.11 functionality (it should
+be able to talk to some 802.11 nodes). There is an exhaustive list of
+configuration parameters, a /proc interface for more parameters, and a
+tool to dump 802.11 frames. Good work&nbsp;!
+<p>
+The new version of the driver adds Alpha support, authentication, and
+compatibility with the Windows driver. SMP is slowly being
+tested. I've added to the driver quite complete support for Wireless
+Extension (changing parameters still doesn't work right - therefore
+wireless.opts do not work).
+<p>
+The driver has been developed for the Raytheon Raylink and has also
+been successfully tested with the WebGear Aviator2.4 and the BUSlink.
+<p>
+I recently improved the support for <B>Wireless Extensions</B>. It is
+now possible to configure the card before the card is brought up (for
+example in the various configuration files). However, it is still not
+possible to change most parameters at run time (but they can always be
+read).
+
+<A NAME="HomeFree">
+<H2>2.10	Diamond Multimedia HomeFree</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>stable
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>tir2000.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>06/02/2000
+</TR><TR>
+<TD>Where&nbsp;:
+<TD><A HREF="http://david.poda.cz/homefree">http://david.poda.cz/homefree</A>
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>Pavel Machek &lt;pavel&#064;suse.cz&gt;
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>README file
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Modules parameters
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>None
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>yes  (except for module parameters setting)
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>proprietary protocol, do not interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Act as a tty device (not a network driver)
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>Windows compatibility
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD><B>May not be legal</B> in all locales...
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.diamondmm.com/">
+http://www.diamondmm.com/</A>
+<br><A HREF="http://www.alation.com/">
+http://www.alation.com/</A>
+</TR>
+</TABLE>
+
+<H3>2.10.1	 The device</H3>
+
+The HomeFree was one of the first affordable home networking
+solution. It is sold by Diamond Multimedia and designed by a small
+company, Alation. The card comes in ISA, PCI and Pcmcia form factor.
+<p>
+To reduce the cost, Alation has used the same solution as IrDA&nbsp;: to
+implement the MAC protocol in the driver instead of on the card. In
+fact, they are using a IrDA chip as the baseband, and instead of
+connecting it to an Ir transceiver, they use a classical 1 Mb/s
+Frequency Hopping modem at 2.4 GHz.
+<p>
+This solution save the cost of an embedded microcontroller on the card
+and allow to build a cheaper product (and to develop it faster). The
+downside is that building the MAC protocol in the driver tend to
+increase the protocol overhead (the MAC need more time to react to
+events - this reduce throughput and increase latency) and use more
+resources on the host (processor cycles and memory). In fact, this is
+an effect similar to win-modems and win-printers. Also, because there
+is a lot more code (which is more tightly integrated in the OS and
+performance critical), the driver is more difficult to port to other
+OSes (and that's why the driver below doesn't implement the HomeFree
+MAC protocol).
+<p>
+Personally, I'm not a fan of this design, but it seems to do the job
+cheaply.
+
+<H3>2.10.2	 The driver</H3>
+
+<I>Pavel</I> has developed a very simple and nice driver for the
+HomeFree. The development was sponsored by PODA s.r.o., a Czech
+company, which allowed Pavel to release the driver as GPL after some
+time...
+<p>
+This driver is both very different from a standard network driver (as
+the other driver I present on this page) and very different from the
+HomeFree Windows driver. This driver is a straight tty interface to
+the hardware (like a serial port), and doesn't implement any MAC
+protocol. Therefore, it can't be interfaced directly to the standard
+Linux networking stack, and is not compatible with the Windows driver.
+<p>
+Therefore, to use this driver, a MAC protocol of some sort is needed
+(to arbitrate access to the medium, multiplex connection and ensure
+reliability). <I>Pavel</I> recommend to use either some Ham protocols
+such as Scarab, or to use the Linux-IrDA stack. You can also develop
+you own application directly on top of this half duplex interface
+(most serial applications will assume full duplex).
+<p>
+The advantage of that is that those protocols are very lightweight, so
+usually perform much better (in term of raw throughput) than the
+original HomeFree protocol, and even better than some other WLAN
+products. However, those protocol (Scarab, IrDA) are not designed for
+the specifics of the 2.4 GHz band and don't include all the goodies
+found in 802.11. For example, IrDA allow only two nodes to be
+exchanging data at one time (only one IrLAP connection active) and
+deal poorly with multi nodes network. I also don't know how they deal
+with co-located networks and radio interferences.
+<p>
+However, the most critical missing feature is regulations
+compliance. The 802.11 protocol include some feature to insure
+compliance with all the various regulations in the 802.11 band (such
+as Frequency Hopping - usage of Radio Frequency tend to be highly <A
+HREF="Linux.Wireless.modem.html#ism">regulated</A>). As the driver of
+<I>Pavel</I> doesn't include all these features, this driver <B>may
+not be legal</B> in your country (note&nbsp;: this doesn't apply to the
+Windows driver, the Windows driver is legal because Diamond has
+certified it with the FCC and ETSI), and usage of this driver may
+bring you big troubles (same as setting up a illegal transmitter in
+the FM band). So, if you care about legislation, I advise you to check
+with <I>Pavel</I> about your specific case, otherwise use at your own
+risks...
+
+<A NAME="BreezeNetPC">
+<H2>2.11	BreezeCom BreezeNet PRO Pcmcia</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>stable
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>brzcom_cs.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>1.0, 1.1-Beta
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://www.alvarion.com/RunTime/Support_10010.asp?tNodeParam=30">
+http://www.alvarion.com/RunTime/Support_10010.asp?tNodeParam=30</A>
+<br><A HREF="http://www.breezecom.com/Support_10010.asp?tNodeParam=30">
+http://www.breezecom.com/Support_10010.asp?tNodeParam=30</A>
+<br><A HREF="ftp://projects.sourceforge.net/pub/pcmcia-cs/contrib/">
+ftp://projects.sourceforge.net/pub/pcmcia-cs/contrib/</A>
+</TR><TR>
+<TD>Creator&nbsp;:
+<TD>Christian Olrog
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>Alfred Cohen &lt;alfred&#064;breezecom.co.il&gt;
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme file
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>module parameters
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>/proc interface
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>no
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-FH (only pro.11), interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>security (WEP), power saving
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.breezecom.com/">http://www.breezecom.com/</A>
+<br><A HREF="http://www.alvarion.com/">http://www.alvarion.com/</A>
+</TR>
+</TABLE>
+
+<H3>2.11.1	 The device</H3>
+
+The BreezeNet is a Radio LAN using the 2.4 GHz ISM band (Frequency
+Hopping). The earlier versions of the Pcmcia cards were OEM of other
+vendors, the old one was an OEM version of the <B>Netwave</B>, then it
+was an OEM version of the <B>Raylink</B>, but their latest pro.11
+Pcmcia card is <B>100&nbsp;% BreezeCom</B> (the one with two little
+antenna sticks). BreezeCom has also a 802.11-b line, called DS.11, and
+the Pcmcia card is a <B>No Wires Needed</B> card.
+<p>
+In term of protocol and modem, the Pcmcia cards are very similar to
+the other BreezeCom products (see <A HREF="#BreezeNetOther"><I>section
+2.11</I></A>). The first two Pcmcia cards were limited in term of
+bit-rate (only 1&nbsp;Mb/s), and have lower transmit power.
+
+<H3>2.11.2	 The driver</H3>
+
+The driver presented here apply only to the latest pro.11 Pcmcia
+card. For the old Pcmcia card (not pro), you may use the netwave_cs
+driver (see <A HREF="#Netwave"><I>section 2.2</I></A>). For the first
+pro.11 Pcmcia card, you may use the ray_cs driver (see <A
+HREF="#Raylink"><I>section 2.9</I></A>). For the DS.11 card (802.11-b
+compliant), you may use the swallow_cs driver (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#Swallow"><I>section
+3.17</I></A>).
+<p>
+BreezeCom has also release a Linux driver for their latest pro.11
+card. I've been informed of the existence of this driver since October
+99, and many people have been using it since by getting it directly
+from BreezeCom, but BreezeCom did release this driver to the wide
+public only 6 months later. Let's not complain, because the driver
+contains the full source and is now GPL, so it was worth the wait !
+<p>
+The driver was written by <I>Christian Olrog</I>, an employee of
+Ericsson, based on the original Windows driver source, and it seems
+that the maintenance has been taken over by <I>Alfred Cohen</I> of
+BreezeCom. The source code looks very nice and complete, with only a
+few features missing. One interesting feature is that the driver can
+show the signal strength for Access Points in the area. However, the
+initial configuration could be simpler...
+<p>
+The driver has been in use by many Linux users since its original
+development and there doesn't seem to have been much complains about
+it, which is good ;-)
+<p>
+The original version of the driver, 1.0, is only for Linux kernel
+2.2.X. There is a beta version of the driver for Linux kernel 2.4.X.
+
+<A NAME="BreezeNetOther">
+<H2>2.12	BreezeCom BreezeNet (not Pcmcia)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>not needed (for Pcmcia, see above)
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Where&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>none
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>none
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>none
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>none
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>yes
+</TR><TR valign="top">
+<TD>Interoperability&nbsp;:
+<TD>802.11-FH (only pro.11), 802.11-DS and 802.11-b (only DS.11),
+interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>configuration &amp; statistics
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.breezecom.com/">http://www.breezecom.com/</A>
+<br><A HREF="http://www.alvarion.com/">http://www.alvarion.com/</A>
+</TR>
+</TABLE>
+
+<H3>2.12.1	 The device</H3>
+
+The BreezeNet is a Radio LAN using the 2.4 GHz ISM band (Frequency
+Hopping). It is built by BreezeCom, a small company from Israel, and
+some OEM version might be available. The BreezeNet doesn't connect to
+any of the usual PC bus but instead uses an Ethernet network card to
+interface to the host computer, and so require no driver to work (they
+have also some real access points). For the Pcmcia hardware, see
+above.
+<p>
+There is three versions of the BreezeNet, the old one, somewhat
+Netwave compatible, then the first pro.11 version (flash upgradable to
+802.11) and the new pro.11 version, which is 802.11 compliant, so with
+all the usual MAC features expected from 802.11 devices. In all cases
+the modem includes Frequency Hopping Spread Spectrum (20&nbsp;ms hop
+period), a 3&nbsp;Mb/s signalling rate (fall back to 2 and
+1&nbsp;Mb/s) and antenna diversity. Note that the 3&nbsp;Mb/s bit rate
+is not 802.11 compliant.
+<p>
+BreezeCom now offers a DS.11 series of adapters which is 802.11-b
+compliant, with usual 802.11-b features (and up to 11&nbsp;Mb/s) and still
+using the Ethernet interface.
+<p>
+In 2001, BreezeCom and Floware Wireless Systems merged together to
+form Alvarion. The new combined company seems to put less emphasis on
+wireless LANs and more on point-to-point links and wireless
+distributions systems, even though the old BreezeNet product lines are
+still available.
+
+<H3>2.12.2	 The driver</H3>
+
+No driver is needed, this product use an Ethernet connection. You need
+to have an dedicated Ethernet 10baseT card configured under Linux to
+plug it into. For the device configuration and statistics, unless
+someone write the necessary tools for Linux, I guess that you must
+return to DOS/Windows.
+
+<p ALIGN=right>
+<A HREF="Linux.Wireless.drivers.802.11b.html"><I>next</I></A>
+<HR>
+<CENTER><TABLE BORDER=0 CELLPADDING=0><TR><TD valign="top" align="center">
+<ADDRESS>
+<A HREF="Wireless.html">Linux Wireless LAN Howto</A> -
+jt&#064;hpl.hp.com
+<br>Converted to html from Frame Maker - 16 september 97
+<br>Updated 29 october 03
+<br>Copyright &#169; 1996-2004 Jean Tourrilhes
+</ADDRESS>
+</TD><TD>
+&nbsp;&nbsp;&nbsp;
+</TD><TD valign="top" align="center">
+Project hosted and sponsored by :
+<br>
+<A HREF="http://www.hpl.hp.com"><IMG SRC="../hplogo.png" HEIGHT=34
+WIDTH=141 ALT="HP home page"></A>
+</TD></TR></TABLE></CENTER>
+
+<!-- Keep Webmaster happy -->
+<script type="text/javascript" language="JavaScript">
+var s_prop7="us"
+var s_prop8="eng"
+var s_prop9="corp"
+var s_prop10="us|eng|corp"
+var s_prop13="hphqglobal,hphqwwhplabs"
+</script>
+
+<!-- Begin METRICS JavaScript -->
+<!-- <script type="text/javascript" language="JavaScript"
+src="http://welcome.hp-ww.com/country/us/eng/js/metrics.js"></script> -->
+<script type="text/javascript" language="JavaScript"
+src="http://www.hpl.hp.com/dev/hplabsmetrics.js"></script>
+<!-- End METRICS JavaScript -->
+
+</BODY>
+</HTML>

@@ -1,0 +1,764 @@
+diff -u -p linux/include/linux/wireless.we18.h linux/include/linux/wireless.h
+--- linux/include/linux/wireless.we18.h	Mon Jun 28 18:14:04 2004
++++ linux/include/linux/wireless.h	Tue Jun 29 18:28:52 2004
+@@ -1,7 +1,7 @@
+ /*
+  * This file define a set of standard wireless extensions
+  *
+- * Version :	18	24.6.04
++ * Version :	19	25.6.04
+  *
+  * Authors :	Jean Tourrilhes - HPL - <jt@hpl.hp.com>
+  * Copyright (c) 1997-2004 Jean Tourrilhes, All Rights Reserved.
+@@ -82,7 +82,7 @@
+  * (there is some stuff that will be added in the future...)
+  * I just plan to increment with each new version.
+  */
+-#define WIRELESS_EXT	18
++#define WIRELESS_EXT	19
+ 
+ /*
+  * Changes :
+@@ -195,6 +195,11 @@
+  *	- Add SIOCSIWAUTH/SIOCGIWAUTH for setting authentication and WPA
+  *	  related parameters (extensible up to 4096 parameter values)
+  *	- Add wireless events: IWEVWPAIE, IWEVRSNIE, IWEVMICHAELMICFAILURE
++ *
++ * V18 to V19
++ * ----------
++ *	- Remove (struct iw_point *)->pointer from events and streams
++ *	- RtNetlink requests support (SET/GET)
+  */
+ 
+ /**************************** CONSTANTS ****************************/
+@@ -931,12 +936,15 @@ struct iw_event
+ #define IW_EV_CHAR_LEN	(IW_EV_LCP_LEN + IFNAMSIZ)
+ #define IW_EV_UINT_LEN	(IW_EV_LCP_LEN + sizeof(__u32))
+ #define IW_EV_FREQ_LEN	(IW_EV_LCP_LEN + sizeof(struct iw_freq))
+-#define IW_EV_POINT_LEN	(IW_EV_LCP_LEN + sizeof(struct iw_point))
+ #define IW_EV_PARAM_LEN	(IW_EV_LCP_LEN + sizeof(struct iw_param))
+ #define IW_EV_ADDR_LEN	(IW_EV_LCP_LEN + sizeof(struct sockaddr))
+ #define IW_EV_QUAL_LEN	(IW_EV_LCP_LEN + sizeof(struct iw_quality))
+-
+-/* Note : in the case of iw_point, the extra data will come at the
+- * end of the event */
++/* iw_point events are special. First, the payload (extra data) come at
++ * the end of the event, so they are bigger than IW_EV_POINT_LEN. Second,
++ * we omit the pointer, so start at an offset. */
++#define IW_EV_POINT_OFF (((char *) &(((struct iw_point *) NULL)->length)) - \
++			  (char *) NULL)
++#define IW_EV_POINT_LEN	(IW_EV_LCP_LEN + sizeof(struct iw_point) - \
++			 IW_EV_POINT_OFF)
+ 
+ #endif	/* _LINUX_WIRELESS_H */
+diff -u -p linux/include/net/iw_handler.we18.h linux/include/net/iw_handler.h
+--- linux/include/net/iw_handler.we18.h	Mon Jun 28 18:14:28 2004
++++ linux/include/net/iw_handler.h	Mon Jun 28 18:18:09 2004
+@@ -1,7 +1,7 @@
+ /*
+  * This file define the new driver API for Wireless Extensions
+  *
+- * Version :	6	21.6.04
++ * Version :	7	25.6.04
+  *
+  * Authors :	Jean Tourrilhes - HPL - <jt@hpl.hp.com>
+  * Copyright (c) 2001-2004 Jean Tourrilhes, All Rights Reserved.
+@@ -206,7 +206,7 @@
+  * will be needed...
+  * I just plan to increment with each new version.
+  */
+-#define IW_HANDLER_VERSION	6
++#define IW_HANDLER_VERSION	7
+ 
+ /*
+  * Changes :
+@@ -231,6 +231,11 @@
+  *	- Remove spy #ifdef, they are always on -> cleaner code
+  *	- Add IW_DESCR_FLAG_NOMAX flag for very large requests
+  *	- Start migrating get_wireless_stats to struct iw_handler_def
++ *
++ * V6 to V7
++ * --------
++ *	- Remove (struct iw_point *)->pointer from events and streams
++ *	- RtNetlink requests support (SET/GET)
+  */
+ 
+ /**************************** CONSTANTS ****************************/
+@@ -424,9 +429,15 @@ extern const char iw_priv_type_size[];
+ extern int dev_get_wireless_info(char * buffer, char **start, off_t offset,
+ 				 int length);
+ 
+-/* Handle IOCTLs, called in net/code/dev.c */
++/* Handle IOCTLs, called in net/core/dev.c */
+ extern int wireless_process_ioctl(struct ifreq *ifr, unsigned int cmd);
+ 
++/* Handle RtNetlink requests, called in net/core/rtnetlink.c */
++extern int wireless_process_rtnetlink(struct sk_buff *		in_skb,
++				      struct net_device *	dev,
++				      char *			data,
++				      int			len);
++
+ /* Second : functions that may be called by driver modules */
+ 
+ /* Send a single event to user space */
+@@ -495,14 +506,17 @@ iwe_stream_add_event(char *	stream,		/* 
+ static inline char *
+ iwe_stream_add_point(char *	stream,		/* Stream of events */
+ 		     char *	ends,		/* End of stream */
+-		     struct iw_event *iwe,	/* Payload */
+-		     char *	extra)
++		     struct iw_event *iwe,	/* Fixed payload */
++		     char *	extra)		/* More payload */
+ {
+ 	int	event_len = IW_EV_POINT_LEN + iwe->u.data.length;
+ 	/* Check if it's possible */
+ 	if((stream + event_len) < ends) {
+ 		iwe->len = event_len;
+-		memcpy(stream, (char *) iwe, IW_EV_POINT_LEN);
++		memcpy(stream, (char *) iwe, IW_EV_LCP_LEN);
++		memcpy(stream + IW_EV_LCP_LEN,
++		       ((char *) iwe) + IW_EV_LCP_LEN + IW_EV_POINT_OFF,
++		       IW_EV_POINT_LEN - IW_EV_LCP_LEN);
+ 		memcpy(stream + IW_EV_POINT_LEN, extra, iwe->u.data.length);
+ 		stream += event_len;
+ 	}
+diff -u -p linux/net/core/rtnetlink.we18.c linux/net/core/rtnetlink.c
+--- linux/net/core/rtnetlink.we18.c	Fri Jun 25 15:11:16 2004
++++ linux/net/core/rtnetlink.c	Mon Jun 28 18:16:27 2004
+@@ -50,6 +50,10 @@
+ #include <net/udp.h>
+ #include <net/sock.h>
+ #include <net/pkt_sched.h>
++#ifdef CONFIG_NET_RADIO
++#include <linux/wireless.h>		/* Note : will define WIRELESS_EXT */
++#include <net/iw_handler.h>
++#endif	/* CONFIG_NET_RADIO */
+ 
+ DECLARE_MUTEX(rtnl_sem);
+ 
+@@ -270,11 +274,24 @@ static int do_setlink(struct sk_buff *sk
+ 		       dev->addr_len);
+ 	}
+ 
++#ifdef WIRELESS_EXT
++	if (ida[IFLA_WIRELESS - 1]) {
++		printk(KERN_DEBUG "Calling wireless stuff\n");
++
++		/* Device validity/presence checked in there */
++		err = wireless_process_rtnetlink(skb, dev, RTA_DATA(ida[IFLA_WIRELESS - 1]), ida[IFLA_WIRELESS - 1]->rta_len);
++
++		/* Skip the notifier, we didn't change any address */
++		goto out2;
++	}
++#endif	/* WIRELESS_EXT */
++
+ 	err = 0;
+ 
+ out:
+ 	if (!err)
+ 		call_netdevice_notifiers(NETDEV_CHANGEADDR, dev);
++out2:
+ 
+ 	dev_put(dev);
+ 	return err;
+diff -u -p linux/net/core/wireless.we18.c linux/net/core/wireless.c
+--- linux/net/core/wireless.we18.c	Mon Jun 28 18:15:21 2004
++++ linux/net/core/wireless.c	Tue Jun 29 17:33:38 2004
+@@ -57,6 +57,10 @@
+  *	o Add wmb() in iw_handler_set_spy() for non-coherent archs/cpus
+  * Based on patch from Pavel Roskin <proski@gnu.org> :
+  *	o Fix kernel data leak to user space in private handler handling
++ *
++ * v7 - 25.06.04 - Jean II
++ *	o Remove (struct iw_point *)->pointer from events and streams
++ *	o RtNetlink requests support (SET/GET)
+  */
+ 
+ /***************************** INCLUDES *****************************/
+@@ -66,10 +70,12 @@
+ #include <linux/types.h>		/* off_t */
+ #include <linux/netdevice.h>		/* struct ifreq, dev_get_by_name() */
+ #include <linux/proc_fs.h>
++#include <linux/netlink.h>		/* netlink stuff */
+ #include <linux/rtnetlink.h>		/* rtnetlink stuff */
+ #include <linux/seq_file.h>
+ #include <linux/init.h>			/* for __init */
+ #include <linux/if_arp.h>		/* ARPHRD_ETHER */
++#include <net/sock.h>			/* struct sock */
+ 
+ #include <linux/wireless.h>		/* Pretty obvious */
+ #include <net/iw_handler.h>		/* New driver API */
+@@ -80,11 +86,15 @@
+ 
+ /* Debugging stuff */
+ #undef WE_IOCTL_DEBUG		/* Debug IOCTL API */
+-#undef WE_EVENT_DEBUG		/* Debug Event dispatcher */
++#define WE_RTNETLINK_DEBUG	/* Debug RtNetlink API */
++#define WE_EVENT_DEBUG		/* Debug Event dispatcher */
+ #undef WE_SPY_DEBUG		/* Debug enhanced spy support */
+ 
+ /* Options */
+-#define WE_EVENT_NETLINK	/* Propagate events using rtnetlink */
++#ifdef CONFIG_NET_RTNETLINK_WIRELESS
++#define WE_REQUEST_RTNETLINK	/* Access requests from RtNetlink */
++#endif
++#define WE_EVENT_RTNETLINK	/* Propagate events using RtNetlink */
+ #define WE_SET_EVENT		/* Generate an event on some set commands */
+ 
+ /************************* GLOBAL VARIABLES *************************/
+@@ -572,6 +582,7 @@ static struct file_operations wireless_s
+ 
+ int __init wireless_proc_init(void)
+ {
++	/* Create /proc/net/wireless entry */
+ 	if (!proc_net_fops_create("wireless", S_IRUGO, &wireless_seq_fops))
+ 		return -ENOMEM;
+ 
+@@ -1043,32 +1054,62 @@ int wireless_process_ioctl(struct ifreq 
+ 	return -EINVAL;
+ }
+ 
+-/************************* EVENT PROCESSING *************************/
++/********************** RTNETLINK SUBROUTINES **********************/
+ /*
+- * Process events generated by the wireless layer or the driver.
+- * Most often, the event will be propagated through rtnetlink
++ * RtNetlink helpers used by bother the main RtNetlink request API and
++ * the Wireless Events RtNetlink code.
+  */
+ 
+-#ifdef WE_EVENT_NETLINK
+-/* "rtnl" is defined in net/core/rtnetlink.c, but we need it here.
+- * It is declared in <linux/rtnetlink.h> */
++#if defined(WE_REQUEST_RTNETLINK) || defined(WE_EVENT_RTNETLINK)
++/* ---------------------------------------------------------------- */
++/*
++ * Fill a rtnetlink skb with a fragmented piece of data.
++ * This avoid copying around large chunks of data, and is therefore
++ * much more efficient...
++ * This is a clone of __rta_fill() in rtnetlink.c. Because of the
++ * padding, we need to change this function.
++ */
++static inline void __rta_fill_double(struct sk_buff *	skb,
++				     int		attrtype,
++				     int		attr1len,
++				     const void *	data1,
++				     int		attr2len,
++				     const void *	data2)
++{
++	struct rtattr *rta;
++	int size = RTA_LENGTH(attr1len + attr2len);
++
++	rta = (struct rtattr*)skb_put(skb, RTA_ALIGN(size));
++	rta->rta_type = attrtype;
++	rta->rta_len = size;
++	memcpy(RTA_DATA(rta), data1, attr1len);
++	if(data2)
++		memcpy(RTA_DATA(rta) + attr1len, data2, attr2len);
++}
++
++#define RTA_PUT_DOUBLE(skb, attrtype, attr1len, data1, attr2len, data2) \
++({	if (unlikely(skb_tailroom(skb) < (int)RTA_SPACE(attr1len+attr2len))) \
++		 goto rtattr_failure; \
++   	__rta_fill_double(skb, attrtype, attr1len, data1, attr2len, data2); }) 
+ 
+ /* ---------------------------------------------------------------- */
+ /*
+- * Fill a rtnetlink message with our event data.
+- * Note that we propage only the specified event and don't dump the
++ * Fill a wireless_netlink message with our event data.
++ * Note that we propage only the specified reply/event and don't dump the
+  * current wireless config. Dumping the wireless config is far too
+- * expensive (for each parameter, the driver need to query the hardware).
++ * expensive : for each parameter, the driver need to query the hardware.
+  */
+-static inline int rtnetlink_fill_iwinfo(struct sk_buff *	skb,
+-					struct net_device *	dev,
+-					int			type,
+-					char *			event,
+-					int			event_len)
+-{
+-	struct ifinfomsg *r;
+-	struct nlmsghdr  *nlh;
+-	unsigned char	 *b = skb->tail;
++static inline int wireless_rtnetlink_fill(struct sk_buff *	skb,
++					  struct net_device *	dev,
++					  int			type,
++					  char *		event,
++					  int			event_len,
++					  char *		extra,
++					  int			extra_len)
++{
++	struct nlmsghdr *	nlh;
++	struct ifinfomsg *	r;
++	unsigned char *		b = skb->tail;
+ 
+ 	nlh = NLMSG_PUT(skb, 0, 0, type, sizeof(*r));
+ 	r = NLMSG_DATA(nlh);
+@@ -1078,9 +1119,9 @@ static inline int rtnetlink_fill_iwinfo(
+ 	r->ifi_flags = dev->flags;
+ 	r->ifi_change = 0;	/* Wireless changes don't affect those flags */
+ 
+-	/* Add the wireless events in the netlink packet */
+-	RTA_PUT(skb, IFLA_WIRELESS,
+-		event_len, event);
++	/* Add the wireless data in the netlink packet */
++	RTA_PUT_DOUBLE(skb, IFLA_WIRELESS,
++		       event_len, event, extra_len, extra);
+ 
+ 	nlh->nlmsg_len = skb->tail - b;
+ 	return skb->len;
+@@ -1093,31 +1134,382 @@ rtattr_failure:
+ 
+ /* ---------------------------------------------------------------- */
+ /*
+- * Create and broadcast and send it on the standard rtnetlink socket
+- * This is a pure clone rtmsg_ifinfo() in net/core/rtnetlink.c
++ * Create and send a wireless reply/event on the RtNetlink channel/
++ * This is a clone rtmsg_ifinfo() in net/core/rtnetlink.c
+  * Andrzej Krzysztofowicz mandated that I used a IFLA_XXX field
+  * within a RTM_NEWLINK event.
+  */
+-static inline void rtmsg_iwinfo(struct net_device *	dev,
+-				char *			event,
+-				int			event_len)
++static void wireless_rtnetlink_send(struct sk_buff *	in_skb,
++				    struct net_device *	dev,
++				    char *		event,
++				    int			event_len,
++				    char *		extra,
++				    int			extra_len)
+ {
+-	struct sk_buff *skb;
+-	int size = NLMSG_GOODSIZE;
+-
+-	skb = alloc_skb(size, GFP_ATOMIC);
++	struct sk_buff *	skb;
++	int			nlmsize;
++	int			rtasize;
++
++	/* Size of the whole event */
++	nlmsize = NLMSG_LENGTH(sizeof(struct ifinfomsg));
++	rtasize = RTA_LENGTH(event_len + extra_len);
++	/* Allocate it */
++	skb = alloc_skb(nlmsize + rtasize, GFP_ATOMIC);
+ 	if (!skb)
+ 		return;
+ 
+-	if (rtnetlink_fill_iwinfo(skb, dev, RTM_NEWLINK,
+-				  event, event_len) < 0) {
++	/* Put our junk in it */
++	if (wireless_rtnetlink_fill(skb, dev,
++				    (in_skb ? RTM_SETLINK : RTM_NEWLINK),
++				    event, event_len, extra, extra_len) < 0) {
+ 		kfree_skb(skb);
+ 		return;
+ 	}
+-	NETLINK_CB(skb).dst_groups = RTMGRP_LINK;
+-	netlink_broadcast(rtnl, skb, 0, RTMGRP_LINK, GFP_ATOMIC);
++
++	/* Send to appropriate socket */
++	if(in_skb) {
++		/* Reply : Unicast to pid/process which made the query */
++		netlink_unicast(in_skb->sk, skb, NETLINK_CB(in_skb).pid,
++				MSG_DONTWAIT);
++	} else {
++		/* Event : Multicast to all processes */
++		NETLINK_CB(skb).dst_groups = RTMGRP_LINK;
++		netlink_broadcast(rtnl, skb, 0, RTMGRP_LINK, GFP_ATOMIC);
++	}
++}
++#endif	/* WE_REQUEST_RTNETLINK || WE_EVENT_RTNETLINK */
++
++/********************** RTNETLINK REQUEST API **********************/
++/*
++ * The alternate user space API to configure all those Wireless Extensions
++ * is through RtNetlink.
++ * This API support only the new driver API (iw_handler).
++ * This is still experimental.
++ *
++ * This RtNetlink API use the same query/reply model as the ioctl API.
++ * This is in contrast to the rest of the RtNetlink API only offer
++ * Set and Dump operations.
++ * We can't offer Dump operations because of the following reasons :
++ *	o Large number of parameters, most optional
++ *	o Large size of some parameters (> 100 bytes)
++ *	o Each parameters need to be extracted from hardware
++ *	o Scan requests can take seconds and disable network activity.
++ * Because of this high cost/overhead, we want to return only the
++ * parameters the user application is really interested in.
++ *
++ * The API uses the standard RtNetlink socket. When the RtNetlink code
++ * find a IFLA_WIRELESS field in a RtNetlink SET_LINK request,
++ * it calls here.
++ */
++
++#ifdef WE_REQUEST_RTNETLINK
++/* ---------------------------------------------------------------- */
++/*
++ *	Allow programatic access to /proc/net/wireless even if /proc
++ *	doesn't exist... Also more efficient...
++ */
++static inline int rtnetlink_iwstats(struct sk_buff *	in_skb,
++				    struct net_device *	dev,
++				    struct iw_event *	request)
++{
++	/* Get stats from the driver */
++	struct iw_statistics *	stats;
++
++	stats = get_wireless_stats(dev);
++	if (stats != (struct iw_statistics *) NULL) {
++		union iwreq_data	wrqu;
++
++		/* Get request details (skip pointer) */
++		memcpy(((char *) &wrqu) + IW_EV_POINT_OFF,
++		       &request->u, IW_EV_POINT_LEN - IW_EV_LCP_LEN);
++
++		/* Send the statistics to the requesting process. */
++		wireless_rtnetlink_send(in_skb, dev,
++					(char *) request, IW_EV_POINT_LEN,
++					(char *) stats,
++					sizeof(struct iw_statistics));
++
++		/* Check if we need to clear the update flag */
++		if(wrqu.data.flags != 0)
++			stats->qual.updated = 0;
++		return 0;
++	} else
++		return -EOPNOTSUPP;
++}
++
++/* ---------------------------------------------------------------- */
++/*
++ * Export the driver private handler definition
++ * They will be picked up by tools like iwpriv...
++ */
++static inline int rtnetlink_export_private(struct sk_buff *	in_skb,
++					   struct net_device *	dev,
++					   struct iw_event *	request)
++{
++	union iwreq_data	wrqu;
++
++	/* Check if the driver has something to export */
++	if((dev->wireless_handlers->num_private_args == 0) ||
++	   (dev->wireless_handlers->private_args == NULL))
++		return -EOPNOTSUPP;
++
++	/* Set the number of available ioctls. */
++	wrqu.data.length = dev->wireless_handlers->num_private_args;
++	wrqu.data.flags = 0;
++
++	/* Put wrqu back where it should (skip pointer) */
++	memcpy(&request->u, ((char *) &wrqu) + IW_EV_POINT_OFF,
++	       IW_EV_POINT_LEN - IW_EV_LCP_LEN);
++
++	/* Send the private descriptions to the requesting process. */
++	wireless_rtnetlink_send(in_skb, dev,
++				(char *) request, IW_EV_POINT_LEN,
++				(char *) dev->wireless_handlers->private_args,
++				sizeof(struct iw_priv_args) * wrqu.data.length);
++
++	return 0;
++}
++
++/* ---------------------------------------------------------------- */
++/*
++ * Wrapper to call a standard Wireless Extension handler.
++ * We do various checks and call the handler with the proper args.
++ */
++static inline int rtnetlink_standard_call(struct sk_buff *	in_skb,
++					  struct net_device *	dev,
++					  struct iw_event *	request,
++					  int			request_len,
++					  iw_handler		handler)
++{
++	const struct iw_ioctl_description *	descr = NULL;
++	unsigned int				cmd;
++	union iwreq_data *			wrqu;
++	int					hdr_len;
++	char *					extra = NULL;
++	int					extra_size = 0;
++	struct iw_request_info			info;
++	int					ret = -EINVAL;
++
++	/* Get the description of the Request */
++	cmd = request->cmd;
++	if((cmd - SIOCIWFIRST) >= standard_ioctl_num)
++		return -EOPNOTSUPP;
++	descr = &(standard_ioctl[cmd - SIOCIWFIRST]);
++
++#ifdef WE_RTNETLINK_DEBUG
++	printk(KERN_DEBUG "%s (WE) : Found standard handler for 0x%04X\n",
++	       dev->name, cmd);
++	printk(KERN_DEBUG "%s (WE) : Header type : %d, Token type : %d, size : %d, token : %d\n", dev->name, descr->header_type, descr->token_type, descr->token_size, descr->max_tokens);
++#endif	/* WE_RTNETLINK_DEBUG */
++
++	/* Extract fixed header from request. This is properly aligned. */
++	wrqu = &request->u;
++
++	/* Prepare the call */
++	info.cmd = cmd;
++	info.flags = 0;
++
++	/* Check if wrqu is complete */
++	hdr_len = event_type_size[descr->header_type];
++	if(request_len < hdr_len) {
++#ifdef WE_RTNETLINK_DEBUG
++		printk(KERN_DEBUG
++		       "%s (WE) : Wireless request too short (%d)\n",
++		       dev->name, request_len);
++#endif	/* WE_RTNETLINK_DEBUG */
++		return -EINVAL;
++	}
++
++	/* Check if we have extra data in the request or not */
++	if(descr->header_type != IW_HEADER_TYPE_POINT) {
++
++		/* No extra arguments. Trivial to handle */
++		ret = handler(dev, &info, wrqu, NULL);
++	} else {
++		union iwreq_data	wrqu_point;
++
++		/* Put wrqu in the right place (skip pointer) */
++		memcpy(((char *) &wrqu_point) + IW_EV_POINT_OFF,
++		       wrqu, IW_EV_POINT_LEN - IW_EV_LCP_LEN);
++
++		/* Calculate space needed by arguments. Always allocate
++		 * for max space. Easier, and won't last long... */
++		extra_size = descr->max_tokens * descr->token_size;
++
++		/* Check what user space is giving us */
++		if(IW_IS_SET(cmd)) {
++			/* Check if number of token fits within bounds */
++			if(wrqu_point.data.length > descr->max_tokens)
++				return -E2BIG;
++			if(wrqu_point.data.length < descr->min_tokens)
++				return -EINVAL;
++
++			/* Length of extra (what's after the fixed header) */
++			extra_size = request_len - hdr_len;
++
++			/* Check if request is self consistent */
++			if(extra_size < (wrqu_point.data.length *
++					 descr->token_size)) {
++#ifdef WE_RTNETLINK_DEBUG
++				printk(KERN_DEBUG "%s (WE) : Wireless request data too short (%d)\n",
++				       dev->name, extra_size);
++#endif	/* WE_RTNETLINK_DEBUG */
++				return -EINVAL;
++			}
++		}
++
++	realloc:
++#ifdef WE_RTNETLINK_DEBUG
++		printk(KERN_DEBUG "%s (WE) : Malloc %d bytes\n",
++		       dev->name, extra_size);
++#endif	/* WE_RTNETLINK_DEBUG */
++
++		/* Create the kernel buffer */
++		extra = kmalloc(extra_size, GFP_KERNEL);
++		if (extra == NULL) {
++			return -ENOMEM;
++		}
++
++		/* If it is a SET, copy data to the aligned buffer */
++		if(IW_IS_SET(cmd)) {
++			/* Copy extra in aligned buffer */
++			if(wrqu_point.data.length != 0)
++				memcpy(extra, ((char *) request) + hdr_len,
++				       extra_size);
++		}
++
++		/* Call the handler */
++		ret = handler(dev, &info, &wrqu_point, extra);
++
++		/* Check if driver needs a bigger buffer (rare) */
++		if((ret == -E2BIG) && IW_IS_GET(cmd) &&
++		   (descr->flags & IW_DESCR_FLAG_NOMAX)) {
++			/* Clean up the buffer, retry with larger size */
++			kfree(extra);
++			extra_size *= 2;
++			goto realloc;
++		}
++
++		/* Put wrqu back where it should (skip pointer) */
++		memcpy(wrqu, ((char *) &wrqu_point) + IW_EV_POINT_OFF,
++		       IW_EV_POINT_LEN - IW_EV_LCP_LEN);
++
++		/* Calculate real returned length for GETs */
++		if(!ret && IW_IS_GET(cmd))
++			extra_size = (wrqu_point.data.length *
++				     descr->token_size);
++		/* For SET, extra_size is already correct */
++	}
++
++	/* If we have something to return to the user */
++	if(!ret && IW_IS_GET(cmd)) {
++		/* Reuse the request as the reply. Both wrqu and extra
++		 * have been modified by the handler. We just need to
++		 * update the event header. */
++		request->len = hdr_len + extra_size;
++
++#ifdef WE_RTNETLINK_DEBUG
++		printk(KERN_DEBUG "%s (WE) : Reply 0x%04X, hdr_len %d, tokens %d, extra_size %d, request->len %d\n", dev->name, cmd, hdr_len, wrqu->data.length, extra_size, request->len);
++#endif	/* WE_RTNETLINK_DEBUG */
++
++		/* Send the reply to the requesting process. */
++		wireless_rtnetlink_send(in_skb, dev,
++					(char *) request, hdr_len,
++					extra, extra_size);
++	}
++
++#ifdef WE_SET_EVENT
++	/* Generate an event to notify listeners of the change */
++	if((descr->flags & IW_DESCR_FLAG_EVENT) &&
++	   ((ret == 0) || (ret == -EIWCOMMIT))) {
++		if(descr->flags & IW_DESCR_FLAG_RESTRICT)
++			/* If the event is restricted, don't
++			 * export the payload */
++			wireless_send_event(dev, cmd, wrqu, NULL);
++		else
++			wireless_send_event(dev, cmd, wrqu, extra);
++	}
++#endif	/* WE_SET_EVENT */
++
++	/* Cleanup - I told you it wasn't that long ;-) */
++	if(extra)
++		kfree(extra);
++
++	/* Call commit handler if needed and defined */
++	if(ret == -EIWCOMMIT)
++		ret = call_commit_handler(dev);
++
++	return ret;
++}
++#endif	/* WE_REQUEST_RTNETLINK */
++
++/* ---------------------------------------------------------------- */
++/*
++ * Main RtNetlink dispatcher. Called from the main networking code
++ * (do_setlink() in net/core/rtnetlink.c).
++ * Check the type of Request and call the appropriate wrapper...
++ */
++int wireless_process_rtnetlink(struct sk_buff *		in_skb,
++			       struct net_device *	dev,
++			       char *			data,
++			       int			len)
++{
++#ifdef WE_REQUEST_RTNETLINK
++	struct iw_event *	request = (struct iw_event *) data;
++	iw_handler		handler;
++
++	/* Check length */
++	if(len < IW_EV_LCP_LEN) {
++		printk(KERN_DEBUG "%s (WE) : RtNetlink request too short (%d)\n",
++		       dev->name, len);
++		return -EINVAL;
++	}
++
++	/* ReCheck length (len may have padding) */
++	if(request->len > len) {
++		printk(KERN_DEBUG "%s (WE) : RtNetlink request len invalid (%d-%d)\n",
++		       dev->name, request->len, len);
++		return -EINVAL;
++	}
++
++	/* Special cases */
++	if(request->cmd == SIOCGIWSTATS)
++		/* Get Wireless Stats */
++		return rtnetlink_iwstats(in_skb, dev, request);
++	if(request->cmd == SIOCGIWPRIV) {
++		/* Check if we have some wireless handlers defined */
++		if(dev->wireless_handlers == NULL)
++			return -EOPNOTSUPP;
++		/* Get Wireless Stats */
++		return rtnetlink_export_private(in_skb, dev, request);
++	}
++
++	/* Basic check */
++	if (!netif_device_present(dev))
++		return -ENODEV;
++
++	/* New driver API : try to find the handler */
++	handler = get_handler(dev, request->cmd);
++	if(handler != NULL) {
++		/* Standard and private are not the same */
++		if(request->cmd < SIOCIWFIRSTPRIV)
++			return rtnetlink_standard_call(in_skb,
++						       dev,
++						       request,
++						       request->len,
++						       handler);
++		// TODO : support for Private Requests
++	}
++#endif	/* WE_REQUEST_RTNETLINK */
++
++	return -EOPNOTSUPP;
+ }
+-#endif	/* WE_EVENT_NETLINK */
++
++/************************* EVENT PROCESSING *************************/
++/*
++ * Process events generated by the wireless layer or the driver.
++ * Most often, the event will be propagated through rtnetlink
++ */
+ 
+ /* ---------------------------------------------------------------- */
+ /*
+@@ -1135,10 +1527,11 @@ void wireless_send_event(struct net_devi
+ 	struct iw_event  *event;		/* Mallocated whole event */
+ 	int event_len;				/* Its size */
+ 	int hdr_len;				/* Size of the event header */
++	int wrqu_off = 0;			/* Offset in wrqu */
+ 	/* Don't "optimise" the following variable, it will crash */
+ 	unsigned	cmd_index;		/* *MUST* be unsigned */
+ 
+-	/* Get the description of the IOCTL */
++	/* Get the description of the Event */
+ 	if(cmd <= SIOCIWLAST) {
+ 		cmd_index = cmd - SIOCIWFIRST;
+ 		if(cmd_index < standard_ioctl_num)
+@@ -1181,6 +1574,8 @@ void wireless_send_event(struct net_devi
+ 		/* Calculate extra_len - extra is NULL for restricted events */
+ 		if(extra != NULL)
+ 			extra_len = wrqu->data.length * descr->token_size;
++		/* Always at an offset in wrqu */
++		wrqu_off = IW_EV_POINT_OFF;
+ #ifdef WE_EVENT_DEBUG
+ 		printk(KERN_DEBUG "%s (WE) : Event 0x%04X, tokens %d, extra_len %d\n", dev->name, cmd, wrqu->data.length, extra_len);
+ #endif	/* WE_EVENT_DEBUG */
+@@ -1191,25 +1586,24 @@ void wireless_send_event(struct net_devi
+ 	event_len = hdr_len + extra_len;
+ 
+ #ifdef WE_EVENT_DEBUG
+-	printk(KERN_DEBUG "%s (WE) : Event 0x%04X, hdr_len %d, event_len %d\n", dev->name, cmd, hdr_len, event_len);
++	printk(KERN_DEBUG "%s (WE) : Event 0x%04X, hdr_len %d, wrqu_off %d, event_len %d\n", dev->name, cmd, hdr_len, wrqu_off, event_len);
+ #endif	/* WE_EVENT_DEBUG */
+ 
+ 	/* Create temporary buffer to hold the event */
+-	event = kmalloc(event_len, GFP_ATOMIC);
++	event = kmalloc(hdr_len, GFP_ATOMIC);
+ 	if(event == NULL)
+ 		return;
+ 
+ 	/* Fill event */
+ 	event->len = event_len;
+ 	event->cmd = cmd;
+-	memcpy(&event->u, wrqu, hdr_len - IW_EV_LCP_LEN);
+-	if(extra != NULL)
+-		memcpy(((char *) event) + hdr_len, extra, extra_len);
+-
+-#ifdef WE_EVENT_NETLINK
+-	/* rtnetlink event channel */
+-	rtmsg_iwinfo(dev, (char *) event, event_len);
+-#endif	/* WE_EVENT_NETLINK */
++	memcpy(&event->u, ((char *) wrqu) + wrqu_off, hdr_len - IW_EV_LCP_LEN);
++
++#ifdef WE_EVENT_RTNETLINK
++	/* Send via the RtNetlink event channel */
++	wireless_rtnetlink_send(NULL, dev, (char *) event, hdr_len,
++				(char *) extra, extra_len);
++#endif	/* WE_EVENT_RTNETLINK */
+ 
+ 	/* Cleanup */
+ 	kfree(event);

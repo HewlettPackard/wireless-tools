@@ -1,0 +1,200 @@
+diff -u -p driver/modules.15/hostap.c driver/modules/hostap.c
+--- driver/modules.15/hostap.c	Sun Sep 15 10:33:05 2002
++++ driver/modules/hostap.c	Thu Dec  5 18:25:47 2002
+@@ -63,6 +63,9 @@ static int prism2_wds_del(local_info_t *
+ static int prism2_ap_get_sta_qual(local_info_t *local, struct sockaddr addr[],
+ 				  struct iw_quality qual[], int buf_size,
+ 				  int aplist);
++#if WIRELESS_EXT > 13
++static int prism2_ap_translate_scan(struct net_device *dev, char *buffer);
++#endif /* WIRELESS_EXT > 13 */
+ #endif /* WIRELESS_EXT */
+ static int prism2_hostapd(struct ap_data *ap,
+ 			  struct prism2_hostapd_param *param);
+diff -u -p driver/modules.15/hostap_ap.c driver/modules/hostap_ap.c
+--- driver/modules.15/hostap_ap.c	Sat Sep 14 08:54:12 2002
++++ driver/modules/hostap_ap.c	Thu Dec  5 18:30:19 2002
+@@ -2129,6 +2129,84 @@ static int prism2_ap_get_sta_qual(local_
+ 
+ 	return count;
+ }
++
++#if WIRELESS_EXT > 13
++/* Translate our list of Access Points & Stations to a card independant
++ * format that the Wireless Tools will understand - Jean II */
++static int prism2_ap_translate_scan(struct net_device *dev, char *buffer)
++{
++	local_info_t *local = (local_info_t *) dev->priv;
++	struct ap_data *ap = local->ap;
++	struct list_head *ptr;
++	unsigned long flags;
++	struct iw_event iwe;
++	char *current_ev = buffer;
++	char *end_buf = buffer + IW_SCAN_MAX_DATA;
++
++	spin_lock_irqsave(&ap->sta_table_lock, flags);
++
++	for (ptr = ap->sta_list.next; ptr != NULL && ptr != &ap->sta_list;
++	     ptr = ptr->next) {
++		struct sta_info *sta = (struct sta_info *) ptr;
++
++		/* First entry *MUST* be the AP MAC address */
++		memset(&iwe, 0, sizeof(iwe));
++		iwe.cmd = SIOCGIWAP;
++		iwe.u.ap_addr.sa_family = ARPHRD_ETHER;
++		memcpy(iwe.u.ap_addr.sa_data, sta->addr, ETH_ALEN);
++		iwe.len = IW_EV_ADDR_LEN;
++		current_ev = iwe_stream_add_event(current_ev, end_buf, &iwe,
++						  IW_EV_ADDR_LEN);
++
++		/* Use the mode to indicate if it's a station or
++		 * an Access Point */
++		memset(&iwe, 0, sizeof(iwe));
++		iwe.cmd = SIOCGIWMODE;
++		if (sta->ap)
++			iwe.u.mode = IW_MODE_MASTER;
++		else
++			iwe.u.mode = IW_MODE_INFRA;
++		iwe.len = IW_EV_UINT_LEN;
++		current_ev = iwe_stream_add_event(current_ev, end_buf, &iwe,
++						  IW_EV_UINT_LEN);
++
++		/* Some quality */
++		memset(&iwe, 0, sizeof(iwe));
++		iwe.cmd = IWEVQUAL;
++		if (sta->last_rx_silence == 0)
++			iwe.u.qual.qual = sta->last_rx_signal < 27 ?
++				0 : (sta->last_rx_signal - 27) * 92 / 127;
++		else
++			iwe.u.qual.qual = sta->last_rx_signal -
++				sta->last_rx_silence - 35;
++		iwe.u.qual.level = HFA384X_LEVEL_TO_dBm(sta->last_rx_signal);
++		iwe.u.qual.noise = HFA384X_LEVEL_TO_dBm(sta->last_rx_silence);
++		iwe.u.qual.updated = sta->last_rx_updated;
++		iwe.len = IW_EV_QUAL_LEN;
++		current_ev = iwe_stream_add_event(current_ev, end_buf, &iwe,
++						  IW_EV_QUAL_LEN);
++		sta->last_rx_updated = 0;
++
++		/* To be continued, we should make good use of IWEVCUSTOM */
++	}
++	spin_unlock_irqrestore(&ap->sta_table_lock, flags);
++
++#if 0
++	{
++		u8 *pos = buffer;
++		left = (current_ev - buffer);
++		printk(KERN_DEBUG "IW SCAN (len=%d):", left);
++		while (left > 0) {
++			printk(" %02x", *pos++);
++			left--;
++		}
++		printk("\n");
++	}
++#endif
++
++	return current_ev - buffer;
++}
++#endif /* WIRELESS_EXT > 13 */
+ #endif /* WIRELESS_EXT */
+ 
+ 
+diff -u -p driver/modules.15/hostap_ioctl.c driver/modules/hostap_ioctl.c
+--- driver/modules.15/hostap_ioctl.c	Sat Oct 12 04:37:26 2002
++++ driver/modules/hostap_ioctl.c	Thu Dec  5 18:18:08 2002
+@@ -1369,20 +1369,24 @@ static int prism2_ioctl_siwscan(struct n
+ 				struct iw_request_info *info,
+ 				struct iw_point *data, char *extra)
+ {
+-#ifdef PRISM2_NO_STATION_MODES
+-	return -EOPNOTSUPP;
+-#else /* PRISM2_NO_STATION_MODES */
+ 	local_info_t *local = (local_info_t *) dev->priv;
++#ifndef PRISM2_NO_STATION_MODES
+ 	struct hfa384x_scan_request scan_req;
+ 	int ret = 0;
++#endif /* !PRISM2_NO_STATION_MODES */
+ 
+ 	if (local->iw_mode == IW_MODE_MASTER) {
+-		printk(KERN_DEBUG "%s: SIOCSIWSCAN is currently only supported"
+-		       " in Station modes\n", dev->name);
++		/* In master mode, we just return the results of our local
++		 * tables, so we don't need to start anything...
++		 * Jean II */
+ 		data->length = 0;
+-		return -EOPNOTSUPP;
++		return 0;
+ 	}
+ 
++#ifdef PRISM2_NO_STATION_MODES
++	return -EOPNOTSUPP;
++#else /* PRISM2_NO_STATION_MODES */
++
+ 	memset(&scan_req, 0, sizeof(scan_req));
+ 	scan_req.channel_list = __constant_cpu_to_le16(0x3fff);
+ 	scan_req.txrate = __constant_cpu_to_le16(HFA384X_RATES_1MBPS);
+@@ -1490,7 +1494,7 @@ static inline int prism2_translate_scan(
+ 		if (capabilities & (WLAN_CAPABILITY_ESS |
+ 				    WLAN_CAPABILITY_IBSS)) {
+ 			if (capabilities & WLAN_CAPABILITY_ESS)
+-				iwe.u.mode = IW_MODE_INFRA;
++				iwe.u.mode = IW_MODE_MASTER;
+ 			else
+ 				iwe.u.mode = IW_MODE_ADHOC;
+ 			iwe.len = IW_EV_UINT_LEN;
+@@ -1569,10 +1573,9 @@ static inline int prism2_translate_scan(
+ }
+ #endif /* PRISM2_NO_STATION_MODES */
+ 
+-
+-static int prism2_ioctl_giwscan(struct net_device *dev,
+-				struct iw_request_info *info,
+-				struct iw_point *data, char *extra)
++static inline int prism2_ioctl_giwscan_sta(struct net_device *dev,
++					   struct iw_request_info *info,
++					   struct iw_point *data, char *extra)
+ {
+ #ifdef PRISM2_NO_STATION_MODES
+ 	return -EOPNOTSUPP;
+@@ -1644,6 +1647,41 @@ static int prism2_ioctl_giwscan(struct n
+ 		return res;
+ 	}
+ #endif /* PRISM2_NO_STATION_MODES */
++}
++
++static int prism2_ioctl_giwscan(struct net_device *dev,
++				struct iw_request_info *info,
++				struct iw_point *data, char *extra)
++{
++	local_info_t *local = (local_info_t *) dev->priv;
++	int res;
++
++	if (local->iw_mode == IW_MODE_MASTER) {
++		/* In MASTER mode, it doesn't make sense to go around
++		 * scanning the frequencies and make the stations we serve
++		 * wait when what the user is really interested about is the
++		 * list of stations and access points we are talking to.
++		 * So, just extract results from our cache...
++		 * Jean II */
++
++		/* Translate to WE format */
++		res = prism2_ap_translate_scan(dev, extra);
++		if (res >= 0) {
++			printk(KERN_DEBUG "Scan result translation succeeded "
++			       "(length=%d)\n", res);
++			data->length = res;
++			return 0;
++		} else {
++			printk(KERN_DEBUG
++			       "Scan result translation failed (res=%d)\n",
++			       res);
++			data->length = 0;
++			return res;
++		}
++	} else {
++		/* Station mode */
++		return prism2_ioctl_giwscan_sta(dev, info, data, extra);
++	}
+ }
+ #endif /* WIRELESS_EXT > 13 */
+ 

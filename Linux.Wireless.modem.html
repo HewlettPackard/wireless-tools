@@ -1,0 +1,969 @@
+<HTML>
+<HEAD>
+<TITLE>Wireless Overview - The radio modem</TITLE>
+<LINK rel="Next"  href="Linux.Wireless.mac.html" title="The MAC level">
+<LINK rel="Prev"  href="Linux.Wireless.wlan.html" title="Anatomy of a
+radio LAN">
+<LINK rel="First" href="Linux.Wireless.intro.html" title="Introduction">
+<LINK rel="Last"  href="Linux.Wireless.std.html" title="Standards">
+<LINK rel="Up"    href="Wireless.html" title="Linux Wireless LAN Howto">
+
+<LINK rel="Contents" href="Linux.Wireless.Overview.html" title="Technology
+overview">
+<LINK rel="section" href="#ism" title="ISM frequency bands">
+<LINK rel="section" href="#unii" title="5 GHz frequency bands">
+<LINK rel="section" href="#spreadspectrum" title="Spread Spectrum techniques">
+<LINK rel="section" href="#directsequence" title="Spread Spectrum -
+Direct Sequence">
+<LINK rel="section" href="#frequencyhopping" title="Spread Spectrum -
+Frequency Hopping">
+<LINK rel="section" href="#diversity" title="Diversity">
+<LINK rel="section" href="#antennas" title="Directional antennas">
+<LINK rel="section" href="#range" title="Range issues">
+<LINK rel="section" href="#txpower" title="Range - Transmitted power">
+<LINK rel="section" href="#sensitivity" title="Range - Sensitivity">
+<LINK rel="section" href="#attenuation" title="Range - Attenuation">
+<LINK rel="section" href="#snr" title="Range - Signal to noise ratio">
+<LINK rel="section" href="#modulations" title="Modulations">
+<LINK rel="section" href="#multirate" title="Modulations - Multi-rate
+systems">
+<LINK rel="section" href="#2fsk" title="Modulations - 2FSK and 4FSK">
+<LINK rel="section" href="#cck" title="Modulations - 802.11 HR">
+<LINK rel="section" href="#ofdm" title="Modulations - OFDM">
+<LINK rel="section" href="#noises" title="Interferences and noises">
+<LINK rel="section" href="#fading" title="Interferences - Fading">
+<LINK rel="section" href="#mwo" title="Interferences - Microwave oven">
+<LINK rel="section" href="#fec" title="Interferences - FEC">
+<LINK rel="section" href="#multipath" title="Interferences - Multipath">
+</HEAD>
+
+<BODY>
+
+<H2>4	The radio modem (physical layer)</H2>
+
+This section of the document deals with all the issues related to the
+physical layer (bottom of the pile, OSI wise&nbsp;:-), or in our case the
+radio modem.
+
+<A NAME="ism">
+<H3>4.1	ISM frequency bands (900 MHz &amp; 2.4 GHz)</H3>
+</A>
+
+In every country, the use of the radio spectrum is <B>regulated</B> by
+some organisations. This is the <I>FCC</I> for North America and the
+<I>ETSI</I> for Europe. These regulators define the allocation of each
+radio frequency bandwidth&nbsp;: for TV and radio broadcasting, for the
+telecommunication operators, for the army... Usually, to use a
+frequency band, you must negotiate with these bodies, register your
+architecture and buy the right to use the frequency.
+<p>
+These organisations, aware of the prospects of local radio
+communications for individual users, have allocated some specific
+frequency bands to be used in a more flexible way. The oldest and most
+commonly used ones are located at 900 MHz and 2.4 GHz and called the
+<B>ISM bands</B> (<I>Industrial, Scientific</I> and
+<I>Medical</I>). The main characteristic of these bands is that they
+are <B>unlicensed</B>, this means that the user is free to use them
+without having to register or to pay anything (apart from the radio
+hardware).
+<p>
+Of course, to avoid abuses, these organisations have imposed a set of
+rules for these frequency bands and only the products certified to
+conform to those rules are allowed to emit in the bands. These rules
+specify at least the maximum power transmitted in the band and the out
+of band emissions (to not pollute adjacent bands). The ISM bands rules
+specify as well that <B>Spread Spectrum</B> has to be used (either
+<I>Direct Sequence</I> or <I>Frequency Hopping</I>, see <A
+HREF="Linux.Wireless.modem.html#spreadspectrum"><I>chapter&nbsp;4.3</I></A>),
+and how the channels are defined, to allow the peaceful cohabitation
+of different systems (that's the theory).
+<p>
+The Spread Spectrum rules mandate <I>Direct Sequence</I> systems must
+spread their signal at least 11 times, and that <I>Frequency
+Hopping</I> systems stay on a channel a maximum of 0.4 s and use 75
+channels at minimum in each 30 s period. But, don't trust me, check
+the exact wording of the rules...
+<p>
+These rules may vary depending on the country&nbsp;: the FCC allocates
+both the 900 MHz and 2.4 GHz band with 1 W maximum power, whereas the
+ETSI allocates only the 2.4 GHz band with 100 mW maximum power (900
+MHz is used for GSM cell phones in Europe). The 2.4 GHz band is
+available worldwide and the regulations are mostly compatible between
+the different authorities (usually 80 MHz of bandwidth between 2.4 GHz
+and 2.48 GHz). The main exception is Japan which has some additional
+constraints.
+<p>
+The Spread Spectrum rules originally allowed around 2 Mb/s maximum bit
+rate (both FH and DS), but the Direct Sequence people managed to find
+a loophole and now offer 11 Mb/s systems (see <A
+HREF="Linux.Wireless.modem.html#cck"><I>chapter&nbsp;4.7.3</I></A>).
+<p>
+Because these bands are &quot;free&quot;, they may be heavily
+<B>polluted</B> by other unlicensed systems. The 2.4 GHz band also
+suffers from the microwave oven radiations (this explains why it was
+given for free).
+<p>
+Please note that the regulation for unlicensed bands is quite
+different from the bands reserved for radio amateurs (HAM). HAM people
+are not happy because their regulations are much more strict (they
+have to pass an examination including morse code and follow stricter
+etiquette) and the bandwidth available to them much more scarce.
+
+<A NAME="unii">
+<H3>4.2	5 GHz frequency bands (HiperLan and UNII band)</H3>
+</A>
+
+The 5 GHz unlicensed bands are another very complicated story.
+<p>
+ETSI was the first to open the 5 GHz band, and so far, the 5.2 GHz
+band is dedicated to <B>HiperLan</B> (see <A
+HREF="Linux.Wireless.std.html#Hiperlan"><I>chapter&nbsp;6.3</I></A>),
+and the 5.4 GHz band reserved for <B>HiperLan II</B> (alias BRAN, see
+<A
+HREF="Linux.Wireless.std.html#Hiperlan2"><I>chapter&nbsp;6.4</I></A>). As
+they have done for <I>GSM</I> and <I>DECT</I>, only systems that fully
+conform to those standards (Phy and MAC) may operate in the band.
+<p>
+In the States, the FCC has allocated the band between 5.2 and 5.8 GHz
+(<B>UNII band</B>) with some very liberal rules (no spread Spectrum
+mandated, no channels allocated). To limit systems, they have
+introduced complicated power rules, making the use of around 20 MHz
+bandwidth optimal (system using less bandwidth can transmit less
+power, system using more bandwidth don't get more power), and divided
+the band in 3 chunks, for low power systems (5.2 GHz), medium power
+(5.4 GHz) and high power (5.6 GHz). Some people have tried to come up
+with some &quot;etiquette&quot; for the UNII band (stricter set of
+rules) but they couldn't accommodate the conflicting requirement of
+all parties.
+<p>
+In the 5 GHz band, because of the availability of more bandwidth,
+higher speed are possible (10 to 40 Mb/s). But, operating in a higher
+frequency band increases the noise level, obstacles and walls are more
+opaque to transmissions (see <A
+HREF="Linux.Wireless.modem.html#multipath"><I>chapter&nbsp;4.8.4</I></A>),
+and a higher bit rate require more SNR (Signal Noise Ratio - see <A
+HREF="Linux.Wireless.modem.html#snr"><I>chapter&nbsp;4.6.4</I></A>),
+which means a reduced range compared to 2.4 GHZ products, which is bad
+news.
+<p>
+In summary, in Europe it's HiperLan or nothing. In the USA, the low
+power chunk of the UNII band (5.2 GHz) is likely to be used by 802.11
+at 5 GHz (see <A HREF="Linux.Wireless.std.html#802.11ab"
+><I>chapter&nbsp;6.2</I></A>) and HiperLan, and people are
+unlikely to propose yet another standard. The high power chunk will be
+used by wireless distribution systems, and both type of system will
+fight for the medium power chunk...
+
+<A NAME="spreadspectrum">
+<H3>4.3	Spread Spectrum techniques</H3>
+</A>
+
+<B>Spread spectrum</B> is a technique (mainly pioneered by the army)
+trading bandwidth for reliability. The goal is to use more bandwidth
+than the system really needs for transmission to reduce the impact of
+localised interferences (bad frequencies) on the system. Spread
+spectrum, as it prevents one system to use the full bandwidth
+capacity, also force independant systems to share the bandwidth (in a
+mostly fair way). In the 2.4 GHz band, the regulation specifies that
+systems have to use one of the two main spread spectrum
+technique&nbsp;: <I>Direct Sequence</I> or <I>Frequency Hopping</I>.
+<p>
+Which one is better ? This is the main technical war between the radio
+LAN vendors. Everybody, of course, argue that its own technology is
+better. For now, no one has come with some decisive arguments about
+the comparative performance and robustness of these two technologies
+(estimating performance of radio systems is a tricky job). Of course,
+comparing products doesn't make sense because the performance of a
+system depend on many other components (the MAC protocol, the
+signalling rate), the optimisation chosen (performance versus
+reliability versus cost) and the actual implementation (hum, hum...).
+
+<A NAME="directsequence">
+<H4>4.3.1	Direct Sequence</H4>
+</A>
+
+The principle of <B>Direct Sequence</B> is to <I>spread</I> the signal
+on a larger band by multiplexing it with a signature (the code), to
+minimise localised interference and background noise.
+<p>
+The system works over a fixed large channel. To spread the signal,
+each bit of the packet to transmit is sur-modulated by a <I>code</I>
+(a fast repetitive pattern). In the receiver, the original signal is
+recovered by receiving the whole spread channel (averaging effect) and
+demodulating by the same code (processing gain). For a 2 Mb/s
+signalling rate modulated by a 11 chips code (like the Wavelan), the
+result is a signal spread over 22 MHz of bandwidth.
+<p>
+Any narrowband interferer, because it uses only a small part of the
+total bandwidth used by the system, will appear much weaker to the
+Direct Sequence system (I think it will be much clearer if you look at
+the picture below). Moreover, the demodulator use the same code as the
+transmitter to match the received signal, which decrease further
+signals not modulated by the code (this is called the processing gain
+of the code, 11 chips as used in 802.11 gives in theory a 10 dB
+processing gain).
+<p>
+
+<CENTER><I>Direct Sequence&nbsp;:</I>
+<TABLE BORDER=2 CELLPADDING=5>
+<TR>
+<TD><CENTER><I>Original signal</I></CENTER></TD>
+<TD><CENTER><I>Spread signal</I></CENTER></TD>
+<TD><CENTER><I>Decoded signal</I></CENTER></TD>
+</TR><TR>
+<TD><CENTER><IMG SRC="DS.orig.png" ALT="graphical figure"></CENTER></TD>
+<TD><CENTER><IMG SRC="DS.spread.png" ALT="graphical figure"></CENTER></TD>
+<TD><CENTER><IMG SRC="DS.orig.png" ALT="graphical figure"></CENTER></TD>
+</TR><TR>
+<TD><CENTER><IMG SRC="DS.transmit.png" ALT="graphical figure"></CENTER></TD>
+<TD><CENTER><IMG SRC="DS.receive.png" ALT="graphical figure"></CENTER></TD>
+<TD><CENTER><IMG SRC="DS.decode.png" ALT="graphical figure"></CENTER></TD>
+</TR>
+</TABLE>
+</CENTER>
+
+<p>
+Direct Sequence is also the principle used by <I>CDMA</I> (Code
+Division Multiple Access - one of the cellular phone technique), but
+in CDMA each individual phone channel is given a different code on the
+same frequency. By having each channel having a orthogonal code and
+the same received power (so, using power control), it is possible to
+recover every CDMA channel using its code. The only limit of the
+scheme is that the noise is proportional of the number of channels (so
+the degradation with increased capacity is graceful). The
+configuration also needs to be a star topology (to use power control),
+which doesn't suit well Wireless LAN.
+<p>
+The spreading with the code produces a faster modulation, therefore a
+DS modem is quite complicated (it usually require faster circuits and
+a DSP or equivalent logic for the spreading). One the other hand, the
+fact of having one single fixed channel (as opposed to Frequency
+Hopping) eases the task of the higher layers (MAC).
+<p>
+Because it uses a large channel, a Direct Sequence system has only a
+few channels available in the bandwidth (3 for the <I>Wavelan</I> - on
+different frequencies). Those channels are totally separate (they
+don't generate interferences on each other). Direct Sequence also
+offers the possibility to use partially overlapping channels for
+systems in adjacent areas, increasing slightly the number of
+channels. But this last solution tends to increase the noise and
+decrease the performance of the system, because all those systems
+usually operate with the same code (and not one code per frequency).
+
+<A NAME="frequencyhopping">
+<H4>4.3.2	Frequency Hopping</H4>
+</A>
+
+<B>Frequency Hopping</B> uses a set of narrow channels and walk
+through all of them in sequence. For example, the 2.4 GHz ISM band is
+divided in 79 channels of 1 MHz. Periodically (every 20 to 400 ms
+usually), the system <I>hop</I> to a new channel, following a
+predetermined cyclic <I>hopping pattern</I>.
+<p>
+The system avoids interferences by never staying on the same
+channel&nbsp;: if a channel is bad, the system might not be able to
+use it and just waits for the next good channel. As the pattern makes
+the whole network hop through all the bandwidth available, the system
+average the effect of bad channels over the time.
+<p>
+This is where Frequency Hopping has a slight advantage over Direct
+Sequence&nbsp;: in the very specific case of strong narrow-band
+interferer present in the band, Frequency Hopping loose some hops but
+will manage to get some hops on good frequencies. On the other hand,
+if the noise is stronger than the received signal, there is not much
+that the Direct Sequence node can do. But, for most interferers at
+common power levels, it's not totally clear which will give the
+highest performance (it depends).
+<p>
+
+<CENTER><I>Frequency Hopping&nbsp;:</I>
+<p>
+<IMG SRC="FH.png" ALT="Frequency Hopping graphical figure"></CENTER>
+
+<p>
+On the other hand, Frequency Hopping introduces more complications at
+the MAC level&nbsp;: scanning to find the network at the
+initialisation (a moving target), keeping the synchronisation of the
+nodes, managing the hops.
+<p>
+This complexity of the MAC has a price in term of performance, and the
+Frequency Hopping mechanism has some overhead. There is management
+overhead to manage the synchronisation, and there is some dead time in
+the transmission when the system hop. In theory, this can be kept to a
+minimum.
+<p>
+Also, the Frequency Hopping system have to include a process called
+whitening, to conform to radio transmission constraints, inserting
+some regular stuff bits in each packets (to avoid long strings of 0 or
+1), adding more overhead (on the other a Direct Sequence signal is
+withened by the Direct Sequence process).
+<p>
+The Frequency Hopping technique can accommodate many more independent
+systems collocated in the same area than the Direct Sequence technique
+by using different hopping pattern (up to 15 for the
+<I>RangeLan2</I>). On the other hand, the different hopping patterns
+of Frequency Hopping will &quot;collide&quot; on the same (or
+adjacent) frequency from time to time. The collisions of the Frequency
+Hopping patterns may reduce the throughput significantly&nbsp;: the
+systems &quot;colliding&quot; on the same (or an adjacent) frequency
+will have to share the bandwidth between them (see discussions on
+aggregate throughput in <A HREF="Linux.Wireless.mac.html#aggregate"
+><I>chapter&nbsp;5.4.6</I></A>).
+
+<H4>4.3.3	Comparison...</H4>
+
+In term of complexity, the Direct Sequence modem is more complicated
+than the Frequency Hopping one, and the Direct Sequence has a simpler
+MAC protocol. With the increasing integration of digital hardware, it
+doesn't cost much more to implement the specific MAC functionalities
+required for the Frequency Hopping system, and as the price of the
+modem is a big portion of a radio LAN and doesn't follow the same cost
+reduction trends, Frequency Hopping systems will tend to be cheaper.
+<p>
+In term of bandwidth sharing, the two technologies perform really
+differently. The same is true in term of resistance to interferences
+(it depend on the strength and pattern of the interferer). Direct
+Sequence systems tend also to have a lower overhead on the air.
+<p>
+In summary, most vendors are going to Frequency Hopping because of the
+lower cost and try to convince people that it is better, and vendors
+having heavily invested in Direct Sequence try to push their raw
+performance advantage (especially now with 802.11 HR, see <A
+HREF="Linux.Wireless.std.html#802.11ab"><I>chapter&nbsp;6.2</I></A>),
+so it is still a kind of religion war.
+
+<A NAME="diversity">
+<H3>4.4	Diversity</H3>
+</A>
+
+<B>Diversity</B> is a generic concept of introducing redundancy in the
+system to overcome noise and to increase the reliability of the
+system. For example, <I>spread spectrum</I> is a type of frequency
+diversity, using more bandwidth than necessary to avoid bad parts of
+the spectrum. <I>Retransmission</I> is a very usual temporal
+diversity. <I>FEC</I> (Forward Error Correction) is another kind of
+temporal diversity. Very often, &quot;diversity&quot; is associated
+with <I>antenna diversity</I> only. Antenna diversity is only one form
+of diversity (a spacial diversity).
+<p>
+
+<B>Antenna diversity</B> means that the radio device has two (or more)
+antennas. The transmission conditions on the channel vary a lot over
+the time. The channel tends to fade in and fade out (see <A
+HREF="Linux.Wireless.modem.html#fading"><I>chapter&nbsp;4.8.1</I></A>),
+so the device has moment of good reception and moment of bad
+reception. But, these conditions are also dependant on the spacial
+position. By having two antennas, even quite close (a few cm), the
+condition at each antenna is very often totally different. One antenna
+may give a poor signal and the other a good one, and a few ms later it
+might be the reverse. So, before receiving each packet, the receiver
+chooses the best antenna of the two by comparing the signal strengths,
+and so can avoid most of the fade out periods.
+
+<A NAME="antennas">
+<H3>4.5	Directional antennas</H3>
+</A>
+
+Most wireless LANs use omnidirectional antennas, but may offer
+<B>directional antennas</B> in option. Instead of receiving in every
+directions, the directional antenna favour reception in a more or less
+narrow angle. The narrower the angle is, the higher the gain is (and
+the range), because you get rid of more unwanted emissions and
+background noise in the other directions.
+<p>
+With directional antennas, it is quite common to have a few kilometres
+of range in line of sight with products in the ISM band. The first
+problem is that you must of course point each antenna towards the node
+you intend to communicate with (depending on the angle this needs to
+be more or less precise). The second problem is that very directional
+antennas tend to be quite big.
+<p>
+This is why directional antennas are only suited for fixed point to
+point links (products like <B>Wireless Bridges</B>). For most networks
+where nodes need to talk to different other nodes in different
+directions and might need to move, omnidirectional antennas are much
+more practical.
+<p>
+<B>Sectored antennas</B> are very similar to directional antennas, and
+heavily used in cellular phone base stations. A set of wide angle
+directional antenna are assembled on a vertical pole, each one
+covering one portion of the horizon (a sector, for example 3 antennas
+120 degrees wide). When talking to a specific node, the base station
+just select the sector of the sectored antenna that cover this node,
+giving the benefit of directionality without sacrificing the coverage.
+<p>
+People are also investigating <B>beam forming antennas</B>. This is an
+adaptive directional antenna, using a set of unidirectional antennas
+and interferometry to enhance the signal. Basically, by adding all the
+signal of the different antennas with specific offset (to compensate
+propagation delay), it is possible to aim the system towards a
+specific direction and have the same benefit as directional
+antenna. As this system is adaptive and dynamic, it could be used for
+Wireless LANs
+
+<A NAME="range">
+<H3>4.6	Range issues</H3>
+</A>
+
+The <B>propagation</B> of radio transmissions is influenced by many
+factors. Walls and floors tend to decrease and reflect the signal, and
+background noise makes it more difficult to demodulate. In a typical
+environment, all the shadows due to obstacles and reflections on the
+walls create a very unpredictable quality of transmission for each
+specific location. The channel quality also vary quite a lot over the
+time (<I>fading</I>, see <A HREF="Linux.Wireless.modem.html#fading"
+><I>chapter&nbsp;4.8.1</I></A>) because the environment is not static.
+<p>
+Because of the way radio transmissions are affected by the environment
+in such a complex way, it is quite difficult to predict the
+comportment of the system and to define a <B>range</B>. You will have
+some good, fair and bad area/period, the closer the two devices are
+the more likely they are to be in a good one.
+<p>
+Most vendors attempt to define a range for their products, which is
+the average maximum distance in usual operating conditions between two
+nodes (diameter of a <B>cell</B> - radio neighbourhood). Some even
+give different ranges for different typical environments. For
+example&nbsp;: open environment (no obstacles), semi-open (cubicles)
+and closed (real walls).
+<p>
+But there is no standard and common operating procedure to measure a
+range (except in free space, but this is useless), so we can't really
+compare the different products from the ranges as indicated in their
+data-sheets, and you must take these values with a bit of caution.
+<p>
+If you want to compare products in term of range performance, you must
+look closely at the <I>transmitted power</I> and <I>sensitivity</I>
+values. These are some measurable characteristics of the hardware
+which indicate the performance of the product in that respect. In
+fact, I would also recommend to do some benchmark of different
+products in your own environment to get a better idea of what coverage
+you can expect.
+
+<A NAME="txpower">
+<H4>4.6.1	Transmitted power</H4>
+</A>
+
+The <B>transmitted power</B> is the strength of the emissions measured
+in Watts (or milliWatts). We have already seen that the regulations
+limit this power (see <A HREF="Linux.Wireless.modem.html#ism"
+><I>chapter&nbsp;4.1</I></A>). Products having a high transmit power
+will also be likely to drain the batteries faster. But, having a high
+transmit power will help to emit signals stronger than the interferers
+in the band (and other systems).
+<p>
+Having a strong transmitted power has some drawback for <I>frequency
+reuse</I>. This means that if you want to put many different networks
+in areas close to each other, they will tend to pollute each
+other. With less transmitted power you can make smaller cells. This is
+why some product may allow to select different transmitted powers.
+
+<A NAME="sensitivity">
+<H4>4.6.2	Sensitivity</H4>
+</A>
+
+The <B>sensitivity</B> is the measure of the weakest signal that may
+be reliably heard on the channel by the receiver (it is able to read
+the bits from the antenna with a low error probability). This
+indicates the performance of the receiver, and the lower the value the
+better the hardware (higher in absolute value). The figure is given in
+dBm, the magic formula to transform power in Watts to dBm is&nbsp;:
+<I>P dBm = 30 + 10.log(P W)</I>. Usual values are around -80 dBm (the
+lowest, the better, for example -90 dBm is better).
+<p>
+One problem is that all manufacturer and standards use the same
+reference to define sensitivity. 802.11 specify the sensitivity as the
+point when the system suffer from 3 % of packets losses (for packets
+of 400 Bytes in a Gaussian channel). Some products use 50 % packet
+losses as the definition of sensitivity, which of course gives a
+better number. The use of a Gaussian channel also gives better numbers
+(the use of a Rayleigh Fading channel with antenna diversity would
+give results approximately 7 dB worse).
+
+<A NAME="attenuation">
+<H4>4.6.3	Attenuation</H4>
+</A>
+
+Knowing those two values, you may calculate the maximum possible
+<B>attenuation</B> of the packets (this is the difference between the
+two values, in dB). The larger the maximum possible attenuation, the
+larger the range. For a 100 mW system with a -80 dBm sensitivity, we
+have 100 dB maximum attenuation.
+<p>
+The attenuation is the decrease of signal strength between the
+transmitter and the receiver. In the air, the attenuation is simply
+proportional to the square of the distance. If you know exactly the
+composition of the signal paths between the two nodes (distance in the
+air, type of obstacles, reflections...), you may calculate the
+attenuation. But usually it is quite tricky to determine the
+attenuation as a function of the distance, especially that the signal
+may be the composite from different propagation paths (see <A
+HREF="Linux.Wireless.modem.html#multipath"><I>chapter&nbsp;4.8.4</I></A>).
+Moreover, the variation in the environment make the attenuation change
+over the time (see <A
+HREF="Linux.Wireless.modem.html#fading"><I>chapter&nbsp;4.8.1</I></A>).
+<p>
+Because of this non straightforward relationship, knowing the maximum
+possible attenuation won't give you the maximum range, but just a
+feeling. The only safe thing is that products with a greater maximum
+possible attenuation are very likely to have a larger range.
+
+<p>
+
+<CENTER><I>Propagation and Range&nbsp;:</I>
+<p>
+<IMG SRC="Attenuation.png" ALT="Propagation graphical figure"></CENTER>
+
+<A NAME="snr">
+<H4>4.6.4	Signal to noise ratio (SNR)</H4>
+</A>
+
+In the case of multirate systems, I've been talking of <B>Signal to
+Noise ratio</B> (SNR). The sensitivity is in fact closely linked to
+the minimum SNR of the modem. The SNR defines the difference of power
+in the receiver between a valid signal and a noise. To be able to
+decode successfully the received signal, the receiver needs a minimum
+SNR (i.e. the signal not too much polluted by the noise). This minimum
+SNR depends on the quality of the receiver hardware and the modulation
+chosen (see <A HREF="Linux.Wireless.modem.html#multirate"
+><I>chapter&nbsp;4.7.1</I></A> on multi rate systems).
+<p>
+So, the link between sensitivity and minimum SNR is quite obvious. If
+you add the minimum SNR to the background noise in the receiver
+(hardware noise and background noise on the channel), you will find
+the sensitivity. So, having a low sensitivity means also a low minimum
+SNR, so the ability to receive reliably packets with potentially
+higher interference strength, which explain why the sensitivity is
+such an important performance characteristic.
+
+<A NAME="modulations">
+<H3>4.7	Modulations</H3>
+</A>
+
+The main job of the radio modem is to transform bits into modulations
+of the radio waves, but there is many way to do that. Most systems use
+a carrier (a base frequency) and modulate it. The simplest way is to
+modulate the strength of the signal (Amplitude Modulation), but as the
+attenuation of the channel is usually not constant (see <A
+HREF="Linux.Wireless.modem.html#attenuation"><I>chapter&nbsp;4.6.3</I></A>),
+this lead to poor performance. Most modern systems modulate either the
+frequency of the signal or the phase of the signal (frequency offset),
+which gives much greater performance.
+
+<A NAME="multirate">
+<H4>4.7.1	Multi-rate systems</H4>
+</A>
+
+If you want a better throughput, the most simple way is to use more
+bandwidth. The problem is that the ISM spread spectrum regulations
+limits the amount of bandwidth usable (1 MHz channels for Frequency
+Hopping). Also, in most hardware the filters used to recover the
+signal are fixed, so the channel width is fixed. This limit the rate
+of symbols that you can use (1 Mbauds for Frequency Hopping).
+<p>
+So, how could some Frequency Hopping systems offer 3 Mb/s in 1 MHz
+channels&nbsp;? The use of more <B>complex modulation</B> schemes
+allows to overcome this limitation. For example, the standard 2FSK
+allows to put 1 bit per symbol, whereas 4FSK allows 2 bits per
+symbols, doubling the signalling rate.
+<p>
+Of course, there is a drawback&nbsp;: a more complex modulation scheme
+is less robust and will require a higher received Signal to Noise
+Ratio to work (SNR - see <A HREF="Linux.Wireless.modem.html#snr"
+><I>chapter&nbsp;4.6.4</I></A>). When going from 2FSK to 4FSK, each
+time the receiver reads a symbol, instead of having to distinguish two
+fairly separated values, now it has to distinguish 4 closer to each
+other (see <A HREF="Linux.Wireless.modem.html#2fsk"
+><I>chapter&nbsp;4.7.2</I></A>). More complex modulations stuff even
+more values in the same space, but then the slightest perturbation of
+the signal (noises) will make the receiver reads the wrong value for
+the symbol.
+<p>
+So, we have the choice between a high speed modulation which requires
+strong received signal and a slower modulation which works even on
+weak signals. In other words, the higher the signalling rate, the
+shorter the range.
+<p>
+Because users want both range and speed, some vendors have build some
+systems using multiple levels of modulations, changing automatically
+from the fast modulation to the robust one depending on the channel
+conditions (when a packet fail, the rate is automatically
+reduced). This introduces a bit of overhead and complexity, but the
+system offer a much better performance characteristic (range or
+speed).
+
+<A NAME="2fsk">
+<H4>4.7.2	2FSK and 4FSK</H4>
+</A>
+
+<B>2FSK</B> (Frequency Shift Keying) is the simplest form of frequency
+modulation. Basically, the system use two different frequencies for
+the values 0 and 1 of each bit. For example, if <I>B</I> is the base
+frequency (the carrier) and <I>d</I> the carrier deviation, each time
+the system want to transmit a 0 it creates a waveform of frequency
+<I>B-d</I> (a symbol), and each time it want to transmit a 1 it
+creates a waveform of frequency <I>B+d</I>. The receiver just need to
+measure the deviation of the signal to the reference frequency
+<I>B</I> to know which value of the bit was transmitted.
+<p>
+
+<CENTER><I>Frequency Modulation (2FSK)&nbsp;:</I>
+<p>
+<IMG SRC="Modulation.png" ALT="Modulation graphical figure"></CENTER>
+
+<p>
+Measuring this deviation is not easy, because each symbol is very
+short in time&nbsp;: the transmitter change it for every bit to
+transmit at the speed given by the baudrate. The receiver needs of
+course to know when the bits are transmitted, which require timing
+synchronisation on the received signal. The carrier deviation has to
+be chosen carefully to enable enough differentiation between the two
+symbols but to have the signal generated fitting in the band allocated
+to it (usually around one hundred kHz for a 1 MHz channel at 2.4 GHz).
+<p>
+As mentioned above, it is possible to put more than one bit per symbol
+(see <A HREF="Linux.Wireless.modem.html#multirate"
+><I>chapter&nbsp;4.7.1</I></A>), like using <B>4FSK</B>. 4FSK use 4
+different symbols having 4 different carrier deviation, <I>B+1/2d,
+B-1/2d, B+3/2d</I> and <I>B-3/2d</I>, each symbol is mapped to a
+combination of two bits (00, 01, 10, 11).
+<p>
+Note that the difference in frequency between each symbol for 4FSK is
+smaller than for 2FSK, to allow the signal to fit in roughly the same
+channel width. Between each symbol, the difference is only <I>d</I>
+for 2FSK, instead of <I>2d</I> for 4FSK, which explains why 4FSK is
+more sensitive and requires a better SNR (see <A
+HREF="Linux.Wireless.modem.html#snr"><I>chapter&nbsp;4.6.4</I></A>).
+
+<A NAME="cck">
+<H4>4.7.3	802.11 HR (11 Mb/s)</H4>
+</A>
+
+When 802.11 was eventually released, 1 and 2 Mb/s was no longer
+considered as decent speed for Wireless LAN and people were already
+talking of using the 5 GHz band for higher throughput (HiperLan and
+802.11 at 5 GHz). However, the migration from 2.4 GHz to 5 GHz
+requires to change all nodes and doesn't provide backward
+compatibility (it's mot the same frequency band, so a new modem is
+necessary).
+<p>
+Therefore, people producing 2.4 GHz products tried to find way to
+extend the life of their technology (mostly Harris and Lucent). They
+cheated with the Spread Spectrum rules, and got away with it, enabling
+them to offer 5 and 11 Mb/s systems.
+<p>
+Basically, a DS system generate signal which occupy around 22 MHz of
+bandwidth. They designed their 11 Mb/s system to generate signal
+similar to a standard DS system. Then, they went to the FC and claimed
+that as their new system was generating the same type of signal as a
+DS system, it's impact on other systems in the band was the same, so
+it should be authorised as well. After a bit of negociation, the FCC
+did accept this extension of the rule. Note that some FH vendors also
+tried to get 5 MHz FH channels in the 2.4 GHz band but failed to
+obtain it.
+<p>
+<I>Lucent</I> came up with the simplest solution, PPM (Pulse Position
+Modulation), which is included in their &quot;Turbo&quot; line of
+products, offering 5 and 10 Mb/s. PPM simply shift the code used in
+the DS modem, each position can encode some more bits. PPM is simple,
+cheap, but low performance.
+<p>
+<I>Harris</I> tried MBOK (M-ary Bi-Orthogonal Keying), offering 5.5
+Mb/s and 11 Mb/s, which is a more complex modulation than PPM, so more
+expensive and more robust. The signal produced by the transmitter is
+also less similar to a DS signal.
+<p>
+They both went back to the 802.11 group, but neither wanted to adopt
+the system of the other. So, they settled down on yet another
+modulation, <B>CCK</B> (Complementary Code Keying), which eventually
+got adopted for the 802.11 HR standard and approved by the FCC. CCK is
+the most complex of the 3 modulations, offering better performance,
+but higher cost, and signals even less similar to the original DS
+signals.
+<p>
+<B>802.11 HR</B> offer 11 and 5.5 Mb/s rate (using the CCK modulation)
+and is backward compatible with original 802.11 DS systems. However,
+the higher bit rate require a higher SNR, which reduce the range
+significantly. Note as well that because of backward compatibility
+most of the underlying protocol is still designed for the 1 Mb/s
+standard (headers and management frames are 1 Mb/s, contention window
+size is still based on 1 Mb/s systems), which mean that at higher rate
+the overhead of the system is much higher.
+
+<A NAME="ofdm">
+<H4>4.7.4	OFDM</H4>
+</A>
+
+People building high speed system like <I>HiperLan</I> were
+complaining that adding to their products an Equaliser necessary to
+combat delay spread (see <A HREF="Linux.Wireless.modem.html#multipath"
+><I>chapter&nbsp;4.8.4</I></A>) was a major cost. So, they invented a
+new technique to get similar or better performance at lower cost,
+called <B>OFDM</B> (Orthogonal Frequency Division Multiplex).
+<p>
+Using equalisation is a post-processing technique, which tries to
+overcome delay spread by brute force. OFDM is a pre-processing
+technique, where the signal transmitted on the band is prepared in
+such a way that the impact of delay spread is reduced.
+<p>
+Delay spread is damaging because the symbol time is very short, so
+OFDM will only use large symbol time. However, by increasing the
+symbol time we reduce the bit-rate. To overcome this constraint, OFDM
+transmit the symbols no longer serially but in parallel ! This way, we
+have very high bit rate with large symbol time.
+<p>
+OFDM use a set of subcarrier frequencies, the frequencies being
+orthogonal. Each subcarrier is modulated individually, the bit rate
+and signal strength of each subcarrier can be adapted to get maximum
+performance of the system (we put more bits on the good subcarriers
+and less on the bad ones). Then, the system splits the bits to
+transmit between the subcarriers, each subcarrier is modulated and
+then combined to produce the transmitted signal (using a Fast Fourrier
+Transform).
+<p>
+The main drawback of OFDM is that it require a greater frequency
+accuracy (we traded timing accuracy to frequency accuracy). As the
+OFDM signal contains many subcarrier very close to each other in
+frequency, the system must be very accurate to match all of them.
+<p>
+The first use of OFDM was in the HiperLan II standard (see <A
+HREF="Linux.Wireless.std.html#Hiperlan2"><I>chapter&nbsp;6.4</I></A>),
+but since 802.11 at 5 GHz has adapted a very similar modulation (see
+<A
+HREF="Linux.Wireless.std.html#802.11ab"><I>chapter&nbsp;6.2</I></A>).
+
+<A NAME="noises">
+<H3>4.8	Interferences and noises</H3>
+</A>
+
+In the previous section we have examined what does affect the range
+performance of a system. Unfortunately, other phenomenon on the radio
+waves affect the performance of a system (even if they may not reduce
+the range), and all kind of interferences and background radio noises
+will impact the system.
+
+<A NAME="fading">
+<H4>4.8.1	Fading</H4>
+</A>
+
+<B>Fading</B> defines all the temporal variations of the signal
+attenuation due to its propagation in a real environment like an
+office or a house. The radio signal interact in various way with the
+environment (see <A HREF="Linux.Wireless.modem.html#range"
+><I>chapter&nbsp;4.6</I></A> and <A
+HREF="Linux.Wireless.modem.html#multipath"
+><I>chapter&nbsp;4.8.4</I></A>), so vary a lot with the environment
+configuration. Moving a few centimetres can make a big different in
+signal quality (see <A
+HREF="Linux.Wireless.modem.html#diversity"><I>chapter&nbsp;4.4</I></A>).
+<p>
+Moreover, the environment is not static, humans are moving, things are
+moving, and the nodes may be moving themselves. All these small
+movements may produce important <B>variations in time</B> in the
+attenuation of the signal. For example the propagation between two
+nodes may alternate from poor to good on a packet basis.
+<p>
+People usually describe the pattern of attenuation with a <I>Rayleigh
+fading model</I> (case where there is no line of sight) or a <I>Ricean
+model</I> (line of sight + additional paths). The main consequence is
+that transmission errors on the channel tend to be clustered and are
+anything but following a Gaussian distribution.
+<p>
+Fading cause transmissions errors that need to be overcome by the
+system. Of course, recovering from these error will add overhead. The
+greater the range the greater will be the impact of the fading and the
+system will degrade with higher range until it loose communication.
+<p>
+The most efficient technique to overcome the effect of fading is
+<I>antenna diversity</I> (see <A
+HREF="Linux.Wireless.modem.html#diversity"><I>chapter&nbsp;4.4</I></A>).
+
+<A NAME="mwo">
+<H4>4.8.2	Microwave oven and other interferers</H4>
+</A>
+
+As we have mentioned earlier, Wireless LANs tend to be implemented in
+the unlicensed bands, which adds more constraints. The vast majority
+of the Wireless systems (cellular phone, telecoms, aviation,
+military...) are designed for dedicated radio bands, so benefit from
+an absence of interferers in the band they are using. This is not the
+case for Wireless LANs, they have to cope with the emissions of other
+systems.
+<p>
+The deployment of unlicensed systems is totally uncoordinated. So,
+other radio systems operating in the area do create
+interferences. This includes other Wireless LANs, cordless phones (900
+MHz and now 2.4 GHz) and other communication systems.
+<p>
+The 2.4 GHz band is also the frequency where water molecules resonate,
+so is used for microwave oven. Domestic microwave oven (the one used
+to heat food in the kitchen) generates a limited amount of
+interferences, the various regulations limit the power of the
+radiation they can leak to less than 1W, they emit periodic short
+bursts and pollute only a limited portion of the 2.4 GHz
+band. Commercial microwave ovens (for example a huge dryer in a paper
+factory) generate much more interferences.
+<p>
+The result of interferences is that packets collide with interference
+signal and can be received corrupted. If the SNR between the packet
+and the interferer is high enough (see <A
+HREF="Linux.Wireless.modem.html#snr"><I>chapter&nbsp;4.6.4</I></A>),
+the receiver can &quot;capture&quot; the packet, otherwise it is
+corrupted.
+<p>
+Most Wireless LANs cope very well with interferers, in fact usually
+much better than cordless phones, but interferences do reduce
+performance.
+
+<A NAME="fec">
+<H4>4.8.3	FEC (Forward Error Correction)</H4>
+</A>
+
+The most obvious way to overcome transmission errors is to use
+<B>FEC</B>. FEC goes further than CRC which just detects errors, FEC
+adds in every transmission some additional redundancy bits. Depending
+on the number of bits added and the FEC code used (the strength of the
+code), this allows to repair a certain number of errors in the
+transmission.
+<p>
+FEC has been used with success in many systems, and the <B>Turbo
+Codes</B> are probably the most efficient one&nbsp;: they are very
+close to the Shannon limit in a Gaussian channel. In other world, if
+the error follow Gaussian distribution (and the parameters are known),
+there is a turbo code nearly optimal giving the highest throughput in
+this channel.
+<p>
+Unfortunately for us, errors on a radio channel (for Wireless LAN)
+follow a fading model and are clustered. This means that most of the
+time the signal is strong, so the packet is error free, but when the
+signal is weak the packet contains lots of error. Interferences has
+roughly the same effect as fading, either the packet is collision free
+so intact, or when a collision occur most of the packet is corrupted.
+<p>
+To correct all those errors in corrupted packets, it would require a
+very strong FEC code. Unfortunately, this code would add lots of
+redundancy bits, so lots of overhead. A normal FEC code would add less
+overhead, but be useless with the correct packets and inefficient with
+the highly corrupted packets.
+<p>
+So, for Wireless LANs, using FEC tends to be ineffective against
+fading and interferers, and no Wireless LAN do implement FEC. A much
+better solution is to use <B>retransmissions</B> (just retransmit the
+original packet in case of errors - some form of packet scheduling and
+retransmission has been proven to be nearly optimal in Rayleigh fading
+channels). This is usually implemented at the MAC level (see <A
+HREF="Linux.Wireless.mac.html#retry"><I>chapter&nbsp;5.2.1</I></A>).
+<p>
+However, in a few case FEC might be needed in Wireless LANs. Some
+receivers, either due to poor implementation or specific design (like
+having an Equaliser), generate random (Gaussian) errors, and might
+benefit from FEC.
+
+<A NAME="multipath">
+<H4>4.8.4	Multipath and delay spread</H4>
+</A>
+
+Radio waves reflect or diffract on obstacles, and are attenuated
+differently by different materials. This is exactly like light, which
+goes through glass, is reflected by mirrors and stop by most
+obstacles, except that much more materials are transparent or
+reflector to radio than to light.
+<p>
+In a real environment like an office or a house, there is a lot of
+surface reflecting radio (walls, ceilings, metal), being
+semi-transparent to radio (walls, ceilings, humans) or opaque to radio
+(metal). This gives trouble estimating the range of the system (see <A
+HREF="Linux.Wireless.modem.html#range"><I>chapter&nbsp;4.6</I></A>). This
+also mean that the signal received at a node may come from different
+directions (depending on reflections on the environment) with
+different strength (depending on attenuations), and the receiver sees
+only the combinations of all these reflections. This phenomenon is
+called <B>multipath</B>.
+<p>
+Most of the time, multipath is good, because the addition of all the
+reflections of the signal increase its strength. The main effect of
+multipath is that <I>range</I> is very difficult to evaluate (see <A
+HREF="Linux.Wireless.modem.html#attenuation"><I>chapter&nbsp;4.6.3</I></A>)
+and the receiver experiences <I>fading</I> (see <A
+HREF="Linux.Wireless.modem.html#fading"><I>chapter&nbsp;4.8.1</I></A>).
+<p>
+But, the main problem of multipath is that it creates <B>delay
+spread</B>. Depending on the number of reflections and the propagation
+speed in different signals, all these signals don't arrive exactly at
+the same time at the receiver. It's like the &quot;echo&quot; you may
+hear in the mountains, the signal going directly will be faster than
+one reflecting twice on the walls.
+<p>
+Of course, as radio propagate at the speed of light, those difference
+are very small (below the microsecond). But, when the bitrate of the
+system increases, those time differences becomes significant with
+regards to the symbol time (see <A
+HREF="Linux.Wireless.modem.html#2fsk"><I>chapter&nbsp;4.7.2</I></A>),
+to the point of creating destructive interferences (the current symbol
+will be corrupted by the echo of the previous symbols).
+<p>
+Bit rate lower than 1 Mb/s are relatively immune to delay spread
+problems (the symbol time is 1&nbsp;&micro;s and higher), but as the
+bit rate increase above 1 Mb/s the effect of delay spread
+increases. It is considered that systems faster than 5 M/s should have
+some technique to overcome delay spread.
+<p>
+
+<CENTER><I>Multipath and Delay Spread&nbsp;:</I>
+<p>
+<IMG SRC="Multipath.png" ALT="Multipath graphical figure"></CENTER>
+
+<p>
+The main technique to overcome delay spread is using an
+<B>Equaliser</B>. An equaliser is a big digital circuit that try to
+estimate the different components of the signals. The equaliser need
+to be trained (packets includes a specific well known training
+sequence) to determine what are the different path, their relative
+timings and strength. Then, the equaliser separate the different
+components of the signal and recalculate the signal removing the delay
+spread.
+<p>
+The main disadvantage of Equaliser is that they are
+expensive. Recently, some standards are starting to use <B>OFDM</B>
+(see <A HREF="Linux.Wireless.modem.html#ofdm"
+><I>chapter&nbsp;4.7.4</I></A>), which is a clever modulation
+technique minimising the impact of delay spread.
+
+<p ALIGN=right>
+<A HREF="Linux.Wireless.mac.html"><I>next</I></A>
+<HR>
+<CENTER><TABLE BORDER=0 CELLPADDING=0><TR><TD valign="top" align="center">
+<ADDRESS>
+<A HREF="Wireless.html">Linux Wireless LAN Howto</A> -
+jt&#064;hpl.hp.com
+<br>Converted to html from Frame Maker - 25 August 98
+<br>Updated 3 August 00
+<br>Copyright &#169; 1996-2004 Jean Tourrilhes
+</ADDRESS>
+</TD><TD>
+&nbsp;&nbsp;&nbsp;
+</TD><TD valign="top" align="center">
+Project hosted and sponsored by :
+<br>
+<A HREF="http://www.hpl.hp.com"><IMG SRC="../hplogo.png" HEIGHT=34
+WIDTH=141 ALT="HP home page"></A>
+</TD></TR></TABLE></CENTER>
+
+<!-- Keep Webmaster happy -->
+<script type="text/javascript" language="JavaScript">
+var s_prop7="us"
+var s_prop8="eng"
+var s_prop9="corp"
+var s_prop10="us|eng|corp"
+var s_prop13="hphqglobal,hphqwwhplabs"
+</script>
+
+<!-- Begin METRICS JavaScript -->
+<!-- <script type="text/javascript" language="JavaScript"
+src="http://welcome.hp-ww.com/country/us/eng/js/metrics.js"></script> -->
+<script type="text/javascript" language="JavaScript"
+src="http://www.hpl.hp.com/dev/hplabsmetrics.js"></script>
+<!-- End METRICS JavaScript -->
+
+</BODY>
+</HTML>

@@ -1,0 +1,176 @@
+<HTML>
+<HEAD>
+<TITLE>Wireless Overview</TITLE>
+<LINK rel="Next"  href="Linux.Wireless.lexicon.html" title="Lexicon">
+<LINK rel="Prev"  href="Linux.Wireless.Extensions.html" title="Wireless
+Extensions">
+<LINK rel="First" href="Linux.Wireless.intro.html" title="Introduction">
+<LINK rel="Last"  href="Linux.Wireless.std.html" title="Standards">
+<LINK rel="Up"    href="Wireless.html" title="Linux Wireless LAN Howto">
+</HEAD>
+
+<BODY>
+
+<H1 ALIGN=center>A bit more about the technologies involved...</H1>
+<HR width=25%>
+<H3 ALIGN=center>Jean Tourrilhes
+<br>Hewlett Packard Laboratories, Palo Alto</H3>
+<H3 ALIGN=center>3 August 00</H3>
+<br><br>
+<BLOCKQUOTE><I>
+La culture c'est comme la confiture, moins on en a, plus on l'&eacute;tale...
+</I></BLOCKQUOTE>
+
+<H2>1	Introduction</H2>
+
+I'm not pretenting to teach a course on <B>Wireless LAN</B>. I guess
+that many books explain the subject in more details and accuracy than
+me (anyway, I hope). I just feel that many users of Wireless LANs
+don't really know what is inside their magic piece of kit and are
+curious about it. I hope that this document will help you to
+understand a bit more of the different technological aspects and
+compare the different Wireless LANs functionalities.
+<p>
+While working on the Wavelan driver and the Wireless Extensions, I've
+gathered much information trying to understand how it works. The
+vendors documentation and web sites have been also very helpful, many
+of them really try to explain the technologies behind their products
+and provide <I>white papers</I>. The Net contains also a lot of papers
+and reports on the subject of wireless LANs and radio communications.
+<p>
+I have still a limited knowledge and understanding of the wide numer
+of technologies used by Wireless LANs, so I hope that it is mostly
+accurate, complete and that it will help you. If some knowledgeable
+person could help me to improve this document, or if anybody could
+give me some suggestions or corrections, I would be glad...
+<p>
+This document is the third part of the <B>Linux Wireless LAN
+Howto</B>, located at <A
+HREF="http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Wireless.html"
+>http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/</A>, and
+available in HTML, PostScritp or PDF form. Please refer to its first
+part for details (copyright, disclaimers...) and a list of some other
+web pages on the subject.
+
+<H2>2	MAC, LAN, Layer and other strange words...</H2>
+
+<UL>
+<LI><A HREF="Linux.Wireless.lexicon.html">MAC, LAN, Layer and other strange words...</A>
+</UL>
+
+<H2>3	Anatomy of a radio LAN</H2>
+
+A <B>radio network</B> is a collection of nodes communicating together
+through radio devices, using radio waves to carry the information
+exchanged (obvious, isn't it ?). It is sometime called a <I>radio
+Ethernet</I>, by analogy of the wired technology. Most <B>radio
+devices</B> are a card (ISA, Pcmcia) to plug in a PC (or workstation),
+and interact directly with the standard networking stack on it (no
+need of PPP or any specific protocol stack).
+
+<UL>
+<LI><A HREF="Linux.Wireless.wlan.html">Anatomy of a radio LAN</A>
+<UL>
+<LI><A HREF="Linux.Wireless.wlan.html#modem">The radio modem</A>
+<LI><A HREF="Linux.Wireless.wlan.html#mac">The MAC controller</A>
+<LI><A HREF="Linux.Wireless.wlan.html#host">The host interface</A>
+<LI><A HREF="Linux.Wireless.wlan.html#driver">The driver</A>
+<LI><A HREF="Linux.Wireless.wlan.html#notalan">Wireless LAN or not</A>
+<LI><A HREF="Linux.Wireless.wlan.html#home">Professional and Home Wireless LANs</A>
+<LI><A HREF="Linux.Wireless.wlan.html#changing">Digital radios and changing the protocol</A>
+</UL>
+</UL>
+
+<H2>4	The radio modem (physical layer)</H2>
+
+This section of the document deals with all the issues related to the
+physical layer (bottom of the pile, OSI wise&nbsp;:-), or in our case the
+radio modem.
+
+<UL>
+<LI><A HREF="Linux.Wireless.modem.html">The radio modem (physical layer)</A>
+<UL>
+<LI><A HREF="Linux.Wireless.modem.html#ism">ISM frequency bands (900 MHz &amp; 2.4 GHz)</A>
+<LI><A HREF="Linux.Wireless.modem.html#unii">5 GHz frequency bands (HiperLan and UNII band)</A>
+<LI><A HREF="Linux.Wireless.modem.html#spreadspectrum">Spread Spectrum techniques</A>
+<LI><A HREF="Linux.Wireless.modem.html#diversity">Diversity</A>
+<LI><A HREF="Linux.Wireless.modem.html#antennas">Directional antennas</A>
+<LI><A HREF="Linux.Wireless.modem.html#range">Range issues</A>
+<LI><A HREF="Linux.Wireless.modem.html#modulations">Modulations</A>
+<LI><A HREF="Linux.Wireless.modem.html#noises">Interferences and noises</A>
+</UL>
+</UL>
+
+<H2>5	The MAC level (link layer)</H2>
+
+This section of the document focus on the next layer up, the link
+layer. This mostly comprise the <B>MAC</B> (Medium Access Control)
+protocol. Different MAC protocols and techniques are presented.
+
+<UL>
+<LI><A HREF="Linux.Wireless.mac.html">The MAC level (link layer)</A>
+<UL>
+<LI><A HREF="Linux.Wireless.mac.html#mac">Main channel access mechanisms</A>
+<LI><A HREF="Linux.Wireless.mac.html#techniques">MAC techniques</A>
+<LI><A HREF="Linux.Wireless.mac.html#topology">Network topology</A>
+<LI><A HREF="Linux.Wireless.mac.html#throughput">Some throughput considerations</A>
+</UL>
+</UL>
+
+<H2>6	Some Wireless LAN standards</H2>
+
+A short gallery of the most famous Wireless LAN standard (but
+unfortunately not necessarily the most widespread...).
+
+<UL>
+<LI><A HREF="Linux.Wireless.std.html">Some Wireless LAN standards</A>
+<UL>
+<LI><A HREF="Linux.Wireless.std.html#802.11">IEEE 802.11</A>
+<LI><A HREF="Linux.Wireless.std.html#802.11ab">802.11 HR and 802.11 at 5 GHz</A>
+<LI><A HREF="Linux.Wireless.std.html#Hiperlan">HiperLan</A>
+<LI><A HREF="Linux.Wireless.std.html#Hiperlan2">HiperLan II</A>
+<LI><A HREF="Linux.Wireless.std.html#OpenAir">OpenAir</A>
+<LI><A HREF="Linux.Wireless.std.html#swap">HomeRF &amp; SWAP</A>
+<LI><A HREF="Linux.Wireless.std.html#mclink">BlueTooth</A>
+</UL>
+</UL>
+
+<p ALIGN=right>
+<A HREF="Wireless.html"><I>up</I></A> -
+<A HREF="Linux.Wireless.lexicon.html"><I>next</I></A>
+<HR>
+<CENTER><TABLE BORDER=0 CELLPADDING=0><TR><TD valign="top" align="center">
+<ADDRESS>
+<A HREF="Wireless.html">Linux Wireless LAN Howto</A> -
+jt&#064;hpl.hp.com
+<br>Converted to html from Frame Maker - 25 August 98
+<br>Updated 3 August 00
+<br>Copyright &#169; 1996-2004 Jean Tourrilhes
+</ADDRESS>
+</TD><TD>
+&nbsp;&nbsp;&nbsp;
+</TD><TD valign="top" align="center">
+Project hosted and sponsored by :
+<br>
+<A HREF="http://www.hpl.hp.com"><IMG SRC="../hplogo.png" HEIGHT=34
+WIDTH=141 ALT="HP home page"></A>
+</TD></TR></TABLE></CENTER>
+
+<!-- Keep Webmaster happy -->
+<script type="text/javascript" language="JavaScript">
+var s_prop7="us"
+var s_prop8="eng"
+var s_prop9="corp"
+var s_prop10="us|eng|corp"
+var s_prop13="hphqglobal,hphqwwhplabs"
+</script>
+
+<!-- Begin METRICS JavaScript -->
+<!-- <script type="text/javascript" language="JavaScript"
+src="http://welcome.hp-ww.com/country/us/eng/js/metrics.js"></script> -->
+<script type="text/javascript" language="JavaScript"
+src="http://www.hpl.hp.com/dev/hplabsmetrics.js"></script>
+<!-- End METRICS JavaScript -->
+
+</BODY>
+</HTML>

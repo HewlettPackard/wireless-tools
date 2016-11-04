@@ -1,0 +1,3671 @@
+<HTML>
+<HEAD>
+<TITLE>The devices, the drivers</TITLE>
+<LINK rel="Next"  href="Linux.Wireless.drivers.802.11ag.html" title="Drivers - 802.11a, 802.11g">
+<LINK rel="Prev"  href="Linux.Wireless.drivers.html" title="Drivers - pre/early 802.11">
+<LINK rel="First" href="Linux.Wireless.intro.html" title="Introduction">
+<LINK rel="Last"  href="Linux.Wireless.std.html" title="Standards">
+<LINK rel="Up"    href="Wireless.html" title="Linux Wireless LAN Howto">
+
+<LINK rel="Contents" href="Wireless.html#howto" title="Linux Wireless LAN Howto">
+<LINK rel="section" href="#WavelanIEEE" title="Wavelan IEEE & Orinoco - GPL driver (wvlan_cs)">
+<LINK rel="section" href="#Orinoco" title="Wavelan IEEE & Orinoco - MPL/GPL driver (orinoco_cs)">
+<LINK rel="section" href="#WavelanIEEEbin" title="Wavelan IEEE & Orinoco - binary library driver (wavelan2_cs)">
+<LINK rel="section" href="#OrinocoUSB" title="Wavelan IEEE & Orinoco - USB driver (orinoco_usb)">
+<LINK rel="section" href="#Airport" title="Wavelan IEEE & Orinoco - Airport driver">
+<LINK rel="section" href="#Prism2" title="PrismII cards - MPL driver (linux-wlan-ng)">
+<LINK rel="section" href="#Orinoco-Prism2" title="PrismII cards - Orinoco driver (orinoco_cs)">
+<LINK rel="section" href="#Prism2-hostAP" title="PrismII cards - driver with HostAP support">
+<LINK rel="section" href="#MagicLAN" title="PrismII cards - Samsung binary library driver (swld11_cs)">
+<LINK rel="section" href="#Spectrum24t" title="Symbol Spectrum24 HR - Symbol GPL driver">
+<LINK rel="section" href="#eriwlan" title="Symbol Spectrum24 HR - Ericsson GPL driver">
+<LINK rel="section" href="#Orinoco-Symbol" title="Symbol Spectrum24 HR - Orinoco driver (orinoco_cs)">
+<LINK rel="section" href="#SpectrumCF" title="Symbol Spectrum24 HR - Orinoco based CF driver (spectrum_cs)">
+<LINK rel="section" href="#Arlan802" title="Cisco/Aironet - MPL driver (airo/airo_cs)">
+<LINK rel="section" href="#Arlan802alt" title="Cisco/Aironet - GPL driver (aironet4500_card/aironet4500_cs)">
+<LINK rel="section" href="#ArlanCisco" title="Cisco/Aironet - Cisco OpenSource driver (airo/airo_cs)">
+<LINK rel="section" href="#Swallow" title="No Wires Needed Swallow">
+<LINK rel="section" href="#Poldhu" title="No Wires Needed 1148 and 3Com old XJack">
+<LINK rel="section" href="#Nokia" title="Nokia C110/C111">
+<LINK rel="section" href="#Atmel" title="Atmel - USB/Pcmcia official driver">
+<LINK rel="section" href="#AtmelUSB" title="Atmel - USB alternate driver">
+<LINK rel="section" href="#AtmelPcmcia" title="Atmel - Pcmcia alternate driver">
+<LINK rel="section" href="#ADMtek" title="ADMtek ADM8211 - binary driver">
+<LINK rel="section" href="#ADMtekGPL" title="ADMtek ADM8211 - GPL driver">
+<LINK rel="section" href="#Realtek" title="Realtek RTL8180L - binary driver">
+<LINK rel="section" href="#RealtekGPL" title="Realtek RTL8180L - GPL driver">
+<LINK rel="section" href="#Ralink" title="Ralink RT2400">
+<LINK rel="section" href="#Centrino" title="Intel PRO/Wireless 2100">
+<LINK rel="section" href="#ZyDAS" title="ZyDAS ZD1201">
+<LINK rel="section" href="#SiS162" title="SiS 160/162">
+</HEAD>
+
+<BODY>
+
+<H1 ALIGN=center>The devices, the drivers - 802.11b</H1>
+<HR width=25%>
+<H3 ALIGN=center>Jean Tourrilhes</H3>
+<H3 ALIGN=center>25 July 07</H3>
+<br><br>
+<BLOCKQUOTE><I>
+The who's who of Wireless LANs under Linux.
+</I></BLOCKQUOTE>
+
+<br>
+This section list devices based on the IEEE 802.11b standard (see <A
+HREF="Linux.Wireless.std.html"><I>section 8</I></A>), operating in the
+2.4&nbsp;GHz band up to 11&nbsp;Mb/s.
+
+<A NAME="WavelanIEEE">
+<H2>3.1	Lucent Wavelan IEEE, Lucent Orinoco, Enterasys RoamAbout 802, Elsa AirLancer 11 and Melco/Buffalo 802.11b</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>obsolete (see <A HREF="#Orinoco"><I>section 3.2</I></A>)
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>wvlan_cs.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>v1.0.7
+</TR><TR>
+<TD>Where&nbsp;:
+<TD>Pcmcia package (3.1.25)
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>Anton Blanchard &lt;anton&#064;samba.org&gt;
+<br>Andreas Neuhaus &lt;andy&#064;fasta.fh-dortmund.de&gt;
+<br>Harald Roelle &lt;harald&#064;roelle.com&gt;
+<br>Moustafa A. Youssef &lt;moustafa&#064;cs.umd.edu&gt;
+</TR><TR valign="top">
+<TD>Web pages&nbsp;:
+<TD><A HREF="http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Wavelan-IEEE.html">
+http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Wavelan-IEEE.html</A>
+<br><A HREF="http://www.fasta.fh-dortmund.de/users/andy/wvlan/">
+http://www.fasta.fh-dortmund.de/users/andy/wvlan/</A>
+<br><A HREF="http://www.roelle.com/wvlanPPC/index.html">
+http://www.roelle.com/wvlanPPC/index.html</A>
+<br><A HREF="http://www.cs.umd.edu/~moustafa/mwvlan/mwvlan.html">
+http://www.cs.umd.edu/~moustafa/mwvlan/mwvlan.html</A>
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="http://lists.samba.org/pipermail/wireless/">
+http://lists.samba.org/pipermail/wireless/</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>man page, headers
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions & module parameters
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc and Ad-Hoc-demo
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP (based on hardware support)
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR valign="top">
+<TD>Other features&nbsp;:
+<TD>MTU selection, multicast, promiscuous mode, power management, WEP hardware encryption, SMP, multi-firmware and PPC support.
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>Some optimisations... Does not support HermesII.
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>May have some performance issues
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.wavelan.com/">http://www.wavelan.com/</A>
+<br><A HREF="http://www.proxim.com/">http://www.proxim.com/</A>
+<br><A HREF="http://www.enterasys.com/wireless/">
+http://www.enterasys.com/wireless/</A>
+<br><A HREF="http://www.elsa.com/">http://www.elsa.com/</A>
+<br><A HREF="http://www.hp.com/notebooks/us/eng/products/wireless/">
+http://www.hp.com/notebooks/us/eng/products/wireless/</A>
+<br><A HREF="http://www.buffalotech.com/">http://www.buffalotech.com/</A>
+<br><A HREF="http://www.1stwave.de/">http://www.1stwave.de/</A>
+<br><A HREF="http://www.artem.de/">http://www.artem.de/</A>
+</TR>
+</TABLE>
+
+<H3>3.1.1	 The device</H3>
+
+Even if it uses the same name, the <B>Wavelan IEEE</B> product is
+completely different from the old Wavelan (see <A
+HREF="Linux.Wireless.drivers.html#Wavelan"><I>section 2.1</I></A>),
+and totally incompatible in term of protocol and hardware
+interface. It is still built by Lucent, and it still operate in the
+2.4 GHz ISM band (Direct Sequence), but the new hardware fully support
+the IEEE 802.11 protocol (and 802.11-b for the more recent versions)
+and is no longer based on a Ethernet MAC chip. There is only a Pcmcia
+version (the ISA version uses a ISA to Pcmcia bridge) and the
+different access points. Recently, Lucent has added a USB adapter and
+mini PCI version of the card for laptop (this one is based on a
+PCI-Pcmcia bridge).
+<p>
+
+To confuse the issue, Lucent has renamed the Wavelan IEEE as
+<B>Orinoco</B> (Wavelan was better IMHO), and this division was part
+of Lucent spin-off into a new company called
+<B>Agere</B>. <B>Avaya</B> (another Lucent spin-off) is also selling
+the Orinoco. Enterasys is also selling the Wavelan IEEE as
+<B>RoamAbout 802</B> (a company formerly known as Cabletron, which was
+the former DEC networking division). Elsa is selling it in Europe as
+<B>AirLancer 11</B> (on the other hand, the 2 Mb/s version is quite
+different). In Japan (and maybe also in Europe), Melco is selling it
+as <B>Buffalo WLI-PCM-L11</B>. Lately, more vendors have been joining
+the club, such as HP (<B>HP 802.11b Wireless LAN</B>), IBM (<B>IBM
+High Rate Wireless LAN</B>), Dell (<B>Dell TrueMobile 1150</B> - on
+the other hand, the 1100 is an <A HREF="#Arlan802"><I>Aironet</I></A>
+card), Compaq (<B>Compaq WL 110, WL 210 and WL 215</B> - the WL100 and
+WL200 are <A HREF="#Prism2"><I>PrismII</I></A> based), 1stWave
+(<B>1stWave PC-Card</B>) and ARtem (<B>ARtem ComCard</B>).  The Apple
+<B>Airport</B> is also derived from the Wavelan IEEE (see <A
+HREF="#Airport"><I>section 3.5</I></A>).
+<p>
+The Wavelan IEEE saga never ends. <B>Proxim</B> bought the card and
+access point business of Agere (Agere kept the chipset and radio
+part), so now the same Orinoco cards are sold by Proxim under the name
+<B>Orinoco Classic</B> or <B>Orinoco World</B> (841X - with the big
+square antenna and using the same Agere Hermes chipset). In a bold
+marketing move, Proxim renamed all it's other lines of wireless cards
+as Orinoco, however those cards are not based on the Agere chipset but
+on <B>Atheros</B> chipset (846X, 847X and 848X). The <B>Orinoco
+11b</B> (842X - 802.11b only with a short antenna) are based on the
+Agere HermesII chipset, which is different from the old chipset (and
+therefore not compatible with the usual Orinoco drivers). So, if the
+Proxim Orinoco card doesn't have a big square antenna and do support
+802.11a or 802.11g, you can be sure it's not a <B>true Orinoco</B>.
+<p>
+The Wavelan IEEE appears to the PC as a standard network card and
+interfaces naturally with the networking stack. The configuration
+includes only setting the network name (ESSID), the rest is automatic
+(finding the equivalent BSSID and channel). As usual for Lucent, the
+documentation and website are rich.
+<p>
+The Lucent Wavelan IEEE is based on the Lucent Hermes chipset. As with
+all IEEE 802.11 products, the Hermes offer a fully featured MAC
+protocol, including MAC level acknowledgement (good news for all of us
+having dealt with the old Wavelan card), optional RTS/CTS,
+fragmentation, automatic rate selection, roaming. This seems
+exhaustive, but is mandatory for IEEE 802.11 compliance. Different
+version of the card include different level of security (bronze is
+basic, silver is with WEP (RC4-40 bits) and gold is with proprietary
+128 bit encryption.
+<p>
+The MAC support both Managed and <B>Ad-Hoc modes</B>. However, the
+initial firmware for those cards did support only a non-compliant
+Ad-Hoc mode (called Ad-Hoc demo mode - which interoperate with most
+PrismII cards). In order to gain WiFi compliance, Lucent added in
+recent firmware (6.06 and greater) a second Ad-Hoc mode which is fully
+802.11 compliant (called Peer to Peer mode or IBSS Ad-Hoc mode - and
+which interoperate with Aironet cards). Of course, the two Ad-Hoc
+modes are not interoperable.
+<p>
+The 2.4 GHz modem is an enhanced version of the previous generation,
+Direct Sequence Spread Spectrum (11 chips encoding), using both 1 and
+2 Mb/s signalling rate (using effectively 22 MHz of bandwidth) and 5.5
+and 11 Mb/s in second generation cards, diversity antennas and with 13
+different frequencies (depending on the regulations).
+<p>
+Initially, the Wavelan was only offering 1 and 2&nbsp;Mb/s bit rates
+(basic IEEE 802.11 DS standard). For a while, Lucent was also selling
+a "turbo" version of the card, which was adding 5 and 10&nbsp;Mb/s
+bit-rates for shorter range using Lucent proprietary modulations (so,
+not compatible with 802.11-b).
+<p>
+Later, Lucent introduced the second generation of the Wavelan IEEE,
+still based on the same Hermes chipset, which is much cheaper and
+fully compliant with the new <B>802.11-b</B> standard, supporting 1,
+2, 5.5 and 11&nbsp;Mb/s bit-rate (compatible with other 11&nbsp;Mb/s
+products).
+<p>
+All Wavelan IEEE cards do not offer the exact same set of features,
+because Lucent keep changing the <B>firmware</B>. From firmware
+<B>1.00</B> to <B>4.52</B>, Lucent was mostly adding features
+(encryption, power saving) and keeping it backward compatible, but
+firmware <B>6.04</B> and later created a major
+incompatibility. Firmware <B>6.06</B> and later implement a fully
+802.11 compliant IBSS Ad-Hoc mode (on top of the Ad-Hoc demo
+mode). Firmware <B>6.04</B> dropped Fragmentation Threshold setting in
+favor of microwave oven robustness (an automatic fragmentation
+scheme). Firmware <B>6.16</B> did fix a few bugs with the IBSS Ad-Hoc
+mode (security, ESSID="any").
+<p>
+Agere has recently released a new <B>HermesII</B> chipset, derived
+from the venerable Hermes chipset. The most notable improvements are a
+higher integration (smaller & cheaper), a PCI interface with DMA
+support and a USB interface. The chip interface and firmware is not
+compatible with the old Hermes chipset, requiring specific driver
+support for HermesII. To my knowledge, this chipset is only used in
+the Proxim 842X cards.
+
+
+<H3>3.1.2	  The driver</H3>
+
+<I>Andreas Neuhaus</I> is no longer working to improve this driver,
+therefore it's now discontinued in favor of the new Orinoco driver
+(see <A HREF="#Orinoco"><I>section 3</I></A>). The driver is based on
+Lucent source code, which is a cut down version of their full
+driver. So, it lacks all the part about handling natively 802.11
+frames and Lucent proprietary API, and initially it lacked some of the
+more fancy features of Lucent's driver, but <I>Andreas</I> is adding
+them slowly. Of course, the driver support all version of the card
+(bronze, silver, gold - basic, turbo, turbo 11 Mb/s) and is fully
+interoperable with Access Points and Windows nodes.
+<p>
+<I>Andreas</I> has done a very good job into providing features like
+Wireless Extensions (I must admit that I did help him quite a bit ;-)
+and many configuration parameters (station name, channel, mtu
+size). The new version adds Power management and encryption setting,
+change of the operating mode via Wireless Extensions, promiscuous and
+multicast support...
+<p>
+<I>Andreas</I> has done a lot of debugging of the driver and it seems
+now much more stable. Lastly, the ISA to Pcmcia and PCI to Pcmcia
+bridges may be a source troubles under Linux. The latest version of
+the driver fixes SMP support, multi-cards configuration, improve
+wireless.opts support, add IBSS Ad-Hoc mode support and support
+properly and sanely the various firmware releases.
+<p>
+<I>Harald Roelle</I> has developped a patch for this driver in order
+to fully support the PPC architecture. This patch mostly contain some
+bit order fixes. This patch should help other architecture with
+endianess issues. His patch was eventually integrated (with major
+changes) by <I>David Hinds</I> in version 1.0.6 of the driver. I added
+firmware detection support in 1.0.6 to properly handle all the various
+firmware releases and their variations (in particular the two Ad-Hoc
+modes), and fixed the remaining SMP bugs.
+<p>
+The driver does not support the USB and Mini-PCI version of the
+Wavelan.
+<p>
+Nowadays, <I>Anton Blanchard</I> is the official maintainer of the
+driver, with the help of <I>David Gibson</I>. <I>David</I> has done a
+complete rewrite of the driver (see <A HREF="#Orinoco"><I>section
+3.2</I></A>), so this driver won't be maintained anymore...
+<p>
+<I>Moustafa</I> has released a version of this driver with scanning
+support.
+<p>
+<B>Note</B> that Lucent has also released a binary library driver (see
+<A HREF="#WavelanIEEEbin"><I>section 3.3</I></A>) which is maybe more
+solid and performant than the driver of <I>Andreas</I> but lack
+complete support for Wireless Extensions.
+
+<A NAME="Orinoco">
+<H2>3.2	Wavelan IEEE/Orinoco, PrismII and Symbol cards</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>stable
+</TR><TR valign="top">
+<TD>Driver name&nbsp;:
+<TD>Pcmcia : orinoco_cs.o
+<br>PLX&nbsp;: orinoco_plx.o
+<br>PCI&nbsp;: orinoco_pci.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>v0.15, CVS
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD>Linux kernel (2.4.21 ; 2.6.18)
+<br>Pcmcia package (3.1.34)
+<br><A HREF="http://www.ozlabs.org/people/dgibson/dldwd">
+http://www.ozlabs.org/people/dgibson/dldwd</A>
+<br><A HREF="http://savannah.nongnu.org/projects/orinoco/">
+http://savannah.nongnu.org/projects/orinoco/</A>
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>David Gibson &lt;hermes&#064;gibson.dropbear.id.au&gt;
+<br>Pavel Roskin &lt;proski&#064;gnu.org&gt;
+</TR><TR valign="top">
+<TD>Web page&nbsp;:
+<TD><A HREF="http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Orinoco.html">
+http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Orinoco.html</A>
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="http://sourceforge.net/mail/?group_id=44338">
+http://sourceforge.net/mail/?group_id=44338</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>man page, headers
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions only
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc and Ad-Hoc-demo
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP (based on hardware support), 802.1x
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions (v0.14 and later)
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes (v0.14 and later)
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR valign="top">
+<TD>Other features&nbsp;:
+<TD>MTU selection, multicast, promiscuous mode, power management, SMP, multi-firmware, multi vendors, PPC & ARM support, PLX and PCI support.
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>Does not support HermesII.
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>WEP not functional on old Prism2 firmwares, some older driver versions
+don't handle properly some Symbol cards.
+</TR><TR>
+<TD>License&nbsp;:
+<TD>MPL and GPL
+</TR><TR valign="top">
+<TD>Vendor web pages&nbsp;:
+<TD>[Too many to list here]
+</TR>
+</TABLE>
+
+<H3>3.2.1	 The device</H3>
+
+As explained in various sections, Lucent Wavelan-IEEE/Orinoco devices
+(see <A HREF="#WavelanIEEE"><I>section 3.1</I></A>), Intersil PrismII
+devices (see <A HREF="#Prism2"><I>section 3.6</I></A>) and Symbol High
+Rate devices (see <A HREF="#Spectrum24t"><I>section 3.10</I></A>) are
+basically using the <B>same MAC controller</B>. This driver attempt to
+support all those devices, which are described in details in their own
+sections.
+<p>
+However, even though those devices use the same MAC controller and the
+same driver, those devices are not the same. Each vendor has its own
+<B>firmware</B>, so the set of features of those cards vary. Some
+differences are visible to the user (for example 128 bits key
+support), some are more related to performance and robustness tuning
+of the MAC.
+<p>
+Moreover, those devices don't use the same <B>radio modem</B> (mostly
+Lucent or Intersil) and same antennas. For PrismII cards, even the
+actual layout of the radio components on the card can make a huge
+difference. This will mostly translate into difference of
+<B>coverage</B> between the various cards (range and resistance to
+interference). The range between some cards may vary by a factor 2 in
+some conditions.
+
+<H3>3.2.2	  The driver</H3>
+
+<I>Anton Blanchard</I> and <I>David Gibson</I> became official
+maintainers of the wvlan_cs driver (see <A
+HREF="#WavelanIEEE"><I>section 3.1</I></A>) in the end of
+2000. <I>David</I> was not very happy about the state of wvlan_cs.
+<p>
+The HCF (the low level library provided by Lucent) hadn't been
+maintained since the initial release of the driver and was quite
+difficult to read and understand. While the higher layer of the driver
+had gone a long way and were robust and fully featured, the HCF was a
+mess and the cause of many problems (TxTimeout, driver
+corruption/crashes and else).
+<p>
+Rather than put up with that, David looked deeply in the low level of
+the <B>wlan-ng</B> driver from Mark (see <A HREF="#Prism2"><I>section
+3.6</I></A>) and the FreeBSD driver and wrote a totally new driver
+combining a new low level core and the high level features of
+wvlan_cs. The end result was a driver much more readable, robust and
+well behaved than wvlan_cs. In the process, David added support for
+PrismII cards. Then, I fixed a few Wireless Extensions bugs, added
+some support for Symbol cards, and we pushed the driver in the
+kernel. The driver was initially named <B>dldwd_cs</B> and was renamed
+<B>orinoco_cs</B> at this point. Later on, <I>David Hinds</I> backported this
+driver to the Pcmcia package for users of earlier kernels.
+<p>
+The main goal of the driver is to support <B>Wavelan IEEE/Orinoco
+cards</B> and OEM. The driver support all the firmwares and features
+of those cards properly and fully (Ad-Hoc demo mode, IBSS mode,
+bit-rate, encryption keys...), and support all the features available
+in wvlan_cs (except module parameters) with less bugs.
+<p>
+<I>Ben</I> has added Airport support to this driver (see <A
+HREF="#Airport"><I>section 3.5</I></A>), and the support of those cards
+is similar to Orinoco cards (i.e. most features supported properly).
+<p>
+Starting in release v0.6d, the support of <B>Symbol cards</B> and OEM
+is complete, at least for firmware 1.5 and 1.7. Bit rate, mode of
+operation (managed, ad-hoc IBSS and ad-hoc demo), encryption and power
+management are fully working. The release v0.8 added full support for
+later Symbol firmware 2.00 and 2.20. On firmware 2.20 and later, Power
+Management is disabled. Version of the driver from <B>v0.10 to v0.12b
+don't work</B> properly with Symbol cards due to a bug, so avoid those
+releases. <B>Symbol CF cards</B> are very different and supported in
+their own driver (see <A HREF="#SpectrumCF"><I>section 3.13</I></A>).
+<p>
+The support of <B>PrismII cards</B> and clones is in progress. More
+debugging and testing need to be done, but the driver can set most
+features to some degree (Ad-Hoc demo mode, IBSS mode, bit-rate,
+encryption keys have been seen to work). It seems the upgrading
+firmware fixes problems related to encryption. However, the
+<I>wlan-ng</I> and <I>HostAP</I> drivers still have more features and
+are more tested...
+<p>
+Starting in release v0.8, the orinoco driver collection also support
+<B>PLX adapters</B> that are sold with some PrismII cards (via the
+<I>orinoco_plx</I> driver). Those adapters are not real Pcmcia
+adapters and the card looks to the system like a PCI card. The driver
+also support Pcmcia cards in regular ISA to Pcmcia or PCI to Pcmcia
+adapters, as long the <B>Pcmcia adapter</B> is recognised and
+configured properly by the Pcmcia package (which might be tricky).
+<p>
+Starting in release v0.11a, the orinoco driver collection also support
+<B>PCI cards</B> (all of them being PrismII cards - via the
+<I>orinoco_pci</I> driver). The standard driver does not support the
+various <B>USB</B> versions of the cards. There is various kind of
+<B>MiniPCI</B> implementation of the card, the driver support some of
+them (Pcmcia based - Lucent ; PCI based - PrismII) but not most (USB
+based - PrismII).
+<p>
+The latest version (v0.13b) seems to have fix most of the hardware
+reset problems of previous versions and seems to have fixed problems
+with Symbol firmwares. <I>Pavel</I> has integrated in v0.14 many
+previously external patches, such as as support for <B>Wireless
+Scanning</B> and Wireless Events, support for <B>Monitor mode</B> and
+support for <B>802.1x</B>. <I>Pavel</I> also fixed support for kernel
+2.6.X, dramatically improved Symbol firmware support and fixed a tons
+of bugs in v0.14.
+<p>
+Version 0.15-rc2 of the driver was merged into kernel 2.6.12. This
+brought all the features and bugfix above in the kernel. Since then,
+<I>Pavel</I> is continuing to fix and update the driver, pushing those
+changes into recent kernels, but he is no longer using version number
+(so I guess we are still at 0.15).
+
+<A NAME="WavelanIEEEbin">
+<H2>3.3	Lucent Wavelan, Enterasys Roamabout and Proxim Orinoco 8420</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>stable, beta
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>wavelan2_cs.o, roamabout_cs.o and wlags49_cs.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>v6.16, v7.18 and v7.22
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://greenblaze.com/proxim.html">
+http://greenblaze.com/proxim.html</A>
+<br><A HREF="http://www.agere.com/mobility/wireless_lan_drivers.html">
+http://www.agere.com/mobility/wireless_lan_drivers.html</A>
+<br><A HREF="http://www.agere.com/support/drivers/index.html">
+http://www.agere.com/support/drivers/index.html</A>
+<br><A HREF="http://www.cs.umd.edu/~moustafa/mwavelan/mwavelan.html">
+http://www.cs.umd.edu/~moustafa/mwavelan/mwavelan.html</A>
+</TR><TR>
+<TD>Contact&nbsp;:
+<TD>Lucent support &lt;usasupport&#064;wavelan.com&gt;
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>Richard van Leeuwen &lt;rleeuwen&#064;lucent.com&gt;
+<br>Dean W. Gehnert &lt;deang&#064;tpi.com&gt;
+<br>Moustafa A. Youssef &lt;moustafa&#064;cs.umd.edu&gt;
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Extensive readme
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Module parameters, Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc and Ad-Hoc-demo
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP (based on hardware support), WPA
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>yes, but the ISA to Pcmcia bridge must be reconfigured
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Power management and microwave oven robustness. Support HermesII cards (v7.08). WPA support.
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>Do not support all firmware releases
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>?
+</TR><TR>
+<TD>License&nbsp;:
+<TD>Binary only for the core + OpenSource Linux wrapper (up to v6.16), GPL (v7.08)
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.wavelan.com/">http://www.wavelan.com/</A>
+<br><A HREF="http://www.enterasys.com/wireless/">
+http://www.enterasys.com/wireless/</A>
+</TR>
+</TABLE>
+
+<H3>3.3.1	  The device</H3>
+
+This is the same device as the previous entry (<A
+HREF="#WavelanIEEE"><I>section 3.1</I></A>).
+
+<H3>3.3.2	  The driver</H3>
+
+<I>Lucent</I> has decided to not put all its eggs in the same basket
+and developed a bold strategy for the support of the Wavelan IEEE
+under Linux. Not only they have released some source code to allow the
+source driver mentioned above, but they have as well contracted
+<I>Dean</I> to release a driver based on a binary library. This gives
+Linux users the choice, a GPL full source driver to hack with and a
+stable full featured binary driver (the official term from Lucent is
+``Linux Driver Source/Library'').
+<p>
+<I>Dean</I> has written the code interfacing between Linux and the
+library, and has put together a nice package easy to install and with
+documentation. As expected, the binary driver is probably more stable
+and than the full source driver mentioned above, with a slightly
+different set of feature, and offers all the features of Lucent Window
+drivers, plus a nice integration with Linux. This driver supports both
+the basic version of the card and the "turbo". The major drawback is
+the binary core, preventing the use on other architectures (PPC,
+Arm...).
+<p>
+Now, the driver is supported by Lucent, and they keep adding in it the
+same features they add to the Windows drivers (such as microwave oven
+robustness). Their also have added support for the IBSS Ad-Hoc mode
+(see discussion above). The latest version adds support for 2.4 kernel
+and many common Wireless Extensions. Note that Enterasys/Cabletron is
+also distributing a slightly modified version of this driver (usually
+an older one).
+<p>
+<I>Moustafa</I> has released a version of this driver with scanning
+support.
+<p>
+Recently, <I>Agere</I> has released a new version of this driver which
+is fully Open Source. This new version has support for the
+<B>HermesII</B> chipset found in the Proxim Orinoco 842X cards (but it
+seems it no longer support the old Orinoco cards - use the older
+driver version). It has also improved Wireless Extension
+support. <I>Agere</I> is still working hard on the driver and has
+recently added support for Wireless Scanning and WPA.
+
+<A NAME="OrinocoUSB">
+<H2>3.4	Orinoco USB cards and HP/Compaq multiport</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>beta
+</TR><TR valign="top">
+<TD>Driver name&nbsp;:
+<TD>orinoco_usb.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>0.1.4
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://www.nongnu.org/orinoco/">
+http://www.nongnu.org/orinoco/</A>
+<br><A HREF="http://savannah.nongnu.org/projects/orinoco/">
+http://savannah.nongnu.org/projects/orinoco/</A>
+</TR><TR valign="top">
+<TD>Maintainer&nbsp;:
+<TD>Manuel Estrada Sainz &lt;ranty&#064;debian.org&gt;
+<br>Ramon Rey Vicente &lt;ramon.rey at hispalinux.es&gt;
+</TR><TR valign="top">
+<TD>Mailing list&nbsp;:
+<TD><A HREF="http://sourceforge.net/mail/?group_id=44338">
+http://sourceforge.net/mail/?group_id=44338</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>headers
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions only
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc and Ad-Hoc-demo
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP (based on hardware support)
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions, with optional patch
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>With optional patch
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR valign="top">
+<TD>Other features&nbsp;:
+<TD>MTU selection, multicast, promiscuous mode, power management,
+multi-firmware.
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>MPL and GPL
+</TR><TR valign="top">
+<TD>Vendor web pages&nbsp;:
+<TD><A HREF="http://www.wavelan.com/">http://www.wavelan.com/</A>
+<br><A HREF="http://www.proxim.com/">http://www.proxim.com/</A>
+<br><A HREF="http://www.hp.com/">http://www.hp.com/</A>
+
+</TR>
+</TABLE>
+
+<H3>3.4.1	 The device</H3>
+
+The Orinoco-USB is of course related to other
+<B>Wavelan-IEEE/Orinoco</B> devices (see <A
+HREF="#WavelanIEEE"><I>section 3.1</I></A>). As most first generation
+USB designs, it is really a standard Orinoco Pcmcia card plugged into
+a <B>Cypress EZ-USB</B> USB-Pcmcia bridge. Such a setup of course
+brings some performance degradation due to USB high latency. The
+Orinoco card inside the device has the same exact features as other
+Orinoco Pcmcia cards and is 802.11b compliant.
+<p>
+Lucent, Agere and Proxim are directly selling this <B>Orinoco</B>
+device. HP/Compaq sells it as <B>WL215</B> (standalone) and
+<B>W200</B> (multiport option for Compaq laptops). Other vendors such
+as Melco are also selling this hardware. One of the particularity of
+this hardware is that the USB-Pcmcia bridge doesn't contain a
+firmware, so the driver need to upload the firmware at power up. On
+the other hand, the Pcmcia card behind the USB-Pcmcia bridge already
+contains its own firmware.
+<p>
+Note that most USB 802.11b cards are based on either the Intersil
+PrismII chipset (see <A HREF="#Prism2"><I>section 3.6</I></A>) or the
+Atmel chipset (see <A HREF="#Atmel"><I>section 3.20</I></A>), and are
+quite different from this hardware.
+
+<H3>3.4.2	  The driver</H3>
+
+Manuel has managed to reverse engineer the Orinoco USB hardware and is
+providing a modified version of the Orinoco driver for Orinoco USB
+adapters. This driver only support <B>Orinoco USB</B> hardware, and
+not other USB cards. Because it is based on the Orinoco driver (see <A
+HREF="#Orinoco"><I>section 3.2</I></A>), this driver offer the same
+extended feature set, such as Wireless Extension support.
+<p>
+The big difference with the standard Orinoco driver is <B>firmware
+uploading</B>. You will need to extract the firmware for the
+USB-Pcmcia bridge from the Windows driver using the tools provided on
+the driver web page. The firmware uploading support in Linux needed
+for this driver is currently being finalised, so check the latest
+driver documentation. On the other hand, the driver offer no support
+for updating the firmware in the Pcmcia card.
+<p>
+This driver was merged into the CVS of the <B>Orinoco driver</B> (see
+<A HREF="#Orinoco"><I>section 3.2</I></A>). However, because the
+Orinoco maintainers are not happy with the locking strategy of this
+driver, this driver was never included in any release of the Orinoco
+driver and is not included in the kernel. The latest version of the
+driver may be found in the Orinoco CVS (see <A
+HREF="#Orinoco"><I>section 3.2</I></A>).
+
+<A NAME="Airport">
+<H2>3.5	Apple Airport</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>stable
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>airport.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>0.15
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD>Linux kernel (2.6.18)
+<br><A HREF="http://www.ozlabs.org/people/dgibson/dldwd">
+http://www.ozlabs.org/people/dgibson/dldwd</A>
+<br><A HREF="http://ppclinux.apple.com/~benh/">
+http://ppclinux.apple.com/~benh/</A>
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>Benjamin Herrenschmidt &lt;benh&#064;kernel.crashing.org&gt;
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>man page, headers
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions & module parameters
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc and Ad-Hoc-demo
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP (based on hardware support)
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions, with optional patch
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>With optional patch
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>No.
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Mac-OS ;-)
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>MTU selection, multicast, promiscuous mode, power management, SMP
+and multi-firmware.
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>Some optimisations...
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR>
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.apple.com/airport/">http://www.apple.com/airport/</A>
+</TR>
+</TABLE>
+
+<H3>3.5.1	 The device</H3>
+
+The Apple <B>AirPort</B> is in fact the Lucent <B>Wavelan IEEE</B>
+repackaged, so has the same characteristic as the Wavelan (see <A
+HREF="#WavelanIEEE"><I>section 3.1</I></A>). All Airport hardware is
+802.11-b compliant (second generation of Wavelan IEEE) and support 11
+Mb/s, and Apple seem to offer only the version with 40 bit encryption.
+<p>
+The AirPort card for the most Apple hardware is the OEM version of the
+Wavelan IEEE, but it uses a specific slot in those computers and the
+antennas are pre-integrated in the host. Most recent Apple machines
+offer this interface (iBook, PowerBook 2000 (aka Pismo), AGP G4s,
+recent iMacs (DV/SE)...). Note that this interface is <B>not Pcmcia
+compatible</B> even is the connector is the same, so this card can't
+be used in the normal PC-Card slot of other laptops. This is why this
+card work only in specific Apple hardware slot and only with a
+specific driver.
+<p>
+The Access Point (the famous flying saucer) is similar in
+functionality to the Lucent RG-1000 Residential Gateway, and is fully
+interoperable with other 802.11-b hardware.
+
+<H3>3.5.2	  The driver</H3>
+
+The <B>first version</B> of the Airport driver was done by <I>Benjamin
+Herrenschmidt</I> by porting the driver of <I>Andreas Neuhaus</I> (see
+<A HREF="#WavelanIEEE"><I>section 3.1</I></A>) to support the Apple
+Aiport card. He has basically integrated the specific PPC patch of
+<I>Harald Roelle</I>, thrown away all the Pcmcia code and replaced it
+with the specific Apple initialisation code.
+<p>
+Apart from that, the driver is basically the same, with the same
+features and same bug ;-)
+<p>
+The <B>second version</B> of the driver was also done by <I>Benjamin
+Herrenschmidt</I> and is just a wrapper on top of the driver of
+<I>David Gibson</I> (see <A HREF="#Orinoco"><I>section 3.2</I></A>),
+and was integrated in version 0.05 (kernel 2.4.5). This is a much
+cleaner solution, because both driver share the same source, so the
+feature set is identical and all improvements and bug fixes of the
+Orinoco driver are automatically in the Airport driver and
+vice-versa. For example, this driver gained both <B>Scanning</B> and
+<B>Monitor mode</B> support in version 0.14 and later.
+
+<A NAME="Prism2">
+<H2>3.6	Intersil PrismII based cards (the most common 802.11b cards)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>stable
+</TR><TR valign="top">
+<TD>Driver name&nbsp;:
+<TD>Pcmcia : prism2_cs.o
+<br>PLX : prism2_plx.o
+<br>PCI : prism2_pci.o
+<br>USB : prism2_usb.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>0.2.8
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://www.linux-wlan.com/linux-wlan">
+http://www.linux-wlan.com/linux-wlan</A>
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>Mark S. Mathews &lt;mark&#064;linux-wlan.com&gt;
+<br>Solomon Peachy &lt;solomon&#064;linux-wlan.com&gt;
+</TR><TR valign="top">
+<TD>Mailing list&nbsp;:
+<TD><A HREF="http://www.linux-wlan.com/linux-wlan/">
+http://www.linux-wlan.com/linux-wlan/</A>
+<br><A HREF="http://www.lifix.fi/extarchive/lwlan/">
+http://www.lifix.fi/extarchive/lwlan/</A>
+</TR><TR valign="top">
+<TD>Documentation&nbsp;:
+<TD>Readme
+<br><A HREF="ftp://ftp.linux-wlan.org/pub/linux-wlan-ng/FAQ">
+ftp://ftp.linux-wlan.org/pub/linux-wlan-ng/FAQ</A>
+<br><A HREF="http://www.linux-wlan.org/docs/linux-wlan-FAQ.html">
+http://www.linux-wlan.org/docs/linux-wlan-FAQ.html</A>
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Module parameters &amp; configuration tool
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Statistic tool & Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP (based on hardware support)
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Specific tool & Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Quite exhaustive 802.11 support, Encryption, PPC support, PLX, PCI and USB support.
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>?
+</TR><TR>
+<TD>License&nbsp;:
+<TD>MPL
+</TR><TR valign="top">
+<TD>Vendor web pages&nbsp;:
+<TD><A HREF="http://www.compaq.com/products/wlan/index.html">
+http://www.compaq.com/products/wlan/index.html</A>
+<br><A HREF="http://www.magiclan.com/">http://www.magiclan.com/</A>
+<br><A HREF="http://www.dlink.com/products/">
+http://www.dlink.com/products/p</A>
+<br><A HREF="http://www.linksys.com/products/">
+http://www.linksys.com/products/</A>
+<br><A HREF="http://www.zoomtel.com/zoomair/za11index.html">
+http://www.zoomtel.com/zoomair/za11index.html</A>
+<br><A HREF="http://www.nokia.com/corporate/wlan/card_c110.html">
+http://www.nokia.com/corporate/wlan/card_c110.html</A>
+<br><A HREF="http://www.addtron.com/">http://www.addtron.com/</A>
+<br><A HREF="http://www.gemtek.com.tw/">
+http://www.gemtek.com.tw/</A>
+<br><A HREF="http://www.smc.com/">http://www.smc.com/</A>
+<br><A HREF="http://www.netgear.com/">http://www.netgear.com/</A>
+<br><A HREF="http://www.ambicom.com/">http://www.ambicom.com/</A>
+<br><A HREF="http://www.teletronics.com/">http://www.teletronics.com/</A>
+<br><A HREF="http://www.intersil.com/design/prism/">
+http://www.intersil.com/design/prism/</A>
+<br><A HREF="http://www.conexant.com/">http://www.conexant.com/</A>
+</TR>
+</TABLE>
+
+<H3>3.6.1	 The device</H3>
+
+The PrismII chipset is the successor of the PrismI chipset, described
+in the previous section (see <A
+HREF="Linux.Wireless.drivers.html#Prism"><I>section 2.4</I></A>), and
+is build by Intersil (formerly Harris). Intersil offer this chipset
+and some reference design to various OEM, allowing them to build
+various 802.11-b products (cards or integrated in their own
+products). I expect that all the people that were formerly using the
+PrismI chipset will switch sooner or later to the PrismII.
+<p>
+The first manufacturers to offer PrismII cards were <B>Samsung</B> and
+<B>Compaq</B> (WL100, WL200, rumored to be a rebadged Samsung card),
+with a Pcmcia card, a PCI card and an Access Point. Other Prism
+vendors like <B>ZoomAir</B>, <B>Nokia</B> and <B>GemTek</B> did
+release later their own version of the PrismII cards, as well as
+<B>Proxim</B> (RangeLAN DS, Harmony 802.11b...). Some big networking
+vendors like <B>D-Link</B>, <B>LinkSys</B>, <B>NetGear</B> and
+<B>SMC</B> were also quick to jump on this new opportunity for them,
+as well as many smaller vendors like <B>AddTron</B>, <B>Ambicom</B>,
+<B>Teletronics</B>, <B>Ampwave</B> and many other that I can't
+list... The rule of thumb is that if your card is not listed in
+another section of the Howto, it could be a PrismII card (or not, see
+below).
+<p>
+Some notable exceptions which are <B>not</B> PrismII cards : the
+<B>Compaq WL 110, WL 210 and WL 215 cards</B> (which are
+<I>Orinoco</I> cards), the <B>D-Link 650H</B> (which is a
+<I>Symbol</I> card), most <B>D-Link/LinkSys/SMC USB</B> cards (which
+are <I>Atmel</I> cards), the <B>SMC 2632W-v2</B> (which is an
+<I>Atmel</I> card), all <B>22&nbsp;Mb/s</B> cards such as the
+<B>D-Link 650+/520+</B> (based on the <I>TI chipset</I>), all
+<B>CardBus</B> cards such as the <B>new D-Link 650</B> (which is an
+<I>ADMtek</I> card), all <B>802.11a</B> cards (which are
+<I>Atheros</I> or <I>Intersil PrismDuette</I> cards) and all
+<B>802.11g</B> cards (which are <I>Broadcom</I>, <I>Atheros</I> or
+<I>Intersil PrismGT</I> cards). In fact, so many vendors seem to be
+moving away from the PrismII chipset (usually without warning and
+without changing the model name) and there is so many changes
+happening that it's impossible to keep track of who is using what.
+<p>
+Please note that everything that <B>looks like a PrismII card</B> may
+not be a PrismII card, and many people are quite confused about
+that. The cards described in this section use both a Intersil PrismII
+chipset and an Intersil firmware. Other vendors, such as Lucent (see
+<A HREF="#WavelanIEEE"><I>section 3.1</I></A>), Aironet (see <A
+HREF="#Arlan802"><I>section 3.14</I></A>), Symbol (see <A
+HREF="#Spectrum24t"><I>section 3.10</I></A>) and Atmel (see <A
+HREF="#Atmel"><I>section 3.20</I></A>) use part of the PrismII chipset
+but with their own firmware and therefore are <B>not compatible</B>
+(even if they sometime use the same device identification as PrismII
+cards and sort of work with PrismII drivers).
+<p>
+Most PrismII vendors offer regular <I>Pcmcia cards</I> for
+laptops. For desktop machines, the situation is a bit more messy, some
+vendors offer standard <I>PCI-Pcmcia cards</I> (where you can slot the
+Pcmcia card), dedicated <I>PLX cards</I> (that look like a regular
+PCI-Pcmcia bridge but is not) or some <I>fully integrated PCI
+cards</I> (Prism2.5). Some vendors also offer <I>USB adapters</I>
+(beware, some of them are <I>Amtel</I> cards, and all of them have
+performance issues). Lastly, some laptop include <I>MiniPCI cards</I>
+that may be either integrated PCI cards or USB adapters.
+<p>
+Like the initial PrismI design, the PrismII is fully compatible with
+802.11 and include a 2.4 GHz Direct Sequence modem, with all the usual
+features (Roaming, WEP...).
+<p>
+The main differences between the PrismI and PrismII chipset are a
+higher integration, a higher performance modem and the replacement of
+the AMD controller with Intersil own design. The higher integration (5
+chips instead of 8) allows to reduce the price and the size of the
+product, and to simplify the integration. The new physical layer
+(modem) has a better performance (but a lower transmit power),
+increasing range, speed and battery life, and is fully compliant with
+the 802.11-b standard (5.5 and 11 Mb/s). Finally, the new MAC
+controller handle most of the 802.11 functionality (instead of leaving
+it to the driver), which simplify driver development and help
+performance on slow devices (palmtop, embedded design).
+<p>
+The <B>Prism2.5</B> and <B>Prism3</B> chipsets are evolution of the
+PrismII chipset, offering even higher integration, lower cost and
+backward compatibility. With respect to the driver, these 3 chipset
+look the same, and therefore driver supporting PrismII hardware will
+also support Prism2.5 and Prism3 hardware.
+<p>
+Note that the PrismII <B>firmwares</B> are usually not of the highest
+quality and quite inconsistent from one release to another, both on
+the cards and on the Access Points, and you may have to try a few of
+them before finding the one that work for you. For example, encryption
+and IBSS ad-hoc mode seems to be working only in the latest firmwares
+(0.8.3 and later), and multicast is not working at all. It also
+usually takes a bit of time to get the workaround for the latest
+firmwares in the various Linux drivers. Latest firmware seem to have
+fixed most problems and have added the feature missing from earlier
+firmwares.
+<p>
+A few words about <B>Ad-Hoc modes</B>&nbsp;: like for Orinoco card,
+the firmware support two ad-hoc mode, the Ad-Hoc demo mode (not
+802.11-b compliant, but reported to be Orinoco Ad-Hoc demo mode
+compatible) and the IBSS Ad-Hoc mode (802.11-b compliant). The IBSS
+Ad-Hoc mode is only available in firmwares 0.8.3 and later.
+
+<H3>3.6.2 The driver</H3>
+
+Who was more qualified to write this driver than <I>Mark</I>, from
+AVS, who already wrote the driver for the PrimsI cards&nbsp;? In fact,
+Intersil did partner with <I>Mark</I> to get this driver written for
+us&nbsp;!
+<p>
+As usual with <I>Mark</I>, the driver is really complete and well
+written. It is currently only in beta stage, and <I>Mark</I> told me
+that he needs to add more documentation and debug some more
+features. The driver support both Pcmcia and PCI cards. This driver is
+compatible with Linux bridging software, includes a generic 802.11
+interface, exposing the full 802.11 MIB to user space, and include
+hooks to build an Access Point. The driver also come with a
+configuration tools, an utility to dump 802.11 frames and a daemon
+responding to 802.11 events.
+<p>
+The release 0.1.10 fixes a number of long standing problems and
+include a number of patches and features that were floating around on
+the mailing lists. This version supports properly WEP encryption and
+Ad-Hoc mode. Note that the driver supports only <B>IBSS ad-hoc</B>
+mode (0.1.10 and later) and only for recent firmwares, whereas most
+cards also support the old ad-hoc demo mode.
+<p>
+The driver supports <B>Pcmcia, PLX and PCI cards</B>. The
+PLX card allow to add a Pcmcia card in a PCI slot, but does not
+support any of the Pcmcia functionality, so is not supported through
+the Pcmcia package but directly by the driver. PCI support is for
+fully integrated PCI cards or MiniPCI cards. <I>Mark</I> has also
+added <B>USB support</B> (only for Intersil USB cards, not Atmel
+cards).
+<p>
+<I>Reyk</I> has developped a patch that adds basic Wireless Extension
+support to the driver, and that was included in version 0.1.13. He
+needs help for testing and improving it.
+<p>
+Since then, <I>Mark</I> is concentrating on a Intersil 802.11a driver
+(not Atheros) and has transferred the maintenance of the driver to
+<I>Solomon</I> (a new AVS employee). <I>Solomon</I> is making the
+driver SMP compliant, cleaning it up and keeping up with the new
+firmwares from Intersil, and keeping up with new
+kernels. <I>Solomon</I> has also added pretty complete support for
+<B>Wireless Extensions</B> in 0.2.1, including Scanning support.
+<p>
+<I>Mark</I> is also selling a Wireless Development kit and an Access
+Point, based on a PPC platform and this driver.
+
+<A NAME="Orinoco-Prism2">
+<H2>3.7	Intersil PrismII support in the Orinoco driver</H2>
+</A>
+
+The Orinoco driver (see <A HREF="#Orinoco"><I>section 3.2</I></A>) may
+be used with most PrismII cards.
+
+<A NAME="Prism2-hostAP">
+<H2>3.8	Intersil PrismII driver with HostAP mode</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>stable
+</TR><TR valign="top">
+<TD>Driver name&nbsp;:
+<TD>Pcmcia : hostap_cs.o
+<br>PLX : hostap_plx.o
+<br>PCI : hostap_pci.o
+</TR><TR>
+<TD>Versions&nbsp;:
+<TD>v0.4.9
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD>Linux kernel (2.6.17)
+<br><A HREF="http://hostap.epitest.fi/">http://hostap.epitest.fi/</A>
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>Jouni Malinen &lt;jkmaline&#064;cc.hut.fi&gt;
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="http://lists.shmoo.com/pipermail/hostap/">
+http://lists.shmoo.com/pipermail/hostap/</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme, web page
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Module parameters and Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions and /proc interface
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc, Master (HostAP), Repeater (WDS)
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP (hardware or host based), 802.1x, WPA
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Host AP mode, bridging, access list, WDS, PLX and PCI support
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>?
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web pages&nbsp;:
+<TD>[Same as PrismII driver]
+</TR>
+</TABLE>
+
+<H3>3.8.1	 The device</H3>
+
+This is the same device as the previous entry (<A
+HREF="#Prism2"><I>section 3.6</I></A>).
+<p>
+One of the most interesting feature of the standard PrismII firmware
+is that it can allow the host to act as an Access Point (<B>HostAP
+mode</B>). This allow to turn a regular PC with a Prism2 cards into an
+Access Point, allowing other nodes to connect to it. In HostAP mode,
+the card does only the critical part of the Access Point (sending
+beacons) and simply pass all the 802.11 management frames to the
+driver (which does 802.11 management itself).
+<p>
+Note that this HostAP mode doesn't exist or is not documented for
+other cards (non-PrismII firmwares). Also, it is possible to load
+special firmware in PrismII card which allows the card to perform the
+full Access Point functionality by itself (tertiary firmware).
+
+<H3>3.8.2 The driver</H3>
+
+<I>Jouni</I> has recently written this totally new driver for PrismII
+card. It is well written, it was probably inspired by the various
+other driver floating around and is much more simpler than the
+linux-wlan-ng driver (see <A HREF="#Prism2"><I>section 3.6</I></A>).
+<p>
+The driver has complete support for the various feature of the PrismII
+card (WEP, IBSS Ad-Hoc mode, scanning...), Monitor mode, very complete
+support for Wireless Extensions and offer various extra information in
+a <U>/proc</U> directory, making already an excellent choice for a
+standard wireless client.
+<p>
+What set this driver apart from the other driver is its support for
+HostAP mode. In this mode, the driver act as an Access Point on the
+air and does all the 802.11 management necessary. In this mode, the
+driver also allows bridging through the regular Ethernet bridge driver
+of Linux. This explain why this driver is use by most Linux
+Access-Point projects.
+<p>
+<I>Jouni</I> continues to refine his driver and has added PLX and PCI
+cards support, monitor mode, MAC address based access list and WDS
+support (to allow Access Point to communicate with each
+other). <I>Jouni</I> latest masterpiece is the addition of <B>WPA
+support</B> in the HostAP driver, and the associated user space
+wpa_supplicant.
+<p>
+In other words : impressive work...
+<p>
+This driver was included in kernel 2.6.14, and has been maintained in
+the kernel since without increasing the version number.
+
+<A NAME="MagicLAN">
+<H2>3.9	Samsung MagicLAN (binary library driver)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>beta
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>swld11_cs.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>1.22
+</TR><TR>
+<TD>Where&nbsp;:
+<TD><A HREF="http://www.magiclan.com/product/magiclan/download/mlist.jsp">
+http://www.magiclan.com/product/magiclan/download/mlist.jsp</A>
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>Jae-Jun Lee &lt;brucejr&#064;samsung.co.kr&gt;
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Module parameters, Wireless Extensions and utility
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>yes
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Encryption, Proprietary Samsung API
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>?
+</TR><TR>
+<TD>License&nbsp;:
+<TD>Binary only for the core + (?)source wrapper
+</TR><TR valign="top">
+<TD>Vendor web pages&nbsp;:
+<TD><A HREF="http://www.sem.samsung.co.kr/">http://www.sem.samsung.co.kr/</A>
+<br><A HREF="http://www.magiclan.com/">http://www.magiclan.com/</A>
+</TR>
+</TABLE>
+
+<H3>3.9.1	 The device</H3>
+
+The Samsung <B>MagicLAN</B> is one of the various products based on
+the Intersil PrismII chipset (see <A HREF="#Prism2"><I>section
+3.6</I></A> for full details). It's a fully featured wireless lan
+compliant with 802.11-b. The Compaq products are rumored to be the
+Samsung one, with a new sticker...
+
+<H3>3.9.2 The driver</H3>
+
+Samsung has released their own version of a PrismII driver for their
+card. The driver seems complete and well written, the new releases
+fixes more bugs and I had report of people successfully using it (with
+Samsung cards and even some LinkSys and D-Link cards).
+<p>
+The main difference with the PrismII driver of <I>Mark</I> (see <A
+HREF="#Prism2"><I>section 3.6</I></A>) is that the Samsung driver is
+based on a binary library (so, only available on x86 platforms), offer
+encryption and Ad-Hoc mode and offer some support for Wireless
+Extensions.
+
+<A NAME="Spectrum24t">
+<H2>3.10	Symbol Spectrum24 High Rate, 3Com AirConnect, Intel PRO/Wireless and Socket Communication</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>Beta (Pcmcia only)
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>spectrum24t_cs.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>1.03 and 1.03-CF
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://sourceforge.net/projects/spectrum24">
+http://sourceforge.net/projects/spectrum24</A>
+<br><A HREF="ftp://ftp.symbol.com/pub/SOFTWARE/IEEE/PC_CARD/LINUX/">
+ftp://ftp.symbol.com/pub/SOFTWARE/IEEE/PC_CARD/LINUX/</A>
+</TR><TR>
+<TD>Contact&nbsp;:
+<TD>Brad LeFore &lt;blefore&#064;sj.symbol.com&gt;
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>Lee John Keyser-Allen &lt;frozbiz&#064;hotmail.com&gt;
+</TR><TR>
+<TD>Discussion forums&nbsp;:
+<TD><A HREF="http://sourceforge.net/forum/?group_id=11099">
+http://sourceforge.net/forum/?group_id=11099</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme file
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>module parameters
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>None
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Multicast, WEP encryption and support for CF cards
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL or BSD
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.symbol.com/products/wireless/wireless.html">
+http://www.symbol.com/products/wireless/wireless.html</A>
+<br><A HREF="http://support.intel.com/support/network/wireless/">
+http://support.intel.com/support/network/wireless/</A>
+<br><A HREF="http://www.3Com.com/">http://www.3Com.com/</A>
+<br><A HREF="http://www.socketcom.com/">http://www.socketcom.com/</A>
+</TR>
+</TABLE>
+
+<H3>3.10.1	 The device</H3>
+
+Despite being a long time proponent of Frequency Hopping, Symbol
+couldn't ignore the success of 802.11-b. After a strategic agreement
+with Intel, Symbol is back with a complete line of 802.11-b products,
+that are called <B>Spectrum24 High Rate</B> (to better confuse them
+with their old FH products). Symbol still sell mostly to vertical
+markets through VAR, but both 3Com and Intel are repackaging Symbol
+cards, as <B>Intel PRO/Wireless</B> and <B>3Com AirConnect</B>.  The
+Symbol CF card is also sold by <B>Socket Communications</B>.
+<p>
+Of course, there are exceptions&nbsp;: the <B>Symbol/Socket CF</B>
+cards (Compact Flash) and the Intel <B>2011B</B> card don't have a
+built in firmware and require a specific version of the driver (called
+CF). On the other hand, the <B>3Com/Intel PCI cards</B> are <A
+HREF="#Prism2"><I>PrismII</I></A> cards, and the latest 3Com 802.11b
+cards include various chipsets (see <A HREF="#Poldhu"><I>section
+3.18</I></A>).
+<p>
+The card is mostly sold in the Pcmcia form factor, along with the
+Access Point. There is a PCI version that looks like a Pcmcia card in
+a regular PCI to Pcmcia slot.  The main originality of Symbol is that
+it offer those famous "all-in-one" products (PDA + barcode + wireless)
+with 802.11-b (beware, they share the same model numbers as the
+non-802.11b devices). Recently Symbol released a <B>Compact Flash</B>
+(CF) version of their card called Wireless Networker which has an
+amazing form factor.
+<p>
+The Symbol product is composed of the Intersil PrismII chipset (see
+<A HREF="#Prism2"><I>section 3.6</I></A>) with Symbol own MAC controller
+(which is originally derived from the same core as the MAC from
+Lucent, Aironet and Intersil). From Symbol, we can expect a design
+giving good quality and performance.
+<p>
+The MAC has all the usual features of the 802.11 standard, like MAC
+level retransmission, RTS/CTS, fragmentation, auto bit-rate selection,
+power saving, WEP encryption and roaming, which extensive
+configurability. The physical layer has the classic PrismII feature,
+supporting 1, 2, 5.5 and 11&nbsp;Mb/s.
+
+<H3>3.10.2	 The driver</H3>
+
+The driver was initially written by TriplePoint, and <I>Lee</I> has
+taken over the maintenance. Not surprisingly, the driver is very
+similar to the Wavelan-IEEE binary driver (except for being full
+source), to the point of mentioning "Turbo" cards (what Symbol calls
+"High Rate").
+<p>
+The driver is well written, has an extensive collection of module
+parameters and has been tested successfully with Symbol, 3Com and
+Intel cards. <I>Lee</I> plans to add Wireless Extensions and fix the
+few remaining bugs...
+<p>
+The version 1.01 of the driver fixes some bugs related to higher bit
+rate (11 Mb/s) and encryption. The version 1.02, adds support for
+kernel 2.4.X and disable power management (doesn't work on latest
+firmwares).
+<p>
+Symbol has recently release a separate version of this driver to
+support <B>Compact Flash</B> cards. Compact Flash cards need a
+specific driver because they don't have the firmware stored on the
+card and therefore the driver has to download the firmware to the card
+after each reset.
+
+<A NAME="eriwlan">
+<H2>3.11	Ericsson WLAN 11&nbsp;Mb/s</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>First shot
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>eriwlan_cs.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>1.0 (2000-10-11)
+</TR><TR>
+<TD>Where&nbsp;:
+<TD><A HREF="http://www.ericsson.com/wlan/su-downloads11.asp">
+http://www.ericsson.com/wlan/su-downloads11.asp</A>
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>Christian Olrog &lt;Christian.Olrog&#064;ericsson.com&gt;
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme file
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>module parameters and /proc interface
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>/proc interface
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Power management
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR>
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.ericsson.com/wlan/">http://www.ericsson.com/wlan/</A>
+</TR>
+</TABLE>
+
+<H3>3.11.1	 The device</H3>
+
+After their success with wide area communications (GSM and co.),
+Ericsson decided to expand in new markets and started looking
+seriously at local connectivity. Ericsson is of course the main
+driving force behind <B>BlueTooth</B> (see <A
+HREF="Linux.Wireless.std.html#mclink"><I>section 8</I></A>), but they
+realised pretty quickly the BlueTooth would not fulfil the need of the
+Wireless LAN market. Ericsson is also pushing hard <B>HiperLAN II</B>
+(see <A HREF="Linux.Wireless.std.html#Hiperlan2"><I>section
+8</I></A>), a high performance system (54 Mb/s) in the 5 GHz band with
+strong quality of service support.
+<p>
+The initial Ericsson Wireless LAN products were OEM of <B>BreezeCom
+pro.11</B> products (Frequency Hopping, 3&nbsp;Mb/s - see <A
+HREF="Linux.Wireless.drivers.html#BreezeNetPC"><I>section
+2.11</I></A>). Due to the success of 802.11-b, their second product
+line are fully 802.11-b compliant, and are in fact OEM of the Symbol
+cards (see <A HREF="#Spectrum24t"><I>section 3.10</I></A>). As such,
+this product has all the usual 802.11-b features...
+
+<H3>3.11.2	 The driver</H3>
+
+This driver apply only to the 11&nbsp;Mb/s version of the Ericsson
+card. This is only the second driver written by <I>Christian</I> from
+scratch, after the BreezeCom driver (see <A
+HREF="Linux.Wireless.drivers.html#BreezeNetPC"><I>section 2.11</I></A>
+- this other driver applies to Ericsson 3&nbsp;Mb/s cards). And as
+usual for him, the source code is well written, concise and
+clean. Impressive job !
+<p>
+This driver is very new, so I don't have yet report of its use. The
+driver seems to support only a minimal set of configuration and
+statistics for now. <I>Christian</I> told me that it should work with
+other Symbol cards with minor changes, and that the driver has been
+tested with IPsec and MobileIP. I hope to have more info about it at a
+later date...
+
+<A NAME="Orinoco-Symbol">
+<H2>3.12	Symbol High Rate support in the Orinoco driver</H2>
+</A>
+
+The Orinoco driver (see <A HREF="#Orinoco"><I>section 3.2</I></A>) may
+be used with most Symbol HR cards.
+
+<A NAME="SpectrumCF">
+<H2>3.13	Symbol CF driver based on the Orinoco driver</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>Beta
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>spectrum_cs.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>v0.15
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD>Linux kernel (2.6.18)
+<br><A HREF="http://www.red-bean.com/~proski/symbol/">
+http://www.red-bean.com/~proski/symbol/</A>
+<br><A HREF="http://savannah.nongnu.org/projects/orinoco/">
+http://savannah.nongnu.org/projects/orinoco/</A>
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>Pavel Roskin &lt;proski&#064;gnu.org&gt;
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme file
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions only
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc and Ad-Hoc-demo
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP (based on hardware support)
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions, with optional patch
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Similar to Orinoco driver (including ARM support)
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>MPL and GPL
+</TR><TR>
+<TD>Vendor web page&nbsp;:
+<TD>[Same as Symbol HR driver]
+</TR>
+</TABLE>
+
+<H3>3.13.1	 The device</H3>
+
+This is the same device as the previous entry (<A
+HREF="#Spectrum24t"><I>section 3.10</I></A>).
+<p>
+Note that this driver is specific to the <B>Compact Flash</B> (CF)
+version of the card and the <B>Intel 2011B</B>.
+
+<H3>3.13.2	 The driver</H3>
+
+The Orinoco driver (see <A HREF="#Orinoco"><I>section 3.2</I></A>)
+already includes support for regular Symbol HR cards. However, the
+Compact Flash cards don't work with the standard Orinoco driver
+because they lack built in firmware. This is the same reason why there
+is two different Spectrum24 drivers (see <A
+HREF="#Spectrum24t"><I>section 3.10</I></A>).
+<p>
+Pavel has created a new driver based on the Orinoco driver and
+Spectrum24-CF driver for those cards. It is similar to the regular
+Orinoco Pcmcia driver, but add the <B>firmware download</B> at each
+reset necessary for those cards. As the core of the driver is common
+with the <B>Orinoco driver</B>, this driver has the exact same feature
+set (which is quite extensive - see <A HREF="#Orinoco"><I>section
+3.2</I></A>). This driver is now integrated in the Orinoco driver
+collection (v0.14 and later), and no longer distributed separately. It
+is now part of the Linux kernel (2.6.14 and later).
+<p>
+Note that for cards that don't require the firmware download (regular
+Pcmcia cards), it is recommended to use the regular Orinoco driver
+instead of this one.
+
+<A NAME="Arlan802">
+<H2>3.14	Aironet ARLAN 4500, 4800, Cisco 340 and Cisco 350 series</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>stable
+</TR><TR valign="top">
+<TD>Driver names&nbsp;:
+<TD>ISA, PCI&nbsp;: airo.o
+<br>Pcmcia&nbsp;: airo_cs.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>1.4
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD>Linux kernel (2.6.17)
+<br>Pcmcia package (3.1.26)
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>Benjamin Reed &lt;breed&#064;almaden.ibm.com&gt;
+<br>Javier Achirica &lt;achirica&#064;gmail.com&gt;
+<br>Dan Williams &lt;dcbw&#064;redhat.com&gt;
+<br>Matthieu Castet &lt;castet.matthieu&#064;free.fr&gt;
+</TR><TR valign="top">
+<TD>Web page&nbsp;:
+<TD><A HREF="http://sourceforge.net/projects/airo-linux/">
+http://sourceforge.net/projects/airo-linux/</A>
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="http://sourceforge.net/mail/?group_id=24926">
+http://sourceforge.net/mail/?group_id=24926</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>README file
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>/proc interface and Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>/proc interface and Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP (hardware), AES (host), MIC, 802.1x, WPA
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>N/A
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Support MPI cards (Mini PCI)
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>MPL & GPL
+</TR><TR>
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.aironet.com/">http://www.aironet.com/</A>
+</TR>
+</TABLE>
+
+<H3>3.14.1	 The device</H3>
+
+Aironet has been the producer of some of the most performant wireless
+LANs for a long time. Aironet was a division of Telxon, and was
+spun-off when Symbol, one of their competitor, did aquire
+Telxon. After a short independent life, Aironet was acquired by Cisco.
+<p>
+The previous section was dealing with Aironet old pre-802.11 products
+(see <A HREF="Linux.Wireless.drivers.html#Arlan"><I>section
+2.8</I></A>), this section deals with their more recent 802.11
+compliant products. Their first 802.11 products were the 3500 family,
+Frequency Hopping (1 and 2&nbsp;Mb/s), and 4500, Direct Sequence (1
+and 2&nbsp;Mb/s).
+<p>
+The Arlan <B>4500</B> family is 802.11 compliant wireless LANs in the
+2.4&nbsp;GHz ISM band, and is Direct Sequence. It includes an ISA,
+PCI, Pcmcia, serial, Ethernet and multi-Ethernet versions, plus the
+Access Point.
+<p>
+These cards are based on the Harris <B>Prism</B> chipset, like many
+other cards (see <A
+HREF="Linux.Wireless.drivers.html#Prism"><I>section 2.4</I></A>), but
+Aironet are using their own MAC controller. The 4500 offer standard 1
+and 2&nbsp;Mb/s bit rate. The MAC includes all the standard 802.11
+features, with Power Saving, WEP, Ad-Hoc mode and roaming, plus a lot
+of Aironet extensions (short headers, variable base rate...). Conform
+to their reputation, their MAC is one of the richest in term of
+features, and one of the most performant.
+<p>
+The <B>3500</B> family (Frequency Hopping) eventually died, and I
+won't talk about it here.
+<p>
+The 4500 family was quickly followed by the <B>4800</B> family, still
+based on the Prism chipset, adding 5.5 and 11&nbsp;Mb/s bit rate,
+either in MBOK (proprietary) or CCK, which is 802.11-b compliant. The
+4800 can do encryption only at 1 and 2&nbsp;Mb/s (this limitation was
+removed in the 4800B).
+<p>
+With introduction of the <B>PrismII</B> chipset, Aironet did release
+the <B>4800B</B> family. It is functionally equivalent to the 4800,
+except that the new PrismII chipset allows lower price, greater
+sensitivity but force a lower transmit power (30 mW). Aironet still
+use their own MAC controller in the 4800B (and not the new PrismII MAC
+- see <A HREF="#Prism2"><I>section 3.6</I></A>).
+<p>
+After the acquisition by Cisco, the Aironet 4800B was renamed <B>Cisco
+340</B> series (exact same hardware, new name). Dell also sell the
+same hardware under its own brand as <B>Dell TrueMobile 1100</B> (on
+the other hand, the TrueMobile 1150 is a Wavelan IEEE).
+<p>
+Like Lucent, Cisco offer different cards with different level of
+encryption. The cards labelled <B>340</B> feature no encryption, the
+cards labelled <B>341</B> feature 40 bits encryption and the cards
+labelled <B>342</B> feature 128 bits encryption. Moreover, some
+versions of the Pcmcia card are sold with antenna but others without
+antennas.
+<p>
+Cisco has now released the <B>Cisco 350</B>, a new family of 802.11b
+cards. From the information I did gather, it seems to be equivalent to
+the 340 series with a greater transmit power (100&nbsp;mW instead of
+30&nbsp;mW). The Cisco 350 also improves the performance of the AP and
+introduce greater security (Radius authentication and co).
+<p>
+Cisco has also released a <B>Mini-PCI (MPI)</B> version of the Aironet
+350, to be added in laptops that support a Mini-PCI slot. For some
+strange reason, this hardware is slightly different from the regular
+Aironet 350 PCI.
+<p>
+Cisco has also a wide range of <B>IEEE 802.11g</B> products, those are
+completely different from this hardware, and most often they are
+Atheros cards (see <A
+HREF="Linux.Wireless.drivers.802.11ag.html#AtherosMADWiFi"><I>section
+4.2</I></A>).
+
+<H3>3.14.2	 The driver</H3>
+
+<I>Ben</I> has produced a solid driver for the Aironet card, The
+driver supports the ISA, PCI and Pcmcia cards (both 4500, 4800 & 4800B
+versions), it looks fairly complete and debugged, with a nice /proc
+interface. The driver also has very complete WEP support.
+<p>
+<I>Ben</I> also told me that the driver was able to recognise the
+PC3500 cards, but more work would be needed there to get it fully
+working.
+<p>
+Recently, I've started adding Wireless Extension to this
+driver. <I>Ben</I> was kind enough to integrate properly my work in
+his driver. Then, <I>Javier Achirica</I> did an amazing job of
+completing Wireless Extension support (power management, spy and co),
+and this driver has one of the most complete Wireless Extension
+support of all.
+<p>
+Then, <I>Javier</I> added to the driver the Cisco proprietary
+API, which allow communication with Cisco utilities (see <A
+HREF="#ArlanCisco"><I>section 3.16</I></A>) and, amongst other things,
+flashing new firmware on the card. All this amazing work is in the
+latest release from <I>Ben</I> (1.5). He also wrote a couple of open
+source utilities allowing to dump all the register of the card and to
+flash new firmwares through this API.
+<p>
+Later, the driver has been integrated in the Linux kernel (2.4.6 and
+later) and moved to SourceForge. <I>Javier</I> has also added the
+ability to dump raw 802.11 frames. Then <I>Javier</I> did extensive
+work to fix locking (SMP support), add monitor mode and Wireless
+Scanning support (in version 1.4).
+<p>
+<I>Ben</I> attempted to add support to MPI card and added code for
+those cards in the CVS. The work on MPI card was completed and now MPI
+cards are properly supported.
+<p>
+<I>Ben</I> and <I>Javier</I> are no longer active. <I>Dan</I> has
+fixed various bug and kept the driver up to date in the kernel, and
+<I>Matthieu</I> has added WPA support.
+
+<A NAME="Arlan802alt">
+<H2>3.15	Aironet ARLAN 802.11 (alternate driver)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>stable
+</TR><TR valign="top">
+<TD>Driver name&nbsp;:
+<TD>ISA, PCI&nbsp;: aironet4500_card.o
+<br>Pcmcia&nbsp;: aironet4500_cs.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>0.1
+</TR><TR>
+<TD>Where&nbsp;:
+<TD>Linux kernel 2.3.31 to 2.5.X
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>Elmer Joandi &lt;elmer&#064;linking.ee&gt;
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Configure.help file
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>/proc interface
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>/proc interface
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>Pcmcia interface
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>Buggy SMP support.
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR>
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.aironet.com/">http://www.aironet.com/</A>
+</TR>
+</TABLE>
+
+<H3>3.15.1	 The device</H3>
+
+This is the same device as the previous entry (<A
+HREF="#Arlan802"><I>section 3.14</I></A>).
+
+<H3>3.15.2	 The driver</H3>
+
+To some, it may seem that this is a totally new driver that has just
+popped up in the kernel with little warning. In fact, <I>Elmer</I> had
+developed this driver for a commercial company (SpectrumWireless) a
+while back and they agreed to let him release it in GPL form after
+some month.
+<p>
+The code is very complete, especially the /proc interface. It comes as
+four modules, the generic core, the /proc interface, the PCI/ISA
+interface and the Pcmcia interface. The driver support both the 4500
+and 4800 families. Unfortunately, the Pcmcia interface is incompatible
+with the Linux Pcmcia support and doesn't work well.
+<p>
+<I>Elmer</I> told me that compared to Ben driver, his driver was
+probably more robust and featured but much less friendly. In essence,
+the focus was slightly different, so each driver has it own strength.
+<p>
+This driver was <B>removed</B> from the Linux kernel during 2.5.X, so
+it is no longer available in kernel 2.6.X.
+
+<A NAME="ArlanCisco">
+<H2>3.16	Cisco/Aironet 802.11 (Cisco driver)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>stable (rock solid)
+</TR><TR valign="top">
+<TD>Driver name&nbsp;:
+<TD>ISA, PCI&nbsp;: airo.o
+<br>Pcmcia&nbsp;: airo_cs.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>2.1
+</TR><TR>
+<TD>Where&nbsp;:
+<TD><A HREF="http://www.cisco.com/public/sw-center/sw-wireless.shtml">
+http://www.cisco.com/public/sw-center/sw-wireless.shtml</A>
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>Cisco
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Text files
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Cisco utilities, Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Cisco utilities, Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP (hardware), AES (host), MIC
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>Cisco open source license
+</TR><TR>
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.aironet.com/">http://www.aironet.com/</A>
+</TR>
+</TABLE>
+
+<H3>3.16.1	 The device</H3>
+
+This is the same device as the two previous entries (<A
+HREF="#Arlan802"><I>section 3.14</I></A>).
+
+<H3>3.16.2	 The driver</H3>
+
+Recently, <I>Cisco</I> decided to get more involved with supporting
+their Wireless LAN cards under Linux. Rather than developing an
+entirely new driver, they decided to base their work on <I>Ben</I>'s
+driver (<A HREF="#Arlan802"><I>section 3.14</I></A>), which is a good
+idea. One of the key person behind this operation was <I>Jim
+Veneskey</I>.
+<p>
+The main contribution of <I>Cisco</I> is a proprietary API, which
+allow communication with Cisco utilities and, amongst other things,
+flashing new firmware on the card, and of course a set of utilities
+which are mostly identical to the Windows utilities. They also
+provided nice installation scripts and did lot's of testing of the
+driver to guarantee its stability (<I>Cisco</I> usually do some pretty
+intensive testing of their products).
+<p>
+However, even if <I>Cisco</I> regularly synchronise with <I>Ben</I>'s
+driver (<A HREF="#Arlan802"><I>section 3.14</I></A>), this one
+continues to improve. As they are derived from the same base, it's
+easy to compare the two drivers. In term of features, I guess that
+<I>Ben</I>'s driver is winning, because it now has the Cisco API of
+this driver and more complete Wireless Extensions support. However, I
+believe that <I>Cisco</I> has an edge in term of stability.
+<p>
+I hope that the two drivers will merge rather than diverge, and that
+changes will be propagated from one to the other, so that we have a
+driver with both features and rock solid stability, but only time will
+tell... <I>Cisco</I> told me that they were going to try to catch up
+with <I>Ben</I>'s driver.
+<p>
+Note that <I>Cisco</I> changed their web site and their driver is no
+longer available as a public download. I can not check if the driver
+still exist and what changed has been made to it.
+
+<A NAME="Swallow">
+<H2>3.17	No Wires Needed Swallow (and BreezeCom DS11)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>stable
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>swallow_cs.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>0.7.0 (kernel 2.4.0) and 0.4.0 (kernel 2.2.16 - older version)
+</TR><TR>
+<TD>Where&nbsp;:
+<TD><A HREF="http://www.xs4all.nl/~bvermeul/swallow/">
+http://www.xs4all.nl/~bvermeul/swallow/</A>
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>Bas Vermeulen &lt;bvermeul&#064;blackstar.xs4all.nl&gt;
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>README file
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Module parameters, Wireless Extensions, /proc interface
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>no
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP, AES
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>unknown
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Security (very complete), roaming table
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>Multicast
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.nwn.com/">http://www.nwn.com/</A>
+<br><A HREF="http://www.breezecom.com/">http://www.breezecom.com/</A>
+</TR>
+</TABLE>
+
+<H3>3.17.1	 The device</H3>
+
+No Wires Needed is a small company in the Netherlands building a range
+of 802.11 DS devices, including a Pcmcia card (Swallow), an Access
+Point and a Hub. They also offer a ISA version using a ISA to Pcmcia
+bridge. They have two version, the <B>550</B> (5.5&nbsp;Mb/s) and the
+more recent <B>1100</B> (11&nbsp;Mb/s). BreezeCom also EOM this card
+for their DS.11 range (the <B>PC-DS.11</B>).
+<p>
+The Swallow delivers all the features expected from a 802.11 compliant
+device, with ad-hoc networking, authentication and roaming. The main
+difference with other 802.11 devices is that NWN offers some strong
+link layer encryption and a key management and distribution system.
+<p>
+The modem is the famous Prism chipset used in many other cards (see <A
+HREF="Linux.Wireless.drivers.html#Prism"><I>section 2.4</I></A>),
+which is 2.4 GHz Direct Sequence, with 1&nbsp;Mb/s, 2&nbsp;Mb/s,
+5.5&nbsp;Mb/s and 11&nbsp;Mb/s bit rate. No Wires Needed use their own
+MAC design on an embedded ARM processor, and not the AMD or PrismII
+MAC controller. This give them more performance and flexibility. Now
+that Intersil has acquired No Wires Needed, Intersil can offer 2
+different 802.11 MAC controller&nbsp;!
+
+<H3>3.17.2	 The driver</H3>
+
+<I>Bas</I> has implemented a quite complete driver for the Swallow 550
+and 1100 card (Pcmcia). He has patiently debugged the driver to fix
+races, timeouts and increase the performance. The driver is working
+for both the NWN and the BreezeCom cards.
+<p>
+<I>Bas</I> has also implemented Wireless Extension support for the
+security support, and support the full range of security features in
+the driver. You can also configure the ESSID on the fly with Wireless
+Extensions...
+<p>
+Lately, <I>Bas</I> has been doing lot of work on roaming support. The
+driver export the roaming tables in a /proc interface, allowing the
+implementation of a user space roaming daemon. This interface also
+contains some other configuration parameters.
+
+<A NAME="Poldhu">
+<H2>3.18	No Wires Needed 1148, old 3Com Wireless LAN XJack</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>stable
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>poldhu_cs.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>0.2.13 (for kernel 2.4.X), 0.3.1 (for kernel 2.6.X)
+</TR><TR>
+<TD>Where&nbsp;:
+<TD><A HREF="http://www.xs4all.nl/~bvermeul/swallow/">
+http://www.xs4all.nl/~bvermeul/swallow/</A>
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>Bas Vermeulen &lt;bvermeul&#064;blackstar.xs4all.nl&gt;
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>README file
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Module parameters, Wireless Extensions, /proc interface
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>no
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP, AES
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>unknown
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Security (very complete)
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>Multicast
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.nwn.com/">http://www.nwn.com/</A>
+<br><A HREF="http://www.3Com.com/">http://www.3Com.com/</A>
+</TR>
+</TABLE>
+
+<H3>3.18.1	 The device</H3>
+
+Recently, No Wires Needed has replaced the Swallow 550 and 1100 with a
+new 802.11-b card, the <B>1148</B>. The design and the feature of this
+card seems very similar to their previous one (see <A
+HREF="#Swallow"><I>section 3.17</I></A>)&nbsp;: The MAC is the same ARM
+core and they still offer AirLock encryption. The main difference
+seems that they are now using a PrismII modem (see <A
+HREF="#Prism2"><I>section 3.6</I></A>).
+<p>
+3Com has also released a quite rare <B>old Wireless LAN XJack</B> card
+(3CRWE62092A) which is a clone of the NWN 1148 (this card). On the
+other hand, the newly released <B>OfficeConnect</B> Wireless LAN cards
+(3CRSHPW196/696 - with or without the XJack antenna) and <B>new
+Wireless LAN XJack</B> card (3CRWE62092B) are <I>Atmel</I> cards (see
+<A HREF="#Atmel"><I>section 3.20</I></A>). The even newer
+<B>OfficeConnect CardBus</B> card (3CRSHPW796) is an <I>ADMTek</I>
+card (see <A HREF="#ADMtek"><I>section 3.23</I></A>). The older
+<B>AirConnect Pcmcia</B> cards (3CRW737A/B) are clone of the <I>Symbol
+HR</I> cards (see <A HREF="#Spectrum24t"><I>section 3.10</I></A>), and
+the <B>AirConnect PCI</B> card (3CRW777A) is a <I>PrismII PLX</I> card
+(see <A HREF="#Prism2"><I>section 3.6</I></A>). The <B>OfficeConnect
+11g</B> card (3CRWE154G72) is an <I>Intersil PrismGT</I> card (see <A
+HREF="Linux.Wireless.drivers.802.11ag.html#Prism54"><I>section
+4.3</I></A>), and the <B>11a/b/g</B> cards (3CRPAG175/3CRDAG675) are
+<I>Atheros</I> cards (see <A
+HREF="Linux.Wireless.drivers.802.11ag.html#AtherosMADWiFi"><I>section
+4.2</I></A>).
+<p>
+Coming back to the NWN 1148, the main difference between the 3Com
+3CRWE62092A and NWN 1148 cards is the removal of AirLock encryption
+(WEP is still available), the addition of Ad-Hoc mode, and of course
+the famous pop-up antenna&nbsp;;-)
+
+<H3>3.18.2	 The driver</H3>
+
+Because the card is so similar to the Swallow, it was natural that a
+driver for this card would be derived from the Swallow driver. In
+fact, No Wires Needed contacted <I>Bas</I> to implement a driver for
+the new card. <I>Bas</I> modified his Swallow driver and created this
+driver which offer very similar functionality and feature as the
+Swallow driver (see <A HREF="#Swallow"><I>section 3.17</I></A>).
+<p>
+So, the driver includes complete security support, Wireless Extensions
+and roaming support. The driver also include read only support for
+most low level commands (SNWNMP).
+<p>
+<I>Bas</I> has also added in the driver the necessary support for the
+3Com WLAN XJack cards, including its specific features. All features
+of the card (ad-hoc mode, encryption) are configurable through
+Wireless Extensions.
+
+<A NAME="Nokia">
+<H2>3.19	Nokia C110/C111</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>???
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>nokia_c110.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>2.05
+</TR><TR>
+<TD>Where&nbsp;:
+<TD><A HREF="http://www.nokia.com/nokia/0,5184,2718,00.html">
+http://www.nokia.com/nokia/0,5184,2718,00.html</A>
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>Nokia
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Specific Pcmcia scripts
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>/proc file
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>yes
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Encryption, multicast, user profiles
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>?
+</TR><TR>
+<TD>License&nbsp;:
+<TD>Binary only for the core + Nokia OpenSource Linux wrapper
+</TR><TR>
+<TD>Vendor web pages&nbsp;:
+<TD><A HREF="http://www.nokia.com/corporate/wlan/">
+http://www.nokia.com/corporate/wlan/</A>
+</TR>
+</TABLE>
+
+<H3>3.19.1	 The device</H3>
+
+In the past years, Nokia has slowly moved into the Wireless LAN
+market. They started by buying <I>Intalk</I>, a company producing
+PrismI clones (see <A
+HREF="Linux.Wireless.drivers.html#Prism"><I>section 2.4</I></A>), and
+Nokia continued selling those cards, renamed Nokia <B>C020</B> and
+<B>C021</B>. While being busy working on BlueTooth and HiperLanII,
+Nokia didn't forget 802.11-b and released a new set of card, the
+<B>C110</B> and <B>C111</B>.
+<p>
+As can be expected, the Nokia C110/C111 is another PrismII clone (see
+<A HREF="#Prism2"><I>section 3.6</I></A>). On the other hand, it seem
+that Nokia has changed quite a few things compared to the original
+PrismII design, for example they have added a Smart Card reader on the
+Pcmcia card (for security settings).
+
+<H3>3.19.2 The driver</H3>
+
+<I>Nokia</I> initially quietly made this driver available in the
+registered only part of their web site and didn't mention it anywhere,
+fortunately I have my spies to inform me&nbsp;;-). Later on, they
+moved this driver to their official driver page on their public web
+site. This driver is only for the C110/C111, on the other hand the
+C020 is supposed to work with the linux-wlan package (see <A
+HREF="Linux.Wireless.drivers.html#Prism"><I>section 2.4</I></A>).
+<p>
+The driver contains a very thin source wrapper on top of the binary
+part (one version for kernel 2.2.X, one for 2.4.X). On the other hand,
+the package come with exhaustive set of complex Pcmcia scripts to
+configure the card and enable profiles.
+<p>
+The driver works in infrastructure and Ad-Hoc mode, and support WEP.
+
+<A NAME="Atmel">
+<H2>3.20	Atmel AT76C502A/AT76C503A cards (802.11b USB and Pcmcia)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>stable
+</TR><TR valign="top">
+<TD>Driver name&nbsp;:
+<TD>Pcmcia&nbsp;:fastvnet_cs.o
+<br>USB&nbsp;:vnetusbX.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>v3.4.1.0&nbsp;; 2002-12-09
+</TR><TR>
+<TD>Where&nbsp;:
+<TD><A HREF="http://atmelwlandriver.sourceforge.net/">
+http://atmelwlandriver.sourceforge.net/</A>
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>Stavros Markou &lt;smarkou&#064;patras.atmel.com&gt;
+<br>Titos Mpetsos &lt;tmpetsos&#064;patras.atmel.com&gt;
+<br>Ron Smith (Wireless Extensions)
+</TR><TR valign="top">
+<TD>Web page&nbsp;:
+<TD><A HREF="http://atmelwlandriver.sourceforge.net/howto/howto.html">
+http://atmelwlandriver.sourceforge.net/howto/howto.html</A>
+<br><A HREF="http://www.fuw.edu.pl/~pliszka/hints/wireless.html">
+http://www.fuw.edu.pl/~pliszka/hints/wireless.html</A>
+<br><A HREF="http://www.gemtek.com.tw/faq_download.htm">
+http://www.gemtek.com.tw/faq_download.htm</A>
+<br><A HREF="http://www.houseofcraig.net/belkin_howto.php">
+http://www.houseofcraig.net/belkin_howto.php</A>
+</TR><TR valign="top">
+<TD>Mailing lists&nbsp;:
+<TD><A HREF="http://sourceforge.net/mail/?group_id=59001">
+http://sourceforge.net/mail/?group_id=59001</A>
+<br><A HREF="http://iprserv.jura.uni-leipzig.de/mailman/listinfo/atmel-wlan-usb">http://iprserv.jura.uni-leipzig.de/mailman/listinfo/atmel-wlan-usb</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme files
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Specific tools, Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP, WPA
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>Intersil radio support
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.atmel.com/atmel/products/prod32a.htm">
+http://www.atmel.com/atmel/products/prod32a.htm</A>
+<br><A HREF="http://www.3Com.com/">http://www.3Com.com/</A>
+<br><A HREF="http://www.gemtek.com.tw/">http://www.gemtek.com.tw</A>
+<br><A HREF="http://www.dlink.com/products/">
+http://www.dlink.com/products/</A>
+<br><A HREF="http://www.linksys.com/products/">
+http://www.linksys.com/products/</A>
+<br><A HREF="http://www.smc.com/">http://www.smc.com/</A>
+</TR>
+</TABLE>
+
+<H3>3.20.1	 The device</H3>
+
+Atmel has decided to join the selected club of company selling 802.11b
+chipsets. Their design is based on an ARM7 processor, and offer a
+Pcmcia and a USB version. The USB version is by far the most popular,
+because it was first to market. Various 802.11b radios can be used
+with this chipset (such as the PrismII radio). Very little public
+information is available about those products, but as they are 802.11
+compliant we can expect the usual set of features.
+<p>
+Of course, with any USB cards the main issue is performance. The
+streaming abstraction of USB doesn't work well with register/memory
+based chipset designs and slow down operations. Also, USB add a
+noticeable latency. I currently don't have any data on how well those
+cards performs in the respect.
+<p>
+Linksys and D-Link are selling various USB products based on this
+chipset, such as Gemtek <B>WL-280</B>, D-Link <B>DWL-120</B>, Linksys
+<B>WUSB11</B>... It seems that the SMC <B>2632W</B> is a Pcmcia card
+also based on the Atmel chipset.
+<p>
+The newly released <B>3Com OfficeConnect</B> Wireless LAN cards
+(3CRSHPW196/696 - with or without the XJack antenna) and new <B>3Com
+Wireless LAN XJack</B> (3CRWE62092B) are also Atmel Pcmcia cards.
+
+<H3>3.20.2	 The driver</H3>
+
+<I>Atmel</I> decided to release themselves a Linux driver. This driver
+is in fact a set of driver for the different combination of
+controllers and radios, and was initially based on a binary
+library. However, <I>Atmel</I> changed their mind and eventually
+released the driver as full source GPL. The USB versions work with
+both uhci and ohci USB drivers. The driver support WEP and Ad-Hoc
+mode.
+<p>
+The package from <I>Atmel</I> include specific configuration tools
+(command line and X-Window). Just after the driver was GPL'ed, the
+support for Wireless Extensions was fixed and greatly enhanced by
+<I>Ron</I> (Wireless Tools can now be used to configure the
+card). Lately, <I>Atmel</I> has improved and enhanced the USB driver,
+but also removed support for Intersil radio, so you will need to use
+older version of the driver for products using Intersil radio. On the
+other hand, the Pcmcia driver seems to be still based on an older
+version of the code.
+<p>
+Lately, the driver has gained support for kernel 2.6.X, better support
+for Wireless Extensions and support for WPA.
+
+<A NAME="AtmelUSB">
+<H2>3.21	Atmel USB alternate driver</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>in development
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>USB : at76_usb.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>0.16 (for kernel 2.6.X), 0.12 (for kernel 2.4.X)
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://at76c503a.berlios.de/">
+http://at76c503a.berlios.de/</A>
+<br><A HREF="http://git.80211libre.org/at76_usb.git/">
+http://git.80211libre.org/at76_usb.git/</A>
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>J&ouml;rg Albert &lt;joerg dot albert at gmx dot de&gt;
+<br>Oliver Kurth &lt;oku at masqmail dot cx&gt;
+<br>Guido Guenther &lt;agx&#064;sigxcpu.org&gt;
+<br>Pavel Roskin &lt;proski&#064;gnu.org&gt;
+</TR><TR valign="top">
+<TD>Web page&nbsp;:
+<TD><A HREF="http://at76c503a.berlios.de/">
+http://at76c503a.berlios.de/</A>
+<br><A HREF="http://www.wireless.org.au/~jhecker/atmeldrv/atmeldrv.html">
+http://www.wireless.org.au/~jhecker/atmeldrv/atmeldrv.html</A>
+</TR><TR valign="top">
+<TD>Mailing lists&nbsp;:
+<TD><A HREF="http://lists.berlios.de/pipermail/at76c503a-user/">
+http://lists.berlios.de/pipermail/at76c503a-user/</A>
+<br><A HREF="https://lists.berlios.de/pipermail/at76c503a-develop/">
+https://lists.berlios.de/pipermail/at76c503a-develop/</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme files
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions (0.12 and later)
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Intersil radio support
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.atmel.com/atmel/products/prod32a.htm">
+http://www.atmel.com/atmel/products/prod32a.htm</A>
+<br><A HREF="http://www.gemtek.com.tw/">http://www.gemtek.com.tw</A>
+<br><A HREF="http://www.dlink.com/products/">
+http://www.dlink.com/products/</A>
+<br><A HREF="http://www.linksys.com/products/">
+http://www.linksys.com/products/</A>
+</TR>
+</TABLE>
+
+<H3>3.21.1	 The device</H3>
+
+This is the same device as the previous entry (<A
+HREF="#Atmel"><I>section 3.20</I></A>).
+
+<H3>3.21.2	 The driver</H3>
+
+<I>Oliver</I> and a group of people were not happy about the official
+Atmel driver and its development (<A HREF="#Atmel"><I>section
+3.20</I></A>), and therefore he started to write an alternate driver
+from scratch, based on the information available in the official
+driver, and soon those other people started to help him.
+<p>
+The driver support only USB devices, and it support both Intersil and
+RFMD radios. At this time, the new driver is still in development, and
+therefore still has some limitations, but it already support both
+infrastructure and ad-hoc mode, and has some Wireless Extension
+support.
+<p>
+As <I>Olivier</I> was no longer active, <I>J&ouml;rg</I> took over the
+driver and is now fixing many bugs, making it more robust and adding a
+few missing features. For example, version 0.12 adds Wireless Scanning
+support, and is the last version to support kernel 2.4.X.
+<p>
+When <I>J&ouml;rg</I> became inactive, <I>Guido</I> and <I>Pavel</I>
+took over the driver. Most of their work in subsequent releases (0.13
+to 0.16) was all the driver cleanup necessary to be able to integrate
+the driver in the kernel (this integration has not happened yet).
+
+<A NAME="AtmelPcmcia">
+<H2>3.22	Atmel Pcmcia alternate driver</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>in development
+</TR><TR valign="top">
+<TD>Driver name&nbsp;:
+<TD>PCI&nbsp;: atmel_pci.o
+<br>Pcmcia&nbsp;: atmel_cs.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>0.9
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD>Kernel 2.6.20
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>Simon Kelley &lt;simon&#064;thekelleys.org.uk&gt;
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="http://lists.berlios.de/pipermail/at76c503a-user/">
+http://lists.berlios.de/pipermail/at76c503a-user/</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme files
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Firmware loading via HotPlug
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.atmel.com/atmel/products/prod32a.htm">
+http://www.atmel.com/atmel/products/prod32a.htm</A>
+<br><A HREF="http://www.3Com.com/">http://www.3Com.com/</A>
+<br><A HREF="http://www.smc.com/">http://www.smc.com/</A>
+</TR>
+</TABLE>
+
+<H3>3.22.1	 The device</H3>
+
+This is the same device as the previous entry (<A
+HREF="#Atmel"><I>section 3.20</I></A>).
+
+<H3>3.22.2	 The driver</H3>
+
+<I>Simon</I> also was not happy with the original Atmel driver. He
+decided to rewrite the Pcmcia/PCI driver based on the original code,
+with the main target being integration in <B>kernel 2.6.X</B>, which
+was done on 2.6.5. <I>Simon</I> did an extensive amount of work on the
+driver, for example his driver has very complete Wireless Extension
+support including Wireless Scanning. However, this driver is not
+compliant with kernel 2.4.X and earlier.
+<p>
+This driver was mostly tested with Pcmcia cards, however <I>Simon</I>
+also managed to get a PCI card for testing and added PCI support in
+the driver. Some of those cards don't have firmwares and therefore
+need to use the new <B>firmware uploading</B> facility of Linux (via
+HotPlug).
+
+<A NAME="ADMtek">
+<H2>3.23	ADMtek ADM8211 based cards</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>beta
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>PCI & Cardbus&nbsp;: 8211.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>v1.05
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://www.admtek.com.tw/index/index/Download.htm">
+http://www.admtek.com.tw/index/index/Download.htm</A>
+<br><A HREF="http://www.espina.info/papers/officeconnect/">
+http://www.espina.info/papers/officeconnect/</A>
+</TR><TR>
+<TD>Contact&nbsp;:
+<TD>ADMtek support &lt;NIC_tech_support&#064;admtek.com.tw&gt;
+</TR><TR valign="top">
+<TD>Maintainer&nbsp;:
+<TD>-
+</TR><TR valign="top">
+<TD>Documentation&nbsp;:
+<TD>Readme files
+<br><A HREF="http://www.houseofcraig.net/belkin_howto.php">
+http://www.houseofcraig.net/belkin_howto.php</A>
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>PCI busmaster
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>?
+</TR><TR>
+<TD>License&nbsp;:
+<TD>Binary only for the core + OpenSource Linux wrapper
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.admtek.com.tw">http://www.admtek.com.tw</A>
+<br><A HREF="http://www.infineon.com/">http://www.infineon.com/</A>
+<br><A HREF="http://www.dlink.com/products/">
+http://www.dlink.com/products/</A>
+</TR>
+</TABLE>
+
+<H3>3.23.1	 The device</H3>
+
+ADMtek is a small taiwanese company that designed a single chip
+802.11b MAC solution. Very little is known about it (for example which
+radio is used with the MAC), but we can expect compliance with the
+802.11b specification and the usual feature set. One of the main
+feature of this chipset is that is uses a PCI busmaster interface (as
+opposed to the Intersil PrismII that uses ISA PIO - <A
+HREF="#Prism2"><I>section 3.6</I></A>), which result in much lower CPU
+utilisation (and potentially higher performance).
+<p>
+Most <B>Cardbus 802.11b</B> cards are based on this chipset. The
+chipset is starting to appear in products, such as some D-Link 802.11b
+Cardbus and PCI cards, Belkin PCI cards, the SMC 2602W V2 and the 3Com
+3CRSHPW796.
+<p>
+ADMtek was bought by Infineon in 2004. Since then, their web site
+disappeared, and the Infineon web site has no information on their
+wireless LAN products. They seem to have shifted their focus towards
+`system on a chip' and don't seem to make standalone 802.11 modules
+anymore.
+
+<H3>3.23.2	 The driver</H3>
+
+<I>ADMtek</I> has released a Linux driver based on a binary library,
+that can be compile for different distributions. The driver has
+complete support for Wireless Extensions, and many people have
+reported success using it.
+<p>
+<I>Eduardo</I> made a patch to add support for the 3Com 3CRSHPW796 to
+this driver.
+
+<A NAME="ADMtekGPL">
+<H2>3.24	ADMtek ADM8211 full source driver</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>pre-release
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>PCI & Cardbus&nbsp;: adm8211.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>20060111
+</TR><TR>
+<TD>Where&nbsp;:
+<TD><A HREF="http://aluminum.sourmilk.net/adm8211/">
+http://aluminum.sourmilk.net/adm8211/</A>
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>Michael Wu &lt;flamingice&#064;sourmilk.net&gt;
+<br>Jouni Malinen &lt;jkmaline&#064;cc.hut.fi&gt;
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>PCI busmaster
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>?
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.admtek.com.tw">http://www.admtek.com.tw</A>
+<br><A HREF="http://www.dlink.com/products/">
+http://www.dlink.com/products/</A>
+</TR>
+</TABLE>
+
+<H3>3.24.1	 The device</H3>
+
+This is the same device as the previous entry (<A
+HREF="#ADMtek"><I>section 3.23</I></A>).
+
+<H3>3.24.2	 The driver</H3>
+
+<I>Michael</I> took a driver originally started by <I>Jouni</I> (of
+HostAp fame - <A HREF="#Prism2-hostAP"><I>section 3.8</I></A>), completed it, debugged it and finally released it. The
+main difference with ADMtek driver is that this driver is fully
+OpenSource and support only kernel 2.6.X.
+<p>
+The driver is still young, but its gaining feature and stability with
+each release, and is well written. Recently it has gained support for
+monitor and Ad-Hoc mode, and many bugfixes and cleanups. You should
+contact <I>Michael</I> if you want to help.
+<p>
+The initial version of the driver uses standalone 802.11
+code. <I>Michael</I> is porting the driver to the new <B>mac80211</B>
+kernel stack (see <A
+HREF="Linux.Wireless.drivers.802.11ag.html#Centrino3945mac80211"><I>section
+4.9</I></A>). This alternate version is only available in the
+wireless-dev GIT repository, and should appear in a Linux kernel in
+the future.
+
+<A NAME="Realtek">
+<H2>3.25	Realtek RTL8180L cards</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>PCI&nbsp;: rtl8180_24x.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>v1.5
+</TR><TR>
+<TD>Where&nbsp;:
+<TD><A HREF="http://www.realtek.com.tw/downloads/">
+http://www.realtek.com.tw/downloads/</A>
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>ShuChen &lt;shuchen&#064;realtek.com.tw&gt;
+</TR><TR valign="top">
+<TD>Documentation&nbsp;:
+<TD>Readme files
+<br><A HREF="http://www.alumni.caltech.edu/~rbell/Realtek8180.html">
+http://www.alumni.caltech.edu/~rbell/Realtek8180.html</A>
+<br><A HREF="http://www.linuxquestions.org/questions/showthread.php?s=&threadid=61832&perpage=15&pagenumber=1">http://www.linuxquestions.org/questions/showthread.php?s=&threadid=61832&perpage=15&pagenumber=1</A>
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Private Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc, Master
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>?
+</TR><TR>
+<TD>License&nbsp;:
+<TD>Binary only driver + OpenSource Linux wrapper
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.realtek.com.tw/">http://www.realtek.com.tw/</A>
+</TR>
+</TABLE>
+
+<H3>3.25.1	 The device</H3>
+
+Realtek is a taiwanese company known for its Ethernet cards, which has
+recently released a 802.11 chipset. This chip seems to have all the
+usual 802.11 features, and offer only a PCI/CardBus interface (for
+lower CPU utilisation).
+
+<H3>3.25.2	 The driver</H3>
+
+<I>Realtek</I> has released a binary driver for their device, with
+precompiled version for Red-Hat and SuSE. The driver doesn't use
+Wireless Extension (but some private extensions), and has a strange
+setup procedure (manual enable, require proper commands in the proper
+sequence).
+<p>
+I didn't try this driver, but I got some feedback from many users. The
+driver version before 1.2 were difficult to install and prone to crash
+the kernel. The version 1.2 had many troubles (such as reassociation),
+but was working. Version 1.3 is more stable, but a little too
+talkative.
+<p>
+Version 1.4 of the driver also adds support for making the card an
+Access Point. Version 1.5 supports newer version of gcc and newer kernels.
+
+<A NAME="RealtekGPL">
+<H2>3.26	Realtek RTL8180L full source driver</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>Beta
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>r8180.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>0.22
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://rtl-wifi.sourceforge.net/">
+http://rtl-wifi.sourceforge.net/</A>
+<br><A HREF="http://rtl8180-sa2400.sourceforge.net/">
+http://rtl8180-sa2400.sourceforge.net/</A>
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>Andrea Merello &lt;andreamrl *at* tiscali.it&gt;
+<br>Hauke Mehrtens &lt;hauke&#064;hauke-m.de&gt;
+</TR><TR>
+<TD>Discussion forums&nbsp;:
+<TD><A HREF="https://sourceforge.net/forum/?group_id=186406">
+https://sourceforge.net/forum/?group_id=186406</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme files
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Philips and Maxim radio support
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>SMP, non-i386
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.realtek.com.tw/">http://www.realtek.com.tw/</A>
+</TR>
+</TABLE>
+
+<H3>3.26.1	 The device</H3>
+
+This is the same device as the previous entry (<A
+HREF="#Realtek"><I>section 3.25</I></A>).
+
+<H3>3.26.2	 The driver</H3>
+
+The <I>Realtek</I> driver is not the most user friendly, and many
+people can't manage to make it work on their configuration. This lead
+<I>Andrea</I> to write his own driver for the Realtek chipset. After
+much hard work by <I>Andrea</I>, his driver is now functional, and
+evolving quickly.
+<p>
+This driver is fully OpenSource and the source is much closer to the
+standard of other Linux drivers. It support PCI and Pcmcia card with
+the Philips radio (the most common), and has experimental support for
+the Maxim radio. It reuses the WEP implementation of the Centrino
+driver (<A HREF="#Centrino"><I>section 3.28</I></A>), which is well
+tested and featured. It supports the latest kernel 2.6.X and 2.4.X,
+has complete support for Wireless Extensions, and support monitor
+mode, so you can see how much <I>Andrea</I> has been busy lately...
+<p>
+During early 2005, <I>Andrea</I> decided to reorganise the driver, and
+created a new branch of the driver called
+<B>rtl818x-newstack</B>. This branch is based on the <B>Intel
+ieee80211 stack</B> from the Centrino driver (see <A
+HREF="#Centrino"><I>section 3.28</I></A>). The goal of this branch is
+better integration in the kernel, and also support for the newer
+Realtek 802.11g cards (see <A
+HREF="Linux.Wireless.drivers.802.11ag.html#RealTek80211g"><I>section
+4.16</I></A>). It seems that <I>Realtek</I> is also taking a more
+active role in supporting <I>Andrea</I> and this driver.
+<p>
+Mid 2005, <I>Andrea</I> stopped updating his project, leaving his work
+on the new branch unfinished. Beginning 2007, a group of users lead by
+<I>Hauke</I> restarted working on the driver, with a new project page
+and new repository. Their main work so far has been updating the
+driver to work with the latest kernel.
+
+<A NAME="Ralink">
+<H2>3.27	Ralink RT2400 cards (Minitar driver)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>Stable
+</TR><TR valign="top">
+<TD>Driver name&nbsp;:
+<TD>stable&nbsp;: rt2400.o
+<br>alpha&nbsp;: rt2x00.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>1.2.2 (stable) and 2.0.4 (pre-alpha)
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://rt2x00.serialmonkey.com/">
+http://rt2x00.serialmonkey.com/</A>
+<br><A HREF="http://rt2400.sourceforge.net/">http://rt2400.sourceforge.net/</A>
+<br><A HREF="http://minitar.com/index.php?maincat=download">
+http://minitar.com/index.php?maincat=download</A>
+<br><A HREF="http://flavio.stanchina.net/debian/rt2400.html">
+http://flavio.stanchina.net/debian/rt2400.html</A>
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>Paul Lin
+<br>Mark Wallis &lt;markwallis at users.sourceforge.net&gt;
+<br>Flavio Stanchina &lt;flavio_AT_stanchina.net&gt;
+<br>Ivo van Doorn &lt;ivd at euronet.nl&gt;
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="http://sourceforge.net/mail/?group_id=107832">
+http://sourceforge.net/mail/?group_id=107832</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Text files, Howtos
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions and specific graphical tool
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Yes (specific tool)
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Promisc/bridge mode support
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>SMP problems
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.ralinktech.com/">http://www.ralinktech.com/</A>
+<br><A HREF="http://minitar.com/">http://minitar.com/</A>
+<br><A HREF="http://rt2x00.serialmonkey.com/wiki/index.php/Hardware">
+http://rt2x00.serialmonkey.com/wiki/index.php/Hardware</A>
+</TR>
+</TABLE>
+
+<H3>3.27.1	 The device</H3>
+
+Ralink is yet another taiwanese company having recently released a
+802.11b chipset. This chip seems to have all the usual 802.11b
+features, and offer only a PCI/CardBus interface (for lower CPU
+utilisation).
+
+<H3>3.27.2	 The driver</H3>
+
+<I>Ralink</I> created the original Linux driver for this card, and
+<I>Minitar</I> released it as fully OpenSource and started helping
+driver users on their forums. This driver support the Wireless
+Extensions, and also comes with a dedicated graphical
+utility. <I>Flavio</I> created a Debian package for this driver, and
+documented how to install and use this driver.
+<p>
+Then, <I>Mark</I> created a SourceForge project for the driver and
+started to maintain it, helped by many users of the driver. Many
+patches have been integrated to improve the stability and
+functionality of the driver.
+<p>
+<I>Ivo</I> has started a rewrite of the driver, called <B>rt2x00</B>,
+his goal is to have a source code easier to integrate in the Linux
+kernel and to maintain. His rewrite targets both the RT2400 and the
+new RT2500 (<A
+HREF="Linux.Wireless.drivers.802.11ag.html#Ralink2500"><I>section
+4.11</I></A>). The initial version of this new driver was using the
+the <B>Intel ieee80211 stack</B> from the Centrino driver (see <A
+HREF="#Centrino"><I>section 3.28</I></A>).
+<p>
+Then, <I>Ivo</I> ported the rt2x00 driver to the new <B>mac80211</B>
+stack (see <A
+HREF="Linux.Wireless.drivers.802.11ag.html#Centrino3945mac80211"><I>section
+4.9</I></A>), and lots of development has happened on that version of
+the driver. This alternate version is available in the wireless-dev
+GIT repository and in the CVS, and should appear in a Linux kernel in
+the future.
+
+<A NAME="Centrino">
+<H2>3.28	Intel PRO/Wireless 2100 802.11b (Centrino)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>Beta
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>ipw2100.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>1.2.2
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD>Linux kernel (2.6.19)
+<br><A HREF="http://ipw2100.sourceforge.net/">
+http://ipw2100.sourceforge.net/</A>
+<br><A HREF="http://ieee80211.sourceforge.net/">
+http://ieee80211.sourceforge.net/</A>
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>James P. Ketrenos &lt;ipw2100-admin&#064;linux.intel.com&gt;
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="http://lists.sourceforge.net/lists/listinfo/ipw2100-devel/">
+http://lists.sourceforge.net/lists/listinfo/ipw2100-devel/</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>/proc interface and Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP, 802.1x, WPA
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Firmware loading via HotPlug
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>?
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.intel.com/">http://www.intel.com/</A>
+</TR>
+</TABLE>
+
+<H3>3.28.1	 The device</H3>
+
+The Intel PRO/Wireless 2100 is the second generation wireless LAN
+product from Intel. Intel initially sold various wireless LAN cards
+and Access Points from Symbol as Intel <B>PRO/Wireless 2011</B> (<A
+HREF="#Spectrum24t"><I>section 3.10</I></A>). However, Intel has a
+long experience with Ethernet MAC controllers, so it was natural for
+them to create their own wireless LAN chips. The first MAC controller
+created by Intel is the PRO/Wireless 2100, and we can expect many more
+products to come.
+<p>
+The <B>PRO/Wireless 2100</B> MAC controller is fully IEEE 802.11b
+compliant and has all the usual 802.11b features. It's a PCI Busmaster
+design, for low CPU utilisation. The Radio most likely is done in
+collaboration with Symbol (Intel and Symbol have one of those
+strategical alliances).
+<p>
+The main difference between this chipset and the vast number of other
+802.11b chipset is Intel's marketing. The PRO/Wireless 2100 is not
+sold as a standalone product, but only as part of the <B>Centrino</B>
+package. Centrino is just a marketing exercise, only laptops equipped
+with a Intel processor, an Intel chipset and a Intel PRO/Wireless card
+can carry the Centrino logo. The PRO/Wireless 2100 is a regular
+MiniPCI card (it's not integrated on the motherboard as some rumors
+suggests), and you can replace the PRO/Wireless 2100 of Centrino
+laptops by any other MiniPCI wireless LAN of your choice.
+<p>
+Intel has been quite successful, and a large number of recent laptops
+includes a PRO/Wireless 2100 MiniPCI card. In fact, if you buy a
+<B>laptop with integrated 802.11b</B> support (without 802.11g or
+802.11a support), it most likely has a PRO/Wireless 2100 card. On the
+other hand, the PRO/Wireless 2100 is not available as a separate
+Pcmcia, Cardbus, PCI or USB card.
+
+<H3>3.28.2	 The driver</H3>
+
+The Linux driver for the PRO/Wireless 2100 was released a long time
+after the card themselves. For this reason, Intel did receive a lot of
+harsh criticism from people buying laptops with this card and finding
+that there was no driver or documentation for it. This was a bit
+unfair, as Intel has always been supportive of Linux, for example most
+drivers for Intel Ethernet chipset are directly maintained by Intel,
+and producing good driver takes time. Eventually, Intel released a
+fully Open Source driver, which they support directly.
+<p>
+By the time <I>James</I> released the driver, it was already
+functional, but limited. Since them, many people have contributed
+fixes and enhancements, and development is happening quickly. Wireless
+Scanning was added. WEP support was added by borrowing code from
+HostAP. The driver require firmware loading, and the firmware loading
+procedure was converted to use the standard HotPlug firmware loading
+support. Support is also being added for the wireless on/off button of
+many specific laptops.
+<p>
+The Linux driver require a <B>specific firmware</B> which Intel says
+is identical to the Windows firmware but packaged differently. This
+firmware mostly make sure that Linux users don't do things breaking
+various radio regulations. Intel must be applauded for taking the
+effort of releasing this specific Linux firmware (and their updates),
+this is what enables the driver to be fully OpenSource and forced
+other driver to be binary, such as the Atheros driver (<A
+HREF="Linux.Wireless.drivers.802.11ag.html#AtherosMADWiFi"><I>section
+4.2</I></A>).
+<p>
+<I>James</I> and various other contributors have been very hard at
+work on the driver and many bugs have been fixed. After that, most of
+the work has been in the area of ad-hoc and monitor mode, WPA support
+and power management.
+<p>
+Around summer 2005, <I>James</I> decided to spin-off the code he had
+borrowed from the HostAP driver in a separate <B>Intel ieee80211
+stack</B>, shared by all Intel drivers (see <A
+HREF="Linux.Wireless.drivers.802.11ag.html#Centrino2200"><I>section
+4.6</I></A> and <A
+HREF="Linux.Wireless.drivers.802.11ag.html#Centrino3945i"><I>section
+4.8</I></A>). The Intel ieee80211 stack was included in <B>kernel
+2.6.14</B>, alongside this driver, and has seen continuous
+improvements after this. This stack only handles 802.11 framing and
+802.11 encryption, but not the SoftMAC function (802.11 management),
+as those drivers don't require it. A separate SoftMAC layer was
+created for this stack (see <A
+HREF="Linux.Wireless.drivers.802.11ag.html#Broadcom"><I>section
+4.13</I></A>), but none of the Intel driver uses it.
+
+<A NAME="ZyDAS">
+<H2>3.29	ZyDAS ZD1201 driver (USB dongles)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>Stable
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>zd1201.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>0.15
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD>Kernel 2.6.12
+<br><A HREF="http://linux-lc100020.sourceforge.net/">
+http://linux-lc100020.sourceforge.net/</A>
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>Jeroen Vreeken &lt;pe1rxq&#064;amsat.org&gt;
+</TR><TR>
+<TD>Forums&nbsp;:
+<TD><A HREF="http://sourceforge.net/forum/?group_id=94356">
+http://sourceforge.net/forum/?group_id=94356</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Web page
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.zydas.com.tw/">http://www.zydas.com.tw/</A>
+<br><A HREF="http://www.sweex.com/">http://www.sweex.com/</A>
+</TR>
+</TABLE>
+
+<H3>3.29.1	 The device</H3>
+
+ZyDAS is yet another taiwanese company having recently released a
+802.11b chipset. This chip seems to have all the usual 802.11b
+features, and offer a PCI. Pcmcia and USB interface. For some reasons,
+it seems to have only been used in various USB dongles.
+
+<H3>3.29.2	 The driver</H3>
+
+Originally <I>Sweex</I> distributed a Linux driver for their ZyDAS
+based USB dongles, but suddenly they retired their Linux drivers from
+their support site. This driver was based on the linux-wlan-ng driver
+(see <A HREF="#Prism2"><I>section 3.6</I></A>). The driver was then
+improved by the Linux users.
+<p>
+<I>Jeroen</I> rewrote the driver to get rid of its dependency on
+linux-wlan-ng, and created a much smaller and simpler driver. This
+driver was further improved and included in kernel 2.6.12. Despite its
+very small size, the driver support a large number of features, such
+as Wireless Extensions, Scanning and Monitor mode.
+
+<A NAME="SiS162">
+<H2>3.30	SiS 160/162</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>Beta
+</TR><TR valign="top">
+<TD>Driver name&nbsp;:
+<TD>PCI: sis160.o, sis162.o
+<br>USB: sis162u.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>R093.02.24
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://driver.sis.com/">http://driver.sis.com/</A>
+<br><A HREF="http://driver.sis.com/linux/wlan/wlan_162_linux.tgz">
+http://driver.sis.com/linux/wlan/wlan_162_linux.tgz</A>
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme file
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Specific tool, Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Specific tool
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11-DS and 802.11-b, interoperate with Windows
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>Binary only for the core + OpenSource Linux wrapper
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.sis.com/">http://www.sis.com/</A>
+</TR>
+</TABLE>
+
+<H3>3.30.1	 The device</H3>
+
+SiS is a taiwanese company better known for their CPU chipsets, but
+they do other products, and amongst them 802.11b chips. The SiS 160
+was their first product, offers all the standard 802.11 features and
+has a PCI interface. The SiS 162 is their second product, adds WPA
+support and has both a PCI and a USB interface. Those chips are low
+cost, and are typically found in cheap USB dongles.
+
+<H3>3.20.2	 The driver</H3>
+
+<I>SiS</I> released two drivers, a driver for the SiS 160 and another
+driver for the SiS 162. Those driver are based on a large binary part
+and a very small source wrapper, and are designed for kernel 2.4.X
+(and only on x86 platforms). They also contains their own binary
+configuration tool, and some basic support for Wireless Extensions.
+<p>
+Users reports are that these drivers can be problematic and only work
+for kernel 2.4.0 to 2.4.18, and do not work in any 2.6.X kernel. From
+a quick look at the source code, most of the functionality is in the
+binary part and it might not be possible to port it to more recent
+kernels.
+
+<p ALIGN=right>
+<A HREF="Linux.Wireless.drivers.802.11ag.html"><I>next</I></A>
+<HR>
+<CENTER><TABLE BORDER=0 CELLPADDING=0><TR><TD valign="top" align="center">
+<ADDRESS>
+<A HREF="Wireless.html">Linux Wireless LAN Howto</A> -
+jt&#064;hpl.hp.com
+<br>Converted to html from Frame Maker - 16 september 97
+<br>Updated 25 July 07
+<br>Copyright &#169; 1996-2007 Jean Tourrilhes
+</ADDRESS>
+</TD><TD>
+&nbsp;&nbsp;&nbsp;
+</TD><TD valign="top" align="center">
+Project hosted and sponsored by :
+<br>
+<A HREF="http://www.hpl.hp.com"><IMG SRC="../hplogo.png" HEIGHT=34
+WIDTH=141 ALT="HP home page"></A>
+</TD></TR></TABLE></CENTER>
+
+<!-- Keep Webmaster happy -->
+<script type="text/javascript" language="JavaScript">
+var s_prop7="us"
+var s_prop8="eng"
+var s_prop9="corp"
+var s_prop10="us|eng|corp"
+var s_prop13="hphqglobal,hphqwwhplabs"
+</script>
+
+<!-- Begin METRICS JavaScript -->
+<!-- <script type="text/javascript" language="JavaScript"
+src="http://welcome.hp-ww.com/country/us/eng/js/metrics.js"></script> -->
+<script type="text/javascript" language="JavaScript"
+src="http://www.hpl.hp.com/dev/hplabsmetrics.js"></script>
+<!-- End METRICS JavaScript -->
+
+</BODY>
+</HTML>

@@ -1,0 +1,176 @@
+diff -u -p linux/drivers/net/wireless/ipw2200.k2.c linux/drivers/net/wireless/ipw2200.c
+--- linux/drivers/net/wireless/ipw2200.k2.c	2006-04-03 17:18:02.000000000 -0700
++++ linux/drivers/net/wireless/ipw2200.c	2006-04-03 18:05:03.000000000 -0700
+@@ -8385,6 +8385,15 @@ static int ipw_wx_get_range(struct net_d
+ 	range->enc_capa = IW_ENC_CAPA_WPA | IW_ENC_CAPA_WPA2 |
+ 		IW_ENC_CAPA_CIPHER_TKIP | IW_ENC_CAPA_CIPHER_CCMP;
+ 
++#if WIRELESS_EXT > 20
++	range->min_pms = 1;
++	range->max_pms = IPW_POWER_LIMIT;
++	range->pms_flags = IW_POWER_SAVING | IW_POWER_RELATIVE;
++	range->pm_capa = IW_POWER_SAVING | IW_POWER_TIMEOUT | IW_POWER_PERIOD;
++
++	range->modul_capa = IW_MODUL_11AG;
++#endif /* WIRELESS_EXT > 20 */
++
+ 	IPW_DEBUG_WX("GET Range\n");
+ 	return 0;
+ }
+@@ -9090,6 +9099,20 @@ static int ipw_wx_set_power(struct net_d
+ 		return -EOPNOTSUPP;
+ 	}
+ 
++#if WIRELESS_EXT > 20
++	/* Check what type of value we are getting */
++	if (wrqu->power.flags & IW_POWER_TYPE) {
++		int mode = wrqu->power.value;
++		/* Accept only saving, and only if within range */
++		if (((wrqu->power.flags & IW_POWER_TYPE) != IW_POWER_SAVING) ||
++		    (mode < 1) || (mode > IPW_POWER_LIMIT)) {
++			mutex_unlock(&priv->mutex);
++			return -EINVAL;
++		}
++		priv->power_mode = IPW_POWER_ENABLED | mode;
++	}
++#endif /* WIRELESS_EXT > 20 */
++
+ 	/* If the user hasn't specified a power management mode yet, default
+ 	 * to BATTERY */
+ 	if (IPW_POWER_LEVEL(priv->power_mode) == IPW_POWER_AC)
+@@ -9113,12 +9136,28 @@ static int ipw_wx_get_power(struct net_d
+ 			    union iwreq_data *wrqu, char *extra)
+ {
+ 	struct ipw_priv *priv = ieee80211_priv(dev);
++	int level = IPW_POWER_LEVEL(priv->power_mode);
+ 	mutex_lock(&priv->mutex);
+ 	if (!(priv->power_mode & IPW_POWER_ENABLED))
+ 		wrqu->power.disabled = 1;
+ 	else
+ 		wrqu->power.disabled = 0;
+ 
++#if WIRELESS_EXT > 20
++	/* Check what is requested */
++	if (wrqu->power.flags & IW_POWER_TIMEOUT) {
++		wrqu->power.value = timeout_duration[level - 1];
++		wrqu->power.flags = IW_POWER_TIMEOUT;
++	} else if (wrqu->power.flags & IW_POWER_PERIOD) {
++		wrqu->power.value = period_duration[level - 1];
++		wrqu->power.flags = IW_POWER_PERIOD;
++	} else {
++		/* Default : display level of power saving */
++		wrqu->power.value = level;
++		wrqu->power.flags = IW_POWER_SAVING | IW_POWER_RELATIVE;
++	}
++#endif /* WIRELESS_EXT > 20 */
++
+ 	mutex_unlock(&priv->mutex);
+ 	IPW_DEBUG_WX("GET Power Management Mode -> %02X\n", priv->power_mode);
+ 
+@@ -9292,6 +9331,95 @@ static int ipw_wx_get_wireless_mode(stru
+ 	return 0;
+ }
+ 
++#if WIRELESS_EXT > 20
++static int ipw_wx_set_modulation(struct net_device *dev,
++				 struct iw_request_info *info,
++				 union iwreq_data *wrqu, char *extra)
++{
++	struct ipw_priv *priv = ieee80211_priv(dev);
++	int mode = 0;
++	u8 band = 0, modulation = 0;
++
++	if (wrqu->param.value & (~IW_MODUL_11AG))
++		return -EINVAL;
++	/* Deal with 'auto' */
++	if (wrqu->param.value == 0)
++		wrqu->param.value = IW_MODUL_11AG;
++	mutex_lock(&priv->mutex);
++
++	priv->ieee->abg_true = 0;	/* Default in most cases */
++
++	if (wrqu->param.value & IW_MODUL_OFDM_A) {
++		if (priv->adapter == IPW_2915ABG) {
++			priv->ieee->abg_true = ((wrqu->param.value
++						 & IW_MODUL_11AG)
++						== IW_MODUL_11AG);
++			band |= IEEE80211_52GHZ_BAND;
++			modulation |= IEEE80211_OFDM_MODULATION;
++			mode |= IEEE_A;
++		} else {
++			IPW_WARNING("Attempt to set 2200BG into "
++				    "802.11a mode\n");
++			mutex_unlock(&priv->mutex);
++			return -EINVAL;
++		}
++	}
++
++	if (wrqu->param.value & IW_MODUL_11B) {
++		band |= IEEE80211_24GHZ_BAND;
++		modulation |= IEEE80211_CCK_MODULATION;
++		mode |= IEEE_B;
++	}
++
++	if (wrqu->param.value & IW_MODUL_OFDM_G) {
++		band |= IEEE80211_24GHZ_BAND;
++		modulation |= IEEE80211_OFDM_MODULATION;
++		mode |= IEEE_G;
++	}
++
++	priv->ieee->mode = mode;
++	priv->ieee->freq_band = band;
++	priv->ieee->modulation = modulation;
++	init_supported_rates(priv, &priv->rates);
++
++	/* Network configuration changed -- force [re]association */
++	IPW_DEBUG_ASSOC("[re]association triggered due to mode change.\n");
++	if (!ipw_disassociate(priv)) {
++		ipw_send_supported_rates(priv, &priv->rates);
++		ipw_associate(priv);
++	}
++
++	/* Update the band LEDs */
++	ipw_led_band_on(priv);
++
++	IPW_DEBUG_WX("PRIV SET MODE: %c%c%c\n",
++		     mode & IEEE_A ? 'a' : '.',
++		     mode & IEEE_B ? 'b' : '.', mode & IEEE_G ? 'g' : '.');
++	mutex_unlock(&priv->mutex);
++	return 0;
++}
++
++static int ipw_wx_get_modulation(struct net_device *dev,
++				 struct iw_request_info *info,
++				 union iwreq_data *wrqu, char *extra)
++{
++	struct ipw_priv *priv = ieee80211_priv(dev);
++	mutex_lock(&priv->mutex);
++	wrqu->param.value = 0;
++	if(priv->ieee->mode & IEEE_A)
++		wrqu->param.value |= IW_MODUL_OFDM_A;
++	if(priv->ieee->mode & IEEE_B)
++		wrqu->param.value |= IW_MODUL_11B; /* DS + CCK */
++	if(priv->ieee->mode & IEEE_G)
++		wrqu->param.value |= IW_MODUL_OFDM_G;
++	/* This is always fixed ? */
++	wrqu->param.fixed = 1;
++	mutex_unlock(&priv->mutex);
++
++	return 0;
++}
++#endif /* WIRELESS_EXT > 20 */
++
+ static int ipw_wx_set_preamble(struct net_device *dev,
+ 			       struct iw_request_info *info,
+ 			       union iwreq_data *wrqu, char *extra)
+@@ -9471,6 +9599,10 @@ static iw_handler ipw_wx_handlers[] = {
+ 	IW_IOCTL(SIOCGIWAUTH) = ipw_wx_get_auth,
+ 	IW_IOCTL(SIOCSIWENCODEEXT) = ipw_wx_set_encodeext,
+ 	IW_IOCTL(SIOCGIWENCODEEXT) = ipw_wx_get_encodeext,
++#if WIRELESS_EXT > 20
++	IW_IOCTL(SIOCSIWMODUL) = ipw_wx_set_modulation,
++	IW_IOCTL(SIOCGIWMODUL) = ipw_wx_get_modulation,
++#endif /* WIRELESS_EXT > 20 */
+ };
+ 
+ enum {

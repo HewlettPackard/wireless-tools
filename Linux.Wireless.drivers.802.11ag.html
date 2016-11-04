@@ -1,0 +1,2512 @@
+<HTML>
+<HEAD>
+<TITLE>The devices, the drivers</TITLE>
+<LINK rel="Next"  href="Linux.Wireless.drivers.other.html" title="Drivers - other">
+<LINK rel="Prev"  href="Linux.Wireless.drivers.802.11b.html" title="Drivers - 802.11b">
+<LINK rel="First" href="Linux.Wireless.intro.html" title="Introduction">
+<LINK rel="Last"  href="Linux.Wireless.std.html" title="Standards">
+<LINK rel="Up"    href="Wireless.html" title="Linux Wireless LAN Howto">
+
+<LINK rel="Contents" href="Wireless.html#howto" title="Linux Wireless LAN Howto">
+<LINK rel="section" href="#acx100" title="TI ACX100">
+<LINK rel="section" href="#AtherosMADWiFi" title="Atheros - MADWiFi driver">
+<LINK rel="section" href="#Prism54" title="Intersil Prism54 - FullMAC driver">
+<LINK rel="section" href="#Prism54softmac" title="Intersil Prism54 - SoftMAC driver">
+<LINK rel="section" href="#Prism54mac80211" title="Intersil Prism54 - mac80211 driver">
+<LINK rel="section" href="#Centrino2200" title="Intel PRO/Wireless 2200/2915 - standard driver">
+<LINK rel="section" href="#CentrinoHostAP" title="Intel PRO/Wireless 2200/2915 - HostAP driver">
+<LINK rel="section" href="#Centrino3945i" title="Intel PRO/Wireless 3945 - Intel stack driver">
+<LINK rel="section" href="#Centrino3945mac80211" title="Intel PRO/Wireless 3945 - mac80211 driver">
+<LINK rel="section" href="#Centrino4965" title="Intel PRO/Wireless 4965">
+<LINK rel="section" href="#Ralink2500" title="Ralink RT2500 - Ralink driver">
+<LINK rel="section" href="#RalinkBSD" title="Ralink RT2500 - BSD driver">
+<LINK rel="section" href="#Broadcom" title="Broadcom 43xx">
+<LINK rel="section" href="#ZD1211" title="ZyDAS ZD1211 - ZyDAS driver">
+<LINK rel="section" href="#ZD1211rw" title="ZyDAS ZD1211 - SoftMAC driver">
+<LINK rel="section" href="#RealTek80211g" title="Realtek - Original PCI/USB driver">
+<LINK rel="section" href="#RealTekMac80211" title="Realtek - mac80211 USB driver">
+<LINK rel="section" href="#Libertas" title="Marvel Libertas">
+<LINK rel="section" href="#AirgoNetworks" title="AirgoNetworks AGNX00 (TrueMIMO)">
+</HEAD>
+
+<BODY>
+
+<H1 ALIGN=center>The devices, the drivers - 802.11a, 802.11g and 802.11n</H1>
+<HR width=25%>
+<H3 ALIGN=center>Jean Tourrilhes</H3>
+<H3 ALIGN=center>25 July 07</H3>
+<br><br>
+<BLOCKQUOTE><I>
+The who's who of Wireless LANs under Linux.
+</I></BLOCKQUOTE>
+
+<br>
+This section list devices going beyond the IEEE 802.11b standard, such
+as those based on the IEEE 802.11a, 802.11g and 802.11n standards (see
+<A HREF="Linux.Wireless.std.html"><I>section 8</I></A>), offering
+bitrates higher than 11&nbsp;Mb/s in the 2.4&nbsp;GHz and 5.2&nbsp;GHz
+bands.
+
+<A NAME="acx100">
+<H2>4.1	TI ACX100 OpenSource driver (All 802.11b+ cards)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>beta
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>PCI&nbsp;: acx100_pci.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>0.3.36  [20070101]
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://acx100.sourceforge.net/">
+http://acx100.sourceforge.net/</A>
+<br><A HREF="http://lisas.de/~andi/acx100/">http://lisas.de/~andi/acx100/</A>
+<br><A HREF="http://rhlx01.fht-esslingen.de/~andi/acx100/">
+http://rhlx01.fht-esslingen.de/~andi/acx100/</A>
+<br><A HREF="http://www.cmartin.tk/acx/">http://www.cmartin.tk/acx/</A>
+</TR><TR>
+<TD>Contact&nbsp;:
+<TD>ACX100 OSS driver project team  &lt;acx100-users&#064;lists.sf.net&gt;
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>Denis Vlasenko &lt;vda at port.imtp.ilyichevsk.odessa.ua&gt;
+<br>Andreas Mohr &lt;andim2 at users.sourceforge.net&gt;
+<br>Jeff Williams &lt;angelbane at users.sourceforge.net&gt;
+<br>Carlos Martin Nieto &lt;carlos&#064;cmartin.tk&gt;
+<br>Benjamin Schrauwen &lt;bschrauw at users.sourceforge.net&gt;
+<br>Moritz Angermann &lt;sfoi at users.sourceforge.net&gt;
+<br>Frederic Deletang &lt;ziga at users.sourceforge.net&gt;
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="http://sourceforge.net/mail/?group_id=75380">
+http://sourceforge.net/mail/?group_id=75380</A>
+</TR><TR valign="top">
+<TD>Documentation&nbsp;:
+<TD>Readme file, Wiki
+<br><A HREF="http://www.houseofcraig.net/acx100_howto.php">
+http://www.houseofcraig.net/acx100_howto.php</A>
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11b and PBCC, 802.11g depending on hardware
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Experimental support for HostAP mode
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>"4X" mode, USB support (WIP), CF support, packet fragmentation, AutoRate
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>some configurations may lockup or loose packets
+</TR><TR>
+<TD>License&nbsp;:
+<TD>MPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.ti.com/">http://www.ti.com/</A>
+<br><A HREF="http://www.dlink.com/products/">
+http://www.dlink.com/products/</A>
+<br><A HREF="http://www.linksys.com/products/">
+http://www.linksys.com/products/</A>
+<br><A HREF="http://www.gemtek.com.tw/">http://www.gemtek.com.tw/</A>
+<br><A HREF="http://www.smc.com/">http://www.smc.com/</A>
+<br><A HREF="http://www.netgear.com/">http://www.netgear.com/</A>
+</TR>
+</TABLE>
+
+<H3>4.1.1	 The device</H3>
+
+In 2001, TI (Texas Instruments) decided to make a big push on the
+802.11 market. Because there was already many other 802.11 vendors, TI
+needed to differentiate themselves. Their solution was to introduce a
+chip with faster data rate. TI introduced a new modulation,
+<B>PBCC</B> (Packet Binary Convolutional) at 5.5, 11 and 22&nbsp;Mb/s,
+which offers higher speed and longer range than 802.11b modulations
+(CCK).
+<p>
+However, to get the market to accept PBCC, TI needed the stamp of
+approval of the IEEE standard group. Other vendors within the IEEE
+were not keen to give TI any advantage, and decided to base 802.11g on
+the OFDM modulation rather than PBCC. After much political fight, the
+final <B>802.11g</B> standard include both OFDM (mandatory) and PBCC
+(optional). Because PBCC is only optional and slower, I don't expect
+anybody else than TI to implement it.
+<p>
+The <B>ACX100</B> was one of the first second generation 802.11b
+chipset. It is based on a ARM7 core, and offer both a PCI/Cardbus and
+USB interface. The use of PCI busmaster allow to reduce CPU
+utilisation compared to 16 bit cards. The MAC includes all the common
+802.11 features, the Phy implement the regular 802.11b modulations and
+PBCC. The design goal seems to have been performance and features.
+<p>
+As soon as TI released its ACX100 chipset, many usual vendors started
+selling PCI, Cardbus and USB cards based on it, for example the D-Link
+520+ and 650+ cards based on it. All the cards that support up to
+22&nbsp;Mb/s are based on this chipset.
+<p>
+The ACX100 is known for its requirement for PCI2.2 mainboards (lack
+thereof or some other reason may lead to conflicts with other cards
+such as SB Live! and crashes). This is not specific to the ACX100,
+other modern wireless chipsets also tend to require PCI2.2.
+<p>
+Note that TI has released newer chipsets, the
+<B>TNETW1100b/1130/1230</B> chipsets, also called <B>ACX111</B>, which
+add support for 802.11g and 802.11a, and don't seem to be driver
+compatible with the ACX100. All cards supporting both <B>22 Mb/s</B>
+and 802.11g/a are based on those chipsets. Note that for 802.11g, a
+name including "plus" does not imply a TI chipset, D-Link has a range
+of 802.11g "plus" cards including Atheros chipsets.
+
+<H3>4.1.2	 The driver</H3>
+
+From the start, TI has refused to give any help towards a Linux driver
+and have decided to totally ignore the Linux community. Toward the end
+of 2002, a binary Linux driver was leaked on the net. Because this
+binary driver is not officially released by any vendor, its legal
+status is unclear (and therefore it is not listed here). Moreover,
+this driver was compiled for a very specific kernel and was overall
+very problematic to install and use.
+<p>
+A group of people using this driver got fed up with the situation and
+decided to reverse engineer the binary driver by disassembling
+it. This is a huge task, as this hardware and driver are fairly
+complex, and most other reverse engineering project I've heard off
+eventually failed. After a few month of work, they eventually released
+their first version of the ACX100 opensource driver.
+<p>
+The initial driver was very experimental, but it evolved fairly
+rapidly, as <I>Andy</I> was working hard on the driver fixing
+bugs. Most basic features are now working (Ad-Hoc and Infrastructure
+mode, WEP, Wireless Extensions, statistics...), and some advanced
+features are implemented (monitor mode, 2.6.X support...). However,
+there are still lockups or eventual traffic loss on some
+machines/networks, power management/hotplug is
+experimental. Preliminary support for USB and ACX111 devices has been
+added, but this is not yet complete. <I>Denis</I> joined and fixed
+support for ACX111, as well as ton of other bugs.
+<p>
+Around mid 2005, <I>Denis</I> created a branch of the driver targeted
+at inclusion in kernel 2.6.X. He dropped support for 2.4.X and some
+non standard features such as the old firmware loader, and fixed many
+bugs. For example, support for USB dongles, 64 bits, SMP is now
+functional. This driver was included in <I>Andrew's</I> kernels (-mm
+version), and meanwhile can be made to compile for standard
+kernels. This version got almost included in the Linux kernel but was
+eventually rejected, and also dropped from -mm kernels.
+<p>
+The initial ACX100 driver contains its own 802.11 code. When the
+<B>SoftMAC</B> 802.11 stack became available in 2005 (see <A
+HREF="#Broadcom"><I>section 4.13</I></A>), <I>Andi</I> and
+<I>Denis</I> ported the driver to it. This SoftMAC driver is currently
+in alpha stage. This driver was included in wireless-2.6 GIT
+repository, in preparation for inclusion in the kernel, and later
+dropped. The concern is that there was no clean separation between the
+people that did the reverse engineering and those who wrote the
+driver, unlike what was done for the Broadcom driver (see <A
+HREF="#Broadcom"><I>section 4.13</I></A>).
+<p>
+In 2006, <I>Jeff</I> and <I>Carlos</I> started porting the driver to
+the new <B>mac80211</B> kernel stack (see <A
+HREF="#Centrino3945mac80211"><I>section 4.9</I></A>). Their intention
+is to initially replace the SoftMAC driver, and eventually replace the
+initial driver. The driver is currently in experimental stage.
+<p>
+In parallel, the branches of the initial driver from <I>Andi</I> and
+<I>Denis</I> were merged. <I>Andi</I> has still been busy fixing
+various bug and keeping this driver up to date with respect to kernel
+changes. This is the version of the driver recommended for maximum
+stability.
+
+<A NAME="AtherosMADWiFi">
+<H2>4.2	Atheros MADWiFi driver (most cards with 802.11a or 108 Mb/s)
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>stable
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>ath_pci.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>0.9.3.1
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://madwifi.org/">http://madwifi.org/</A>
+<br><A HREF="http://sourceforge.net/projects/madwifi">
+http://sourceforge.net/projects/madwifi</A>
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>Sam Leffler &lt;sam&#064;errno.com&gt;
+<br>Michael Renzmann &lt;netdev&#064;nospam.otaku42.de&gt;
+<br>Greg Chesson &lt;greg&#064;atheros.com&gt;
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="http://sourceforge.net/mail/?group_id=82936">
+http://sourceforge.net/mail/?group_id=82936</A>
+</TR><TR valign="top">
+<TD>Documentation&nbsp;:
+<TD>Readme file
+<br><A HREF="http://www.mattfoster.clara.co.uk/madwifi-faq.htm">
+http://www.mattfoster.clara.co.uk/madwifi-faq.htm</A>
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc, Master (HostAP)
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP, 802.1x, WPA
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11b, 802.11g, 802.11a depending on hardware
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>HostAP mode
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>Ad-Hoc mode
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>Binary only for the HAL + BSD driver
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.atheros.com/">http://www.atheros.com/</A>
+<br><A HREF="http://actiontec.com.tw/">http://actiontec.com.tw/</A>
+<br><A HREF="http://www.proxim.com/">http://www.proxim.com/</A>
+<br><A HREF="http://www.dlink.com/products/">
+http://www.dlink.com/products/</A>
+<br><A HREF="http://www.linksys.com/products/">
+http://www.linksys.com/products/</A>
+<br><A HREF="http://www.gemtek.com.tw/">http://www.gemtek.com.tw/</A>
+<br><A HREF="http://www.smc.com/">http://www.smc.com/</A>
+<br><A HREF="http://www.netgear.com/">http://www.netgear.com/</A>
+</TR>
+</TABLE>
+
+<H3>4.2.1	 The device</H3>
+
+Atheros was the first company to release a complete 802.11a solution,
+and therefore most existing products are based on it. <B>Proxim</B>
+was the first company releasing products based on the Atheros chipset,
+but other familiar names such as <B>Linksys</B>, <B>D-Link</B> and
+<B>SMC</B> did follow quickly.
+<p>
+Most vendor offer a CardBus card (32 bits Pcmcia) and Access Points,
+and a few offer PCI solutions.
+<p>
+The first Atheros chipset, <B>ar5210</B>, implement the full
+<B>802.11a</B> standard. The MAC protocol is identical to 802.11b, the
+Atheros chipset offer both infrastructure and ad-hoc mode, enhanced
+WEP with per link keys (for 802.1x) The radio modem use OFDM in the 5
+GHz band (8 separate channels), with speeds from 6 Mb/s to 54 Mb/s
+(depending on range).
+<p>
+The Atheros chipset has a few proprietary features, such as its X2
+mode (turbo) that allow to double the rate by using two channels in
+parallel (unfortunately, it also increases the sensitivity to
+interferences, decrease the number of channels and is incompatible
+with 802.11a).
+<p>
+The Atheros cards offer a busmaster host interface, allowing high
+performance and low CPU utilisation (almost all 802.11b cards are
+limited to PIO, which keeps the CPU busy). The card deals only with
+the low level of the MAC protocol, and the driver has to deal with all
+the 802.11 management (making driver development more
+complicated). The other main characteristics of the Atheros chipset is
+that it's a fully CMOS solution (including the radio), which reduces
+the cost.
+<p>
+Atheros has released its second generation chipset, derived from the
+initial ar5210, that have better performance and are no longer limited
+to only 802.11a. The <B>ar5211</B> support both <I>802.11a</I> and
+<I>802.11b</I>, whereas the ar5212 support <I>802.11a</I>,
+<I>802.11b</I> and <I>802.11g</I>. The following chipsets from Atheros
+(<B>ar5213, ar5214, ar5413, ar5414, ar5513</B>) kept the basic same
+design and features and mostly added a wide range of proposed
+enhancements to the 802.11g/a standard, add 802.11e QoS or proprietary
+extensions, such as Turbo mode (bound two channels), bursting and
+proprietary MIMO.
+<p>
+After that, Atheros released a number of more specialised chipsets,
+such as single-chip solutions (integrating both MAC and radio on the
+same chip) and PCI-Express chipsets. Their USB chipset AR5007UG is the
+former ZyDAS ZD1211 (see <A HREF="#XXXXXXXXXXXXXX"><I>section
+4.14</I></A>). Their new generation chipset, such as the
+<B>ar5416</B>, support draft-802.11n MIMO (up to 300&nbsp;Mb/s), and
+obviously adds new proprietary extensions.
+<p>
+There is many products on the market using Atheros chipsets. In fact,
+the vast majority of <B>802.11a</B> cards are based Atheros
+chipset. Most all the 802.11g cards that advertise <B>108 Mb/s</B> are
+also based on Atheros chipsets.
+
+<H3>4.2.2	 The driver</H3>
+
+<I>Sam</I>, with the help of Atheros, had created a BSD driver for
+those cards some time ago. Unfortunately, he was unable to release it
+because of the FCC regulations. The Atheros hardware is basic and
+doesn't enforce that valid operating parameters are set (such as
+frequency and power level) and does not ensure compliance to the
+various <B>radio regulations</B>, however the regulatory
+organisations, such as the FCC and ETSI, mandate that end user should
+not be able to set invalid operating parameters. Eventually,
+<I>Atheros</I> managed to find a solution that was acceptable : they
+created a <B>HAL</B>, a binary layer that sits between the hardware
+and the driver and enforces that radio regulations are respected. The
+downside is that the HAL is available only for selected architectures
+(i386, PPC, Arm, Mips, SH4, Alpha and Sparc64).
+<p>
+In the mean time, <I>Sam</I> had ported is original BSD driver to
+Linux, and integrated into Linux. Like the BSD driver, the initial
+MADWiFi driver is based on the HAL, however it supports Wireless
+Extensions and Wireless Scanning (which are Linux specific). This
+driver requires a recent 2.4.X kernel or 2.6.X kernel, and requires
+Wireless Extensions V14 or later.
+<p>
+As the hardware is basic, a lot of the 802.11 functionality is handled
+in the driver (as opposed to firmware). To handle this, <I>Sam</I> has
+created a 802.11 stack for this driver that became the de-facto 802.11
+stack of BSD operating systems. This is a lot of code, and for the
+first release there was still some bugs and many features and
+optimisations missing (for example, Ad-Hoc mode is not yet
+functional). The good news is that over time, the performance and
+functionality of this driver increased. Lately, WPA support has been
+added to the driver (which is a lot of work).
+<p>
+In early 2005, the project went into hibernation, no new release was
+done and activity slowed down. Then, in mid 2005 the project was
+re-energised, and <I>Michael</I> took over the driver maintenance. He
+is coordinating the work on a new branch of the driver called
+<B>madwifi-ng</B> created by Atheros to support more recent cards and
+their features. This is now the main branch of the driver, seeing
+active development, and the old branch has been deprecated.
+<p>
+This driver has a vast number of <B>features</B> and good hardware
+compatibility, thanks to the support from Atheros and the close
+integration with the 802.11 stack. Nearly all features of the hardware
+are supported (QoS and performance enhancements). The driver also
+support virtual network interfaces (called VAP), which allow one card
+to act as multiple 802.11 devices.
+<p>
+The MadWiFi project has recently added two other branches of the
+driver. The first branch is called <B>DadWiFi</B> and is a port of the
+driver to the new <B>mac80211</B> kernel stack (see <A
+HREF="#Centrino3945mac80211"><I>section 4.9</I></A>). Currently, the
+mac80211 stack does not offer much more than the 802.11 stack in the
+madwifi-ng driver, but with time it may change.
+<p>
+The other branch is called <B>OpenHAL</B>, it is a replacement of the
+binary only HAL with OpenSource code. The OpenHAL is mostly a port
+from the OpenBSD Atheros driver called ar5k from <I>Reyk Floeter</I>,
+which itself is derived from the vt_ar5k driver for Linux written by
+<I>Reyk</I>, which was listed in this document a few years ago. The
+work on OpenHal and the port to mac80211 would make this driver more
+likely to go in the Linux kernel at some point in the future.
+
+<A NAME="Prism54">
+<H2>4.3	Intersil Prism54 FullMac (802.11a/802.11g)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>stable
+</TR><TR valign="top">
+<TD>Driver name&nbsp;:
+<TD>Cardbus : prism54.o
+<br>PCI : prism54.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>0.2
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD>Linux kernel (2.6.19)
+<br><A HREF="http://prism54.org/fullmac.html">
+http://prism54.org/fullmac.html</A>
+</TR><TR valign="top">
+<TD>Authors&nbsp;:
+<TD>W. Termorshuizen
+<br>R. Bastings
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>Luis R. Rodriguez &lt;mcgrof&#064;ruslug.rutgers.edu&gt;
+<br>Frederik Kunz &lt;frederik.kunz&#064;web.de&gt;
+<br>Sebastian Schoeps &lt;sebastian&#064;schoeps.org&gt;
+<br>Aurelien Alleaume &lt;slts&#064;free.fr&gt;
+<br>Herbert Valerio Riedel &lt;hvr&#064;gnu.org&gt;
+</TR><TR>
+<TD>Mailing lists&nbsp;:
+<TD><A HREF="http://prism54.org/mailing.html">
+http://prism54.org/mailing.html</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme, web page
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions & configuration tool
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc, Master (FirmwareAP)
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP, AES
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>yes
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11b, 802.11g, 802.11a depending on hardware
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Encryption, Access Point mode, WDS, Firmware loading via HotPlug.
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>SoftMAC firmware support
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>?
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web pages&nbsp;:
+<TD><A HREF="http://www.dlink.com/products/">
+http://www.dlink.com/products/</A>
+<br><A HREF="http://www.smc.com/">http://www.smc.com/</A>
+<br><A HREF="http://www.netgear.com/">http://www.netgear.com/</A>
+<br><A HREF="http://www.gemtek.com.tw/">http://www.gemtek.com.tw/</A>
+<br><A HREF="http://www.conexant.com/">http://www.conexant.com/</A>
+</TR>
+</TABLE>
+
+<H3>4.3.1	 The device</H3>
+
+The Prism Indigo, Prism GT and Prism Duette are the third generation
+of chipsets from Intersil, logical follower of the second generation
+PrismII and Prism3 chipsets (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#Prism2"><I>section
+3.6</I></A>). The <B>Prism Indigo</B> was released first, and support
+802.11a (5&nbsp;GHz band). The <B>Prism GT</B> support 802.11g (and
+802.11b - 2.4&nbsp;GHz band). The <B>Prism Duette</B> support both
+802.11a and 802.11g (in both the 2.4&nbsp;GHz and 5&nbsp;GHz band).
+<p>
+Because of the limitations of the previous PrismII design, those new
+chipsets feature a totally new design, much cleaner and much more
+efficient, and doesn't share much in common with the earlier Prism
+designs, but is more likely to be related to the NWN MAC that Intersil
+acquired (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#Swallow"><I>section
+3.17</I></A>).
+<p>
+The chipset is highly integrated (2 or 3 chip solutions). Like
+previous Prism chipsets, most of the 802.11 management is handed in
+firmware. However, the bus interface is now PCI DMA only (less CPU
+overhead, faster). The MAC support the usual 802.11 features, and
+hardware WEP and AES encryption, and the firmware fully act as an
+Access Point. The Radio implement the OFDM modulation necessary to
+support 802.11a and 802.11g.
+<p>
+There doesn't seem to be any products using the Prism Indigo chipset
+(most card offering 802.11a are based on Atheros chipset - see <A
+HREF="#AtherosMADWiFi"><I>section 4.2</I></A>), and I don't expect to
+see any in the future. A few of the usual Intersil partners, such as
+<B>Netgear</B> and <B>SMC</B>, have started selling 802.11g cards
+based on the Prism GT and Prism Duette chipsets.
+<p>
+Note that there are two types of firmware for this card, the FullMAC
+firmware, that can handle most of the 802.11 functionality by itself,
+and the SoftMAC firmware, that delegates it to the driver. Older
+revision of the hardware can handle both types of firmware, whereas
+newer revisions can only handle the SoftMAC firmware. Cards that can
+support the older FullMAC firmware are now very difficult to find.
+<p>
+After releasing this chipset, the wireless division of <B>Intersil</B>
+(formerly part of Harris) was bought by <B>GlobespanVirata</B>, and
+after a few month, GlobespanVirata merged with
+<B>Conexant</B>. Therefore, the Prism chipsets are now sold by
+Conexant.
+
+<H3>4.3.2 The driver</H3>
+
+This driver was written and released as GPL by <I>Intersil</I>
+themselves&nbsp;!  This is a much stronger commitment to OpenSource
+than some other vendors have made. Unfortunately, after the aquisition
+by Conexant, they stopped contributing to the OpenSource community.
+<p>
+<I>Luis</I>, <I>Frederik</I> and <I>Sebastian</I> are taking care of
+this driver after the initial release from Intersil and helping people
+with the driver. They are fixing bugs and improving compatibility
+with the various kernels and configurations. <I>Aurelien</I> has done
+a tremendous work on Wireless Extensions support.
+<p>
+After an initial frenetic pace of changes and reorganisation, the
+driver has stabilised and matured, and is now included in the <B>Linux
+2.6.X kernel</B>. The driver requires firmware download (through the
+standard HotPlug support) and has full support for Wireless Extensions
+(including Wireless Scanning) and monitor mode. The driver also can
+act as an Access Point through a FirmwareAP mode (all the AP
+management is handled by the firmware). Full support for WPA has been
+added recently to the driver.
+<p>
+One of the limitation of the driver is that it does not support the
+new SoftMAC devices, which means that it only works with older Prism54
+devices. For SoftMAC devices, you will need the SoftMAC driver (see <A
+HREF="#Prism54softmac"><I>section 4.4</I></A>).
+
+<A NAME="Prism54softmac">
+<H2>4.4	Intersil Prism54 SoftMac (islsm)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>beta
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>islsm.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>0.7
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://prism54.org/newdrivers.html">
+http://prism54.org/newdrivers.html</A>
+<br><A HREF="http://jbnote.free.fr/">http://jbnote.free.fr/</A>
+<br><A HREF="http://islsm.org/~jb/islsm/islsm.git/">
+http://islsm.org/~jb/islsm/islsm.git/</A>
+</TR><TR valign="top">
+<TD>Maintainer&nbsp;:
+<TD>Jean-Baptiste Note &lt;jean-baptiste.note&#064;m4x.org&gt;
+<br>Jean-Baptiste Note &lt;jbnote&#064;gmail.com&gt;
+</TR><TR>
+<TD>Mailing lists&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11b, 802.11g, 802.11a depending on hardware
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>?
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web pages&nbsp;:
+<TD><A HREF="http://www.dlink.com/products/">
+http://www.dlink.com/products/</A>
+<br><A HREF="http://www.smc.com/">http://www.smc.com/</A>
+<br><A HREF="http://www.netgear.com/">http://www.netgear.com/</A>
+<br><A HREF="http://www.gemtek.com.tw/">http://www.gemtek.com.tw/</A>
+<br><A HREF="http://www.conexant.com/">http://www.conexant.com/</A>
+</TR>
+</TABLE>
+
+<H3>4.4.1	 The device</H3>
+
+After Conexant acquired the Prism54 family of chipsets (see <A
+HREF="#Prism54"><I>section 4.3</I></A>), the Prism54 chipsets changed
+their mode of operation from <B>FullMAC</B>, where the firmware handle
+all the 802.11 protocol, to <B>SoftMAC</B>, where the driver has to
+handle all the 802.11 protocol. This allows to reduce the cost of the
+cards by decreasing the on-board memory and flash. However, the
+chipset is no longer compatible at the driver level, because the
+firmware is different. Older devices can support both types of
+firmwares, newer card with less memory can not accommodate the FullMAC
+firmwares. All the Prism54 USB devices and most recent PCI/Cardbus
+cards can only support SoftMAC operation.
+<p>
+Conexant also released the <B>Prism WorldRadio</B>, an enhanced
+version of the Prism Duette with 802.11a and 802.11g support with
+proprietary bit rate enhancement. Then, they released the CX85510,
+which adds QoS and more security features, and the CX3110x, a single
+chip solution.
+
+<H3>4.4.2 The driver</H3>
+
+Up to that point, <I>Intersil</I> had a long tradition of being one of
+the most friendly vendor towards Linux, and they did help the many
+Linux drivers and even released themselves the Prism54 FullMAC driver
+(see <A HREF="#Prism54"><I>section 4.3</I></A>). However, after being
+acquired by Conexant and with the release of SoftMAC devices, they
+decided to ignore the Linux community. The Prism54 team tried for
+months to negotiate the release of specs in vain.
+<p>
+<I>Jean-Baptiste</I> has led the effort to reverse engineer the
+Windows driver and create a driver for the Prism54 SoftMAC devices. He
+reversed engineered the driver by loading it with ndiswrapper and
+spying on the USB traffic, as opposed to other effort that actually
+disassemble a driver.
+<p>
+<I>Jean-Baptiste</I> is mostly concentrating on support for USB
+devices, however support for PCI devices was added as well to the
+Prism54 SoftMAC driver. The driver is based on the 802.11 stack from
+the <B>MadWifi</B> project (see <A HREF="#AtherosMADWiFi"><I>section
+4.2</I></A>). The driver is claimed to work, but at the time of
+writing not tarball or release seems to be available.
+
+<A NAME="Prism54mac80211">
+<H2>4.5	Intersil Prism54 mac80211 driver (p54)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>alpha
+</TR><TR valign="top">
+<TD>Driver name&nbsp;:
+<TD>PCI/Cardbus&nbsp;: prism54pci.o
+<br>USB&nbsp;: prism54usb.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>?
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD>wireless-dev GIT
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>Michael Wu &lt;flamingice&#064;sourmilk.net&gt;
+<br>Christian Lamparter &lt;chunkeey&#064;web.de&gt;
+<br>Jean-Baptiste Note &lt;jbnote&#064;gmail.com&gt;
+</TR><TR>
+<TD>Mailing lists&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP, 802.1x, WPA
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11b, 802.11g, 802.11a depending on hardware
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>mac80211 features, Firmware loading via HotPlug
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>?
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web pages&nbsp;:
+<TD><A HREF="http://www.conexant.com/">http://www.conexant.com/</A>
+</TR>
+</TABLE>
+
+<H3>4.5.1	 The device</H3>
+
+This is the same device as the previous entry (<A
+HREF="#Prism54softmac"><I>section 4.4</I></A>).
+
+<H3>4.5.2 The driver</H3>
+
+When <I>Jean-Baptiste</I> decided to write the SoftMAC Prism54 driver
+(see <A HREF="#Prism54softmac"><I>section 4.4</I></A>), he decided to
+use the 802.11 stack from the <B>MadWifi</B> project (see <A
+HREF="#AtherosMADWiFi"><I>section 4.2</I></A>), which is one of the
+most fully featured 802.11 stack available. Since then, the Linux
+kernel developers decided to standardise on the <B>mac80211</B> stack
+(see <A HREF="#Centrino3945mac80211"><I>section 4.9</I></A>), and
+therefore a driver using another stack can not be included in the
+kernel.
+<p>
+<I>Michael</I> ported the work of <I>Jean-Baptiste</I> to the mac80211
+stack, with the goal of merging it in the Linux kernel in the near
+future. The driver has two versions, one for PCI/Cardbus devices and
+one for USB devices. This driver is only available in the wireless-dev
+GIT repository, and not much documentation is available about it.
+
+<A NAME="Centrino2200">
+<H2>4.6	Intel PRO/Wireless 2200 802.11g and 2915 802.11ag (Centrino)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>Stable
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>ipw2200.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>1.2.2
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD>Linux kernel (2.6.20)
+<br><A HREF="http://ipw2200.sourceforge.net/">
+http://ipw2200.sourceforge.net/</A>
+<br><A HREF="http://ieee80211.sourceforge.net/">
+http://ieee80211.sourceforge.net/</A>
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>James P. Ketrenos &lt;ipw2100-admin&#064;linux.intel.com&gt;
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="http://lists.sourceforge.net/lists/listinfo/ipw2100-devel/">
+http://lists.sourceforge.net/lists/listinfo/ipw2100-devel/</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>/proc interface and Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP, 802.1x, WPA
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11b, 802.11g, 802.11a depending on hardware
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Firmware loading via HotPlug, 802.11e (QoS)
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>?
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.intel.com/">http://www.intel.com/</A>
+<br><A HREF="http://www.passys.nl/tips/tip40_en.htm">
+http://www.passys.nl/tips/tip40_en.htm</A>
+</TR>
+</TABLE>
+
+<H3>4.6.1	 The device</H3>
+
+The Intel <B>PRO/Wireless 2200</B> is the second 802.11 product
+designed by Intel, following the previous PRO/Wireless 2100 product
+(<A HREF="Linux.Wireless.drivers.802.11b.html#Centrino"><I>section
+3.28</I></A>). It mostly adds support for 802.11g (i.e. faster data
+rates). The <B>PRO/Wireless 2915</B> is their third 802.11 product,
+and adds support for 802.11a.
+<p>
+The design of the 2200 and 2915 are based on the original 2100, the
+main improvement are the new radio modems and better support for the
+new security protocols (WPA). The MAC core still support the same vast
+array of standard 802.11 features. The radio are obviously different,
+adding the OFDM bit-rates, up to 54&nbsp;Mb/s, and support for
+5&nbsp;GHz frequencies for the 2915.
+<p>
+The marketing program is still the same, and the PRO/Wireless 2200 and
+2915 Mini-PCI cards are exclusively sold as part of the
+<B>Centrino</B> package, therefore you will mostly find them
+integrated in various laptops, and not as a separate add-on card.
+<p>
+If you really want a separate add-on card, Intel also sells the Intel
+<B>PRO/Wireless 2225</B>, which is basically the PRO/Wireless 2200 in
+a half-height PCI card and sold separatly. And obviously, it's not
+called Centrino. And this card is very hard to find and buy, and is
+not listed on Intel web site.
+<p>
+Some people, such as <B>Passys</B>, have built PCI to Mini-PCI
+adapters for the PRO/Wireless 2200. This allows to put a standard
+Mini-PCI PRO/Wireless 2200 in any regular desktop, and it is supported
+by Linux.
+
+<H3>4.6.2	 The driver</H3>
+
+<I>Intel</I> is actively supporting the driver for both the
+PRO/Wireless 2200 and 2915, like they do for the PRO/Wireless 2100 (<A
+HREF="Linux.Wireless.drivers.802.11b.html#Centrino"><I>section
+3.28</I></A>). <I>James</I> is still leading the development of this
+driver. The driver is fully OpenSource, and like for the 2100 require
+a specific firmware.
+<p>
+Obviously, the driver share a lot of code with the 2100 driver, it
+supports both the <B>2200</B> and the <B>2915</B> and offer a similar
+rich feature set (WEP, WPA, Scanning). The development is very active
+and many bug are being fixed and features added.
+<p>
+The 802.11 code originally taken from the HostAP driver (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#Prism2-hostAP"><I>section
+3.8</I></A>) was eventually spin-off into the separate <B>Intel
+ieee80211 stack</B> (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#Centrino"><I>section
+3.28</I></A>). This driver and the 802.11 stack was included in Linux
+kernel 2.6.14.
+
+<A NAME="CentrinoHostAP">
+<H2>4.7	Intel PRO/Wireless 2200/2915 with HostAP mode</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>Beta
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>ipw2200.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>0.3
+</TR><TR>
+<TD>Where&nbsp;:
+<TD>Linux kernel (2.6.20)
+<br><A HREF="http://sourceforge.net/projects/ipw2200-ap">
+http://sourceforge.net/projects/ipw2200-ap</A>
+</TR><TR>
+<TD>Maintainer&nbsp;:
+<TD>York Liu &lt;york_liu&#064;linux.intel.com&gt;
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="http://sourceforge.net/mail/?group_id=149502">
+http://sourceforge.net/mail/?group_id=149502</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>/proc interface and Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc, Master
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP, 802.1x, WPA
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11b, 802.11g, 802.11a depending on hardware
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Firmware loading via HotPlug
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>?
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.intel.com/">http://www.intel.com/</A>
+</TR>
+</TABLE>
+
+<H3>4.7.1	 The device</H3>
+
+This is the same device as the previous entry (<A
+HREF="#Centrino2200"><I>section 4.6</I></A>).
+
+<H3>4.7.2	 The driver</H3>
+
+<I>Intel</I> is one of the most active company when it comes to Linux
+wireless drivers. After releasing the standard driver for the
+PRO/Wireless 2200 and 2915 (see <A HREF="#Centrino2200"><I>section
+4.6</I></A>), they released an alternate driver with Access Point mode
+(HostAP mode), which let you use your card as an Access Point.
+<p>
+The driver is still based on the 802.11 code originally taken from the
+HostAP driver (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#Prism2-hostAP"><I>section
+3.8</I></A>), it is a variant of the Intel ieee80211 stack (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#Centrino"><I>section
+3.28</I></A>) that includes the HostAP functionality. This driver
+requires a specific firmware for the card, provided by Intel. This
+driver seems to be updated less often than the standard drivers.
+
+<A NAME="Centrino3945i">
+<H2>4.8	Intel PRO/Wireless 3945ABG 802.11g/802.11ag (Centrino)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>Stable
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>ipw3945.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>1.2.1
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://ipw3945.sourceforge.net/">
+http://ipw3945.sourceforge.net/</A>
+<br><A HREF="http://ieee80211.sourceforge.net/">
+http://ieee80211.sourceforge.net/</A>
+</TR><TR valign="top">
+<TD>Maintainer&nbsp;:
+<TD>James P. Ketrenos &lt;ipw2100-admin&#064;linux.intel.com&gt;
+<br>Zhu Yi &lt;yi.zhu&#064;intel.com&gt;
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="https://lists.sourceforge.net/lists/listinfo/ipw3945-devel">
+https://lists.sourceforge.net/lists/listinfo/ipw3945-devel</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>/proc interface and Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP, 802.1x, WPA
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11b, 802.11g, 802.11a depending on hardware
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Firmware loading via HotPlug, 802.11e (QoS), binary daemon
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>?
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL, except the binary daemon
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.intel.com/">http://www.intel.com/</A>
+</TR>
+</TABLE>
+
+<H3>4.8.1	 The device</H3>
+
+The Intel <B>PRO/Wireless 3945</B> is the third 802.11 product
+designed by Intel, following the previous <B>PRO/Wireless 2200</B>
+product (see <A HREF="#Centrino2200"><I>section 4.6</I></A>). The main
+goal was to reduce the cost and the size of the previous chipset,
+however Intel has added a few novel features such as WakeOnWLAN and
+better VoIP support.
+<p>
+Like their previous chipset, the 3945 is only available as a
+<B>MiniPCI card</B> for Intel Centrino processor, integrated in
+various laptops, and not available as a separate add-on card.
+
+<H3>4.8.2	 The driver</H3>
+
+Like for all their previous chipset, <I>Intel</I> decided to release a driver
+for this chipset. However, they were faced with a problem. To achieve
+reduced cost, a lot of functionality was moved from the
+hardware/firmware into the driver. The task of insuring compliance
+with various <B>radio regulations</B> was moved out of the hardware,
+which is an issue because regulatory organisations, such as the FCC
+and ETSI, mandate that end user should not be able to set invalid
+operating parameters. This is the reason why the Atheros drivers
+contains a binary HAL (see <A HREF="#AtherosMADWiFi"><I>section
+4.2</I></A>).
+<p>
+<I>Intel</I> opted for a different approach, they created a fully
+OpenSource driver and moved regulation compliance to a <B>binary
+userspace daemon</B> interacting with the driver. This is technically
+better than using a binary driver, as the driver could be included in
+the kernel and the user just need to add the binary daemon to his
+system, which is simpler than adding a kernel driver. However, this
+has similar downside as a binary driver, the platform support is
+limited (currently only to x86 and x86-64).
+<p>
+The driver is similar to the ipw2200 driver (see <A
+HREF="#Centrino2200"><I>section 4.6</I></A>), it share a lot of code
+with it, has a similar set of features and uses the same <B>Intel
+ieee80211</B> stack (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#Centrino"><I>section
+3.28</I></A>).
+<p>
+Note that Intel has a second driver for this hardware using the new
+<B>mac80211</B> kernel stack (see <A
+HREF="#Centrino3945mac80211"><I>section 4.9</I></A>).
+
+<A NAME="Centrino3945mac80211">
+<H2>4.9	Intel PRO/Wireless 3945ABG mac802.11 driver</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>Experimental
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>iwl3945.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>0.1.3
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://intellinuxwireless.org/?p=iwlwifi">
+http://intellinuxwireless.org/?p=iwlwifi</A>
+<br><A HREF="http://intellinuxwireless.org/?p=mac80211">
+http://intellinuxwireless.org/?p=mac80211</A>
+</TR><TR valign="top">
+<TD>Maintainer&nbsp;:
+<TD>James P. Ketrenos &lt;ipw2100-admin&#064;linux.intel.com&gt;
+<br>Zhu Yi &lt;yi.zhu&#064;intel.com&gt;
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="https://lists.sourceforge.net/lists/listinfo/ipw3945-devel">
+https://lists.sourceforge.net/lists/listinfo/ipw3945-devel</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP, 802.1x, WPA
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11b, 802.11g, 802.11a depending on hardware
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Firmware loading via HotPlug, 802.11e (QoS)
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>?
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.intel.com/">http://www.intel.com/</A>
+</TR>
+</TABLE>
+
+<H3>4.9.1	 The device</H3>
+
+This is the same device as the previous entry (<A
+HREF="#Centrino3945i"><I>section 4.8</I></A>).
+
+<H3>4.9.2	 The driver</H3>
+
+With all their previous drivers, <I>Intel</I> were using their
+<B>Intel ieee80211</B> stack (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#Centrino"><I>section
+3.28</I></A>), derived from the HostAP driver (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#Prism2-hostAP"><I>section
+3.8</I></A>). This stack is a good match for the previous Intel
+chipsets, however it is not well suited to the 3945 and other modern
+wireless chipset from other vendors due to the fact that it does not
+handle the MAC management functionality. The SoftMAC addition to Intel
+ieee80211 stack adds such function (see <A HREF="#Broadcom"><I>section
+4.13</I></A>), but is very limited in functionality compared to modern
+802.11 stacks such as the MadWiFi stack (see <A
+HREF="#AtherosMADWiFi"><I>section 4.2</I></A>).
+<p>
+For these reasons, various driver maintainers decided to standardised
+on a new stack, the <B>mac80211 stack</B>. This stack was initially
+released in middle 2006 by DeviceScape, a Linux consulting company,
+and was mostly designed by <I>Jouni Malinen</I>, author of the HostAP
+driver (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#Prism2-hostAP"><I>section
+3.8</I></A>). After this release, the DeviceScape stack was very
+heavily reworked by <I>Jiri Benc</I>, <I>Michael Wu</I> and <I>Zhu
+Yi</I> and the rest of the Linux wireless community, to become
+mac80211. The mac80211 stack was included in kernel 2.6.22, but it is
+still experimental and a lot of work remains. For example, early
+version of mac80211 have deadlocks and are not SMP safe.
+<p>
+<I>Intel</I> was obviously interested in this new mac80211 stack, as
+in the long term it makes their driver better and easier to
+maintain. Intel is contributing to the mac80211 stack, and they also
+have their own branch of mac80211 with features needed by their driver
+and not found yet in the kernel stack (but planed to be merged later).
+<p>
+<I>Intel</I> also ported their driver for the 3945 chipset to the new
+mac80211 stack, as part of the <B>iwlwifi</B> package. The driver is
+still experimental and under heavy development.
+<p>
+The previous driver for the 3945 requires a binary daemon for
+regulation compliance, but this turned out to be not
+satisfactory. Intel decided to rewrite the firmware for the 3945 to
+ensure regulation compliance. This means that the iwlwifi Linux driver
+requires its <B>own specific firmware</B>, and that the driver can be
+fully OpenSource without binary daemon. This represents an impressive
+commitment to the Linux community.
+
+<A NAME="Centrino4965">
+<H2>4.10	Intel PRO/Wireless 4965AGN draft-802.11n (Centrino)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>Experimental
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>iwl4965.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>0.1.3
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://intellinuxwireless.org/?p=iwlwifi">
+http://intellinuxwireless.org/?p=iwlwifi</A>
+<br><A HREF="http://intellinuxwireless.org/?p=mac80211">
+http://intellinuxwireless.org/?p=mac80211</A>
+</TR><TR valign="top">
+<TD>Maintainer&nbsp;:
+<TD>James P. Ketrenos &lt;ipw2100-admin&#064;linux.intel.com&gt;
+<br>Zhu Yi &lt;yi.zhu&#064;intel.com&gt;
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="https://lists.sourceforge.net/lists/listinfo/ipw3945-devel">
+https://lists.sourceforge.net/lists/listinfo/ipw3945-devel</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP, 802.1x, WPA
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11b, 802.11g, 802.11a depending on hardware
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Firmware loading via HotPlug, 802.11e (QoS)
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>?
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.intel.com/">http://www.intel.com/</A>
+</TR>
+</TABLE>
+
+<H3>4.10.1	 The device</H3>
+
+The Intel <B>PRO/Wireless 4965</B> is the fourth 802.11 product
+designed by Intel, following the previous PRO/Wireless 3945 product
+(<A HREF="#Centrino3945i"><I>section 4.8</I></A>). It mostly adds
+support for draft-802.11n support, i.e. MIMO.
+<p>
+MIMO uses multiple antennas to simultaneously transmit or receive
+signal, and using some clever processing can achieve much greater
+range or speed than regular transmissions. The 802.11n standard is not
+yet finalised, which is why those products are called draft-802.11n
+compliant. It offer bitrate up to 300&nbsp;Mb/s (most users won't see
+that in practice), and may double the range indoors.
+<p>
+Like their previous chipset, the 4965 is only available as a
+<B>MiniPCI card</B> for Intel Centrino processor, integrated in
+various laptops, and not available as a separate add-on card.
+
+<H3>4.10.2	 The driver</H3>
+
+For the 4965, <I>Intel</I> decided to directly based their driver on
+the new <B>mac80211</B> kernel stack (see <A
+HREF="#Centrino3945mac80211"><I>section 4.9</I></A>). This driver is
+part of the <B>iwlwifi</B> package, and currently requires a version
+of mac80211 with Intel changes to support draft-802.11n. This driver
+also require a specific firmware the ensure regulation compliance.
+
+<A NAME="Ralink2500">
+<H2>4.11	Ralink RT2500 and 2570 cards</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>Beta
+</TR><TR valign="top">
+<TD>Driver name&nbsp;:
+<TD>rt2500.o
+<br>PCI&nbsp;: rt61.o
+<br>USB&nbsp;: rt73.o
+<br>rt2x00.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>1.1.0 (beta) and 2.0.4 (alpha)
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://rt2x00.serialmonkey.com/">
+http://rt2x00.serialmonkey.com/</A>
+<br><A HREF="http://rt2400.sourceforge.net/">http://rt2400.sourceforge.net/</A>
+<br><A HREF="http://www.ralinktech.com/supp-1.htm">
+http://www.ralinktech.com/supp-1.htm</A>
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>Paul Lin
+<br>Mark Wallis &lt;markwallis at users.sourceforge.net&gt;
+<br>Ivo van Doorn &lt;ivd at euronet.nl&gt;
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="http://sourceforge.net/mail/?group_id=107832">
+http://sourceforge.net/mail/?group_id=107832</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Text files, Howtos
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions and specific graphical tool
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP, WPA
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11b, 802.11g and 802.11a depending on hardware
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>SMP problems
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.ralinktech.com/">http://www.ralinktech.com/</A>
+<br><A HREF="http://minitar.com/">http://minitar.com/</A>
+<br><A HREF="http://rt2x00.serialmonkey.com/wiki/index.php/Hardware">
+http://rt2x00.serialmonkey.com/wiki/index.php/Hardware</A>
+</TR>
+</TABLE>
+
+<H3>4.11.1	 The device</H3>
+
+Ralink may have been late in releasing a 802.11b chipset, the RT2400
+(<A HREF="Linux.Wireless.drivers.802.11b.html#Ralink"><I>section
+3.27</I></A>), however it was fairly quickly followed by the
+<B>RT2500</B>, a 802.11g chipset. The RT2500 is a evolution of the
+RT2400, and share many characteristics with it.
+<p>
+Like other 802.11g chipsets, it supports standard OFDM bitrates up to
+54 Mb/s and all modern 802.11 features such as WPA and QoS
+(802.11e). On top of that, it support a proprietary 72 Mb/s
+bitrate. The RT2500 is designed for MiniPCI and CardBus interfaces,
+and the <B>RT2570</B> is designed with a USB 2.0 interface.
+<p>
+As usual, this chipset is sold by a wide variety of vendors under
+different model names, and some of those use the same model name for
+different chipsets. The project pages includes a long list of cards
+including this chipset. A special mention to Minitar which has a
+dedicated Linux support forum.
+<p>
+The RT2500 was quickly followed by other 802.11g chipsets. The
+<B>RT61</B> family includes the rt2561 and rt2661 PCI chipsets and
+adds support for turbo bit rate (100&nbsp;Mb/s) and for the rt2661 only
+proprietary MIMO (not 802.11n compatible). The <B>RT73</B> family
+includes the RT2573 and RT2571 USB chipsets, and is the equivalent of
+the RT61 (but without the MIMO chipset). Those chipset are available
+with two radio options, 2.4 GHz only, or 2.4 GHz plus 5 GHz, for
+additional 802.11a support.
+<p>
+Ralink has now released the <B>RT2800</B> family. The main feature of
+those chipset is the addition of draft-802.11n MIMO support.
+
+
+<H3>4.11.2	 The driver</H3>
+
+Like for the RT2400, <I>Ralink</I> wrote a Linux driver for the RT2500
+and RT2750, but this time they decided to release it themselves as
+GPL. Moreover, the driver is functional, full of features and with a
+graphical utility, so this represent a very generous contribution to
+the OpenSource community. The driver supports WEP, WPA, Scanning and
+Monitor mode...
+<p>
+<I>Mark</I> integrated this driver in the existing SourceForge project
+for the RT2400 driver and started to maintain it. Many patches have
+been integrated to improve the stability and functionality of the
+driver.
+<p>
+After that, <I>Ralink</I> released the <B>RT61</B> driver and the
+<B>RT73</B> driver, to support the new 802.11g chipset. Those drivers
+are GPL and have the same features as the RT2500 chipset. <I>Mark</I>
+has integrated this driver in the existing SourceForge project, and
+the community is provided various improvement to those drivers.
+<p>
+<I>Ivo</I> has started a rewrite of those drivers, called
+<B>rt2x00</B>, his goal is to have a source code easier to integrate
+in the Linux kernel and to maintain. His rewrite targets both the
+RT2400 (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#Ralink"><I>section
+3.27</I></A>), the RT2500, the RT61 and RT73. The initial version of
+this new driver was using the Intel ieee80211 stack from the Centrino
+driver (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#Centrino"><I>section
+3.28</I></A>).
+<p>
+Then, <I>Ivo</I> ported the driver to the new <B>mac80211</B> kernel
+stack (see <A HREF="#Centrino3945mac80211"><I>section 4.9</I></A>),
+and lots of development has happened on that version of the
+driver. This alternate version is available in the wireless-dev GIT
+repository and in the CVS, and should appear in a Linux kernel in the
+future.
+
+<A NAME="RalinkBSD">
+<H2>4.12	Ralink ural-linux driver (BSD driver)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>Alpha
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>ural.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>0.8.2
+</TR><TR>
+<TD>Where&nbsp;:
+<TD><A HREF="http://etudiants.insia.org/~jbobbio/ural-linux/">
+http://etudiants.insia.org/~jbobbio/ural-linux/</A>
+</TR><TR>
+<TD>Maintainers&nbsp;:
+<TD>Jeremy Bobbio &lt;jeremy.bobbio&#064;etu.upmc.fr&gt;
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP, WPA
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11b and 802.11g
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>BSD
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.ralinktech.com/">http://www.ralinktech.com/</A>
+</TR>
+</TABLE>
+
+<H3>4.7.1	 The device</H3>
+
+This is the same device as the previous entry (<A
+HREF="#Ralink2500"><I>section 4.11</I></A>).
+
+<H3>4.7.2	 The driver</H3>
+
+<I>Jeremy</I> has ported the <B>BSD driver</B> for the RT2750 to
+Linux. This port is based on the 802.11 stack from the <B>MadWifi</B>
+project (see <A HREF="#AtherosMADWiFi"><I>section 4.2</I></A>) and
+support only USB devices. This driver is experimental and has not seen
+much work since 2005.
+
+<A NAME="Broadcom">
+<H2>4.13	Broadcom 43xx cards</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>Beta
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>bcm43xx.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>?
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD>Linux kernel (2.6.22)
+<br><A HREF="http://bcm43xx.berlios.de/">http://bcm43xx.berlios.de/</A>
+<br><A HREF="http://linux-bcom4301.sourceforge.net/">
+http://linux-bcom4301.sourceforge.net/</A>
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>Michael Buesch &lt;mbuesch&#064;freenet.de&gt;
+<br>Martin Langer &lt;martin-langer&#064;gmx.de&gt;
+<br>Stefano Brivio &lt;st3&#064;riseup.net&gt;
+<br>Danny van Dyk &lt;kugelfang&#064;gentoo.org&gt;
+<br>Andreas Jaggi &lt;andreas.jaggi&#064;waterwave.ch&gt;
+<br>Larry Finger &lt;Larry.Finger&#064;lwfinger.net&gt;
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="https://lists.berlios.de/mailman/listinfo/bcm43xx-dev">
+https://lists.berlios.de/mailman/listinfo/bcm43xx-dev</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>README files
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP, 802.1x, WPA
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11b, 802.11g, 802.11a depending on hardware
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>802.11a
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.broadcom.com/">http://www.broadcom.com/</A>
+<br><A HREF="http://www.linksys.com/">http://www.linksys.com/</A>
+<br><A HREF="http://www.usr.com/">http://www.usr.com/</A>
+</TR>
+</TABLE>
+
+<H3>4.13.1	 The device</H3>
+
+Broadcom is a company that is developing all king of networking
+solutions, and well known for its Ethernet chipsets. When it decided
+to enter the Wireless LAN market, they decided a bold
+strategy. Instead of releasing a 802.11b product, which was the only
+standard at that time, they decided to release a product based on the
+upcoming 802.11g specification that was still one year from
+completion. Most competitors were taken by surprise, consumer were
+attracted by the higher speed and Broadcom quickly gained a good
+market share. When the 802.11g standard was eventually released,
+Broadcom quickly upgraded to it, and for a while the vast majority of
+802.11g card were based on Broadcom chipsets. Many laptops of that
+period also included Broadcom chipsets. The Apple <B>Airport
+Express</B> is also based on the Broadcom chipset.
+<p>
+Eventually, the competition caught up, started offering more features
+than Broadcom or cheaper prices, and a lot of vendor using Broadcom
+chipsets migrated to other chipsets. <B>Linksys</B> is still a
+Broadcom stronghold, and a large portion of their 802.11g products are
+based on Broadcom chipsets (but not exclusively). A lot of laptops
+today that offer 802.11 includes either an Intel Centrino or a
+Broadcom chipset.
+<p>
+Like most 802.11g chipsets, the BCM43xx chipsets support standard OFDM
+bitrates up to 54 Mb/s and all modern 802.11 features such as WPA and
+QoS (802.11e). Broadcom has a complete family of chipsets, each
+iteration lowering the price or adding features. Their newer chipsets
+add support for 802.11a and pre-802.11n MIMO, and also add USB and
+PCI-Express interfaces.
+<p>
+Broadcom first proprietary extension is SpeedBooster, Broadcom's name
+for Packet Bursting, which is part of the 802.11e standard. They have
+few proprietary extension, their newer chipsets include a proprietary
+125 High Speed Mode : this is not a enhanced modulation at 125 Mb/s,
+the card still use 54 Mb/s and a combination of protocol enhancement
+and compression. In fact, if a card advertise <B>125 Mb/s</B> (which
+is misleading), it's a good clue that it's most likely a Broadcom
+card. Broadcom also advertise BroadRange, which is mostly a higher
+radio sensitivity.
+<p>
+Broadcom has two main firmware version, V3 and V4. Most cards can run
+both firmware, however older cards do not support V3 (such as the
+BCM4301 chipset, which is 802.11b only). Firmware V4 is necessary for
+most of the more advanced features.
+
+<H3>4.13.2	 The driver</H3>
+
+Like TI (see <A HREF="#acx100"><I>section 4.1</I></A>), Broadcom
+quickly gained a reputation as being very unfriendly to Linux. It was
+known that Broadcom internally had a fully functional Linux driver,
+but it was unwilling to release it in any form (even binary), and was
+not answering call for chipset specifications. However, soon people
+realised that the <B>Linksys WRT54G</B>, a router/access point with a
+Broadcom chipset, was based on Linux. Linksys was made aware that,
+because Linux is GPL, they had to release the full source code of the
+WRT54G firmware, which they promptly did. This source code contained a
+binary Linux driver for the Broadcom chipset.
+<p>
+A team of people led by <I>Brett Wooldridge</I>, <I>Joe Jezak</I> and
+<I>Johannes Berg</I> started to reverse engineer this driver by
+disassembling it, like it was done for the TI driver (see <A
+HREF="#acx100"><I>section 4.1</I></A>). They did not write directly a
+driver, they produced a set of documentation so that the driver
+development would be legally separate from the reverse engineering
+effort.
+<p>
+A second team of people led by <I>Michael</I> started to write a
+driver based on those documents. They based their driver on the
+<B>Intel ieee80211 stack</B> from the Centrino driver (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#Centrino"><I>section
+3.28</I></A>), and added a <B>SoftMAC layer</B>. The SoftMAC layer add
+all the MAC management functionality missing from the Intel ieee80211
+stack. Both the driver and the SoftMAC stack were merged in the Linux
+kernel 2.6.17.
+<p>
+The driver and SoftMAC have seen tremendous development and reached a
+point where they are usable and stable. Support for more variations of
+the Broadcom chipset was added, such as PCI-E, support basic and
+advanced encryption was added. This driver only supports <B>firmware
+V3</B>.
+<p>
+In 2006, <I>Michael</I> started porting the driver to the new
+<B>mac80211</B> kernel stack (see <A
+HREF="#Centrino3945mac80211"><I>section 4.9</I></A>). Along the way,
+the driver was significantly changed, this version only supports
+<B>firmware V4</B> (so dropped support for older cards), and should
+offer support for the advanced features not supported in the SoftMAC
+driver, such as 802.11a. The mac80211 version is only available in the
+wireless-dev GIT repository, and should appear in a Linux kernel in
+the future.
+<p>
+In parallel, <I>Larry</I> has reused the SoftMAC driver and the
+mac80211 driver above to create an alternate driver for the mac80211
+kernel stack that support only <B>firmware V3</B>. This driver
+supports cards that are not supported by the other mac80211
+driver. Note that the names of all those drivers is currently in flux.
+
+<A NAME="ZD1211">
+<H2>4.14	ZyDAS ZD1211 driver (USB dongles)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>Stable
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>zd1211.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>2.18.0.0
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://sourceforge.net/projects/zd1211/">
+http://sourceforge.net/projects/zd1211/</A>
+<br><A HREF="http://zd1211.ath.cx/zd1211">http://zd1211.ath.cx/zd1211</A>
+<br><A HREF="http://www.zydas.com.tw/downloads/download-1211.asp">
+http://www.zydas.com.tw/downloads/download-1211.asp</A>
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>Markus Karg &lt;markus-karg&#064;users.sourceforge.net&gt;
+<br>ZyDAS
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="http://sourceforge.net/mail/?group_id=129083">
+http://sourceforge.net/mail/?group_id=129083</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Web pages
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP, WEP256, WPA
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>No (need external patch)
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11b, 802.11g, 802.11a depending on hardware
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>64 bit support
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.atheros.com/">http://www.atheros.com/</A>
+</TR>
+</TABLE>
+
+<H3>4.14.1	 The device</H3>
+
+After the release of the ZD1201 (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#ZyDAS"><I>section
+3.29</I></A>), the logical step for ZyDAs was to release a 802.11g
+chipset, the <B>ZD1211</B>. This chipset has similar features as other
+802.11g chipset, such as advanced security features, and it seems that
+some version also support 802.11a.
+<p>
+The main feature of ZyDAS chipsets is their small size and low power
+consumption, making them especially suitable for <B>USB
+dongles</B>. Actually, it seems that this chipset is only found in USB
+dongles, even though it support other interfaces (PCI and Pcmcia). USB
+2.0 is needed for full 802.11g operation.
+<p>
+ZyDAS was acquired by <B>Atheros</B>, and the ZD1211 is now known as
+Atheros <B>AR5007UG</B>.
+
+<H3>4.14.2	 The driver</H3>
+
+Like for the ZD1201 (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#ZyDAS"><I>section
+3.29</I></A>), <I>ZyDAS</I> themselves released a driver to support the
+ZD1211 under the GPL license.
+<p>
+At this point, a community organised around this driver : many people
+contributed patches and created branches of the driver. Most of the
+branches, which were aiming at simplifying the driver code or
+integrating it in the kernel, seems to have died. Instead, a new
+driver was written (see <A
+HREF="#ZD1211rw"><I>section 4.15</I></A>).
+<p>
+Meanwhile, <I>ZyDAS</I> continues to release new version of the driver
+including bug fixes and patches from the community. Markus is hosting
+this driver and many patches on his web site.
+
+<A NAME="ZD1211rw">
+<H2>4.15	ZyDAS ZD1211 SoftMAC driver</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>Stable
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>zd1211rw.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>-
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD>Linux kernel (2.6.23)
+<br><A HREF="http://zd1211.wiki.sourceforge.net/">
+http://zd1211.wiki.sourceforge.net/</A>
+<br><A HREF="http://www.linuxwireless.org/en/users/Drivers/zd1211rw">
+http://www.linuxwireless.org/en/users/Drivers/zd1211rw</A>
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>Daniel Drake &lt;dsd&#064;gentoo.org&gt;
+<br>Ulrich Kunitz &lt;kune&#064;deine-taler.de&gt;
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="http://sourceforge.net/mail/?group_id=129083">
+http://sourceforge.net/mail/?group_id=129083</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Web pages
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP, 802.1x, WPA
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11b, 802.11g, 802.11a depending on hardware
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>Automatic bitrate selection, Ad-Hoc mode
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.atheros.com/">http://www.atheros.com/</A>
+</TR>
+</TABLE>
+
+<H3>4.15.1	 The device</H3>
+
+This is the same device as the previous entry (<A
+HREF="#ZD1211"><I>section 4.14</I></A>).
+
+<H3>4.15.2	 The driver</H3>
+
+Various effort to cleanup and simplify the ZyDAS driver failed (see <A
+HREF="#ZD1211"><I>section 4.14</I></A>), so <I>Ulrich</I> and
+<I>Daniel</I> decided to write a new driver for the ZD1211 USB.
+<p>
+The driver was developped based on the <B>SoftMAC</B> 802.11 stack
+(see <A HREF="#Broadcom"><I>section 4.13</I></A>), saw a rapid
+development and was included in kernel 2.6.18. After that, it was
+gradually improved with new features and more hardware
+support. However, some important features, such as automatic bitrate
+selection, are missing from this driver, and users have to manually
+select a bitrate. The performance is also not as good as the official
+driver, but it is very stable.
+<p>
+Many of the shortcomings of the SoftMAC driver are due to function not
+implemented in the SoftMAC 802.11 stack. Rather than implement those
+features in their driver, Daniel and Ulrich decided to port their
+driver to the new <B>mac80211</B> kernel stack, which include those
+features (see <A HREF="#Centrino3945mac80211"><I>section
+4.9</I></A>). This new driver currently does not have the same level
+of features and stability as the SoftMAC driver. This alternate
+version is currently only available in the wireless-dev GIT
+repository.
+
+<A NAME="RealTek80211g">
+<H2>4.16	Realtek RTL8185L & RTL8187L (802.11g)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>Experimental
+</TR><TR valign="top">
+<TD>Driver name&nbsp;:
+<TD>PCI&nbsp;: r8180.o
+<br>USB&nbsp;: r8187.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>0.22
+</TR><TR valign="top">
+<TD>Where&nbsp;:
+<TD><A HREF="http://rtl-wifi.sourceforge.net/">
+http://rtl-wifi.sourceforge.net/</A>
+<br><A HREF="http://rtl8180-sa2400.sourceforge.net/">
+http://rtl8180-sa2400.sourceforge.net/</A>
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>Andrea Merello &lt;andreamrl *at* tiscali.it&gt;
+<br>Hauke Mehrtens &lt;hauke&#064;hauke-m.de&gt;
+</TR><TR>
+<TD>Discussion forums&nbsp;:
+<TD><A HREF="https://sourceforge.net/forum/?group_id=186406">
+https://sourceforge.net/forum/?group_id=186406</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme files
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11b, 802.11g, 802.11a depending on hardware
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>SMP
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.realtek.com.tw/">http://www.realtek.com.tw/</A>
+</TR>
+</TABLE>
+
+<H3>4.16.1	 The device</H3>
+
+Like all the other 802.11b chipset manufacturer, Realtek introduced a
+new 802.11g chipset based on their earlier design, the RTL8180L (see
+<A HREF="Linux.Wireless.drivers.802.11b.html#Realtek"><I>section
+3.25</I></A>). It mostly adds support for the OFDM bit rates (up to 54
+Mb/s), and some version also support 802.11a. The <B>RTL8185L</B> has
+a PCI/Cardbus interface, whereas the <B>RTL8187L</B> has a USB 2.0
+interface. Realtek offers a proprietary turbo mode with 72 Mb/s, but
+other chipsets do as well (see <A HREF="#Ralink2500"><I>section
+4.11</I></A>).
+
+<H3>4.16.2	 The driver</H3>
+
+With those new chipsets, <I>Realtek</I> changed their driver
+strategy. Instead of releasing a binary driver (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#Realtek"><I>section
+3.25</I></A>), they decided to team up with <I>Andrea</I> who produced
+the GPL driver for their previous chipset (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#RealtekGPL"><I>section
+3.26</I></A>). They sent him a few reference design cards (prototypes)
+and specifications to help him.
+<p>
+<I>Andrea</I> has added preliminary support for those cards in the new
+branch of the RTL8180L driver, called <B>rtl8180-sa2400</B>. He also
+created a driver for the USB dongle called <B>rtl8187-dev</B>. Those
+branches are using their own 802.11 code.
+<p>
+To gain robust 802.11 support, he decided to create a new versions of
+the driver based on the <B>Intel ieee80211 stack</B> from the Centrino
+driver (see <A
+HREF="Linux.Wireless.drivers.802.11b.html#Centrino"><I>section
+3.28</I></A>), those branches are called respectively
+<B>rtl818x-newstack</B> and <B>rtl8187-newstack</B>.
+<p>
+Mid 2005, <I>Andrea</I> stopped this work, leaving his work on the new
+branches unfinished, and later started helping the mac80211 driver
+(see <A HREF="#RealTekMac80211"><I>section 4.17</I></A>). Beginning
+2007, a group of users led by <I>Hauke</I> restarted working on the
+driver, with a new project page and new repository. Their main work so
+far has been updating the driver to work with the latest kernel.
+
+<A NAME="RealTekMac80211">
+<H2>4.17	Realtek RTL8187L mac80211 driver</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>Experimental
+</TR><TR valign="top">
+<TD>Driver name&nbsp;:
+<TD>rtl8187.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Where&nbsp;:
+<TD>Linux kernel (2.6.23)
+</TR><TR valign="top">
+<TD>Maintainers&nbsp;:
+<TD>Michael Wu &lt;flamingice&#064;sourmilk.net&gt;
+<br>Andrea Merello &lt;andreamrl *at* tiscali.it&gt;
+</TR><TR>
+<TD>Discussion forums&nbsp;:
+<TD><A HREF="https://sourceforge.net/forum/?group_id=186406">
+https://sourceforge.net/forum/?group_id=186406</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP, 802.1x, WPA
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11b, 802.11g, 802.11a depending on hardware
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>SMP
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.realtek.com.tw/">http://www.realtek.com.tw/</A>
+</TR>
+</TABLE>
+
+<H3>4.17.1	 The device</H3>
+
+This is the same device as the previous entry (<A
+HREF="#RealTek80211g"><I>section 4.16</I></A>).
+
+<H3>4.17.2	 The driver</H3>
+
+<I>Michael</I> and <I>Andrea</I> decided to port the USB driver
+written by Andrea (see <A HREF="#RealTek80211g"><I>section
+4.16</I></A>) to new <B>mac80211</B> kernel stack (see <A
+HREF="#Centrino3945mac80211"><I>section 4.9</I></A>). <I>Michael</I>
+did most of the work, with <I>Andrea</I> helping with the tricky parts
+about the hardware.
+<p>
+This driver was included in the Linux kernel 2.6.23. It will be the
+first driver included in the kernel to use the new mac80211 kernel
+stack, and as such it may be a bit rough for a while. Because it uses
+the <B>mac80211</B> stack, the driver offer a wide array of features,
+such as monitor mode, WPA and virtual interfaces, and as mac80211
+evolves this set of features should increases.
+
+<A NAME="Libertas">
+<H2>4.18	Marvel Libertas (802.11g)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>Stable
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>libertas.o
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Where&nbsp;:
+<TD>Linux kernel (2.6.22)
+</TR><TR>
+<TD>Maintainers&nbsp;:
+<TD>Dan Williams &lt;dcbw&#064;redhat.com&gt;
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD><A HREF="http://lists.infradead.org/mailman/listinfo/libertas-dev">
+http://lists.infradead.org/mailman/listinfo/libertas-dev</A>
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>Readme files
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>Wireless Extensions and debugfs
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>Managed, Ad-Hoc, Mesh
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>WEP, 802.1x, WPA
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>Wireless Extensions
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>Yes
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>?
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>802.11b and 802.11g
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>Firmware loading via HotPlug, 802.11e (QoS)
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>?
+</TR><TR>
+<TD>License&nbsp;:
+<TD>GPL
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.marvell.com/">http://www.marvell.com/</A>
+</TR>
+</TABLE>
+
+<H3>4.18.1	 The device</H3>
+
+Marvell is a networking company mostly based in the Silicon Valley,
+they design various networking and storage chips. When Marvell decided
+to release a 802.11 product, the market was already very
+crowded. Obviously, they would have to include all the features of the
+latest standard, but they would also need a few differentiators.
+<p>
+The Libertas chipset was designed mostly for the <B>embedded</B>
+market and access point market. Embedded devices don't have much
+resources, and use all kind of weird software platforms, therefore
+Marvell decided to push as much functionality as possible in the chip,
+so that interfacing to the chip and writing driver would be simplified
+and use less resources. The Libertas chipset includes an ARM core and
+the whole 802.11 stack, including management and security, runs on
+that core. This is very similar to the architecture of early 802.11b
+chipsets (FullMAC).
+<p>
+The Libertas chipset has all the features of a modern 802.11g chipset,
+such as security (802.1x, WPA) and QoS (802.11e). Libertas also added
+proprietary extensions to increase bitrate and range.
+<p>
+One of the interesting thing of the architecture of this chipset is
+that some additional code can be run on the ARM core. For example, in
+the case of the Access Point version of this chipset, all the access
+point functionality is running on the ARM core and the chip doesn't
+need an external CPU. The One Laptop Per Child project contracted
+CozyBit to develop a <B>proprietary mesh</B> functionality running
+inside the Libertas chipset. The advantage of such an implementation
+is that packet in the mesh can be forwarded without having to wake up
+and go through the CPU.
+
+<H3>4.18.2	 The driver</H3>
+
+The <B>One Laptop Per Child</B> (OLPC) project wanted integrate
+wireless mesh capability into their devices. Their desire was to be
+able to off-load the mesh functionality to the chipset, to save
+battery power, however nearly all modern 802.11 design are softmac, a
+simple hardware with all the 802.11 intelligence in the driver. One of
+the few candidate was the Marvell Libertas, however there was no Linux
+driver and Marvell was restrictive about sharing information. The OLPC
+project convinced Marvell to allow them to write a Linux driver and
+release it.
+<p>
+The driver was written for OLPC by Red-Hat, lead by <I>Dan</I> (who
+also wrote NetworkManager). The driver does not use any 802.11 stack,
+because such functionality is implemented in the firmware, and it
+offers all modern functionality such as Scanning and WPA support. The
+Linux driver also supports the <B>proprietary mesh</B> functionality
+when using the appropriate firmware. The driver has been developped
+and tested in the OLPC source tree for a long time, and after various
+changes required for kernel inclusion, it was eventually included in
+kernel 2.6.22.
+
+<A NAME="AirgoNetworks">
+<H2>4.19	AirgoNetworks AGNX00 (TrueMIMO)</H2>
+</A>
+
+<TABLE>
+<TR>
+<TD>Driver status&nbsp;:
+<TD>None yet
+</TR><TR>
+<TD>Driver name&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Version&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Where&nbsp;:
+<TD>http://airgo.wdwconsulting.net/mymoin
+</TR><TR>
+<TD>Maintainers&nbsp;:
+<TD>Jeff Williams &lt;jeff AT SPAMFREE esawireless DOT com&gt;
+</TR><TR>
+<TD>Mailing list&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Documentation&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Configuration&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Statistics&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Modes&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Security&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Scanning&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Monitor&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Multi-devices&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Interoperability&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Other features&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Non implemented&nbsp;:
+<TD>-
+</TR><TR>
+<TD>Bugs&nbsp;:
+<TD>-
+</TR><TR>
+<TD>License&nbsp;:
+<TD>-
+</TR><TR valign="top">
+<TD>Vendor web page&nbsp;:
+<TD><A HREF="http://www.airgonetworks.com/">http://www.airgonetworks.com/</A>
+<br><A HREF="http://www.cdmatech.com/products/wlan.jsp">
+http://www.cdmatech.com/products/wlan.jsp</A>
+</TR>
+</TABLE>
+
+<H3>4.19.1	 The device</H3>
+
+AirgoNetworks was a small startup based in the Silicon Valley, and one
+of the pioneers in MIMO designs. AirgoNetworks decided to apply their
+expertise of MIMO to the successful 802.11 standard, and released in
+2003 some 802.11g products with a proprietary MIMO extension. Their
+MIMO extension is branded <B>TrueMIMO</B> and initially delivered
+bitrate of 108&nbsp;Mb/s, further version increased it to
+240&nbsp;Mb/s.
+<p>
+MIMO uses multiple antennas in the radio transmitter and in the
+receiver to exploit the physical diversity of the channel, especially
+indoor where you typically have multipath. The radio path between each
+pair or transmitting and receiving antenna is different, and therefore
+using clever techniques on both sides, it is possible for the receiver
+system to properly decode multiple simultaneous transmissions from the
+transmitter system. Using MIMO, it is possible to increase bandwidth
+by sending multiple data streams in parallel, the bandwidth increase
+depends on the number of antenna used. By using more robust encoding,
+it is also possible to increase range (at lower speed).
+<p>
+Shorty after the release of AirgoNetwork products, the IEEE 802.11
+committee decided to create the new <B>802.11n</B> standard, a 802.11
+standard using MIMO technology. The new 802.11n standard was not
+planned to be compatible with TrueMIMO, and as of 2007 has not been
+yet finalised. Because there is not standard yet, any devices that is
+compliant with the evolving 802.11n draft is called pre-802.11n, and
+as the draft evolves future compatibility is unknown.
+<p>
+The strategy of AirgoNetworks was quite successful, and the vast
+majority of the early and non pre-802.11n devices were based on their
+chipset. However, the other major 802.11 vendor reacted quickly, first
+by releasing their own proprietary MIMO chipset, and then by releasing
+pre-802.11n products. The 802.11n standard is now gaining momentum,
+therefore the newer chipsets of AirgoNetworks are compliant with the
+802.11n draft, with bitrate up to 315 Mb/s.
+<p>
+AirgoNetworks was acquired by <B>Qualcom</B>, most likely because of
+its patent portfolio on MIMO technology. Qualcom sells the former
+AirgoNetworks chipset under a new name but with the same TrueMIMO
+branding.
+
+<H3>4.19.2	 The driver</H3>
+
+Like a lot of 802.11 vendors, AirgoNetworks does not want to release
+any driver of specification to the Linux community, even though they
+have internally a Linux driver (used on their Access Point platform).
+<p>
+<I>Jeff Williams</I> started reverse engineering the binary Linux
+driver of AirgoNetworks, and documented the interface for the AGN100
+and AGN300 chipsets. <I>Jeff</I> previously led the reverse
+engineering on the TI ACX driver (see <A HREF="#acx100"><I>section
+4.1</I></A>), and because of the problems with the ACX driver, he is
+using the methodology of the team who wrote the Broadcom Linux driver
+(see <A HREF="#Broadcom"><I>section 4.13</I></A>)&nbsp;: he is not
+implementing any driver and only publishing the specification of the
+chipsets.
+<p>
+Currently there is no Linux driver available, but hopefully some
+people will use the work of <I>Jeff</I> to produce a Linux driver.
+
+<p ALIGN=right>
+<A HREF="Linux.Wireless.drivers.other.html"><I>next</I></A>
+<HR>
+<CENTER><TABLE BORDER=0 CELLPADDING=0><TR><TD valign="top" align="center">
+<ADDRESS>
+<A HREF="Wireless.html">Linux Wireless LAN Howto</A> -
+jt&#064;hpl.hp.com
+<br>Converted to html from Frame Maker - 16 september 97
+<br>Updated 25 July 07
+<br>Copyright &#169; 1996-2007 Jean Tourrilhes
+</ADDRESS>
+</TD><TD>
+&nbsp;&nbsp;&nbsp;
+</TD><TD valign="top" align="center">
+Project hosted and sponsored by :
+<br>
+<A HREF="http://www.hpl.hp.com"><IMG SRC="../hplogo.png" HEIGHT=34
+WIDTH=141 ALT="HP home page"></A>
+</TD></TR></TABLE></CENTER>
+
+<!-- Keep Webmaster happy -->
+<script type="text/javascript" language="JavaScript">
+var s_prop7="us"
+var s_prop8="eng"
+var s_prop9="corp"
+var s_prop10="us|eng|corp"
+var s_prop13="hphqglobal,hphqwwhplabs"
+</script>
+
+<!-- Begin METRICS JavaScript -->
+<!-- <script type="text/javascript" language="JavaScript"
+src="http://welcome.hp-ww.com/country/us/eng/js/metrics.js"></script> -->
+<script type="text/javascript" language="JavaScript"
+src="http://www.hpl.hp.com/dev/hplabsmetrics.js"></script>
+<!-- End METRICS JavaScript -->
+
+</BODY>
+</HTML>

@@ -1,0 +1,230 @@
+diff -u -p linux/drivers/net/wireless.we16/airo.c linux/drivers/net/wireless/airo.c
+--- linux/drivers/net/wireless.we16/airo.c	Mon Jun 28 16:32:46 2004
++++ linux/drivers/net/wireless/airo.c	Mon Jun 28 16:35:55 2004
+@@ -1188,6 +1188,7 @@ struct airo_info {
+ 	struct iw_statistics	wstats;		// wireless stats
+ 	unsigned long		scan_timestamp;	/* Time started to scan */
+ 	struct iw_spy_data	spy_data;
++	struct iw_public_data	wireless_data;
+ #endif /* WIRELESS_EXT */
+ #ifdef MICSUPPORT
+ 	/* MIC stuff */
+@@ -2625,7 +2626,6 @@ static void wifi_setup(struct net_device
+ 	dev->set_mac_address = &airo_set_mac_address;
+ 	dev->do_ioctl = &airo_ioctl;
+ #ifdef WIRELESS_EXT
+-	dev->get_wireless_stats = airo_get_wireless_stats;
+ 	dev->wireless_handlers = (struct iw_handler_def *)&airo_handler_def;
+ #endif /* WIRELESS_EXT */
+ 	dev->change_mtu = &airo_change_mtu;
+@@ -2653,6 +2653,9 @@ static struct net_device *init_wifidev(s
+ 	dev->priv = ethdev->priv;
+ 	dev->irq = ethdev->irq;
+ 	dev->base_addr = ethdev->base_addr;
++#ifdef WIRELESS_EXT
++	dev->wireless_data = ethdev->wireless_data;
++#endif /* WIRELESS_EXT */
+ 	memcpy(dev->dev_addr, ethdev->dev_addr, dev->addr_len);
+ 	err = register_netdev(dev);
+ 	if (err<0) {
+@@ -2732,8 +2735,9 @@ struct net_device *_init_airo_card( unsi
+ 	dev->set_mac_address = &airo_set_mac_address;
+ 	dev->do_ioctl = &airo_ioctl;
+ #ifdef WIRELESS_EXT
+-	dev->get_wireless_stats = airo_get_wireless_stats;
+ 	dev->wireless_handlers = (struct iw_handler_def *)&airo_handler_def;
++	ai->wireless_data.spy_data = &ai->spy_data;
++	dev->wireless_data = &ai->wireless_data;
+ #endif /* WIRELESS_EXT */
+ 	dev->change_mtu = &airo_change_mtu;
+ 	dev->open = &airo_open;
+@@ -3215,7 +3219,7 @@ badrx:
+ 					goto exitrx;
+ 				}
+ 			}
+-#ifdef IW_WIRELESS_SPY		/* defined in iw_handler.h */
++#ifdef WIRELESS_SPY
+ 			if (apriv->spy_data.spy_number > 0) {
+ 				char *sa;
+ 				struct iw_quality wstats;
+@@ -3235,7 +3239,7 @@ badrx:
+ 				/* Update spy records */
+ 				wireless_spy_update(dev, sa, &wstats);
+ 			}
+-#endif /* IW_WIRELESS_SPY */
++#endif /* WIRELESS_SPY */
+ 			OUT4500( apriv, EVACK, EV_RX);
+ 
+ 			if (test_bit(FLAG_802_11, &apriv->flags)) {
+@@ -3465,7 +3469,7 @@ badmic:
+ #else
+ 		memcpy(buffer, ai->rxfids[0].virtual_host_addr, len);
+ #endif
+-#ifdef IW_WIRELESS_SPY		/* defined in iw_handler.h */
++#ifdef WIRELESS_SPY
+ 		if (ai->spy_data.spy_number > 0) {
+ 			char *sa;
+ 			struct iw_quality wstats;
+@@ -3477,7 +3481,7 @@ badmic:
+ 			/* Update spy records */
+ 			wireless_spy_update(ai->dev, sa, &wstats);
+ 		}
+-#endif /* IW_WIRELESS_SPY */
++#endif /* WIRELESS_SPY */
+ 
+ 		skb->dev = ai->dev;
+ 		skb->ip_summed = CHECKSUM_NONE;
+@@ -6502,6 +6506,13 @@ static int airo_get_range(struct net_dev
+ 		range->avg_qual.level = 176;	/* -80 dBm */
+ 	range->avg_qual.noise = 0;
+ 
++	/* Event capability (kernel + driver) */
++	range->event_capa[0] = (IW_EVENT_CAPA_K_0 |
++				IW_EVENT_CAPA_MASK(SIOCGIWTHRSPY) |
++				IW_EVENT_CAPA_MASK(SIOCGIWAP) |
++				IW_EVENT_CAPA_MASK(SIOCGIWSCAN));
++	range->event_capa[1] = IW_EVENT_CAPA_K_1;
++	range->event_capa[4] = IW_EVENT_CAPA_MASK(IWEVTXDROP);
+ 	return 0;
+ }
+ 
+@@ -6869,9 +6880,15 @@ static int airo_get_scan(struct net_devi
+ 	while((!rc) && (BSSList.index != 0xffff)) {
+ 		/* Translate to WE format this entry */
+ 		current_ev = airo_translate_scan(dev, current_ev,
+-						 extra + IW_SCAN_MAX_DATA,
++						 extra + dwrq->length,
+ 						 &BSSList);
+ 
++		/* Check if there is space for one more entry */
++		if((extra + dwrq->length - current_ev) <= IW_EV_ADDR_LEN) {
++			/* Ask user space to try again with a bigger buffer */
++			return -E2BIG;
++		}
++
+ 		/* Read next entry */
+ 		rc = PC4500_readrid(ai, RID_BSSLISTNEXT,
+ 				    &BSSList, sizeof(BSSList), 1);
+@@ -7010,9 +7027,7 @@ static const struct iw_handler_def	airo_
+ 	.standard	= (iw_handler *) airo_handler,
+ 	.private	= (iw_handler *) airo_private_handler,
+ 	.private_args	= (struct iw_priv_args *) airo_private_args,
+-	.spy_offset	= ((void *) (&((struct airo_info *) NULL)->spy_data) -
+-			   (void *) NULL),
+-
++	.get_wireless_stats = airo_get_wireless_stats,
+ };
+ 
+ #endif /* WIRELESS_EXT */
+diff -u -p linux/drivers/net/wireless.we16/wavelan.c linux/drivers/net/wireless/wavelan.c
+--- linux/drivers/net/wireless.we16/wavelan.c	Thu Jun 24 12:02:32 2004
++++ linux/drivers/net/wireless/wavelan.c	Mon Jun 28 16:35:55 2004
+@@ -2172,6 +2172,11 @@ static int wavelan_get_range(struct net_
+ 	range->num_bitrates = 1;
+ 	range->bitrate[0] = 2000000;	/* 2 Mb/s */
+ 
++	/* Event capability (kernel + driver) */
++	range->event_capa[0] = (IW_EVENT_CAPA_MASK(0x8B02) |
++				IW_EVENT_CAPA_MASK(0x8B04));
++	range->event_capa[1] = IW_EVENT_CAPA_K_1;
++
+ 	/* Disable interrupts and save flags. */
+ 	spin_lock_irqsave(&lp->spinlock, flags);
+ 	
+@@ -2406,8 +2411,7 @@ static const struct iw_handler_def	wavel
+ 	.standard	= (iw_handler *) wavelan_handler,
+ 	.private	= (iw_handler *) wavelan_private_handler,
+ 	.private_args	= (struct iw_priv_args *) wavelan_private_args,
+-	.spy_offset	= ((void *) (&((net_local *) NULL)->spy_data) -
+-			   (void *) NULL),
++	.get_wireless_stats = wavelan_get_wireless_stats,
+ };
+ 
+ /*------------------------------------------------------------------*/
+@@ -4190,8 +4194,9 @@ static int __init wavelan_config(struct 
+ #endif				/* SET_MAC_ADDRESS */
+ 
+ #ifdef WIRELESS_EXT		/* if wireless extension exists in the kernel */
+-	dev->get_wireless_stats = wavelan_get_wireless_stats;
+ 	dev->wireless_handlers = (struct iw_handler_def *)&wavelan_handler_def;
++	lp->wireless_data.spy_data = &lp->spy_data;
++	dev->wireless_data = &lp->wireless_data;
+ #endif
+ 
+ 	dev->mtu = WAVELAN_MTU;
+diff -u -p linux/drivers/net/wireless.we16/wavelan.p.h linux/drivers/net/wireless/wavelan.p.h
+--- linux/drivers/net/wireless.we16/wavelan.p.h	Thu Jun 24 12:02:32 2004
++++ linux/drivers/net/wireless/wavelan.p.h	Mon Jun 28 16:35:55 2004
+@@ -510,6 +510,7 @@ struct net_local
+   iw_stats	wstats;		/* Wireless-specific statistics */
+ 
+   struct iw_spy_data	spy_data;
++  struct iw_public_data	wireless_data;
+ #endif
+ 
+ #ifdef HISTOGRAM
+@@ -614,6 +615,8 @@ static inline void
+ /* ------------------- IOCTL, STATS & RECONFIG ------------------- */
+ static en_stats	*
+ 	wavelan_get_stats(struct net_device *);	/* Give stats /proc/net/dev */
++static iw_stats *
++	wavelan_get_wireless_stats(struct net_device *);
+ static void
+ 	wavelan_set_multicast_list(struct net_device *);
+ /* ----------------------- PACKET RECEPTION ----------------------- */
+diff -u -p linux/drivers/net/wireless.we16/wavelan_cs.c linux/drivers/net/wireless/wavelan_cs.c
+--- linux/drivers/net/wireless.we16/wavelan_cs.c	Thu Jun 24 12:02:32 2004
++++ linux/drivers/net/wireless/wavelan_cs.c	Mon Jun 28 16:35:55 2004
+@@ -2438,6 +2438,12 @@ static int wavelan_get_range(struct net_
+ 	range->num_bitrates = 1;
+ 	range->bitrate[0] = 2000000;	/* 2 Mb/s */
+ 
++	/* Event capability (kernel + driver) */
++	range->event_capa[0] = (IW_EVENT_CAPA_MASK(0x8B02) |
++				IW_EVENT_CAPA_MASK(0x8B04) |
++				IW_EVENT_CAPA_MASK(0x8B06));
++	range->event_capa[1] = IW_EVENT_CAPA_K_1;
++
+ 	/* Disable interrupts and save flags. */
+ 	spin_lock_irqsave(&lp->spinlock, flags);
+ 	
+@@ -2740,8 +2746,7 @@ static const struct iw_handler_def	wavel
+ 	.standard	= (iw_handler *) wavelan_handler,
+ 	.private	= (iw_handler *) wavelan_private_handler,
+ 	.private_args	= (struct iw_priv_args *) wavelan_private_args,
+-	.spy_offset	= ((void *) (&((net_local *) NULL)->spy_data) -
+-			   (void *) NULL),
++	.get_wireless_stats = wavelan_get_wireless_stats,
+ };
+ 
+ /*------------------------------------------------------------------*/
+@@ -4722,7 +4727,8 @@ wavelan_attach(void)
+ #ifdef WIRELESS_EXT	/* If wireless extension exist in the kernel */
+   dev->wireless_handlers = (struct iw_handler_def *)&wavelan_handler_def;
+   dev->do_ioctl = wavelan_ioctl;	/* old wireless extensions */
+-  dev->get_wireless_stats = wavelan_get_wireless_stats;
++  lp->wireless_data.spy_data = &lp->spy_data;
++  dev->wireless_data = &lp->wireless_data;
+ #endif
+ 
+   /* Other specific data */
+diff -u -p linux/drivers/net/wireless.we16/wavelan_cs.p.h linux/drivers/net/wireless/wavelan_cs.p.h
+--- linux/drivers/net/wireless.we16/wavelan_cs.p.h	Thu Jun 24 12:02:32 2004
++++ linux/drivers/net/wireless/wavelan_cs.p.h	Mon Jun 28 16:35:55 2004
+@@ -629,6 +629,7 @@ struct net_local
+   iw_stats	wstats;		/* Wireless specific stats */
+ 
+   struct iw_spy_data	spy_data;
++  struct iw_public_data	wireless_data;
+ #endif
+ 
+ #ifdef HISTOGRAM
+@@ -725,6 +726,8 @@ static inline void
+ /* ------------------- IOCTL, STATS & RECONFIG ------------------- */
+ static en_stats	*
+ 	wavelan_get_stats(struct net_device *);	/* Give stats /proc/net/dev */
++static iw_stats *
++	wavelan_get_wireless_stats(struct net_device *);
+ /* ----------------------- PACKET RECEPTION ----------------------- */
+ static inline int
+ 	wv_start_of_frame(struct net_device *,	/* Seek beggining of current frame */

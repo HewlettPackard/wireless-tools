@@ -1,0 +1,864 @@
+<HTML>
+<HEAD>
+<TITLE>Wireless Overview - The MAC level</TITLE>
+<LINK rel="Next"  href="Linux.Wireless.std.html" title="Standards">
+<LINK rel="Prev"  href="Linux.Wireless.modem.html" title="The radio modem">
+<LINK rel="First" href="Linux.Wireless.intro.html" title="Introduction">
+<LINK rel="Last"  href="Linux.Wireless.std.html" title="Standards">
+<LINK rel="Up"    href="Wireless.html" title="Linux Wireless LAN Howto">
+
+<LINK rel="Contents" href="Linux.Wireless.Overview.html" title="Technology
+overview">
+<LINK rel="section" href="#mac" title="Main channel access mechanisms">
+<LINK rel="section" href="#tdma" title="MAC - TDMA">
+<LINK rel="section" href="#csma" title="MAC - CSMA">
+<LINK rel="section" href="#polling" title="MAC - Polling">
+<LINK rel="section" href="#watm" title="MAC - Reservation">
+<LINK rel="section" href="#techniques" title="Some MAC techniques">
+<LINK rel="section" href="#retry" title="Techniques - Retransmissions">
+<LINK rel="section" href="#frags" title="Techniques - Fragmentation">
+<LINK rel="section" href="#rts" title="Techniques - RTS/CTS">
+<LINK rel="section" href="#rslot" title="Techniques - Reservation slot">
+<LINK rel="section" href="#topology" title="Network topology">
+<LINK rel="section" href="#adhoc" title="Topology - Ad-hoc network">
+<LINK rel="section" href="#ap" title="Topology - Access Points and Roaming">
+<LINK rel="section" href="#forwarding" title="Topology - MAC forwarding">
+<LINK rel="section" href="#throughput" title="Some throughput considerations">
+<LINK rel="section" href="#bitrate" title="Throughput - Bit-rate vs
+throughput">
+<LINK rel="section" href="#multirate" title="Throughput - Multirate">
+<LINK rel="section" href="#shared" title="Throughput - Shared throughput">
+<LINK rel="section" href="#contention" title="Throughput - Contention and
+congestion">
+<LINK rel="section" href="#tcp" title="Throughput - TCP and packet losses">
+<LINK rel="section" href="#aggregate" title="Throughput - Aggregate
+throughput">
+</HEAD>
+
+<BODY>
+
+<H2>5	The MAC level (link layer)</H2>
+
+This section of the document focus on the next layer up, the link
+layer. This mostly comprise the <B>MAC</B> (Medium Access Control)
+protocol. Different MAC protocols and techniques are presented.
+
+<A NAME="mac">
+<H3>5.1	Main channel access mechanisms</H3>
+</A>
+
+The main job of the MAC protocol is to regulate the usage of the
+medium, and this is done through a channel access mechanism. A
+<B>channel access mechanism</B> is a way to divide the main resource
+between nodes, the radio channel, by regulating the use of it. It
+tells each node when it can transmit and when it is expected to
+receive data. The channel access mechanism is the core of the <I>MAC
+protocol</I>. In this section, we describe <I>TDMA, CSMA</I> and
+<I>polling</I> which are the 3 main classes of channel access
+mechanisms for radio.
+
+
+<A NAME="tdma">
+<H4>5.1.1	TDMA</H4>
+</A>
+
+In this chapter, we discuss TDMA as a channel access mechanism and not
+its applications and protocols based on it.
+<p>
+<B>TDMA</B> (Time Division Multiplex Access) is very simple. A
+specific node, the <B>base station</B>, has the responsibility to
+coordinate the nodes of the network. The time on the channel is
+divided into <I>time slots</I>, which are generally of fixed
+size. Each node of the network is allocated a certain number of slots
+where it can transmit. Slots are usually organised in a frame, which
+is repeated on a regular basis.
+<p>
+The base station specify in the beacon (a management frame) the
+organisation of the frame. Each node just needs to follow blindly the
+instruction of the base station. Very often, the frame is organised as
+downlink (base station to node) and uplink (node to base station)
+slots, and all the communications goes through the base station. A
+service slot allows a node to request the allocation of a connection,
+by sending a connection request message in it (see <A
+HREF="Linux.Wireless.mac.html#rslot"><I>chapter&nbsp;5.2.4</I></A>). In
+some standards, uplink and downlink frames are one different
+frequencies, and the service slots might also be a separate channel.
+<p>
+
+<CENTER><I>TDMA channel access mechanism&nbsp;:</I>
+<p>
+<IMG SRC="TDMA.png" ALT="TDMA graphical figure"></CENTER>
+
+<p>
+TDMA suits very well phone applications, because those application
+have very predictable needs (fixed and identical bit rate). Each
+handset is allocated a downlink and a uplink slot of a fixed size (the
+size of the voice data for the duration of the frame). This is no
+surprise why TDMA is used into all cellular phone standards (GSM in
+Europe, TDMA and PCS in the USA) and cordless phone standards (DECT in
+Europe). TDMA is also very good to achieve low latency and guarantee
+of bandwidth (where CSMA/CA is quite bad).
+<p>
+TDMA is not well suited for data networking applications, because it
+is very strict and inflexible. IP is connectionless and generates
+bursty traffic which is very unpredictable by nature, while TDMA is
+connection oriented (so it has to suffer the overhead of creating
+connections for single IP packets). TDMA use fixed size packets and
+usually symmetrical link, which doesn't suit IP that well (variable
+size packets).
+<p>
+TDMA is very much dependant of the quality of the frequency band. In a
+dedicated clean band, as it is the case for cellular phone standard,
+TDMA is fine. But, because of it's inflexibility, and because it
+doesn't really take care of what's happening on the channel, TDMA
+can't cope and adapt to the bursty interference sources found in the
+unlicensed bands (unless a retry mechanism is put on top of it).
+
+<A NAME="csma">
+<H4>5.1.2	CSMA/CA</H4>
+</A>
+
+<B>CSMA/CA</B> (Carrier Sense Multiple Access/Collision Avoidance) is
+the <I>channel access</I> mechanism used by most wireless LANs in the
+ISM bands. A channel access mechanism is the part of the
+<I>protocol</I> which specifies how the node uses the medium&nbsp;:
+when to listen, when to transmit...
+<p>
+The basic principles of CSMA/CA are <I>listen before talk</I> and
+<I>contention</I>. This is an <I>asynchronous</I> message passing
+mechanism (connectionless), delivering a best effort service, but no
+bandwidth and latency guarantee (you are still following ?). It's main
+advantages are that it is suited for network protocols such as TCP/IP,
+adapts quite well with the variable condition of traffic and is quite
+robust against interferences.
+<p>
+CSMA/CA is fundamentally different from the channel access mechanism
+used by cellular phone systems (see <I>TDMA</I> in <A
+HREF="Linux.Wireless.mac.html#tdma"><I>chapter&nbsp;5.1.1</I></A>).
+<p>
+CSMA/CA is derived from CSMA/CD (Collision Detection), which is the
+base of <I>Ethernet</I>. The main difference is the <I>collision
+avoidance</I>&nbsp;: on a wire, the transceiver has the ability to
+listen while transmitting and so to detect collisions (with a wire all
+transmissions have approximately the same strength). But, even if a
+radio node could listen on the channel while transmitting, the
+strength of its own transmissions would mask all other signals on the
+air. So, the protocol can't directly detect collisions like with
+<I>Ethernet</I> and only tries to avoid them.
+<p>
+
+<CENTER><I>CSMA/CA channel Access Mechanisms&nbsp;:</I>
+<p>
+<IMG SRC="CSMA.png" ALT="CSMA graphical figure"></CENTER>
+
+<p>
+The protocol starts by listening on the channel (this is called
+<I>carrier sense</I>), and if it is found to be idle, it sends the
+first packet in the transmit queue. If it is busy (either another node
+transmission or interference), the node waits the end of the current
+transmission and then starts the <B>contention</B> (wait a random
+amount of time). When its contention timer expires, if the channel is
+still idle, the node sends the packet. The node having chosen the
+shortest contention delay wins and transmits its packet. The other
+nodes just wait for the next contention (at the end of this
+packet). Because the contention is a random number and done for every
+packets, each node is given an equal chance to access the channel (on
+average - it is statistic).
+<p>
+As we have mentioned, we can't detect collisions on the radio, and
+because the radio needs time to switch from receive to transmit, this
+contention is usually <B>slotted</B> (a transmission may start only at
+the beginning of a slot&nbsp;: 50 &micro;s in 802.11 FH and 20
+&micro;s in 802.11 DS). This makes the average contention delay
+larger, but reduces significantly the collisions (we can't totally
+avoid them).
+
+<A NAME="polling">
+<H4>5.1.3	Polling MAC</H4>
+</A>
+
+<B>Polling</B> is the third major channel access mechanism, after
+<I>TDMA</I> and <I>CSMA/CA </I>(see <A
+HREF="Linux.Wireless.mac.html#tdma"><I>chapter&nbsp;5.1.1</I></A> and
+<A HREF="Linux.Wireless.mac.html#csma"><I>chapter&nbsp;5.1.2</I></A>
+respectively - There exist also Token Ring, but I guess that nobody
+would be crazy enough to implement it on a radio link). The most
+successful networking standard using polling is 100vg (IEEE 802.12),
+but some wireless standard are also using it. For example,
+<I>802.11</I> offers a polling channel access mechanism (Point
+Coordination Function) in addition to the CSMA/CA one.
+<p>
+Polling is in fact in between TDMA and CSMA/CA. The base station
+retains total control over the channel, but the frame content is no
+more fixed, allowing variable size packets to be sent. The base
+station sends a specific packet (a poll packet) to trigger the
+transmission by the node. The node just wait to receive a poll packet,
+and upon reception sends what it has to transmit.
+<p>
+Polling can be implemented as a connection oriented service (very much
+like TDMA, but with higher flexibility in packet size) or connection
+less-service (asynchronous packet based). The base station can either
+poll permanently all the nodes of the network just to check if they
+have something to send (that is workable only with a very limited
+number of nodes), or the protocol use reservation slots (see <A
+HREF="Linux.Wireless.mac.html#rslot"><I>chapter&nbsp;5.2.4</I></A>)
+where each node can request a connection or to transmit a packet
+(depending is the MAC protocol is connection oriented or not).
+<p>
+
+<CENTER><I>Polling channel Access Mechanisms&nbsp;:</I>
+<p>
+<IMG SRC="Polling.png" ALT="Polling graphical figure"></CENTER>
+
+<p>
+
+In the case of 100vg, the polling mechanism doesn't use any bandwidth
+(it's done out of band through tones), leading to a very efficient use
+of the channel (over 96 % user throughput). For 802.11 and wireless
+LAN, all the polling packets have to be transmitted over the air,
+generating much more overhead. More recent system use reservation
+slots, which is more flexible but still require significant overhead.
+<p>
+As CSMA/CA offers ad-hoc networking (no need of a base station) and
+similar performance, it is usually preferred in most wireless
+LANs. For example, most 802.11 vendors prefer to use the distributed
+mode (CSMA/CA) over the coordinated mode (polling).
+
+<A NAME="watm">
+<H4>5.1.4	Reservation protocols and WATM</H4>
+</A>
+
+The most interesting feature of protocols based on TDMA or Polling
+mechanism is that the Base Station has absolute control of the traffic
+and can guarantee bandwidth and latency for applications that require
+it. Sceptics might wonder what can be guaranteed anyway in an
+environment open to interferers and without deployment control (see <A
+HREF="Linux.Wireless.modem.html#ism"><I>chapter&nbsp;4.1</I></A>), but
+that's another topic of discussions.
+<p>
+The guarantee of bandwidth is essential for people deploying Wireless
+Distributions Systems (also called Last Mile Delivery Systems), like
+replacing the cable between your house and your ISP with
+wireless. Those people want to be able to restrict and segregate users
+and guarantee fairness. Standards such as HiperLan II (Broadband Radio
+Access Network project - see <A
+HREF="Linux.Wireless.std.html#Hiperlan2"><I>chapter&nbsp;6.4</I></A>)
+is aiming at those usages.
+<p>
+The basic idea is to put ATM (Asynchronous Transfer Mode) over radio,
+as ATM implement all the Quality Of Service features that they are
+dreaming off. The network is centrally managed (so uses TDMA or
+Polling mechanism with reservation slots), the base station implement
+a call admission control (accept or reject new ATM circuits) and
+scheduler (prioritise and send ATM cells) to guarantee the quality of
+service requested. On top of the MAC, all the usual ATM layers are
+needed (virtual circuits, segmentation/reassembly, IP adaptation...),
+as well as some specific mobile features (to manage roaming).
+<p>
+Unfortunately, radio transmission has a lot of overhead (like large
+synchronisation field and headers) which is somewhat incompatible with
+the small ATM cells. The main benefit of ATM small cells is to allow
+very efficient switching, but this is not needed over radio. At the
+end of the day, WATM doesn't resemble at all to ATM ; ATM uses
+individual channel for each node and is asynchronous, whereas WATM
+uses a shared medium and is totally synchronous.
+
+<A NAME="techniques">
+<H3>5.2	MAC techniques</H3>
+</A>
+
+We have described the main principle of CSMA/CA (see <A
+HREF="Linux.Wireless.mac.html#csma"><I>chapter&nbsp;5.1.2</I></A>),
+but most MAC protocols use additional techniques to improve the
+performance of CSMA/CA.
+
+<A NAME="retry">
+<H4>5.2.1	MAC retransmissions</H4>
+</A>
+
+As we have seen in the previous chapter, the main problem of the
+<I>CSMA/CA protocol</I> is that the transmitter can't detect
+collisions on the medium. There is also a higher error rate on the air
+than on a wire (see <A HREF="Linux.Wireless.modem.html#noises"
+><I>chapter&nbsp;4.8</I></A>), so a higher chance of packets being
+corrupted. TCP doesn't like very much packet losses at the <I>MAC
+layer</I> (see TCP and packet losses problem - <A
+HREF="Linux.Wireless.mac.html#tcp"><I>chapter&nbsp;5.4.5</I></A>). Because
+of that, most MAC protocols also implement <B>positive
+acknowledgement</B> and <B>MAC level retransmissions</B> to avoid
+losing packets on the air.
+<p>
+The principle is quite simple&nbsp;: each time a node receives a
+packet, it sends back immediately a short message (an ack) to the
+transmitter to indicate that it has successfully received the packet
+without errors. If after sending a packet the transmitter doesn't
+receive an ack, it knows that the packet was lost, so it will
+retransmit the packet (after contending again for the medium, like in
+Ethernet).
+<p>
+Most MAC protocols use a stop and go mechanism, they transmit the next
+packet of the queue only if the current packet has been properly
+acknowledged (no sliding window mechanism like in TCP). The rationale
+is that it makes the protocol simpler, minimise latency and avoid
+desenquencing packets (something that TCP doesn't like as well).
+<p>
+
+<CENTER><I>MAC retransmissions in CSMA/CA&nbsp;:</I>
+<p>
+<IMG SRC="Retry.png" ALT="Retransmission graphical figure"></CENTER>
+
+<p>
+The acks are &quot;embedded&quot; in the MAC protocol, so they are
+guaranteed not to collide (the contention starts after the ack - see
+figure). These acks are very different from the TCP acks, which work
+at a different level (and on a different time frame). Of course,
+broadcast and multicast packets are not acknowledged, so they are more
+likely to fail...
+<p>
+If all modern Wireless LAN protocols implement this essential feature,
+some old products may lack it. Wireless WAN protocols (like satellite
+links) don't implement that either, because the round trip delay in
+their case is so long that by the time they would receive the ack they
+could have sent another packet. If your Wireless LAN doesn't implement
+MAC level retransmissions, all is not lost&nbsp;: students of Berkeley
+have created a protocol called <I>snoop</I> (see at <A
+HREF="ftp://daedalus.cs.berkeley.edu/pub/snoop/"
+>ftp://daedalus.cs.berkeley.edu/pub/snoop/</A>) which filters the TCP
+acks and retransmits the lost packets before TCP even notices that
+they are lost (this is still a link level retransmission, but done
+just over the MAC).
+
+<A NAME="frags">
+<H4>5.2.2	Fragmentation</H4>
+</A>
+
+The radio medium has a higher <I>error rate</I> than a wire. We have
+explained in the previous chapter&nbsp;that it was why most products
+were including MAC level retransmissions to avoid losing packets.
+<p>
+MAC level retransmissions solve this problem, but is not really
+performant. If the packet to transmit is long and contains only one
+error, the node needs to retransmit it entirely. If the error rate is
+significantly high, we could come to some situation were the
+probability of error in large packet is dangerously close to 1 (we
+can't fit a packet between the bursts of errors due to fading or
+interferers), so we can't get packet through.
+<p>
+This is why some products use <B>fragmentation</B>. Fragmentation is
+sending the big packets in small pieces over the medium. Of course,
+this adds some overhead, because it duplicates packet headers in every
+fragments. Each fragment is individually checked and retransmitted if
+necessary. The first advantage is that in case of error, the node
+needs only to retransmit one small fragment, so it is faster. The
+second advantage is that if the medium is very noisy, a small packet
+has a higher probability to get through without errors, so the node
+increases its chance of success in bad conditions.
+
+<A NAME="rts">
+<H4>5.2.3	RTS/CTS</H4>
+</A>
+
+In the chapter&nbsp;about range (<A
+HREF="Linux.Wireless.modem.html#range"><I>chapter&nbsp;4.6</I></A>),
+we have seen that the main effect of transmission on radio waves is
+the attenuation of the signal. Because of this attenuation, we have
+very commonly a problem of <I>hidden nodes</I>.
+<p>
+The hidden node problem comes from the fact that all nodes may not
+hear each other because the attenuation is too strong between
+them. Because transmissions are based on the carrier sense mechanism,
+those nodes ignore each other and may transmit at the same
+time. Usually, this is a good thing because it allows <I>frequency
+reuse</I> (they are effectively in different cells).
+<p>
+But, for a node placed in between, these simultaneous transmissions
+have a comparable strength and so collide (in its receiver). This node
+could be impossible to reach because of these collisions.
+<p>
+The fundamental problem with carrier sense only is that the
+transmitter tries to estimate if the channel is free at the receiver
+with only local information. The situation might be quite different
+between those two locations.
+<p>
+An simple and elegant solution to this problem (proposed by <A
+HREF="http://people.qualcomm.com/karn/">Phil Karn</A> in his MACA
+protocol for AX.25) is to use <B>RTS/CTS</B> (Request To Send/Clear To
+Send). RTS/CTS is a <I>handshaking</I>&nbsp;: before sending a packet,
+the transmitter sends a RTS and wait for a CTS from the receiver (see
+figure below). The reception of a CTS indicates that the receiver is
+able to receive the RTS, so the packet (the channel is clear in its
+area).
+<p>
+At the same time, every node in the range of the receiver hears the
+CTS (even if it doesn't hear the RTS), so understands that a
+transmission is going on. The nodes hearing the CTS are the nodes that
+could potentially create collisions in the receiver (assuming a
+symmetric channel). Because these nodes may not hear the data
+transmission, the RTS and CTS messages contain the size of the
+expected transmission (to know how long the transmission will
+last). This is the <I>collision avoidance</I> feature of the RTS/CTS
+mechanism (also called <I>virtual carrier sense</I>)&nbsp;: all nodes
+avoid accessing the channel after hearing the CTS even if their
+carrier sense indicate that the medium is free.
+<p>
+
+<CENTER><I>RTS/CTS and hidden nodes in CSMA/CA&nbsp;:</I>
+<p>
+<IMG SRC="RTS.png" ALT="RTS/CTS graphical figure"></CENTER>
+
+<p>
+RTS/CTS has another advantage&nbsp;: it lowers the overhead of a
+collision on the medium (collisions are much shorter in time). If two
+nodes attempt to transmit in the same slot of the contention window,
+their RTS collide and they don't receive any CTS, so they loose only a
+RTS, whereas in the normal scenario they would have lost a whole
+packet.
+<p>
+Because the RTS/CTS handshaking adds a significant overhead, usually
+it is not used for small packets or lightly loaded networks.
+
+<A NAME="rslot">
+<H4>5.2.4	Reservation and service slots</H4>
+</A>
+
+One of the main problem of TDMA and Polling protocol is for the base
+station to know when the nodes want to transmit. In CSMA/CA, each node
+simply waits to win a contention, so this problem doesn't
+exist. However, TDMA and Polling usually require a <B>service slot</B>
+or <B>reservation slot</B> mechanism.
+<p>
+The idea is to offer a period of time where nodes can contend
+(compete) and send to the base station some information about their
+traffic requirements (a reservation request packet), this period of
+time coming at regular interval (the remaining of the time, nodes just
+obey the base station normally). The base station feeds the
+reservation requests to its <I>scheduling algorithm</I> and decides
+the main frame structure (when each node will transmit). This period
+of time for sending reservation requests is either called service slot
+(if it is use for more purpose like cell location and roaming) or
+reservation slot (if it is use only to request a transmission or
+connection).
+<p>
+If the MAC is connection oriented, the rate of new connection is low,
+so usually a single service slot is enough (see figure in <A
+HREF="Linux.Wireless.mac.html#tdma"><I>chapter&nbsp;5.1.1</I></A>). If
+the MAC is packet oriented, the rate of requests is higher, so usually
+the protocol offer many reservation slots together (see <A
+HREF="Linux.Wireless.mac.html#polling"
+CLASS="XRef"><I>chapter&nbsp;5.1.3</I></A>). Nodes use a simple
+<I>Aloha protocol</I> in the slots&nbsp;: they transmit, and if it
+fail (collision with other requests or medium errors) they backoff a
+random number of slots before retrying.
+<p>
+Protocols which use many different channels, such as cellular phone,
+can even have a dedicated service channel separate from other
+transmissions, instead of multiplexing service requests with the data
+traffic.
+
+<A NAME="topology">
+<H3>5.3	Network topology</H3>
+</A>
+
+The topology of Wireless LAN is very different from traditional
+LANs. The connectivity is limited by the range, so we usually don't
+have complete coverage (some node may not see each other). This breaks
+some assumptions of higher layers. To overcome this, either the
+network is divided in cells managed by an <I>Access Point</I>, or the
+network use <I>MAC level forwarding</I>.
+
+<A NAME="adhoc">
+<H4>5.3.1	Ad-hoc network</H4>
+</A>
+
+Ad-hoc network is the simplest form of Wireless LAN is a network
+composed of a few nodes without any bridging or forwarding
+capability. All nodes are equal and may join or leave at any time, and
+have equal right to the medium. In fact, it's very much like an
+Ethernet, where you may add or remove node at discretion. This is the
+kind of radio networks deployed in homes of small offices.
+<p>
+Of course, for this to work all nodes must be able to see all the
+other nodes of the network, to be able to establish communication with
+them. When a nodes goes out of range, he just loose connection with
+the rest of the ad-hoc network. Effectively, this is a single cell
+network.
+<p>
+One of the node of the ad-hoc network may provide routing or proxying
+to communicate to the rest of the work, but nodes are still confined
+to the area within that cell.
+
+<A NAME="ap">
+<H4>5.3.2	Access Points and Roaming</H4>
+</A>
+
+Wireless networks are sometime isolated networks (called ad-hoc), but
+most of the time they need to be connected to the rest of the world
+(and the Internet&nbsp;:-). This is usually done through <B>Access
+Points</B>.
+<p>
+In fact, an Access Point is simply a <B>bridge</B>, connected on one
+side to the radio network and on the other side to <I>Ethernet</I>
+(usually), forwarding packets between the two networks. A bridge works
+at the MAC level, just looking through the MAC headers to make its
+decisions (filtering) and changing MAC headers according to the MAC
+protocol used. This means that <I>NetBeui</I> and <I>IPX</I> work
+across the access point, and that the nodes connected to the radio
+must use the same <I>TCP/IP subnet</I> as the Ethernet segment the
+access point is connected to.
+<p>
+Because of the interactions with MAC level acknowledgement, most of
+the time bridging on Wireless LAN is not as simple and transparent as
+on Ethernet, and a specific scheme is designed in the MAC
+protocol. When a node sends a packet, the source address must be his
+to properly receive the MAC level ack coming back (and vice versa). In
+theory, if the MAC and the driver are carefully implemented it could
+be possible to support transparently Ethernet bridges (like in a Linux
+box), but most manufacturers don't bother (especially that they want
+you to buy an Access Point).
+<p>
+Using Access Points allows to divide the network in <B>cells</B>. Each
+Access Point is at the centre of a cell and is given a different
+channel (frequency, hopping pattern... - the goal is for each cell to
+interferer the least with the others). By careful deployment of those
+Access Point, it is possible to give network access in all parts of
+large areas.
+<p>
+In fact, most radio access points provide more than this simple
+bridging functionality. Most of them provide <I>access control</I> (to
+prevent any unwanted radio node to access the network), <I>roaming</I>
+and <I>out of range forwarding</I>.
+<p>
+The use of the last two features requires that all the access points
+that are used to cover the desired area are connected on the same
+wired segment (IP subnet). Each node needs to register to one of the
+access point (to avoid confusion between the APs), the nearest one,
+usually (in fact, more likely the one having the strongest signal,
+which might not be the nearest). If the node moves, it will
+automatically switch from one access point to another to retain its
+access to the wired network (that is <B>roaming</B>). If a node wants
+to communicate with a node which is not in its reach, its access point
+forwards the packets through the wired network and via the access
+point where the destination is registered (that is <B>out of range
+forwarding</B>).
+<p>
+A few systems use as well the access point as a network central
+coordinator of the channel access mechanism (TDMA and polling
+mode). This is a bad idea, because it decreases the overall
+reliability and flexibility of the system&nbsp;: every node must be
+able to communicate at any time the access point in order to work,
+even if it wants to communicate with a close neighbour.
+<p>
+
+<CENTER><I>Access Points, roaming and radio MAC forwarding&nbsp;:</I>
+<TABLE BORDER=2 CELLPADDING=5>
+<TR>
+<TD><CENTER><I>Roaming &amp; Access Points</I></CENTER></TD>
+<TD><CENTER><I>Radio MAC forwarding</I></CENTER></TD>
+</TR><TR>
+<TD><CENTER><IMG SRC="AP.png" ALT="Access Point graphical figure"></CENTER></TD>
+<TD><CENTER><IMG SRC="Forward.png" ALT="Forwarding graphical figure"></CENTER></TD>
+</TR>
+</TABLE>
+</CENTER>
+
+<p>
+
+<A NAME="forwarding">
+<H4>5.3.3	Radio MAC forwarding</H4>
+</A>
+
+The forwarding mechanism designed around <I>Access Points</I> (see <A
+HREF="Linux.Wireless.mac.html#ap"><I>chapter&nbsp;5.3.2</I></A>)
+requires a fixed wired infrastructure to link the Access Point. This
+might be satisfactory for most usages, but is not adequate for ad-hoc
+networks.
+<p>
+Some MAC protocol (such as HiperLan - see <A
+HREF="Linux.Wireless.std.html#Hiperlan"><I>chapter&nbsp;6.3</I></A>)
+provide a <B>MAC level forwarding</B>, where every node of the network
+can be used to relay the message on the air to the destination. The
+protocol doesn't rely any more on a fixed infrastructure, but on all
+the wireless nodes on the path.
+<p>
+So, how do we found the optimal path through the nodes to the correct
+destination&nbsp;? This forwarding mechanism use management message to
+propagate network changes and topology information, and from those
+messages nodes can compute the optimal forwarding tables. Nodes must
+implement the forwarding capability and propagate message based on
+those routing tables. In fact, each node of the network acts as a
+ad-hoc wireless bridge.
+<p>
+Broadcast and multicast messages are a bit of a problem (they have
+always been on bridging technologies)&nbsp;: all nodes just repeat
+them and the strategy is to flood the network with them (that's the
+only way to make sure they reach all possible destinations).
+<p>
+Some <I>access points</I> also offer the possibility to be configured
+as <B>Wireless Repeaters</B>, which provide the same kind of radio
+forwarding but in a managed way.
+<p>
+Radio MAC forwarding is elegant and interesting, but all the
+forwarding consume some more radio bandwidth, which is already limited
+to start with.
+
+<A NAME="throughput">
+<H3>5.4	Some throughput considerations</H3>
+</A>
+
+If the physical layer people are mostly talking range and dB, MAC
+layer people are (or should be) concerned about the throughput of the
+system.
+
+<A NAME="bitrate">
+<H4>5.4.1	Bit-rate versus maximum user throughput</H4>
+</A>
+
+Like for wired products, most radio LAN vendors indicate only the
+<B>bit-rate</B> of their products (also called signalling rate). For
+example, <I>Ethernet</I> is 10&nbsp;Mb/s, 100&nbsp;Mb/s or 1 Gb/s, and
+most radio LAN products between 0.5 and 3&nbsp;Mb/s (higher rate like
+10&nbsp;Mb/s are slowly coming to the market). The signalling rate is
+the speed at which bits are transmitted over the medium, but, because
+of the many overheads of the protocols used to communicate, the user
+throughput is usually less (note also that they use decimal
+multiplicators, so for them 1&nbsp;Mb/s is
+10<SUP>6</SUP>&nbsp;b/s&nbsp;!). The Wireless LANs protocols have
+usually a <B>higher overhead</B> than their wired counterpart (such as
+Ethernet). This is due to different factors&nbsp;:
+<p>
+The first is the <I>radio technology</I>&nbsp;: radio receivers
+require large synchronisation fields (receiver training, antenna
+selection...) ; the radio itself is slow to react (switch from receive
+to transmit), so needs large slots in the contention window and
+between packets.
+<p>
+The second is the addition of the <I>features</I> necessary for the
+radio protocol which makes the packet MAC headers larger (fields for
+network id, encryption parameters...) or introduces new management
+packets (synchronisation, authentication, access point registration).
+<p>
+The third is that some <I>trade-offs</I> are made to improve the
+reliability. For example, we might split big packets into small
+independent fragments to decrease the error probability (see <A
+HREF="Linux.Wireless.mac.html#frags"><I>chapter&nbsp;5.2.2</I></A> on
+fragmentation). Acks and RTS/CTS add also some overhead. Having a
+slotted contention decreases the collisions but makes the average
+contention delay larger as well.
+<p>
+When you add all this, it starts to make a significant difference. If
+in the case of Ethernet you may hope to reach 80-95&nbsp;% of the
+signalling rate, for most radio products, despite being slower, the
+user throughput is usually between 50 and 70&nbsp;% of the signalling
+rate (or even less...).
+
+<A NAME="multirate">
+<H4>5.4.2	Multirate system considerations</H4>
+</A>
+
+Most vendors offer multirate systems (see <A
+HREF="Linux.Wireless.modem.html#multirate"><I>chapter&nbsp;4.7.1</I></A>),
+the lower rate allowing a greater coverage and the higher rate
+allowing greater throughput at lower range, and offer a mechanism for
+each node to adapt the bit-rate depending on channel
+conditions. Basically, when packets start to fail, the node reduce the
+rate.
+<p>
+Of course, people are likely to benchmark nodes in relatively close
+proximity (two nodes on the table), when the system will use the
+highest rate, but the real advantage of Wireless LANs is usually given
+at higher range (in the garden, moving around), and in this case the
+system is likely to select the lower rate (and maybe suffer from
+packet losses and retransmission due to range), so the performance
+will be less.
+<p>
+However, those rate adaptation schemes are not always the most
+clever. When there is an interferer in the band, reducing the rate may
+increase marginally chances of packets to get through, but most of the
+time having longer transmission time just increase the probability of
+collision. In cases where there is lot's of contention (lot's of nodes
+with lot's of traffic), some products do reduce the rate which doesn't
+help to reduce to congestion (I've seen that personally). In those
+particular cases, you may want to fix the rate yourself to the highest
+and disable the rate reduction feature.
+<p>
+Having a multi-rate system also impact the overhead of the system,
+especially at high rates. All the basic part of the protocol (headers,
+management messages, contention) is designed for the slowest rate, so
+when going to higher rate their relative size increase (their duration
+remain the same while the payload duration decreases).
+<p>
+For example, when sending the same 1500&nbsp;B packet at 4FSK instead
+of 2FSK with 802.11, the overhead of the contention window double, the
+overhead of the MAC level acknowledgement and RTS/CTS double and the
+overhead of the header increases by 28&nbsp;%. I've heard that the
+overhead for 802.11 HR at 11&nbsp;Mb/s was significantly noticeable
+compared to 1 and 2&nbsp;Mb/s speeds, and Lucent claims that
+increasing the bit rate from 2 to 10&nbsp;Mb/s (Lucent turbo PPM DS
+modulation), the effective throughput (user level) is increased only
+by a factor 3.
+
+<A NAME="shared">
+<H4>5.4.3	Shared throughput versus individual throughput</H4>
+</A>
+
+In the previous chapter, we have examined the overhead added by the
+protocol and talked about the maximum user throughput usable by the
+Wireless LAN. But, sometimes, even in a clear channel, the maximum
+<B>node to node throughput</B> may be even less than that. This is
+usually caused by implementation problems.
+<p>
+The most obvious is for example a slow interface between the PC and
+the Wireless device. A serial or parallel interface is slower than an
+ISA or Pcmcia bus and may be a bottleneck.
+<p>
+The second example is devices implementing only one transmit
+buffer. This saves some cost (memory, complexity), but, as the buffer
+may be either written by the driver or transmitted over the air but
+not both at the same time, this creates dead time over the air while
+the driver refills the buffer and reduces the available
+throughput. This was one of the performance gain between the first and
+the second generation of Ethernet cards in the old days.
+<p>
+The protocol might also performs better when many node are active than
+when only one of them transmits. For example, the contention window in
+CSMA/CA (number of contention slots) impact the performance ; a larger
+contention window will decreases the collisions but when there is a
+few nodes, those will wait on average longer to access the channel
+(the common 802.11 parameters gives better performance for 2 active
+nodes than for 1). A polling protocol which uses a round robin
+scheduling mechanism (asks each node in turn if it has a packet to
+transmit) performs better is every node has something to send than
+only one node (in this case, between each packet of this node the
+protocol has to pool all the other nodes of the network for nothing).
+<p>
+Lastly, in the case of MACs being connection oriented (TDMA and some
+implementation of pooling), an individual node may not be able to use
+the full link capacity, limiting its performance. For example, if a
+TDMA system has 10 slots per frame, some physical layer or MAC layer
+constraints may prevent a node to use more than one slot in each
+frame, even if the 9 other slots of the frame are free. If the node
+implementation can only manage one slot, the node individual
+throughput is only 1/10th of the shared throughput. For the individual
+throughput to be the maximum throughput, the node must be able to
+manage multiple slots and multiplex data between these slots.
+
+<A NAME="contention">
+<H4>5.4.4	Contention and congestion</H4>
+</A>
+
+In the previous chapter&nbsp;we examine why the shared throughput
+could be higher than the individual throughput. But, the reverse can
+also be true (and is actually more likely for CSMA/CA systems).
+<p>
+When there is many nodes sending packets on the network, the
+probability of having two nodes choosing the same slot in the
+contention window increases. When two nodes choose the same slot (and
+they are first), their packets collide and are lost. This mean that
+when the level of <B>contention</B> increases, the number of retry
+increases as well, so the performance of the network drop up to the
+point of congestion.
+<p>
+In fact, 802.11 has a relatively short contention window (16 slots but
+with a memory effect), and is very sensitive to
+contention. Unfortunately, it's very easy for any kind of device to
+generate enough traffic to saturate the wireless link, especially
+those which assume being on an Ethernet. I have personally seen a
+nodes composed of 3 nodes and 1 access point (802.11) where the number
+of retransmissions was higher than the number of packets sent (each
+packet transmitted on average more than twice).
+<p>
+A solution to this problem is to use RTS/CTS (see <A
+HREF="Linux.Wireless.mac.html#rts"><I>chapter&nbsp;5.2.3</I></A>),
+because RTS/CTS makes each collision much shorter. In fact, with
+RTS/CTS enabled, 802.11 can support more than a dozen active nodes
+without significant reduction in performance due to contention (apart
+that those nodes have to share the bandwidth). As the RTS/CTS
+handshake is usually done at the basic rates, its benefit tends to
+decrease for the highest transmission rates.
+
+<A NAME="tcp">
+<H4>5.4.5	TCP and packet losses problem</H4>
+</A>
+
+TCP has been developed for wired LANs, where packet losses are
+minimal. If a packet is lost, TCP assumes that it is dropped in a
+router or a bridge because of <B>congestion</B>. To try to reduce the
+congestion, TCP slows down drastically.
+<p>
+On the radio medium, collisions can't be detected and the error rate
+is higher, so there is more packet losses (if we don't do anything
+about it). TCP sees that as congestion and reduces its throughput, and
+so doesn't use all the available bandwidth.
+<p>
+In modern Wireless LAN, <B>MAC level retransmissions</B> (see <A
+HREF="Linux.Wireless.mac.html#retry"><I>chapter&nbsp;5.1.3</I></A>)
+solve totally this problem by detecting and eliminating packet losses
+due to errors and collisions (and also avoid desequencing packets), so
+TCP sees a reliable channel and has no reason to slow down (except if
+MAC level retransmissions are poorly implemented).
+
+<A NAME="aggregate">
+<H4>5.4.6	Aggregate throughput</H4>
+
+It's quite common practice for vendors to advertise for their products
+something called <B>aggregate throughput</B>. This figure indicates
+the maximum throughput that it is possible to transmit in the full
+bandwidth by having different adjacent and independent networks on
+different frequencies or hopping patterns.
+<p>
+Of course, the user of the Wireless LAN will never see such a
+throughput, and it is a bit like advocating that by having 10
+<I>Ethernet 10baseT</I> cables you are able to have a 100&nbsp;Mb/s
+throughput... But, it gives an indication of how well overlapping
+cells will share the bandwidth.
+<p>
+For example, with a Frequency Hopping system having 1.6&nbsp;Mb/s user
+throughput, by putting 15 networks, each on a different hopping
+pattern, we should have in theory a 24&nbsp;Mb/s aggregate
+throughput. In fact, because the different Frequency Hopping patterns
+&quot;collide&quot; on the same frequency (and also suffer from
+co-channel interference) from time to time, the actual aggregate
+throughput is less, and is in this example only 15&nbsp;Mb/s.
+<p>
+These collisions of the hopping patterns is why Frequency Hopping
+can't offer up to 79 networks on the 79 channels (but only up to 15 in
+this case)...
+
+<p ALIGN=right>
+<A HREF="Linux.Wireless.std.html"><I>next</I></A>
+<HR>
+<CENTER><TABLE BORDER=0 CELLPADDING=0><TR><TD valign="top" align="center">
+<ADDRESS>
+<A HREF="Wireless.html">Linux Wireless LAN Howto</A> -
+jt&#064;hpl.hp.com
+<br>Converted to html from Frame Maker - 25 August 98
+<br>Updated 3 August 00
+<br>Copyright &#169; 1996-2004 Jean Tourrilhes
+</ADDRESS>
+</TD><TD>
+&nbsp;&nbsp;&nbsp;
+</TD><TD valign="top" align="center">
+Project hosted and sponsored by :
+<br>
+<A HREF="http://www.hpl.hp.com"><IMG SRC="../hplogo.png" HEIGHT=34
+WIDTH=141 ALT="HP home page"></A>
+</TD></TR></TABLE></CENTER>
+
+<!-- Keep Webmaster happy -->
+<script type="text/javascript" language="JavaScript">
+var s_prop7="us"
+var s_prop8="eng"
+var s_prop9="corp"
+var s_prop10="us|eng|corp"
+var s_prop13="hphqglobal,hphqwwhplabs"
+</script>
+
+<!-- Begin METRICS JavaScript -->
+<!-- <script type="text/javascript" language="JavaScript"
+src="http://welcome.hp-ww.com/country/us/eng/js/metrics.js"></script> -->
+<script type="text/javascript" language="JavaScript"
+src="http://www.hpl.hp.com/dev/hplabsmetrics.js"></script>
+<!-- End METRICS JavaScript -->
+
+</BODY>
+</HTML>

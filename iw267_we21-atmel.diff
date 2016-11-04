@@ -1,0 +1,52 @@
+diff -u -p linux/drivers/net/wireless/atmel.20.c linux/drivers/net/wireless/atmel.c
+--- linux/drivers/net/wireless/atmel.20.c	2006-04-03 16:43:44.000000000 -0700
++++ linux/drivers/net/wireless/atmel.c	2006-04-03 16:47:41.000000000 -0700
+@@ -1657,13 +1657,13 @@ static int atmel_set_essid(struct net_de
+ 		priv->connect_to_any_BSS = 0;
+ 
+ 		/* Check the size of the string */
+-		if (dwrq->length > MAX_SSID_LENGTH + 1)
++		if (dwrq->length > MAX_SSID_LENGTH)
+ 			 return -E2BIG;
+ 		if (index != 0)
+ 			return -EINVAL;
+ 
+-		memcpy(priv->new_SSID, extra, dwrq->length - 1);
+-		priv->new_SSID_size = dwrq->length - 1;
++		memcpy(priv->new_SSID, extra, dwrq->length);
++		priv->new_SSID_size = dwrq->length;
+ 	}
+ 
+ 	return -EINPROGRESS;
+@@ -2121,9 +2121,9 @@ static int atmel_set_retry(struct net_de
+ 	struct atmel_private *priv = netdev_priv(dev);
+ 
+ 	if (!vwrq->disabled && (vwrq->flags & IW_RETRY_LIMIT)) {
+-		if (vwrq->flags & IW_RETRY_MAX)
++		if (vwrq->flags & IW_RETRY_LONG)
+ 			priv->long_retry = vwrq->value;
+-		else if (vwrq->flags & IW_RETRY_MIN)
++		else if (vwrq->flags & IW_RETRY_SHORT)
+ 			priv->short_retry = vwrq->value;
+ 		else {
+ 			/* No modifier : set both */
+@@ -2145,15 +2145,15 @@ static int atmel_get_retry(struct net_de
+ 
+ 	vwrq->disabled = 0;      /* Can't be disabled */
+ 
+-	/* Note : by default, display the min retry number */
+-	if (vwrq->flags & IW_RETRY_MAX) {
+-		vwrq->flags = IW_RETRY_LIMIT | IW_RETRY_MAX;
++	/* Note : by default, display the short retry number */
++	if (vwrq->flags & IW_RETRY_LONG) {
++		vwrq->flags = IW_RETRY_LIMIT | IW_RETRY_LONG;
+ 		vwrq->value = priv->long_retry;
+ 	} else {
+ 		vwrq->flags = IW_RETRY_LIMIT;
+ 		vwrq->value = priv->short_retry;
+ 		if (priv->long_retry != priv->short_retry)
+-			vwrq->flags |= IW_RETRY_MIN;
++			vwrq->flags |= IW_RETRY_SHORT;
+ 	}
+ 
+ 	return 0;

@@ -1,0 +1,172 @@
+<HTML>
+<HEAD>
+<TITLE>Linux Wireless LAN Howto : introduction</TITLE>
+<LINK rel="Next"  href="Linux.Wireless.drivers.html" title="Drivers">
+<LINK rel="Prev"  href="Linux.Wireless.intro.html" title="Introduction">
+<LINK rel="First" href="Linux.Wireless.intro.html" title="Introduction">
+<LINK rel="Last"  href="Linux.Wireless.std.html" title="Standards">
+<LINK rel="Up"    href="Wireless.html" title="Linux Wireless LAN Howto">
+</HEAD>
+
+<BODY>
+
+<H1 ALIGN=center>Linux Wireless LAN Howto : introduction</H1>
+<HR width=25%>
+<H3 ALIGN=center>Jean Tourrilhes</H3>
+<H3 ALIGN=center>8 september 99</H3>
+<br><br>
+<BLOCKQUOTE><I>
+Linux &amp; Wireless LANs : Un*x, with no string attached...
+</I></BLOCKQUOTE>
+
+<br>
+This document will explore the magical world of <B>Wireless LANs</B>
+and <B>Linux</B>. Wireless LAN is not a very widespread and well known
+technology, even in the Linux world, so we will try to gather here
+most of the available information. Despite the fact that it is very
+similar to common networking technologies, it is significantly
+different to justify this specific document covering the subject.
+
+<H2>1	What is a Wireless LAN&nbsp;?</H2>
+It's a <B>networking</B> technology allowing the connection of
+computers without any wires and cables (apart from the mains), mostly
+using <B>radio</B> technology (and sometime <B>infrared</B>). It's
+called LAN (Local Area Network) because the range targeted is small
+(within an office, a building, a store, a small campus, a
+house...). This technology is slowly growing (I should say maturing),
+and despite a general lack of interest, Linux is able to take
+advantage of some of the wireless networks available.
+
+<H2>2	Content of this document</H2>
+My first task is to talk a bit about the different Wireless LANs
+options under Linux. What the <B>products</B> on the market are, their
+compatibility with Linux and where to find the necessary bits and
+pieces to make them work. This should help you to make your mind on
+the product of your dreams.
+<p>
+Once you've picked a Wireless LAN, you will have to live with it. The
+next chapter go through the main <B>differences</B> of Wireless LAN
+compared to other networking technologies. This includes the main
+steps of the installation and usage considerations.
+<p>
+Then, we will have a nice overview of the Wireless Extensions. The
+<B>Wireless Extensions</B> is a new standard interface to configure
+Wireless LAN devices and get wireless specific statistics from
+them. Of course, this is a Linux exclusivity !
+<p>
+At this point, you will find a long and dense section, talking mostly
+of the different <B>technologies</B> used in Wireless LANs and other
+boring related stuff. It is quite safe to skip that one.
+
+<H2>3	Target and Assumptions</H2>
+
+The main goal of this document is to reduce the traffic of unanswered
+questions related to wireless in the Linux newsgroups and mailing
+lists (and in my mailbox). After that, you should have no more
+arguments for asking foolish questions around (but I know you will do
+anyway).
+<p>
+I hope that this document will help people to make the most of their
+Wireless LAN under a competent operating system and understand what is
+in the box. If I could convince people to give it a try, it would make
+me happy.
+<p>
+This document act mostly as a complement to the exhaustive
+documentation existing for Linux. Because of that, I might not explain
+every details of everything and target already quite knowledgeable
+people. Don't worry, there is a section on how to improve your culture
+at the beginning of the <A HREF="Linux.Wireless.usage.html"><I>section
+3</I></A>.
+
+<H2>4	Legal stuff</H2>
+Strange world where everybody has to protect himself from sharks,
+lawyers and crazy people :
+<p>
+Any information in this document is purely fictious and any
+resemblance to real hardware, software or driver is purely
+coincidental...
+<p>
+I mean, if because you read this document your hardware burn, you get
+fired from your job or anything else bad happen, I'm not responsible,
+it can't be my fault, so please use your own brain. Writing this kind
+of documents is not part of my job at HP, so I don't expect them to
+claim any responsibility for its content.
+<p>
+Any brand mentioned in this document is trademark of its respective
+owner. For example Linux is a trademark of Linus Torvalds.
+<p>
+Then, this is my document, written by me (Jean Tourrilhes), therefore
+I own its copyright. So don't remove my name (and copyright notice)
+and pretend that you wrote it yourself. In matter of copy,
+distribution and modification, you should ask me politely and use
+common sense.
+<p>
+Having said that, this document is also licensed under the terms of
+the <A HREF="http://www.linuxdoc.org/">Linux Documentation Project
+Copying License</A>.
+
+<H2>5	This document</H2>
+
+This document is only available in the format that are convenient to
+me (acrobat/pdf, html). It might be updated in the future (if I feel
+like it and if I have some time). I guess that it is pretty safe to
+assume that it will still be available for the time to come at these
+<B>web</B> addresses :
+<p ALIGN=center>
+<A HREF="http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Wireless.html">
+http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Wireless.html</A>
+<br>
+<A HREF="http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Wavelan.html">
+http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Wavelan.html</A>
+<p>
+I may be reached at the following <B>e-mail</B> address :
+<p ALIGN=center>
+<A HREF="mailto:jt&#064;hpl.hp.com">jt&#064;hplb.hpl.hp.com</A>
+<p>
+Constructive comments and interesting information are welcomed. I hope
+that you will help me to keep this document up to date and improve its
+content.
+<p>
+Comments about my english and my style will be answered in french
+(because I still curse better in french than in italian). Flames and
+spam will be processed through a Rayleig Fading channel with a
+-120&nbsp;dB attenuation in order to reduce the noise&nbsp;:-)
+
+<p ALIGN=right>
+<A HREF="Linux.Wireless.drivers.html"><I>next</I></A>
+<HR>
+<CENTER><TABLE BORDER=0 CELLPADDING=0><TR><TD valign="top" align="center">
+<ADDRESS>
+<A HREF="Wireless.html">Linux Wireless LAN Howto</A> -
+jt&#064;hpl.hp.com
+<br>Converted to html from Frame Maker - 16 september 97
+<br>Updated 8 september 99
+<br>Copyright &#169; 1996-2004 Jean Tourrilhes
+</ADDRESS>
+</TD><TD>
+&nbsp;&nbsp;&nbsp;
+</TD><TD valign="top" align="center">
+Project hosted and sponsored by :
+<br>
+<A HREF="http://www.hpl.hp.com"><IMG SRC="../hplogo.png" HEIGHT=34
+WIDTH=141 ALT="HP home page"></A>
+</TD></TR></TABLE></CENTER>
+
+<!-- Keep Webmaster happy -->
+<script type="text/javascript" language="JavaScript">
+var s_prop7="us"
+var s_prop8="eng"
+var s_prop9="corp"
+var s_prop10="us|eng|corp"
+var s_prop13="hphqglobal,hphqwwhplabs"
+</script>
+
+<!-- Begin METRICS JavaScript -->
+<!-- <script type="text/javascript" language="JavaScript"
+src="http://welcome.hp-ww.com/country/us/eng/js/metrics.js"></script> -->
+<script type="text/javascript" language="JavaScript"
+src="http://www.hpl.hp.com/dev/hplabsmetrics.js"></script>
+<!-- End METRICS JavaScript -->
+
+</BODY>
+</HTML>

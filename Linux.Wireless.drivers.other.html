@@ -1,0 +1,260 @@
+<HTML>
+<HEAD>
+<TITLE>The devices, the drivers</TITLE>
+<LINK rel="Next"  href="Linux.Wireless.usage.html" title="Usage">
+<LINK rel="Prev"  href="Linux.Wireless.drivers.802.11ag.html" title="Drivers - 802.11a, 802.11g">
+<LINK rel="First" href="Linux.Wireless.intro.html" title="Introduction">
+<LINK rel="Last"  href="Linux.Wireless.std.html" title="Standards">
+<LINK rel="Up"    href="Wireless.html" title="Linux Wireless LAN Howto">
+
+<LINK rel="Contents" href="Wireless.html#howto" title="Linux Wireless LAN Howto">
+<LINK rel="section" href="#notsup" title="Unsupported devices">
+<LINK rel="section" href="#win32" title="Win32 drivers">
+<LINK rel="section" href="#other" title="Other technologies">
+</HEAD>
+
+<BODY>
+
+<H1 ALIGN=center>The devices, the drivers - other</H1>
+<HR width=25%>
+<H3 ALIGN=center>Jean Tourrilhes</H3>
+<H3 ALIGN=center>13 April 04</H3>
+<br><br>
+<BLOCKQUOTE><I>
+The who's who of Wireless LANs under Linux.
+</I></BLOCKQUOTE>
+
+<br>
+This section contains information about some devices which don't have a
+specific entry in one of the previous three sections.
+
+<A NAME="notsup">
+<H2>5.1	Not supported (the hall of shame)</H2>
+</A>
+
+<B>Netwave AirSurfer plus</B> (in 802.11 mode), <B>BayStack
+650</B>&nbsp;: Now that a driver for the BayStack 660 is available, it
+should be quite easy to make a driver for those cards, by reusing the
+physical layer parts in the AirSurfer plus driver. FreeBsd seems to
+have a driver for this device... This product has been discontinued.
+<p>
+<B>RadioLan</B> has a 10 Mb/s at 5 GHz product, rather very short
+range and no Linux drivers. This product has been discontinued.
+<p>
+<B>WebGear Aviator 900 MHz</B>&nbsp;: connect to the parallel port and
+offer cable replacement solution. No functional Linux driver. This
+product has been discontinued.
+<p>
+The <B>IBM Wireless LAN Entry</B> is a discontinued product that may
+be sometime found for a very very low price. Unfortunately, there is
+no working driver for those and information on the device is
+impossible to find. This product has been discontinued.
+<p>
+Both <B>TI</B> and <B>Broadcom</B> are very unfriendly toward
+Linux. They don't release Linux drivers or any information to help
+build Linux drivers for their cards despite using Linux drivers
+internally and in some products. Open Source drivers for those cards
+exist, based on reverse engineering, but because those drivers
+probably will never support all features/models of those cards and
+because of the overall attitude of those companies, you may want to
+avoid those cards.
+<p>
+<B>Conexant</B> (formerly Intersil) seems to have reverted their
+previously pro-Linux approach to ignoring the Linux community (which
+did help them so much).
+
+<A NAME="Win32">
+<H2>5.2	Win32 drivers</H2>
+</A>
+
+Two packages enable the use of Win32 wireless LAN drivers under
+Linux&nbsp;:
+<UL>
+<LI>DriverLoader&nbsp;: http://www.linuxant.com/driverloader/
+<LI>NdisWrapper&nbsp;: http://ndiswrapper.sourceforge.net/
+</UL>
+DriverLoader is commercial, whereas NdisWrapper is GPL. Both seems to
+work with a wide range of Win32 drivers and Linux features, for
+example both support Broadcom, TI and Intel drivers, and most Wireless
+Extensions including Wireless Scanning.
+<p>
+Some people have strong objections to using Win32 drivers under
+Linux. Obviously, such a solution is restricted to the i386
+architecture, and make use of a lot of binary code. Also, some less
+used Wireless Extensions features are not available in the NDIS
+specification (such as link quality, noise level, iwspy, master and
+monitor mode).
+
+<H2>5.3	A note on driver licenses</H2>
+
+<I>Donald Becker</I>'s web page alerted me on the <B>license and
+copyright</B> issues for networking drivers (see <A
+HREF="http://www.scyld.com/expert/modules.html#legal">
+http://www.scyld.com/expert/modules.html#legal</A> for details). If
+you just plan to use the driver in your Linux PC, there should be no
+problem, but if you plan other use of the drivers you should pay
+attention to the exact license the driver come in.
+<p>
+Most drivers are <B>GPL</B>, which prevent their use with non-GPL
+kernels (so commercial operating systems can't reuse the code) and
+prevent to use portions of the source in non-GPL drivers, except with
+the explicit authorisation from the author.
+<p>
+Some other drivers come with a <B>binary library</B>, which restrict
+its potential use (the driver can't be ported to other architectures).
+<p>
+This may be restrict what you can do with those drivers, but those
+people have spend long nights and week ends convincing the hardware
+manufacturer to release information, writing and debugging the code,
+so please respect their copyrights and decisions.
+
+<H2>5.4	More information on the devices, other Wireless LANs</H2>
+
+You will notice that I don't give too much information on the
+different devices. The web page of each <B>vendors</B> usually contain
+the full specification of the products they sell.
+<p>
+They are many more products available than the ones that I've listed
+(which are the most common). If your favourite wireless LAN is not
+listed above, either there is no driver under Linux that I know of, or
+it is an <B>OEM</B> version of one of these (same hardware under a new
+brand).
+<p>
+To have a good picture of all the devices available and their
+characteristics, you should redirect your favourite browser to&nbsp;:
+<p ALIGN=center>
+<A HREF="http://hydra.carleton.ca/info/wlan.html">
+http://hydra.carleton.ca/info/wlan.html</A>
+<p>
+
+<A NAME="other">
+<H2>5.5	Other Wireless technologies</H2>
+</A>
+
+<H3>5.5.1	Wireless bridges</H3>
+<B>Wireless bridges</B> allow to connect different networks via radio,
+their goal is to replace a dedicated leased line (T1, for
+example). They usually offer longer distance through <B>directional
+antennas</B>, and are peer to peer.
+<p>
+These devices are a totally independent box (like other bridges,
+routers or gateways) and not a card to plug in your PC, so have no
+interactions with Linux.
+
+<H3>5.5.2	Radio Amateur and AX25 (HAM)</H3>
+These devices are quite specific and are described in their own <I>
+howto</I>.
+
+<H3>5.5.3	Infrared</H3>
+
+Apart from the remote control stuff, most infrared devices are
+<B>IrDA</B> compliant. IrDA defines a full lightweight protocol stack
+on top of very cheap and simple hardware, and is optimal for short
+ad-hoc transactions (using Obex for example). TCP/IP networking over
+IrDA can be done using <B>PPP over IrComm</B>, <B>IrLAN</B> or
+<B>IrNET</B> (all of them point-to-point solutions).
+<p>
+More information on IrDA for Linux is available at :
+<p ALIGN=center>
+<A HREF="http://irda.sourceforge.net/">
+http://irda.sourceforge.net/</A>
+<br>
+<A HREF="http://www.tuxmobil.com/howtos.html">
+http://www.tuxmobil.com/howtos.html</A>
+<br>
+<A HREF="http://www.hpl.hp.com/personal/Jean_Tourrilhes/IrDA/IrDA.html">
+http://www.hpl.hp.com/personal/Jean_Tourrilhes/IrDA/IrDA.html</A>
+<p>
+There is also some real Wireless LANs using diffuse infrared (no more
+peer to peer), but I don't have much information on these.
+
+<H3>5.5.4	BlueTooth</H3>
+
+<B>BlueTooth</B> is a radio standard heavily influenced by IrDA and
+USB, and offers the functionality of a wireless USB and serial cable
+replacement (see <A
+HREF="Linux.Wireless.std.html#mclink"><I>section 8</I></A> for a more
+complete description). BlueTooth defines its own protocol stack as
+well, and offers the possibility to create long term binding between
+devices (attach wirelessly peripherals to a phone or a PDA). TCP/IP
+networking over BlueTooth can be done using <B>PPP over RfComm</B> or
+<B>PAN</B> (BNEP).
+<p>
+More information on BlueTooth for Linux is available at :
+<p ALIGN=center>
+<A HREF="http://bluez.sourceforge.net/">
+http://bluez.sourceforge.net/</A>
+<br>
+<A HREF="http://sourceforge.net/projects/bluetooth/">
+http://sourceforge.net/projects/bluetooth/</A>
+<br>
+<A HREF="http://www.holtmann.org/linux/bluetooth/">
+http://www.holtmann.org/linux/bluetooth/</A>
+<br>
+<A HREF="http://www.hpl.hp.com/personal/Jean_Tourrilhes/bt/">
+http://www.hpl.hp.com/personal/Jean_Tourrilhes/bt/</A>
+<p>
+
+<H3>5.5.5	Digital mobile phones and other radio WAN</H3>
+
+Again, this is quite different from Wireless LANs. I don't know much
+about those devices, except the usual generalitie.
+<p>
+<B>Digital mobile phones</B> (<I>GSM, TDMA, CDMA, PHS</I>) very often
+allow data connections (slow and expensive). Most of them offer a
+standard serial interface with an extended AT command set, so can be
+configured like a normal modem&nbsp;: PPP over the serial port.
+<p>
+Some Nokia GSM phones use a kind of half winmodem interface where the
+upper layer handling is done by the host. For these phones you need
+<B>gnokii</B> (<A
+HREF="http://gnokii.org">http://gnokii.org</A>). This package also
+provide tools to play with various extra features of the phone (SMS,
+address book...).
+<p>
+Of course, the ultimate geek challenge is to use IrDA (see <A
+HREF="#other"><I>section 5.5.3</I></A>) to connect your mobile phone to
+your laptop. That's done with PPP over IrComm or gnokii.
+<p>
+In most cases, <B>Wireless WANs</B> such as <I>CDPD</I> cards, the
+<I>Metricom Ricochet</I> and <I>ARDIS</I> should use modem interface
+as well.
+
+<p ALIGN=right>
+<A HREF="Linux.Wireless.usage.html"><I>next</I></A>
+<HR>
+<CENTER><TABLE BORDER=0 CELLPADDING=0><TR><TD valign="top" align="center">
+<ADDRESS>
+<A HREF="Wireless.html">Linux Wireless LAN Howto</A> -
+jt&#064;hpl.hp.com
+<br>Converted to html from Frame Maker - 16 september 97
+<br>Updated 13 april 04
+<br>Copyright &#169; 1996-2004 Jean Tourrilhes
+</ADDRESS>
+</TD><TD>
+&nbsp;&nbsp;&nbsp;
+</TD><TD valign="top" align="center">
+Project hosted and sponsored by :
+<br>
+<A HREF="http://www.hpl.hp.com"><IMG SRC="../hplogo.png" HEIGHT=34
+WIDTH=141 ALT="HP home page"></A>
+</TD></TR></TABLE></CENTER>
+
+<!-- Keep Webmaster happy -->
+<script type="text/javascript" language="JavaScript">
+var s_prop7="us"
+var s_prop8="eng"
+var s_prop9="corp"
+var s_prop10="us|eng|corp"
+var s_prop13="hphqglobal,hphqwwhplabs"
+</script>
+
+<!-- Begin METRICS JavaScript -->
+<!-- <script type="text/javascript" language="JavaScript"
+src="http://welcome.hp-ww.com/country/us/eng/js/metrics.js"></script> -->
+<script type="text/javascript" language="JavaScript"
+src="http://www.hpl.hp.com/dev/hplabsmetrics.js"></script>
+<!-- End METRICS JavaScript -->
+
+</BODY>
+</HTML>

@@ -1,0 +1,3060 @@
+%!PS-Adobe-3.0
+%%BoundingBox: (atend)
+%%Pages: (atend)
+%%PageOrder: (atend)
+%%DocumentFonts: (atend)
+%%Creator: Frame 5.0
+%%DocumentData: Clean7Bit
+%%EndComments
+%%BeginProlog
+%
+% Frame ps_prolog 5.0, for use with Frame 5.0 products
+% This ps_prolog file is Copyright (c) 1986-1995 Frame Technology
+% Corporation.  All rights reserved.  This ps_prolog file may be
+% freely copied and distributed in conjunction with documents created
+% using FrameMaker, FrameMaker/SGML and FrameViewer as long as this 
+% copyright notice is preserved.
+%
+% FrameMaker users specify the proper paper size for each print job in the
+% "Print" dialog's "Printer Paper Size" "Width" and "Height~ fields.  If the
+% printer that the PS file is sent to does not support the requested paper
+% size, or if there is no paper tray of the proper size currently installed, 
+% then the job will not be printed.  The following flag, if set to true, will
+% cause the job to print on the default paper in such cases.
+/FMAllowPaperSizeMismatch            false def
+%
+% Frame products normally print colors as their true color on a color printer
+% or as shades of gray, based on luminance, on a black-and white printer. The
+% following flag, if set to true, forces all non-white colors to print as pure
+% black. This has no effect on bitmap images.
+/FMPrintAllColorsAsBlack             false def
+%
+% Frame products can either set their own line screens or use a printer's 
+% default settings. Three flags below control this separately for no 
+% separations, spot separations and process separations. If a flag
+% is true, then the default printer settings will not be changed. If it is
+% false, Frame products will use their own settings from a table based on
+% the printer's resolution.
+/FMUseDefaultNoSeparationScreen      true  def
+/FMUseDefaultSpotSeparationScreen    true  def
+/FMUseDefaultProcessSeparationScreen false def
+%
+% For any given PostScript printer resolution, Frame products have two sets of 
+% screen angles and frequencies for printing process separations, which are 
+% recomended by Adobe. The following variable chooses the higher frequencies
+% when set to true or the lower frequencies when set to false. This is only
+% effective if the appropriate FMUseDefault...SeparationScreen flag is false.
+/FMUseHighFrequencyScreens true def
+%
+% The following is a set of predefined optimal frequencies and angles for various
+% common dpi settings. This is taken from "Advances in Color Separation Using
+% PostScript Software Technology," from Adobe Systems (3/13/89 P.N. LPS 0043)
+% and corrolated with information which is in various PPD (4.0) files.
+%
+% The "dpiranges" figure is the minimum dots per inch device resolution which
+% can support this setting. The "low" and "high" values are controlled by the
+% setting of the FMUseHighFrequencyScreens flag above. The "TDot" flags control
+% the use of the "Yellow Triple Dot" feature whereby the frequency id divided by
+% three, but the dot function is "trippled" giving a block of 3x3 dots per cell.
+%
+% PatFreq is a compromise pattern frequency for ps Level 2 printers which is close
+% to the ideal WYSIWYG pattern frequency of 9 repetitions/inch but does not beat
+% (too badly) against the screen frequencies of any separations for that DPI.
+/dpiranges   [  2540    2400    1693     1270    1200     635      600      0      ] def
+/CMLowFreqs  [ 100.402  94.8683 89.2289 100.402  94.8683  66.9349  63.2456 47.4342 ] def
+/YLowFreqs   [  95.25   90.0    84.65    95.25   90.0     70.5556  66.6667 50.0    ] def
+/KLowFreqs   [  89.8026 84.8528 79.8088  89.8026 84.8528  74.8355  70.7107 53.033  ] def
+/CLowAngles  [  71.5651 71.5651 71.5651 71.5651  71.5651  71.5651  71.5651 71.5651 ] def
+/MLowAngles  [  18.4349 18.4349 18.4349 18.4349  18.4349  18.4349  18.4349 18.4349 ] def
+/YLowTDot    [  true    true    false    true    true     false    false   false   ] def
+/CMHighFreqs [ 133.87  126.491 133.843  108.503 102.523  100.402   94.8683 63.2456 ] def
+/YHighFreqs  [ 127.0   120.0   126.975  115.455 109.091   95.25    90.0    60.0    ] def
+/KHighFreqs  [ 119.737 113.137 119.713  128.289 121.218   89.8026  84.8528 63.6395 ] def
+/CHighAngles [  71.5651 71.5651 71.5651  70.0169 70.0169  71.5651  71.5651 71.5651 ] def
+/MHighAngles [  18.4349 18.4349 18.4349  19.9831 19.9831  18.4349  18.4349 18.4349 ] def
+/YHighTDot   [  false   false   true     false   false    true     true    false   ] def
+/PatFreq     [	10.5833 10.0     9.4055  10.5833 10.0	  10.5833  10.0	   9.375   ] def
+%
+% PostScript Level 2 printers contain an "Accurate Screens" feature which can
+% improve process separation rendering at the expense of compute time. This 
+% flag is ignored by PostScript Level 1 printers.
+/FMUseAcccurateScreens true def
+%
+% The following PostScript procedure defines the spot function that Frame
+% products will use for process separations. You may un-comment-out one of
+% the alternative functions below, or use your own.
+%
+% Dot function
+/FMSpotFunction {abs exch abs 2 copy add 1 gt 
+		{1 sub dup mul exch 1 sub dup mul add 1 sub }
+		{dup mul exch dup mul add 1 exch sub }ifelse } def
+%
+% Line function
+% /FMSpotFunction { pop } def
+%
+% Elipse function
+% /FMSpotFunction { dup 5 mul 8 div mul exch dup mul exch add 
+%		sqrt 1 exch sub } def
+%
+%
+/FMversion (5.0) def 
+/fMLevel1 /languagelevel where {pop languagelevel} {1} ifelse 2 lt def
+/FMPColor
+	fMLevel1 {
+		false
+		/colorimage where {pop pop true} if
+	} {
+		true
+	} ifelse
+def
+/FrameDict 400 dict def 
+systemdict /errordict known not {/errordict 10 dict def
+		errordict /rangecheck {stop} put} if
+% The readline in PS 23.0 doesn't recognize cr's as nl's on AppleTalk
+FrameDict /tmprangecheck errordict /rangecheck get put 
+errordict /rangecheck {FrameDict /bug true put} put 
+FrameDict /bug false put 
+mark 
+% Some PS machines read past the CR, so keep the following 3 lines together!
+currentfile 5 string readline
+00
+0000000000
+cleartomark 
+errordict /rangecheck FrameDict /tmprangecheck get put 
+FrameDict /bug get { 
+	/readline {
+		/gstring exch def
+		/gfile exch def
+		/gindex 0 def
+		{
+			gfile read pop 
+			dup 10 eq {exit} if 
+			dup 13 eq {exit} if 
+			gstring exch gindex exch put 
+			/gindex gindex 1 add def 
+		} loop
+		pop 
+		gstring 0 gindex getinterval true 
+		} bind def
+	} if
+/FMshowpage /showpage load def
+/FMquit /quit load def
+/FMFAILURE { 
+	dup = flush 
+	FMshowpage 
+	/Helvetica findfont 12 scalefont setfont
+	72 200 moveto show
+	72 220 moveto show
+	FMshowpage 
+	FMquit 
+	} def 
+/FMVERSION {
+	FMversion ne {
+		(Frame product version does not match ps_prolog!  Check installation;)
+		(also check ~/fminit and ./fminit for old versions) FMFAILURE
+		} if
+	} def 
+/FMBADEPSF { 
+	(Adobe's PostScript Language Reference Manual, 2nd Edition, section H.2.4)
+	(says your EPS file is not valid, as it calls X              )
+	dup dup (X) search pop exch pop exch pop length 
+	5 -1 roll 
+	putinterval 
+	FMFAILURE
+	} def
+/fmConcatProcs
+	{
+	/proc2 exch cvlit def/proc1 exch cvlit def/newproc proc1 length proc2 length add array def
+	newproc 0 proc1 putinterval newproc proc1 length proc2 putinterval newproc cvx
+}def
+FrameDict begin [
+	/ALDsave
+	/FMdicttop
+	/FMoptop
+	/FMpointsize
+	/FMsaveobject
+	/b
+	/bitmapsave
+	/blut
+	/bpside
+	/bs
+	/bstring
+	/bwidth
+	/c
+	/cf
+	/cs
+	/cynu
+	/depth
+	/edown
+	/fh
+	/fillvals
+	/fw
+	/fx
+	/fy
+	/g
+	/gfile
+	/gindex
+	/grnt
+	/gryt
+	/gstring
+	/height
+	/hh
+	/i
+	/im
+	/indx
+	/is
+	/k
+	/kk
+	/landscape
+	/lb
+	/len
+	/llx
+	/lly
+	/m
+	/magu
+	/manualfeed
+	/n
+	/offbits
+	/onbits
+	/organgle
+	/orgbangle
+	/orgbfreq
+	/orgbproc
+	/orgbxfer
+	/orgfreq
+	/orggangle
+	/orggfreq
+	/orggproc
+	/orggxfer
+	/orgmatrix
+	/orgproc
+	/orgrangle
+	/orgrfreq
+	/orgrproc
+	/orgrxfer
+	/orgxfer
+	/pagesave
+	/paperheight
+	/papersizedict
+	/paperwidth
+	/pos
+	/pwid
+	/r
+	/rad
+	/redt
+	/sl
+	/str
+	/tran
+	/u
+	/urx
+	/ury
+	/val
+	/width
+	/width
+	/ws
+	/ww
+	/x
+	/x1
+	/x2
+	/xindex
+	/xpoint
+	/xscale
+	/xx
+	/y
+	/y1
+	/y2
+	/yelu
+	/yindex
+	/ypoint
+	/yscale
+	/yy
+] { 0 def } forall
+/FmBD {bind def} bind def
+systemdict /pdfmark known {
+	/fMAcrobat true def
+	
+	/FmPD /pdfmark load def
+	
+	
+	/FmPT /show load def
+	
+	
+	currentdistillerparams /CoreDistVersion get 2000 ge {
+	
+		
+		/FmPD2 /pdfmark load def
+		
+		
+		
+		
+		
+		/FmPA { mark exch /Dest exch 5 3 roll 
+				/View [ /XYZ null 6 -2 roll FmDC exch pop null] /DEST FmPD 
+		}FmBD
+	} {
+		
+		/FmPD2 /cleartomark load def
+		/FmPA {pop pop pop}FmBD
+	} ifelse
+} {
+	
+	/fMAcrobat false def
+	/FmPD /cleartomark load def
+	/FmPD2 /cleartomark load def
+	/FmPT /pop load def
+	/FmPA {pop pop pop}FmBD
+} ifelse
+/FmDC {
+	transform fMDefaultMatrix itransform cvi exch cvi exch
+}FmBD
+/FmBx {
+	dup 3 index lt {3 1 roll exch} if 
+	1 index 4 index lt {4 -1 roll 3 1 roll exch 4 1 roll} if
+}FmBD
+/FMnone 0 def
+/FMcyan 1 def
+/FMmagenta 2 def
+/FMyellow 3 def
+/FMblack 4 def
+/FMcustom 5 def
+/fMNegative false def 
+/FrameSepIs FMnone def 
+/FrameSepBlack 0 def
+/FrameSepYellow 0 def
+/FrameSepMagenta 0 def
+/FrameSepCyan 0 def
+/FrameSepRed 1 def
+/FrameSepGreen 1 def
+/FrameSepBlue 1 def
+/FrameCurGray 1 def
+/FrameCurPat null def
+/FrameCurColors [ 0 0 0 1 0 0 0 ] def 
+/FrameColorEpsilon .001 def	
+/eqepsilon {		
+	sub dup 0 lt {neg} if
+	FrameColorEpsilon le
+} bind def
+/FrameCmpColorsCMYK { 
+	2 copy 0 get exch 0 get eqepsilon {
+		2 copy 1 get exch 1 get eqepsilon {
+			2 copy 2 get exch 2 get eqepsilon {
+				3 get exch 3 get eqepsilon
+			} {pop pop false} ifelse
+		}{pop pop false} ifelse
+	} {pop pop false} ifelse
+} bind def
+/FrameCmpColorsRGB { 
+	2 copy 4 get exch 0 get eqepsilon {
+		2 copy 5 get exch 1 get eqepsilon {
+			6 get exch 2 get eqepsilon
+		}{pop pop false} ifelse
+	} {pop pop false} ifelse
+} bind def
+/RGBtoCMYK { 
+	1 exch sub 
+	3 1 roll 
+	1 exch sub 
+	3 1 roll 
+	1 exch sub 
+	3 1 roll 
+	3 copy 
+	2 copy 
+	le { pop } { exch pop } ifelse 
+	2 copy 
+	le { pop } { exch pop } ifelse 
+	dup dup dup 
+	6 1 roll 
+	4 1 roll 
+	7 1 roll 
+	sub 
+	6 1 roll 
+	sub 
+	5 1 roll 
+	sub 
+	4 1 roll 
+} bind def
+/CMYKtoRGB { 
+	dup dup 4 -1 roll add 						  
+	5 1 roll 3 -1 roll add 						  
+	4 1 roll add 								  
+	1 exch sub dup 0 lt {pop 0} if 3 1 roll 	  
+	1 exch sub dup 0 lt {pop 0} if exch 	      
+	1 exch sub dup 0 lt {pop 0} if exch	  		  
+} bind def
+/FrameSepInit {
+	1.0 RealSetgray
+} bind def
+/FrameSetSepColor { 
+	/FrameSepBlue exch def
+	/FrameSepGreen exch def
+	/FrameSepRed exch def
+	/FrameSepBlack exch def
+	/FrameSepYellow exch def
+	/FrameSepMagenta exch def
+	/FrameSepCyan exch def
+	/FrameSepIs FMcustom def
+	setCurrentScreen	
+} bind def
+/FrameSetCyan {
+	/FrameSepBlue 1.0 def
+	/FrameSepGreen 1.0 def
+	/FrameSepRed 0.0 def
+	/FrameSepBlack 0.0 def
+	/FrameSepYellow 0.0 def
+	/FrameSepMagenta 0.0 def
+	/FrameSepCyan 1.0 def
+	/FrameSepIs FMcyan def
+	setCurrentScreen	
+} bind def
+ 
+/FrameSetMagenta {
+	/FrameSepBlue 1.0 def
+	/FrameSepGreen 0.0 def
+	/FrameSepRed 1.0 def
+	/FrameSepBlack 0.0 def
+	/FrameSepYellow 0.0 def
+	/FrameSepMagenta 1.0 def
+	/FrameSepCyan 0.0 def
+	/FrameSepIs FMmagenta def
+	setCurrentScreen
+} bind def
+ 
+/FrameSetYellow {
+	/FrameSepBlue 0.0 def
+	/FrameSepGreen 1.0 def
+	/FrameSepRed 1.0 def
+	/FrameSepBlack 0.0 def
+	/FrameSepYellow 1.0 def
+	/FrameSepMagenta 0.0 def
+	/FrameSepCyan 0.0 def
+	/FrameSepIs FMyellow def
+	setCurrentScreen
+} bind def
+ 
+/FrameSetBlack {
+	/FrameSepBlue 0.0 def
+	/FrameSepGreen 0.0 def
+	/FrameSepRed 0.0 def
+	/FrameSepBlack 1.0 def
+	/FrameSepYellow 0.0 def
+	/FrameSepMagenta 0.0 def
+	/FrameSepCyan 0.0 def
+	/FrameSepIs FMblack def
+	setCurrentScreen
+} bind def
+ 
+/FrameNoSep { 
+	/FrameSepIs FMnone def
+	setCurrentScreen
+} bind def
+/FrameSetSepColors { 
+	FrameDict begin
+	[ exch 1 add 1 roll ]
+	/FrameSepColors  
+	exch def end
+	} bind def
+/FrameColorInSepListCMYK { 
+	FrameSepColors {  
+       		exch dup 3 -1 roll 
+       		FrameCmpColorsCMYK 
+       		{ pop true exit } if
+    	} forall 
+	dup true ne {pop false} if
+	} bind def
+/FrameColorInSepListRGB { 
+	FrameSepColors {  
+       		exch dup 3 -1 roll 
+       		FrameCmpColorsRGB 
+       		{ pop true exit } if
+    	} forall 
+	dup true ne {pop false} if
+	} bind def
+/RealSetgray /setgray load def
+/RealSetrgbcolor /setrgbcolor load def
+/RealSethsbcolor /sethsbcolor load def
+end 
+/setgray { 
+	FrameDict begin
+	FrameSepIs FMnone eq
+		{ RealSetgray } 
+		{ 
+		FrameSepIs FMblack eq 
+			{ RealSetgray } 
+			{ FrameSepIs FMcustom eq 
+			  FrameSepRed 0 eq and
+			  FrameSepGreen 0 eq and
+			  FrameSepBlue 0 eq and {
+			  	RealSetgray
+			  } {
+				1 RealSetgray pop 
+			  } ifelse
+			} ifelse
+		} ifelse
+	end
+} bind def
+/setrgbcolor { 
+	FrameDict begin
+	FrameSepIs FMnone eq
+	{  RealSetrgbcolor }
+	{
+		3 copy [ 4 1 roll ] 
+		FrameColorInSepListRGB
+		{
+				FrameSepBlue eq exch 
+			 	FrameSepGreen eq and exch 
+			 	FrameSepRed eq and
+			 	{ 0 } { 1 } ifelse
+		}
+		{
+			FMPColor {
+				RealSetrgbcolor
+				currentcmykcolor
+			} {
+				RGBtoCMYK
+			} ifelse
+			FrameSepIs FMblack eq
+			{1.0 exch sub 4 1 roll pop pop pop} {
+			FrameSepIs FMyellow eq
+			{pop 1.0 exch sub 3 1 roll pop pop} {
+			FrameSepIs FMmagenta eq
+			{pop pop 1.0 exch sub exch pop } {
+			FrameSepIs FMcyan eq
+			{pop pop pop 1.0 exch sub } 
+			{pop pop pop pop 1} ifelse } ifelse } ifelse } ifelse 
+		} ifelse
+		RealSetgray
+	} 
+	ifelse
+	end
+} bind def
+/sethsbcolor {
+	FrameDict begin
+	FrameSepIs FMnone eq 
+	{ RealSethsbcolor } 
+	{
+		RealSethsbcolor 
+		currentrgbcolor  
+		setrgbcolor 
+	} 
+	ifelse
+	end
+} bind def
+FrameDict begin
+/setcmykcolor where {
+	pop /RealSetcmykcolor /setcmykcolor load def
+} {
+	/RealSetcmykcolor {
+		4 1 roll
+		3 { 3 index add 0 max 1 min 1 exch sub 3 1 roll} repeat 
+		RealSetrgbcolor pop
+	} bind def
+} ifelse
+userdict /setcmykcolor { 
+		FrameDict begin
+		FrameSepIs FMnone eq
+		{ RealSetcmykcolor } 
+		{
+			4 copy [ 5 1 roll ]
+			FrameColorInSepListCMYK
+			{
+				FrameSepBlack eq exch 
+				FrameSepYellow eq and exch 
+				FrameSepMagenta eq and exch 
+				FrameSepCyan eq and 
+				{ 0 } { 1 } ifelse
+			}
+			{
+				FrameSepIs FMblack eq
+				{1.0 exch sub 4 1 roll pop pop pop} {
+				FrameSepIs FMyellow eq
+				{pop 1.0 exch sub 3 1 roll pop pop} {
+				FrameSepIs FMmagenta eq
+				{pop pop 1.0 exch sub exch pop } {
+				FrameSepIs FMcyan eq
+				{pop pop pop 1.0 exch sub } 
+				{pop pop pop pop 1} ifelse } ifelse } ifelse } ifelse 
+			} ifelse
+			RealSetgray
+		}
+		ifelse
+		end
+	} bind put
+fMLevel1 { 
+	
+	
+	
+	/patScreenDict 7 dict dup begin
+		<0f1e3c78f0e1c387> [ 45  { pop } {exch pop} 		.5   2 sqrt] FmBD
+		<0f87c3e1f0783c1e> [ 135 { pop } {exch pop}			.5   2 sqrt] FmBD
+		<cccccccccccccccc> [ 0   { pop } dup				.5   2	   ] FmBD
+		<ffff0000ffff0000> [ 90  { pop } dup				.5   2	   ] FmBD
+		<8142241818244281> [ 45  { 2 copy lt {exch} if pop}	dup .75  2 sqrt] FmBD
+		<03060c183060c081> [ 45  { pop } {exch pop}			.875 2 sqrt] FmBD
+		<8040201008040201> [ 135 { pop } {exch pop}			.875 2 sqrt] FmBD
+	end def
+} { 
+	
+	/patProcDict 5 dict dup begin
+		<0f1e3c78f0e1c387> { 3 setlinewidth -1 -1 moveto 9 9 lineto stroke 
+											4 -4 moveto 12 4 lineto stroke
+											-4 4 moveto 4 12 lineto stroke} bind def
+		<0f87c3e1f0783c1e> { 3 setlinewidth -1 9 moveto 9 -1 lineto stroke 
+											-4 4 moveto 4 -4 lineto stroke
+											4 12 moveto 12 4 lineto stroke} bind def
+		<8142241818244281> { 1 setlinewidth -1 9 moveto 9 -1 lineto stroke
+											-1 -1 moveto 9 9 lineto stroke } bind def
+		<03060c183060c081> { 1 setlinewidth -1 -1 moveto 9 9 lineto stroke 
+											4 -4 moveto 12 4 lineto stroke
+											-4 4 moveto 4 12 lineto stroke} bind def
+		<8040201008040201> { 1 setlinewidth -1 9 moveto 9 -1 lineto stroke 
+											-4 4 moveto 4 -4 lineto stroke
+											4 12 moveto 12 4 lineto stroke} bind def
+	end def
+	/patDict 15 dict dup begin
+		/PatternType 1 def		
+		/PaintType 2 def		
+		/TilingType 3 def		
+		/BBox [ 0 0 8 8 ] def 	
+		/XStep 8 def			
+		/YStep 8 def			
+		/PaintProc {
+			begin
+			patProcDict bstring known {
+				patProcDict bstring get exec
+			} {
+				8 8 true [1 0 0 -1 0 8] bstring imagemask
+			} ifelse
+			end
+		} bind def
+	end def
+} ifelse
+/combineColor {
+    FrameSepIs FMnone eq
+	{
+		graymode fMLevel1 or not {
+			
+			[/Pattern [/DeviceCMYK]] setcolorspace
+			FrameCurColors 0 4 getinterval aload pop FrameCurPat setcolor
+		} {
+			FrameCurColors 3 get 1.0 ge {
+				FrameCurGray RealSetgray
+			} {
+				fMAcrobat not FMPColor graymode and and {
+					0 1 3 { 
+						FrameCurColors exch get
+						1 FrameCurGray sub mul
+					} for
+					RealSetcmykcolor
+				} {
+					4 1 6 {
+						FrameCurColors exch get
+						graymode {
+							1 exch sub 1 FrameCurGray sub mul 1 exch sub
+						} {
+							1.0 lt {FrameCurGray} {1} ifelse
+						} ifelse
+					} for
+					RealSetrgbcolor
+				} ifelse
+			} ifelse
+		} ifelse
+	} { 
+		FrameCurColors 0 4 getinterval aload
+		FrameColorInSepListCMYK {
+			FrameSepBlack eq exch 
+			FrameSepYellow eq and exch 
+			FrameSepMagenta eq and exch 
+			FrameSepCyan eq and
+			FrameSepIs FMcustom eq and
+			{ FrameCurGray } { 1 } ifelse
+		} {
+			FrameSepIs FMblack eq
+			{FrameCurGray 1.0 exch sub mul 1.0 exch sub 4 1 roll pop pop pop} {
+			FrameSepIs FMyellow eq
+			{pop FrameCurGray 1.0 exch sub mul 1.0 exch sub 3 1 roll pop pop} {
+			FrameSepIs FMmagenta eq
+			{pop pop FrameCurGray 1.0 exch sub mul 1.0 exch sub exch pop } {
+			FrameSepIs FMcyan eq
+			{pop pop pop FrameCurGray 1.0 exch sub mul 1.0 exch sub } 
+			{pop pop pop pop 1} ifelse } ifelse } ifelse } ifelse 
+		} ifelse
+		graymode fMLevel1 or not {
+			
+			[/Pattern [/DeviceGray]] setcolorspace
+			FrameCurPat setcolor
+		} { 
+			graymode not fMLevel1 and {
+				
+				dup 1 lt {pop FrameCurGray} if
+			} if
+			RealSetgray
+		} ifelse
+	} ifelse
+} bind def
+/savematrix {
+	orgmatrix currentmatrix pop
+	} bind def
+/restorematrix {
+	orgmatrix setmatrix
+	} bind def
+/fMDefaultMatrix matrix defaultmatrix def
+/fMatrix2 matrix def
+/dpi    72 0 fMDefaultMatrix dtransform
+    dup mul exch   dup mul add   sqrt def
+	
+/freq dpi dup 72 div round dup 0 eq {pop 1} if 8 mul div def
+/sangle 1 0 fMDefaultMatrix dtransform exch atan def
+	sangle fMatrix2 rotate 
+	fMDefaultMatrix fMatrix2 concatmatrix 
+	dup 0 get /sflipx exch def
+	    3 get /sflipy exch def
+/screenIndex {
+	0 1 dpiranges length 1 sub { dup dpiranges exch get 1 sub dpi le {exit} {pop} ifelse } for
+} bind def
+/getCyanScreen {
+	FMUseHighFrequencyScreens { CHighAngles CMHighFreqs} {CLowAngles CMLowFreqs} ifelse
+		screenIndex dup 3 1 roll get 3 1 roll get /FMSpotFunction load
+} bind def
+/getMagentaScreen {
+	FMUseHighFrequencyScreens { MHighAngles CMHighFreqs } {MLowAngles CMLowFreqs} ifelse
+		screenIndex dup 3 1 roll get 3 1 roll get /FMSpotFunction load
+} bind def
+/getYellowScreen {
+	FMUseHighFrequencyScreens { YHighTDot YHighFreqs} { YLowTDot YLowFreqs } ifelse
+		screenIndex dup 3 1 roll get 3 1 roll get { 3 div
+			{2 { 1 add 2 div 3 mul dup floor sub 2 mul 1 sub exch} repeat
+			FMSpotFunction } } {/FMSpotFunction load } ifelse
+			0.0 exch
+} bind def
+/getBlackScreen  {
+	FMUseHighFrequencyScreens { KHighFreqs } { KLowFreqs } ifelse
+		screenIndex get 45.0 /FMSpotFunction load 
+} bind def
+/getSpotScreen {
+	getBlackScreen
+} bind def
+/getCompositeScreen {
+	getBlackScreen
+} bind def
+/FMSetScreen 
+	fMLevel1 { /setscreen load 
+	}{ {
+		8 dict begin
+		/HalftoneType 1 def
+		/SpotFunction exch def
+		/Angle exch def
+		/Frequency exch def
+		/AccurateScreens FMUseAcccurateScreens def
+		currentdict end sethalftone
+	} bind } ifelse
+def
+/setDefaultScreen {
+	FMPColor {
+		orgrxfer cvx orggxfer cvx orgbxfer cvx orgxfer cvx setcolortransfer
+	}
+	{
+		orgxfer cvx settransfer
+	} ifelse
+	orgfreq organgle orgproc cvx setscreen
+} bind def
+/setCurrentScreen {
+	FrameSepIs FMnone eq {
+		FMUseDefaultNoSeparationScreen {
+			setDefaultScreen
+		} {
+			getCompositeScreen FMSetScreen
+		} ifelse
+	} {
+		FrameSepIs FMcustom eq {
+			FMUseDefaultSpotSeparationScreen {
+				setDefaultScreen
+			} {
+				getSpotScreen FMSetScreen
+			} ifelse
+		} {
+			FMUseDefaultProcessSeparationScreen {
+				setDefaultScreen
+			} {
+				FrameSepIs FMcyan eq {
+					getCyanScreen FMSetScreen
+				} {
+					FrameSepIs FMmagenta eq {
+						getMagentaScreen FMSetScreen
+					} {
+						FrameSepIs FMyellow eq {
+							getYellowScreen FMSetScreen
+						} {
+							getBlackScreen FMSetScreen
+						} ifelse
+					} ifelse
+				} ifelse
+			} ifelse
+		} ifelse
+	} ifelse 
+} bind def
+end
+	
+/FMDOCUMENT { 
+	array /FMfonts exch def 
+	/#copies exch def
+	FrameDict begin
+	0 ne /manualfeed exch def
+	/paperheight exch def
+	/paperwidth exch def
+	0 ne /fMNegative exch def 
+	0 ne /edown exch def 
+	/yscale exch def
+	/xscale exch def
+	fMLevel1 {
+		manualfeed {setmanualfeed} if
+		/FMdicttop countdictstack 1 add def 
+		/FMoptop count def 
+		setpapername 
+		manualfeed {true} {papersize} ifelse 
+		{manualpapersize} {false} ifelse 
+		{desperatepapersize} {false} ifelse 
+		{papersizefailure} if
+		count -1 FMoptop {pop pop} for
+		countdictstack -1 FMdicttop {pop end} for 
+		}
+		{2 dict
+		 dup /PageSize [paperwidth paperheight] put
+		 manualfeed {dup /ManualFeed manualfeed put} if
+		 {setpagedevice} stopped {papersizefailure} if
+		}
+	ifelse 
+	
+	FMPColor {
+		currentcolorscreen
+			cvlit /orgproc exch def
+				  /organgle exch def 
+				  /orgfreq exch def
+			cvlit /orgbproc exch def
+				  /orgbangle exch def 
+				  /orgbfreq exch def
+			cvlit /orggproc exch def
+				  /orggangle exch def 
+				  /orggfreq exch def
+			cvlit /orgrproc exch def
+				  /orgrangle exch def 
+				  /orgrfreq exch def
+			currentcolortransfer 
+			fMNegative {
+				1 1 4 { 
+					pop { 1 exch sub } fmConcatProcs 4 1 roll
+				} for
+				4 copy
+				setcolortransfer
+			} if
+			cvlit /orgxfer exch def
+			cvlit /orgbxfer exch def
+			cvlit /orggxfer exch def
+			cvlit /orgrxfer exch def
+	} {
+		currentscreen 
+			cvlit /orgproc exch def
+				  /organgle exch def 
+				  /orgfreq exch def
+				  
+		currenttransfer 
+		fMNegative {
+			{ 1 exch sub } fmConcatProcs
+			dup settransfer
+		} if 
+		cvlit /orgxfer exch def
+	} ifelse
+	end 
+} def 
+/FMBEGINPAGE { 
+	FrameDict begin 
+	/pagesave save def
+	3.86 setmiterlimit
+	/landscape exch 0 ne def
+	landscape { 
+		90 rotate 0 exch dup /pwid exch def neg translate pop 
+	}{
+		pop /pwid exch def
+	} ifelse
+	edown { [-1 0 0 1 pwid 0] concat } if
+	0 0 moveto paperwidth 0 lineto paperwidth paperheight lineto 
+	0 paperheight lineto 0 0 lineto 1 setgray fill
+	xscale yscale scale
+	/orgmatrix matrix def
+	gsave 
+} def 
+/FMENDPAGE {
+	grestore 
+	pagesave restore
+	end 
+	showpage
+	} def 
+/FMFONTDEFINE { 
+	FrameDict begin
+	findfont 
+	ReEncode 
+	1 index exch 
+	definefont 
+	FMfonts 3 1 roll 
+	put
+	end 
+	} def 
+/FMFILLS {
+	FrameDict begin dup
+	array /fillvals exch def
+	dict /patCache exch def
+	end 
+	} def 
+/FMFILL {
+	FrameDict begin
+	 fillvals 3 1 roll put
+	end 
+	} def 
+/FMNORMALIZEGRAPHICS { 
+	newpath
+	1 setlinewidth
+	0 setlinecap
+	0 0 0 sethsbcolor
+	0 setgray 
+	} bind def
+/FMBEGINEPSF { 
+	end 
+	/FMEPSF save def 
+	/showpage {} def 
+% See Adobe's "PostScript Language Reference Manual, 2nd Edition", page 714.
+% "...the following operators MUST NOT be used in an EPS file:" (emphasis ours)
+	/banddevice {(banddevice) FMBADEPSF} def
+	/clear {(clear) FMBADEPSF} def
+	/cleardictstack {(cleardictstack) FMBADEPSF} def 
+	/copypage {(copypage) FMBADEPSF} def
+	/erasepage {(erasepage) FMBADEPSF} def
+	/exitserver {(exitserver) FMBADEPSF} def
+	/framedevice {(framedevice) FMBADEPSF} def
+	/grestoreall {(grestoreall) FMBADEPSF} def
+	/initclip {(initclip) FMBADEPSF} def
+	/initgraphics {(initgraphics) FMBADEPSF} def
+	/quit {(quit) FMBADEPSF} def
+	/renderbands {(renderbands) FMBADEPSF} def
+	/setglobal {(setglobal) FMBADEPSF} def
+	/setpagedevice {(setpagedevice) FMBADEPSF} def
+	/setshared {(setshared) FMBADEPSF} def
+	/startjob {(startjob) FMBADEPSF} def
+	/lettertray {(lettertray) FMBADEPSF} def
+	/letter {(letter) FMBADEPSF} def
+	/lettersmall {(lettersmall) FMBADEPSF} def
+	/11x17tray {(11x17tray) FMBADEPSF} def
+	/11x17 {(11x17) FMBADEPSF} def
+	/ledgertray {(ledgertray) FMBADEPSF} def
+	/ledger {(ledger) FMBADEPSF} def
+	/legaltray {(legaltray) FMBADEPSF} def
+	/legal {(legal) FMBADEPSF} def
+	/statementtray {(statementtray) FMBADEPSF} def
+	/statement {(statement) FMBADEPSF} def
+	/executivetray {(executivetray) FMBADEPSF} def
+	/executive {(executive) FMBADEPSF} def
+	/a3tray {(a3tray) FMBADEPSF} def
+	/a3 {(a3) FMBADEPSF} def
+	/a4tray {(a4tray) FMBADEPSF} def
+	/a4 {(a4) FMBADEPSF} def
+	/a4small {(a4small) FMBADEPSF} def
+	/b4tray {(b4tray) FMBADEPSF} def
+	/b4 {(b4) FMBADEPSF} def
+	/b5tray {(b5tray) FMBADEPSF} def
+	/b5 {(b5) FMBADEPSF} def
+	FMNORMALIZEGRAPHICS 
+	[/fy /fx /fh /fw /ury /urx /lly /llx] {exch def} forall 
+	fx fw 2 div add fy fh 2 div add  translate
+	rotate
+	fw 2 div neg fh 2 div neg translate
+	fw urx llx sub div fh ury lly sub div scale 
+	llx neg lly neg translate 
+	/FMdicttop countdictstack 1 add def 
+	/FMoptop count def 
+	} bind def
+/FMENDEPSF {
+	count -1 FMoptop {pop pop} for 
+	countdictstack -1 FMdicttop {pop end} for 
+	FMEPSF restore
+	FrameDict begin 
+	} bind def
+FrameDict begin 
+/setmanualfeed {
+%%BeginFeature *ManualFeed True
+	 statusdict /manualfeed true put
+%%EndFeature
+	} bind def
+/max {2 copy lt {exch} if pop} bind def
+/min {2 copy gt {exch} if pop} bind def
+/inch {72 mul} def
+/pagedimen { 
+	paperheight sub abs 16 lt exch 
+	paperwidth sub abs 16 lt and
+	{/papername exch def} {pop} ifelse
+	} bind def
+/setpapername { 
+	/papersizedict 14 dict def 
+	papersizedict begin
+	/papername /unknown def 
+		/Letter 8.5 inch 11.0 inch pagedimen
+		/LetterSmall 7.68 inch 10.16 inch pagedimen
+		/Tabloid 11.0 inch 17.0 inch pagedimen
+		/Ledger 17.0 inch 11.0 inch pagedimen
+		/Legal 8.5 inch 14.0 inch pagedimen
+		/Statement 5.5 inch 8.5 inch pagedimen
+		/Executive 7.5 inch 10.0 inch pagedimen
+		/A3 11.69 inch 16.5 inch pagedimen
+		/A4 8.26 inch 11.69 inch pagedimen
+		/A4Small 7.47 inch 10.85 inch pagedimen
+		/B4 10.125 inch 14.33 inch pagedimen
+		/B5 7.16 inch 10.125 inch pagedimen
+	end
+	} bind def
+/papersize {
+	papersizedict begin
+		/Letter {lettertray letter} def
+		/LetterSmall {lettertray lettersmall} def
+		/Tabloid {11x17tray 11x17} def
+		/Ledger {ledgertray ledger} def
+		/Legal {legaltray legal} def
+		/Statement {statementtray statement} def
+		/Executive {executivetray executive} def
+		/A3 {a3tray a3} def
+		/A4 {a4tray a4} def
+		/A4Small {a4tray a4small} def
+		/B4 {b4tray b4} def
+		/B5 {b5tray b5} def
+		/unknown {unknown} def
+	papersizedict dup papername known {papername} {/unknown} ifelse get
+	end
+	statusdict begin stopped end 
+	} bind def
+/manualpapersize {
+	papersizedict begin
+		/Letter {letter} def
+		/LetterSmall {lettersmall} def
+		/Tabloid {11x17} def
+		/Ledger {ledger} def
+		/Legal {legal} def
+		/Statement {statement} def
+		/Executive {executive} def
+		/A3 {a3} def
+		/A4 {a4} def
+		/A4Small {a4small} def
+		/B4 {b4} def
+		/B5 {b5} def
+		/unknown {unknown} def
+	papersizedict dup papername known {papername} {/unknown} ifelse get
+	end
+	stopped 
+	} bind def
+/desperatepapersize {
+	statusdict /setpageparams known
+		{
+		paperwidth paperheight 0 1 
+		statusdict begin
+		{setpageparams} stopped 
+		end
+		} {true} ifelse 
+	} bind def
+/papersizefailure {
+	FMAllowPaperSizeMismatch not
+		{
+(The requested paper size is not available in any currently-installed tray)
+(Edit the PS file to "FMAllowPaperSizeMismatch true" to use default tray)
+		 FMFAILURE } if
+	} def
+/DiacriticEncoding [
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /space /exclam /quotedbl
+/numbersign /dollar /percent /ampersand /quotesingle /parenleft
+/parenright /asterisk /plus /comma /hyphen /period /slash /zero /one
+/two /three /four /five /six /seven /eight /nine /colon /semicolon
+/less /equal /greater /question /at /A /B /C /D /E /F /G /H /I /J /K
+/L /M /N /O /P /Q /R /S /T /U /V /W /X /Y /Z /bracketleft /backslash
+/bracketright /asciicircum /underscore /grave /a /b /c /d /e /f /g /h
+/i /j /k /l /m /n /o /p /q /r /s /t /u /v /w /x /y /z /braceleft /bar
+/braceright /asciitilde /.notdef /Adieresis /Aring /Ccedilla /Eacute
+/Ntilde /Odieresis /Udieresis /aacute /agrave /acircumflex /adieresis
+/atilde /aring /ccedilla /eacute /egrave /ecircumflex /edieresis
+/iacute /igrave /icircumflex /idieresis /ntilde /oacute /ograve
+/ocircumflex /odieresis /otilde /uacute /ugrave /ucircumflex
+/udieresis /dagger /.notdef /cent /sterling /section /bullet
+/paragraph /germandbls /registered /copyright /trademark /acute
+/dieresis /.notdef /AE /Oslash /.notdef /.notdef /.notdef /.notdef
+/yen /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/ordfeminine /ordmasculine /.notdef /ae /oslash /questiondown
+/exclamdown /logicalnot /.notdef /florin /.notdef /.notdef
+/guillemotleft /guillemotright /ellipsis /.notdef /Agrave /Atilde
+/Otilde /OE /oe /endash /emdash /quotedblleft /quotedblright
+/quoteleft /quoteright /.notdef /.notdef /ydieresis /Ydieresis
+/fraction /currency /guilsinglleft /guilsinglright /fi /fl /daggerdbl
+/periodcentered /quotesinglbase /quotedblbase /perthousand
+/Acircumflex /Ecircumflex /Aacute /Edieresis /Egrave /Iacute
+/Icircumflex /Idieresis /Igrave /Oacute /Ocircumflex /.notdef /Ograve
+/Uacute /Ucircumflex /Ugrave /dotlessi /circumflex /tilde /macron
+/breve /dotaccent /ring /cedilla /hungarumlaut /ogonek /caron
+] def
+/ReEncode { 
+	dup 
+	length 
+	dict begin 
+	{
+	1 index /FID ne 
+		{def} 
+		{pop pop} ifelse 
+	} forall 
+	0 eq {/Encoding DiacriticEncoding def} if 
+	currentdict 
+	end 
+	} bind def
+FMPColor 
+	
+	{
+	/BEGINBITMAPCOLOR { 
+		BITMAPCOLOR} def
+	/BEGINBITMAPCOLORc { 
+		BITMAPCOLORc} def
+	/BEGINBITMAPTRUECOLOR { 
+		BITMAPTRUECOLOR } def
+	/BEGINBITMAPTRUECOLORc { 
+		BITMAPTRUECOLORc } def
+	/BEGINBITMAPCMYK { 
+		BITMAPCMYK } def
+	/BEGINBITMAPCMYKc { 
+		BITMAPCMYKc } def
+	}
+	
+	{
+	/BEGINBITMAPCOLOR { 
+		BITMAPGRAY} def
+	/BEGINBITMAPCOLORc { 
+		BITMAPGRAYc} def
+	/BEGINBITMAPTRUECOLOR { 
+		BITMAPTRUEGRAY } def
+	/BEGINBITMAPTRUECOLORc { 
+		BITMAPTRUEGRAYc } def
+	/BEGINBITMAPCMYK { 
+		BITMAPCMYKGRAY } def
+	/BEGINBITMAPCMYKc { 
+		BITMAPCMYKGRAYc } def
+	}
+ifelse
+/K { 
+	FMPrintAllColorsAsBlack {
+		dup 1 eq 2 index 1 eq and 3 index 1 eq and not
+			{7 {pop} repeat 0 0 0 1 0 0 0} if
+	} if 
+	FrameCurColors astore 
+	pop combineColor
+} bind def
+/graymode true def
+fMLevel1 {
+	/fmGetFlip {
+		fMatrix2 exch get mul 0 lt { -1 } { 1 } ifelse
+	} FmBD
+} if
+/setPatternMode {
+	fMLevel1 {
+		2 index patScreenDict exch known {
+			pop pop
+			patScreenDict exch get aload pop 
+			freq 								
+			mul									
+			5 2 roll							
+			fMatrix2 currentmatrix 1 get 0 ne {
+				3 -1 roll 90 add 3 1 roll 		
+				sflipx 1 fmGetFlip sflipy 2 fmGetFlip neg mul
+			} {  								
+				sflipx 0 fmGetFlip sflipy 3 fmGetFlip mul 
+			} ifelse
+			0 lt {exch pop} {pop} ifelse 		
+			fMNegative { 
+				{neg} fmConcatProcs 			
+			} if
+			bind
+			
+			
+			
+			systemdict /setscreen get exec		
+			/FrameCurGray exch def
+		} {
+			/bwidth  exch def
+			/bpside  exch def
+			/bstring exch def
+			/onbits 0 def  /offbits 0 def
+			freq sangle landscape {90 add} if 
+				{/ypoint exch def
+				 /xpoint exch def
+				 /xindex xpoint 1 add 2 div bpside mul cvi def
+				 /yindex ypoint 1 add 2 div bpside mul cvi def
+				 bstring yindex bwidth mul xindex 8 idiv add get
+				 1 7 xindex 8 mod sub bitshift and 0 ne fMNegative {not} if
+				 {/onbits  onbits  1 add def 1}
+				 {/offbits offbits 1 add def 0}
+				 ifelse
+				}
+				setscreen
+			offbits offbits onbits add div fMNegative {1.0 exch sub} if
+			/FrameCurGray exch def
+		} ifelse
+	} { 
+		pop pop
+		dup patCache exch known {
+			patCache exch get
+		} { 
+			dup
+			patDict /bstring 3 -1 roll put
+			patDict 
+			9 PatFreq screenIndex get div dup matrix scale
+			makepattern
+			dup 
+			patCache 4 -1 roll 3 -1 roll put
+		} ifelse
+		/FrameCurGray 0 def
+		/FrameCurPat exch def
+	} ifelse
+	/graymode false def
+	combineColor
+} bind def
+/setGrayScaleMode {
+	graymode not {
+		/graymode true def
+		fMLevel1 {
+			setCurrentScreen
+		} if
+	} if
+	/FrameCurGray exch def
+	combineColor
+} bind def
+/normalize {
+	transform round exch round exch itransform
+	} bind def
+/dnormalize {
+	dtransform round exch round exch idtransform
+	} bind def
+/lnormalize { 
+	0 dtransform exch cvi 2 idiv 2 mul 1 add exch idtransform pop
+	} bind def
+/H { 
+	lnormalize setlinewidth
+	} bind def
+/Z {
+	setlinecap
+	} bind def
+	
+/PFill {
+	graymode fMLevel1 or not {
+		gsave 1 setgray eofill grestore
+	} if
+} bind def
+/PStroke {
+	graymode fMLevel1 or not {
+		gsave 1 setgray stroke grestore
+	} if
+	stroke
+} bind def
+/X { 
+	fillvals exch get
+	dup type /stringtype eq
+	{8 1 setPatternMode} 
+	{setGrayScaleMode}
+	ifelse
+	} bind def
+/V { 
+	PFill gsave eofill grestore
+	} bind def
+/Vclip {
+	clip
+	} bind def
+/Vstrk {
+	currentlinewidth exch setlinewidth PStroke setlinewidth
+	} bind def
+/N { 
+	PStroke
+	} bind def
+/Nclip {
+	strokepath clip newpath
+	} bind def
+/Nstrk {
+	currentlinewidth exch setlinewidth PStroke setlinewidth
+	} bind def
+/M {newpath moveto} bind def
+/E {lineto} bind def
+/D {curveto} bind def
+/O {closepath} bind def
+/L { 
+ 	/n exch def
+	newpath
+	normalize
+	moveto 
+	2 1 n {pop normalize lineto} for
+	} bind def
+/Y { 
+	L 
+	closepath
+	} bind def
+/R { 
+	/y2 exch def
+	/x2 exch def
+	/y1 exch def
+	/x1 exch def
+	x1 y1
+	x2 y1
+	x2 y2
+	x1 y2
+	4 Y 
+	} bind def
+/rarc 
+	{rad 
+	 arcto
+	} bind def
+/RR { 
+	/rad exch def
+	normalize
+	/y2 exch def
+	/x2 exch def
+	normalize
+	/y1 exch def
+	/x1 exch def
+	mark
+	newpath
+	{
+	x1 y1 rad add moveto
+	x1 y2 x2 y2 rarc
+	x2 y2 x2 y1 rarc
+	x2 y1 x1 y1 rarc
+	x1 y1 x1 y2 rarc
+	closepath
+	} stopped {x1 y1 x2 y2 R} if 
+	cleartomark
+	} bind def
+/RRR { 
+	/rad exch def
+	normalize /y4 exch def /x4 exch def
+	normalize /y3 exch def /x3 exch def
+	normalize /y2 exch def /x2 exch def
+	normalize /y1 exch def /x1 exch def
+	newpath
+	normalize moveto 
+	mark
+	{
+	x2 y2 x3 y3 rarc
+	x3 y3 x4 y4 rarc
+	x4 y4 x1 y1 rarc
+	x1 y1 x2 y2 rarc
+	closepath
+	} stopped
+	 {x1 y1 x2 y2 x3 y3 x4 y4 newpath moveto lineto lineto lineto closepath} if
+	cleartomark
+	} bind def
+/C { 
+	grestore
+	gsave
+	R 
+	clip
+	setCurrentScreen
+} bind def
+/CP { 
+	grestore
+	gsave
+	Y 
+	clip
+	setCurrentScreen
+} bind def
+/F { 
+	FMfonts exch get
+	FMpointsize scalefont
+	setfont
+	} bind def
+/Q { 
+	/FMpointsize exch def
+	F 
+	} bind def
+/T { 
+	moveto show
+	} bind def
+/RF { 
+	rotate
+	0 ne {-1 1 scale} if
+	} bind def
+/TF { 
+	gsave
+	moveto 
+	RF
+	show
+	grestore
+	} bind def
+/P { 
+	moveto
+	0 32 3 2 roll widthshow
+	} bind def
+/PF { 
+	gsave
+	moveto 
+	RF
+	0 32 3 2 roll widthshow
+	grestore
+	} bind def
+/S { 
+	moveto
+	0 exch ashow
+	} bind def
+/SF { 
+	gsave
+	moveto
+	RF
+	0 exch ashow
+	grestore
+	} bind def
+/B { 
+	moveto
+	0 32 4 2 roll 0 exch awidthshow
+	} bind def
+/BF { 
+	gsave
+	moveto
+	RF
+	0 32 4 2 roll 0 exch awidthshow
+	grestore
+	} bind def
+/G { 
+	gsave
+	newpath
+	normalize translate 0.0 0.0 moveto 
+	dnormalize scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	closepath 
+	PFill fill
+	grestore
+	} bind def
+/Gstrk {
+	savematrix
+    newpath
+    2 index 2 div add exch 3 index 2 div sub exch 
+    normalize 2 index 2 div sub exch 3 index 2 div add exch 
+    translate
+    scale 
+    0.0 0.0 1.0 5 3 roll arc 
+    restorematrix
+    currentlinewidth exch setlinewidth PStroke setlinewidth
+    } bind def
+/Gclip { 
+	newpath
+	savematrix
+	normalize translate 0.0 0.0 moveto 
+	dnormalize scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	closepath 
+	clip newpath
+	restorematrix
+	} bind def
+/GG { 
+	gsave
+	newpath
+	normalize translate 0.0 0.0 moveto 
+	rotate 
+	dnormalize scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	closepath
+	PFill
+	fill
+	grestore
+	} bind def
+/GGclip { 
+	savematrix
+	newpath
+    normalize translate 0.0 0.0 moveto 
+    rotate 
+    dnormalize scale 
+    0.0 0.0 1.0 5 3 roll arc 
+    closepath
+	clip newpath
+	restorematrix
+	} bind def
+/GGstrk { 
+	savematrix
+    newpath
+    normalize translate 0.0 0.0 moveto 
+    rotate 
+    dnormalize scale 
+    0.0 0.0 1.0 5 3 roll arc 
+    closepath 
+	restorematrix
+    currentlinewidth exch setlinewidth PStroke setlinewidth
+	} bind def
+/A { 
+	gsave
+	savematrix
+	newpath
+	2 index 2 div add exch 3 index 2 div sub exch 
+	normalize 2 index 2 div sub exch 3 index 2 div add exch 
+	translate 
+	scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	restorematrix
+	PStroke
+	grestore
+	} bind def
+/Aclip {
+	newpath
+	savematrix
+	normalize translate 0.0 0.0 moveto 
+	dnormalize scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	closepath 
+	strokepath clip newpath
+	restorematrix
+} bind def
+/Astrk {
+	Gstrk
+} bind def
+/AA { 
+	gsave
+	savematrix
+	newpath
+	
+	3 index 2 div add exch 4 index 2 div sub exch 
+	
+	normalize 3 index 2 div sub exch 4 index 2 div add exch
+	translate 
+	rotate 
+	scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	restorematrix
+	PStroke
+	grestore
+	} bind def
+/AAclip {
+	savematrix
+	newpath
+    normalize translate 0.0 0.0 moveto 
+    rotate 
+    dnormalize scale 
+    0.0 0.0 1.0 5 3 roll arc 
+    closepath
+	strokepath clip newpath
+	restorematrix
+} bind def
+/AAstrk {
+	GGstrk
+} bind def
+/BEGINPRINTCODE { 
+	/FMdicttop countdictstack 1 add def 
+	/FMoptop count 7 sub def 
+	/FMsaveobject save def
+	userdict begin 
+	/showpage {} def 
+	FMNORMALIZEGRAPHICS 
+	3 index neg 3 index neg translate
+	} bind def
+/ENDPRINTCODE {
+	count -1 FMoptop {pop pop} for 
+	countdictstack -1 FMdicttop {pop end} for 
+	FMsaveobject restore 
+	} bind def
+/gn { 
+	0 
+	{	46 mul 
+		cf read pop 
+		32 sub 
+		dup 46 lt {exit} if 
+		46 sub add 
+		} loop
+	add 
+	} bind def
+/cfs { 
+	/str sl string def 
+	0 1 sl 1 sub {str exch val put} for 
+	str def 
+	} bind def
+/ic [ 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0223
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0223
+	0
+	{0 hx} {1 hx} {2 hx} {3 hx} {4 hx} {5 hx} {6 hx} {7 hx} {8 hx} {9 hx}
+	{10 hx} {11 hx} {12 hx} {13 hx} {14 hx} {15 hx} {16 hx} {17 hx} {18 hx}
+	{19 hx} {gn hx} {0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12}
+	{13} {14} {15} {16} {17} {18} {19} {gn} {0 wh} {1 wh} {2 wh} {3 wh}
+	{4 wh} {5 wh} {6 wh} {7 wh} {8 wh} {9 wh} {10 wh} {11 wh} {12 wh}
+	{13 wh} {14 wh} {gn wh} {0 bl} {1 bl} {2 bl} {3 bl} {4 bl} {5 bl} {6 bl}
+	{7 bl} {8 bl} {9 bl} {10 bl} {11 bl} {12 bl} {13 bl} {14 bl} {gn bl}
+	{0 fl} {1 fl} {2 fl} {3 fl} {4 fl} {5 fl} {6 fl} {7 fl} {8 fl} {9 fl}
+	{10 fl} {11 fl} {12 fl} {13 fl} {14 fl} {gn fl}
+	] def
+/ms { 
+	/sl exch def 
+	/val 255 def 
+	/ws cfs 
+	/im cfs 
+	/val 0 def 
+	/bs cfs 
+	/cs cfs 
+	} bind def
+400 ms 
+/ip { 
+	is 
+	0 
+	cf cs readline pop 
+	{	ic exch get exec 
+		add 
+		} forall 
+	pop 
+	
+	} bind def
+/rip { 
+	   
+	  
+	  bis ris copy pop 
+      is
+      0
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+	  pop pop 
+	  ris gis copy pop 
+	  dup is exch 
+	  
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+	  pop pop
+	  gis bis copy pop 
+	  dup add is exch 
+	  
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+      pop 
+      
+      } bind def
+/rip4 { 
+	   
+	  
+	  kis cis copy pop 
+      is
+      0
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+	  pop pop 
+	  cis mis copy pop 
+	  dup is exch 
+	  
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+	  pop pop
+	  mis yis copy pop 
+	  dup dup add is exch 
+	  
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+	  pop pop
+	  yis kis copy pop 
+	  3 mul is exch 
+	  
+      cf cs readline pop 
+      {       ic exch get exec 
+              add 
+              } forall 
+      pop 
+      
+      } bind def
+/wh { 
+	/len exch def 
+	/pos exch def 
+	ws 0 len getinterval im pos len getinterval copy pop
+	pos len 
+	} bind def
+/bl { 
+	/len exch def 
+	/pos exch def 
+	bs 0 len getinterval im pos len getinterval copy pop
+	pos len 
+	} bind def
+/s1 1 string def
+/fl { 
+	/len exch def 
+	/pos exch def 
+	/val cf s1 readhexstring pop 0 get def
+	pos 1 pos len add 1 sub {im exch val put} for
+	pos len 
+	} bind def
+/hx { 
+	3 copy getinterval 
+	cf exch readhexstring pop pop 
+	} bind def
+/wbytes { 
+      dup dup
+      8 gt { pop 8 idiv mul }
+      { 8 eq {pop} {1 eq {7 add 8 idiv} {3 add 4 idiv} ifelse} ifelse } ifelse
+	} bind def
+/BEGINBITMAPBWc { 
+	1 {} COMMONBITMAPc
+	} bind def
+/BEGINBITMAPGRAYc { 
+	8 {} COMMONBITMAPc
+	} bind def
+/BEGINBITMAP2BITc { 
+	2 {} COMMONBITMAPc
+	} bind def
+/COMMONBITMAPc { 
+		 
+	/cvtProc exch def
+	/depth exch def
+	gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+	/bitmapsave save def 
+	cvtProc                
+	/is im 0 lb getinterval def 
+	ws 0 lb getinterval is copy pop 
+	/cf currentfile def 
+	width height depth [width 0 0 height neg 0 height] 
+	{ip} image 
+	bitmapsave restore 
+	grestore
+	} bind def
+/BEGINBITMAPBW { 
+	1 {} COMMONBITMAP
+	} bind def
+/BEGINBITMAPGRAY { 
+	8 {} COMMONBITMAP
+	} bind def
+/BEGINBITMAP2BIT { 
+	2 {} COMMONBITMAP
+	} bind def
+/COMMONBITMAP { 
+	/cvtProc exch def
+	/depth exch def
+	gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/bitmapsave save def 
+	cvtProc              
+	/is width depth wbytes string def
+	/cf currentfile def 
+	width height depth [width 0 0 height neg 0 height] 
+	{cf is readhexstring pop} image
+	bitmapsave restore 
+	grestore
+	} bind def
+/ngrayt 256 array def
+/nredt 256 array def
+/nbluet 256 array def
+/ngreent 256 array def
+fMLevel1 {
+/colorsetup {
+	currentcolortransfer
+	/gryt exch def
+	/blut exch def
+	/grnt exch def
+	/redt exch def
+	0 1 255 {
+		/indx exch def
+		/cynu 1 red indx get 255 div sub def
+		/magu 1 green indx get 255 div sub def
+		/yelu 1 blue indx get 255 div sub def
+		/kk cynu magu min yelu min def
+		/u kk currentundercolorremoval exec def
+%		/u 0 def
+		nredt indx 1 0 cynu u sub max sub redt exec put
+		ngreent indx 1 0 magu u sub max sub grnt exec put
+		nbluet indx 1 0 yelu u sub max sub blut exec put
+		ngrayt indx 1 kk currentblackgeneration exec sub gryt exec put
+	} for
+	{255 mul cvi nredt exch get}
+	{255 mul cvi ngreent exch get}
+	{255 mul cvi nbluet exch get}
+	{255 mul cvi ngrayt exch get}
+	setcolortransfer
+	{pop 0} setundercolorremoval
+	{} setblackgeneration
+	} bind def
+}
+{
+/colorSetup2 {
+	[ /Indexed /DeviceRGB 255 
+		{dup red exch get 255 div 
+		 exch dup green exch get 255 div 
+		 exch blue exch get 255 div}
+	] setcolorspace
+} bind def
+} ifelse
+/fakecolorsetup {
+	/tran 256 string def
+	0 1 255 {/indx exch def 
+		tran indx
+		red indx get 77 mul
+		green indx get 151 mul
+		blue indx get 28 mul
+		add add 256 idiv put} for
+	currenttransfer
+	{255 mul cvi tran exch get 255.0 div}
+	exch fmConcatProcs settransfer
+} bind def
+/BITMAPCOLOR { 
+	/depth 8 def
+	gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/bitmapsave save def
+	fMLevel1 {	
+		colorsetup
+		/is width depth wbytes string def
+		/cf currentfile def 
+		width height depth [width 0 0 height neg 0 height] 
+		{cf is readhexstring pop} {is} {is} true 3 colorimage 
+	} {
+		colorSetup2
+		/is width depth wbytes string def
+		/cf currentfile def 
+		7 dict dup begin
+			/ImageType 1 def
+			/Width width def
+			/Height height def
+			/ImageMatrix [width 0 0 height neg 0 height] def
+			/DataSource {cf is readhexstring pop} bind def
+			/BitsPerComponent depth def
+			/Decode [0 255] def
+		end image	
+	} ifelse
+	bitmapsave restore 
+	grestore
+	} bind def
+/BITMAPCOLORc { 
+	/depth 8 def
+	gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+	/bitmapsave save def 
+	fMLevel1 {	
+		colorsetup
+		/is im 0 lb getinterval def 
+		ws 0 lb getinterval is copy pop 
+		/cf currentfile def 
+		width height depth [width 0 0 height neg 0 height] 
+		{ip} {is} {is} true 3 colorimage
+	} {
+		colorSetup2
+		/is im 0 lb getinterval def 
+		ws 0 lb getinterval is copy pop 
+		/cf currentfile def 
+		7 dict dup begin
+			/ImageType 1 def
+			/Width width def
+			/Height height def
+			/ImageMatrix [width 0 0 height neg 0 height] def
+			/DataSource {ip} bind def
+			/BitsPerComponent depth def
+			/Decode [0 255] def
+		end image	
+	} ifelse
+	bitmapsave restore 
+	grestore
+	} bind def
+/BITMAPTRUECOLORc { 
+	/depth 24 def
+        gsave
+ 	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+	/bitmapsave save def 
+        
+	/is im 0 lb getinterval def	
+	/ris im 0 width getinterval def	
+	/gis im width width getinterval def	
+	/bis im width 2 mul width getinterval def 
+        
+	ws 0 lb getinterval is copy pop 
+	/cf currentfile def 
+	width height 8 [width 0 0 height neg 0 height] 
+	{width rip pop ris} {gis} {bis} true 3 colorimage
+	bitmapsave restore 
+	grestore
+	} bind def
+/BITMAPCMYKc { 
+	/depth 32 def
+        gsave
+ 	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+	/bitmapsave save def 
+        
+	/is im 0 lb getinterval def	
+	/cis im 0 width getinterval def	
+	/mis im width width getinterval def	
+	/yis im width 2 mul width getinterval def 
+	/kis im width 3 mul width getinterval def 
+        
+	ws 0 lb getinterval is copy pop 
+	/cf currentfile def 
+	width height 8 [width 0 0 height neg 0 height] 
+	{width rip4 pop cis} {mis} {yis} {kis} true 4 colorimage
+	bitmapsave restore 
+	grestore
+	} bind def
+/BITMAPTRUECOLOR { 
+        gsave
+		
+		3 index 2 div add exch	
+		4 index 2 div add exch	
+		translate		
+		rotate			
+		1 index 2 div neg	
+		1 index 2 div neg	
+		translate		
+		scale			
+		/height exch def /width exch def
+        /bitmapsave save def 
+        /is width string def
+        /gis width string def
+        /bis width string def
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        { cf is readhexstring pop } 
+        { cf gis readhexstring pop } 
+        { cf bis readhexstring pop } 
+        true 3 colorimage 
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPCMYK { 
+        gsave
+		
+		3 index 2 div add exch	
+		4 index 2 div add exch	
+		translate		
+		rotate			
+		1 index 2 div neg	
+		1 index 2 div neg	
+		translate		
+		scale			
+		/height exch def /width exch def
+        /bitmapsave save def 
+        /is width string def
+        /mis width string def
+        /yis width string def
+        /kis width string def
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        { cf is readhexstring pop } 
+        { cf mis readhexstring pop } 
+        { cf yis readhexstring pop } 
+        { cf kis readhexstring pop } 
+        true 4 colorimage 
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPTRUEGRAYc { 
+	/depth 24 def
+        gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+        /bitmapsave save def 
+        
+	/is im 0 lb getinterval def	
+	/ris im 0 width getinterval def	
+	/gis im width width getinterval def	
+	/bis im width 2 mul width getinterval def 
+        ws 0 lb getinterval is copy pop 
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        {width rip pop ris gis bis width gray} image
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPCMYKGRAYc { 
+	/depth 32 def
+        gsave
+	
+	3 index 2 div add exch	
+	4 index 2 div add exch	
+	translate		
+	rotate			
+	1 index 2 div neg	
+	1 index 2 div neg	
+	translate		
+	scale			
+	/height exch def /width exch def
+	/lb width depth wbytes def 
+	sl lb lt {lb ms} if 
+        /bitmapsave save def 
+        
+	/is im 0 lb getinterval def	
+	/cis im 0 width getinterval def	
+	/mis im width width getinterval def	
+	/yis im width 2 mul width getinterval def 
+	/kis im width 3 mul width getinterval def 
+        ws 0 lb getinterval is copy pop 
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        {width rip pop cis mis yis kis width cgray} image
+        bitmapsave restore 
+        grestore
+        } bind def
+/cgray { 
+        /ww exch def
+        /k exch def
+        /y exch def
+        /m exch def
+        /c exch def
+        0 1 ww 1 sub { /i exch def c i get m i get y i get k i get CMYKtoRGB
+				.144 mul 3 1 roll .587 mul 3 1 roll .299 mul add add
+				c i 3 -1 roll floor cvi put } for
+        c
+ 		} bind def
+/gray { 
+        /ww exch def
+        /b exch def
+        /g exch def
+        /r exch def
+        0 1 ww 1 sub { /i exch def r i get .299 mul g i get .587 mul
+			b i get .114 mul add add r i 3 -1 roll floor cvi put } for
+        r
+        } bind def
+/BITMAPTRUEGRAY { 
+        gsave
+		
+		3 index 2 div add exch	
+		4 index 2 div add exch	
+		translate		
+		rotate			
+		1 index 2 div neg	
+		1 index 2 div neg	
+		translate		
+		scale			
+		/height exch def /width exch def
+        /bitmapsave save def 
+        /is width string def
+        /gis width string def
+        /bis width string def
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        { cf is readhexstring pop 
+          cf gis readhexstring pop 
+          cf bis readhexstring pop width gray}  image
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPCMYKGRAY { 
+        gsave
+		
+		3 index 2 div add exch	
+		4 index 2 div add exch	
+		translate		
+		rotate			
+		1 index 2 div neg	
+		1 index 2 div neg	
+		translate		
+		scale			
+		/height exch def /width exch def
+        /bitmapsave save def 
+        /is width string def
+        /yis width string def
+        /mis width string def
+        /kis width string def
+        /cf currentfile def 
+        width height 8 [width 0 0 height neg 0 height] 
+        { cf is readhexstring pop 
+          cf mis readhexstring pop 
+          cf yis readhexstring pop 
+          cf kis readhexstring pop width cgray}  image
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPGRAY { 
+	8 {fakecolorsetup} COMMONBITMAP
+	} bind def
+/BITMAPGRAYc { 
+	8 {fakecolorsetup} COMMONBITMAPc
+	} bind def
+/ENDBITMAP {
+	} bind def
+end 
+	/ALDmatrix matrix def ALDmatrix currentmatrix pop
+/StartALD {
+	/ALDsave save def
+	 savematrix
+	 ALDmatrix setmatrix
+	} bind def
+/InALD {
+	 restorematrix
+	} bind def
+/DoneALD {
+	 ALDsave restore
+	} bind def
+/I { setdash } bind def
+/J { [] 0 setdash } bind def
+%%EndProlog
+%%BeginSetup
+(5.0) FMVERSION
+1 1 0 0 595.3 841.9 0 1 6 FMDOCUMENT
+0 0 /NewCenturySchlbk-Roman FMFONTDEFINE
+1 0 /NewCenturySchlbk-Bold FMFONTDEFINE
+2 0 /NewCenturySchlbk-Italic FMFONTDEFINE
+3 0 /Courier FMFONTDEFINE
+32 FMFILLS
+0 0 FMFILL
+1 0.1 FMFILL
+2 0.3 FMFILL
+3 0.5 FMFILL
+4 0.7 FMFILL
+5 0.9 FMFILL
+6 0.97 FMFILL
+7 1 FMFILL
+8 <0f1e3c78f0e1c387> FMFILL
+9 <0f87c3e1f0783c1e> FMFILL
+10 <cccccccccccccccc> FMFILL
+11 <ffff0000ffff0000> FMFILL
+12 <8142241818244281> FMFILL
+13 <03060c183060c081> FMFILL
+14 <8040201008040201> FMFILL
+16 1 FMFILL
+17 0.9 FMFILL
+18 0.7 FMFILL
+19 0.5 FMFILL
+20 0.3 FMFILL
+21 0.1 FMFILL
+22 0.03 FMFILL
+23 0 FMFILL
+24 <f0e1c3870f1e3c78> FMFILL
+25 <f0783c1e0f87c3e1> FMFILL
+26 <3333333333333333> FMFILL
+27 <0000ffff0000ffff> FMFILL
+28 <7ebddbe7e7dbbd7e> FMFILL
+29 <fcf9f3e7cf9f3f7e> FMFILL
+30 <7fbfdfeff7fbfdfe> FMFILL
+%%EndSetup
+%%Page: "1" 1
+%%BeginPaperSize: A4
+%%EndPaperSize
+595.3 841.9 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+J
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+72.86 793.47 522.44 805.47 R
+7 X
+0 0 0 1 0 0 0 K
+V
+0 12 Q
+0 X
+(< Linux Wireless LAN Howto >) 210.48 797.47 T
+72.86 50.57 522.44 62.57 R
+7 X
+V
+0 X
+(1) 294.31 54.57 T
+70.88 90.86 524.42 751.05 R
+7 X
+V
+406.46 740.31 188.84 740.31 2 L
+0 X
+V
+0.7 H
+0 Z
+N
+1 14 Q
+(Wireless Extensions for Linux) 188.84 741.71 T
+1 12 Q
+(Jean Tourrilhes) 247.6 709.05 T
+(23 January 97) 254.21 677.05 T
+2 10 Q
+(A Wireless LAN API for the Linux operating system.) 99.22 642.38 T
+1 14 Q
+(1) 70.88 611.71 T
+( Introduction) 85.05 611.71 T
+0 12 Q
+3.99 (The purpose of this document is to give an overview of the) 99.22 593.05 P
+1 F
+4.12 (Wireless) 471.98 593.05 P
+1.37 (Extensions) 70.88 579.05 P
+0 F
+1.33 (. The first part will explain the reason of this development and the) 139.53 579.05 P
+2.4 (generals ideas behind this work. Then, we will give the current status of the) 70.88 565.05 P
+-0.31 (development. The third part will explore the user interface. We will finish by some) 70.88 551.05 P
+(implementation details and the possible evolution of the Wireless Extensions.) 70.88 537.05 T
+0.27 (This document is a part of the Linux Wireless LAN Howto. Please refer to it) 99.22 519.05 P
+(for details.) 70.88 505.05 T
+1 14 Q
+(2) 70.88 473.71 T
+( Philosophy & Goal) 85.05 473.71 T
+0 12 Q
+-0.49 (It all started when I tried to install a) 99.22 455.05 P
+1 F
+-0.51 (Wavelan) 302.85 455.05 P
+0 F
+-0.49 ( network on) 355.95 455.05 P
+1 F
+-0.51 (Linux) 423.59 455.05 P
+0 F
+-0.49 ( computers.) 460.47 455.05 P
+0.62 (I was having a ISA and a PCMCIA versions of the Wavelan, and the two drivers) 70.88 441.05 P
+0.29 (were using totally different methods for the setup and collection of statistics \050and) 70.88 427.05 P
+1.15 (in fact fairly incomplete...\051. As my small hard disks didn\325t allow me to reboot to) 70.88 413.05 P
+(DOS to set up those missing parameters, I started to modify the driver code.) 70.88 399.05 T
+0.33 (I decided to define a wireless API which would allow the user to manipulate) 99.22 381.05 P
+-0.26 (any wireless networking device in a) 70.88 367.05 P
+1 F
+-0.27 (standard) 270.65 367.05 P
+0 F
+-0.26 ( and) 326.88 367.05 P
+1 F
+-0.27 (uniform) 353.91 367.05 P
+0 F
+-0.26 ( way. Of course, those) 404.58 367.05 P
+0.7 (devices are fundamentally different, so the standardisation would only be on the) 70.88 353.05 P
+-0.01 (methods but not on the values \050a Network ID is always a parameter that you may) 70.88 339.05 P
+1.07 (set and get and use to distinguish logical networks, but some devices might use) 70.88 325.05 P
+0.39 (4) 70.88 311.05 P
+0.39 (bits and others 16) 80.88 311.05 P
+0.39 (bits, and the effect of a change may be immediate or delayed) 185.19 311.05 P
+(after a reconfiguration of the device...\051.) 70.88 297.05 T
+-0.55 (This interface would need to be flexible and extensible. The primary need was) 99.22 279.05 P
+5.01 (for device) 70.88 265.05 P
+1 F
+5.17 (configuration) 137.33 265.05 P
+0 F
+5.01 (, but wireless) 222.88 265.05 P
+1 F
+5.17 (statistics) 315.26 265.05 P
+0 F
+5.01 ( and the development of) 371.48 265.05 P
+1 F
+0.65 (wireless aware applications) 70.88 251.05 P
+0 F
+0.63 ( was desirable. I needed also something simple to) 245.97 251.05 P
+0.59 (implement and conform to the Linux standard to have something much easier to) 70.88 237.05 P
+-0.38 (share and maintain. The interface would need to evolve with the apparition of new) 70.88 223.05 P
+(products and with specific needs.) 70.88 209.05 T
+0.76 (I tried to be as generic as possible, but I was obliged to restrict myself on a) 99.22 191.05 P
+-0.21 (specific set of devices. I focused on the) 70.88 177.05 P
+1 F
+-0.22 (Wireless LAN) 283.39 177.05 P
+0 F
+-0.21 ( type of devices \050indoor radio) 366.82 177.05 P
+1.61 (networks\051, which appears in the operating system as a normal network device.) 70.88 163.05 P
+1 F
+-0.19 (AX25) 70.88 149.05 P
+0 F
+-0.19 ( \050Amateur Radio\051 devices are too specific and have already their own specific) 102.42 149.05 P
+-0.52 (network stack and tools. I also ruled out) 70.88 135.05 P
+1 F
+-0.54 (cellular data) 292.96 135.05 P
+0 F
+-0.52 ( \050data over GSM and mobile) 371.66 135.05 P
+2.51 (phone\051 and medium and long distance wireless communications because their) 70.88 121.05 P
+1.29 (interface are quite different and they don\325t operate in the same way.) 70.88 107.05 P
+1 F
+1.33 (InfraRed) 467.97 107.05 P
+FMENDPAGE
+%%EndPage: "1" 1
+%%Page: "2" 2
+595.3 841.9 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+72.86 793.47 522.44 805.47 R
+7 X
+0 0 0 1 0 0 0 K
+V
+0 12 Q
+0 X
+(< Linux Wireless LAN Howto >) 210.48 797.47 T
+72.86 50.57 522.44 62.57 R
+7 X
+V
+0 X
+(2) 294.31 54.57 T
+70.88 90.86 524.42 751.05 R
+7 X
+V
+0 X
+0.03 (should be similar enough to Radio LANs to benefit from this interface \050if someday) 70.88 743.05 P
+(an InfraRed network driver for Linux appears\051.) 70.88 729.05 T
+2.23 (As it was only an extension to the current Linux networking interface, I) 99.22 711.05 P
+2.55 (decided to call it \322Wireless Extensions\323. The words interface and API are too) 70.88 697.05 P
+(ambitious for this simple set of tools.) 70.88 683.05 T
+1 14 Q
+(3) 70.88 651.71 T
+( Availability) 85.05 651.71 T
+0 12 Q
+2.73 (The wireless extensions have been implemented in three complementary) 99.22 633.05 P
+2.81 (parts. The first part is the user interface, a set of tools to manipulate those) 70.88 619.05 P
+0.82 (extensions. The second part is a modification of the Linux kernel to support and) 70.88 605.05 P
+-0.52 (define the extensions. The third part is the hardware interface and is implemented) 70.88 591.05 P
+3.46 (in each network driver itself to map the extensions to the actual hardware) 70.88 577.05 P
+(manipulations.) 70.88 563.05 T
+-0.02 (The kernel modifications have been included in the last Linux releases \050from) 99.22 545.05 P
+1.14 (2.0.30 and 2.1.17\051 and so the kernel now supports them. Users of release 1.2.13) 70.88 531.05 P
+2.22 (may use a patch to add the support in their kernels. By default, the wireless) 70.88 517.05 P
+2.86 (extensions are disabled, and users need to enable the) 70.88 503.05 P
+2 F
+2.86 (CONFIG_NET_RADIO) 394.86 503.05 P
+0 F
+0.97 (option in the kernel configuration \050this is the option which enables the choice of) 70.88 489.05 P
+(radio interfaces in the network driver list\051.) 70.88 475.05 T
+1.81 (The tools are quite simple and so should be able to compile in any Linux) 99.22 457.05 P
+(system provided that the kernel supports wireless extensions.) 70.88 443.05 T
+2.63 (The modifications of the wireless network drivers are probably the most) 99.22 425.05 P
+1.17 (important. Each driver needs to support wireless extensions and to perform the) 70.88 411.05 P
+-0.51 (corresponding dialogue with the specific hardware. For now, only the Wavelan ISA) 70.88 397.05 P
+0.51 (and the Wavelan PCMCIA drivers support wireless extensions, but I\325m confident) 70.88 383.05 P
+3.53 (that others will eventually follow. The modified Wavelan PCMCIA driver is) 70.88 369.05 P
+2.19 (available in the last pcmcia packages \050from 2.9.1\051. The modified Wavelan ISA) 70.88 355.05 P
+(driver is available in the kernel \050from 2.0.30 and 2.1.17\051.) 70.88 341.05 T
+1 14 Q
+(4) 70.88 309.71 T
+( User interface and tools) 85.05 309.71 T
+0 12 Q
+-0.62 (The user interface is composed of 3 programs and a) 99.22 291.05 P
+407.74 289.85 380.86 289.85 2 L
+V
+0.6 H
+0 Z
+N
+-0.62 (/proc) 380.86 291.05 P
+-0.62 ( entry. The main goal) 407.74 291.05 P
+1.92 (of the Wireless Extension development effort wasn\325t the user interface, so this) 70.88 277.05 P
+(interface is quite basic.) 70.88 263.05 T
+1 F
+(4.1 /proc/net/wireless) 70.88 239.05 T
+0 F
+1.73 (This is a) 99.22 222.05 P
+181.98 220.85 155.1 220.85 2 L
+V
+N
+1.73 (/proc) 155.1 222.05 P
+1.73 ( entry.) 181.98 222.05 P
+252.1 220.85 225.22 220.85 2 L
+V
+N
+1.73 (/proc) 225.22 222.05 P
+1.73 ( is a pseudo file system giving information and) 252.1 222.05 P
+-0.43 (statistics about the current system, which is usually located in) 70.88 208.05 P
+443.72 206.85 416.84 206.85 2 L
+V
+N
+-0.43 (/proc) 416.84 208.05 P
+-0.43 (. These entries) 443.72 208.05 P
+0.08 (act as files, so a) 70.88 194.05 P
+1 F
+0.08 (cat) 161.53 194.05 P
+0 F
+0.08 ( on them will give the required information.) 180.64 194.05 P
+524.42 192.85 427.53 192.85 2 L
+V
+N
+0.08 (/proc/net/wireless) 427.53 194.05 P
+-0.62 (is designed to give some wireless specific statistics on each wireless interface in the) 70.88 180.05 P
+-0.72 (system. This entry is in fact a clone of) 70.88 166.05 P
+348.22 164.85 277.34 164.85 2 L
+V
+N
+-0.72 (/proc/net/dev) 277.34 166.05 P
+-0.72 ( which gives the standard driver) 348.22 166.05 P
+(statistics.) 70.88 152.05 T
+(The output looks like this) 99.22 134.05 T
+(:) 244.59 134.05 T
+3 10 Q
+(<jean@tourrilhes>cat /proc/net/wireless) 70.88 109.38 T
+(Inter-|sta|  Quality       |  Discarded packets) 70.88 97.38 T
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "2" 2
+%%Page: "3" 3
+595.3 841.9 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+72.86 793.47 522.44 805.47 R
+7 X
+0 0 0 1 0 0 0 K
+V
+0 12 Q
+0 X
+(< Linux Wireless LAN Howto >) 210.48 797.47 T
+72.86 50.57 522.44 62.57 R
+7 X
+V
+0 X
+(3) 294.31 54.57 T
+70.88 90.86 524.42 751.05 R
+7 X
+V
+3 10 Q
+0 X
+( face |tus|link level noise| nwid crypt  misc) 70.88 744.38 T
+(  eth2: f0   15.  24.    4.   181     0     0) 70.88 732.38 T
+0 12 Q
+(For each device, the following information is given) 99.22 703.05 T
+(:) 381.69 703.05 T
+(\245) 85.05 685.05 T
+2 F
+(Status) 98.09 685.05 T
+0 F
+(: Its current state. This is a device dependent information.) 137.43 685.05 T
+(\245) 85.05 667.05 T
+2 F
+(Quality - link) 98.09 667.05 T
+0 F
+(: general quality of the reception.) 175.86 667.05 T
+(\245) 85.05 649.05 T
+2 F
+(Quality - level) 98.09 649.05 T
+0 F
+(: signal strength at the receiver.) 178.74 649.05 T
+(\245) 85.05 631.05 T
+2 F
+(Quality - noise) 98.09 631.05 T
+0 F
+(: silence level \050no packet\051 at the receiver.) 181.85 631.05 T
+(\245) 85.05 613.05 T
+2 F
+(Discarded - nwid) 98.09 613.05 T
+0 F
+(: number of discarded packets due to invalid network id.) 196.29 613.05 T
+(\245) 85.05 595.05 T
+2 F
+(Discarded - crypt) 98.09 595.05 T
+0 F
+(: number of packet unable to decrypt.) 196.06 595.05 T
+(\245) 85.05 577.05 T
+2 F
+(Discarded - misc) 98.09 577.05 T
+0 F
+(: unused \050for now\051.) 193.61 577.05 T
+-0.56 (These informations allow the user to have a better feedback about his system.) 99.22 559.05 P
+2.46 (A high value of) 70.88 545.05 P
+2 F
+2.46 (Discarded - nwid) 167.84 545.05 P
+0 F
+2.46 ( packet might indicate a nwid configuration) 267.62 545.05 P
+2.53 (problem or an adjacent network. The) 70.88 531.05 P
+2 F
+2.53 (Quality - level) 294.29 531.05 P
+0 F
+2.53 ( might help him to track) 376.65 531.05 P
+(shadow areas.) 70.88 517.05 T
+-0.34 (The basic difference between) 99.22 499.05 P
+2 F
+-0.34 (Quality - link) 261.19 499.05 P
+0 F
+-0.34 ( and) 334.94 499.05 P
+2 F
+-0.34 (Quality - level) 361.82 499.05 P
+0 F
+-0.34 ( is that the first) 438.45 499.05 P
+-0.5 (indicate how good the reception is \050for example the percentage of correctly received) 70.88 485.05 P
+2.35 (packets\051 and the second how strong the signal is. The) 70.88 471.05 P
+2 F
+2.35 (Quality - level) 393.49 471.05 P
+0 F
+2.35 ( is some) 475.49 471.05 P
+3.14 (directly measurable data that is likely to have the same signification across) 70.88 457.05 P
+(devices.) 70.88 443.05 T
+0.26 (When the) 99.22 425.05 P
+2 F
+0.26 (Quality) 156.85 425.05 P
+0 F
+0.26 ( values have been updated since the last read of the entry,) 198.62 425.05 P
+-0.36 (a dot will follow that value \050typically, it mean that a new measure has been made\051.) 70.88 411.05 P
+1 F
+(4.2 iwconfig) 70.88 387.05 T
+0 F
+0.8 (This tool is designed to configure all the wireless specific parameters of the) 99.22 370.05 P
+2.17 (driver and the hardware. This is a clone of) 70.88 356.05 P
+1 F
+2.24 (ifconfig) 329.08 356.05 P
+0 F
+2.17 ( used for standard device) 376.86 356.05 P
+(configuration. The following parameters are available) 70.88 342.05 T
+(:) 372.26 342.05 T
+(\245) 85.05 324.05 T
+2 F
+(freq) 98.09 324.05 T
+0 F
+( or) 119.41 324.05 T
+2 F
+(channel) 137.41 324.05 T
+0 F
+(: the frequency or the channel sequence.) 184.29 324.05 T
+(\245) 85.05 306.05 T
+2 F
+(nwid) 98.09 306.05 T
+0 F
+(: network id or domain, to distinguish different logical networks.) 129.42 306.05 T
+(\245) 85.05 288.05 T
+(the) 98.09 288.05 T
+2 F
+(name) 119.43 288.05 T
+0 F
+( of the \322protocol\323 used on the air.) 149.64 288.05 T
+(\245) 85.05 270.05 T
+2 F
+-0.68 (sens) 98.09 270.05 P
+0 F
+-0.68 (: this is the signal level threshold to trigger packet reception \050sensitivity\051.) 124.74 270.05 P
+(\245) 85.05 252.05 T
+2 F
+(enc) 98.09 252.05 T
+0 F
+(: the encryption or scrambling key used.) 119.41 252.05 T
+3.12 (The frequency or channel parameter is the physical separation between) 99.22 234.05 P
+0.16 (networks \050the keyword) 70.88 220.05 P
+2 F
+0.16 (freq) 201.8 220.05 P
+0 F
+0.16 ( and) 223.12 220.05 P
+2 F
+0.16 (channel) 251 220.05 P
+0 F
+0.16 ( are synonymous\051. For frequency hopping) 294.53 220.05 P
+1.21 (devices, it might be the hopping pattern. On the other hand, the nwid is only a) 70.88 206.05 P
+4.33 (logical \050virtual\051 separation between networks which might be on the same) 70.88 192.05 P
+(frequency.) 70.88 178.05 T
+1.34 (The name of the protocol is often the generic name of the device itself \050for) 99.22 160.05 P
+5.79 (example) 70.88 146.05 P
+2 F
+5.79 (\322Wavelan\323) 126.46 146.05 P
+0 F
+5.79 (\051. This is quite useful because these protocols are all) 183.57 146.05 P
+1.08 (incompatible. The apparition of standards such as) 70.88 132.05 P
+1 F
+1.12 (802.11) 359.39 132.05 P
+0 F
+1.08 ( and) 397.16 132.05 P
+1 F
+1.12 (HiperLan) 426.89 132.05 P
+0 F
+1.08 ( might) 487.11 132.05 P
+(help a bit in the future.) 70.88 118.05 T
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "3" 3
+%%Page: "4" 4
+595.3 841.9 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+72.86 793.47 522.44 805.47 R
+7 X
+0 0 0 1 0 0 0 K
+V
+0 12 Q
+0 X
+(< Linux Wireless LAN Howto >) 210.48 797.47 T
+72.86 50.57 522.44 62.57 R
+7 X
+V
+0 X
+(4) 294.31 54.57 T
+70.88 90.86 524.42 751.05 R
+7 X
+V
+0 X
+-0.15 (The encryption setting includes the key itself \050up to 64 bits\051, the activation of) 99.22 743.05 P
+0.68 (encryption \050) 70.88 729.05 P
+2 F
+0.68 (on) 137.99 729.05 P
+0 F
+0.68 (/) 151.32 729.05 P
+2 F
+0.68 (off) 154.66 729.05 P
+0 F
+0.68 (\051 and an optional argument \050either the type of algorithm or the) 168.65 729.05 P
+(key number for multi key systems\051.) 70.88 715.05 T
+0.96 (Without any argument,) 99.22 697.05 P
+1 F
+0.99 (iwconfig) 235.9 697.05 P
+0 F
+0.96 ( gives the value of these parameters \050and) 289.67 697.05 P
+(the content of) 70.88 683.05 T
+247.1 681.85 150.21 681.85 2 L
+V
+0.6 H
+0 Z
+N
+(/proc/net/wireless) 150.21 683.05 T
+(\051 :) 247.1 683.05 T
+3 10 Q
+(<jean@tourrilhes>iwconfig) 70.88 658.38 T
+(lo        no wireless extensions.) 70.88 646.38 T
+(eth1      no wireless extensions.) 70.88 622.38 T
+(eth2      Wavelan  NWID:1234  Frequency:2.422GHz  Sensitivity:4) 70.88 598.38 T
+(          Link quality:15/15  Signal level:22/63  Noise level:0/63) 70.88 586.38 T
+(          Rx invalid nwid:181  invalid crypt:0  invalid misc:0) 70.88 574.38 T
+0 12 Q
+-0.41 (By giving a command line option, the user may change these parameters \050if it) 99.22 545.05 P
+2.71 (is possible in the driver and if the user is root\051. For example, to change the) 70.88 531.05 P
+-0.38 (frequency to) 70.88 517.05 P
+2 F
+-0.38 (2.462) 141.88 517.05 P
+-0.38 (GHz) 175.24 517.05 P
+0 F
+-0.38 ( and disable nwid checking on the device) 200.13 517.05 P
+2 F
+-0.38 (eth2) 425.77 517.05 P
+0 F
+-0.38 (, the user will) 449.33 517.05 P
+(do) 70.88 503.05 T
+(:) 87.1 503.05 T
+3 10 Q
+(#iwconfig eth2 freq 2.462G nwid off) 70.88 478.38 T
+0 12 Q
+1.11 (The user may also list the available frequencies for a specific device or the) 99.22 449.05 P
+(number of channels defined) 70.88 435.05 T
+(:) 227.76 435.05 T
+3 10 Q
+(<jean@tourrilhes>iwconfig eth2 list_freq) 70.88 410.38 T
+-1.46 (10 channels ; available frequencies : 2.422GHz  2.425GHz  2.4305GHz  2.432GHz) 70.88 398.38 P
+(2.442GHz  2.452GHz  2.46GHz  2.462GHz) 70.88 386.38 T
+1 12 Q
+(4.3 iwspy) 70.88 351.05 T
+-0.32 (iwspy) 99.22 334.05 P
+0 F
+-0.31 ( was designed to test the) 135.67 334.05 P
+1 F
+-0.32 (Mobile IP) 273.81 334.05 P
+0 F
+-0.31 ( support. It allows the user to set a) 333.8 334.05 P
+0.18 (list of network addresses in the driver. The driver will gather quality information) 70.88 320.05 P
+2.32 (for each of those addresses \050updated each time it receives a packet from that) 70.88 306.05 P
+0.2 (address\051. The tool allows the user to display the information associated with each) 70.88 292.05 P
+(address in the list.) 70.88 278.05 T
+1 F
+-0.12 (iwspy) 99.22 260.05 P
+0 F
+-0.12 ( accept IP address as well as hardware addresses \050MAC\051. IP addresses) 135.67 260.05 P
+-0.38 (will be converted to hardware addresses before being transmitted to the driver. No) 70.88 246.05 P
+1.55 (verification is made on the hardware address. On the command line, hardware) 70.88 232.05 P
+(addresses should be prefixed by the keyword) 70.88 218.05 T
+2 F
+(hw) 321.78 218.05 T
+0 F
+(:) 341.79 218.05 T
+3 10 Q
+(#iwspy eth2 15.144.104.4 hw 08:00:0E:21:3A:1F) 70.88 193.38 T
+0 12 Q
+0.87 (The tool accept the keyword) 99.22 164.05 P
+2 F
+0.87 (\322+\323) 262.01 164.05 P
+0 F
+0.87 ( to add the new addresses at the end of the) 278.62 164.05 P
+(list) 70.88 150.05 T
+(:) 92 150.05 T
+3 10 Q
+(#iwspy eth2 + hw 08:00:0E:2A:26:FA) 70.88 125.38 T
+0 12 Q
+(To display the list of address) 99.22 96.05 T
+(:) 261.92 96.05 T
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "4" 4
+%%Page: "5" 5
+595.3 841.9 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+72.86 793.47 522.44 805.47 R
+7 X
+0 0 0 1 0 0 0 K
+V
+0 12 Q
+0 X
+(< Linux Wireless LAN Howto >) 210.48 797.47 T
+72.86 50.57 522.44 62.57 R
+7 X
+V
+0 X
+(5) 294.31 54.57 T
+70.88 90.86 524.42 751.05 R
+7 X
+V
+3 10 Q
+0 X
+(<jean@tourrilhes>iwspy eth2) 70.88 732.38 T
+(08:00:0E:21:D7:4E : Quality 15 ; Signal 29 ; Noise 0 \050updated\051) 70.88 720.38 T
+(08:00:0E:21:3A:1F : Quality 0 ; Signal 0 ; Noise 0) 70.88 708.38 T
+(08:00:0E:2A:26:FA : Quality 0 ; Signal 0 ; Noise 0) 70.88 696.38 T
+0 12 Q
+-0.65 (The) 99.22 667.05 P
+2 F
+-0.65 (\050updated\051) 123.25 667.05 P
+0 F
+-0.65 ( indication show that we have received a packet since we set the) 176.57 667.05 P
+1.66 (address in the driver. We haven\325t received anything from the second and third) 70.88 653.05 P
+0.31 (address \050this explain why the values are 0\051. A) 70.88 639.05 P
+1 F
+0.32 (ping) 330.4 639.05 P
+0 F
+0.31 ( to those address should solve) 358.39 639.05 P
+(the problem.) 70.88 625.05 T
+-0.07 (The number of addresses is limited to 8, because each address slow down the) 99.22 607.05 P
+(driver \050it increases the processing for each received packets\051.) 70.88 593.05 T
+1 F
+(4.4 iwpriv) 70.88 569.05 T
+2.02 (iwpriv) 99.22 552.05 P
+0 F
+1.96 ( is some experimental support for device specific extensions. Some) 140.34 552.05 P
+6.69 (drivers \050like the Wavelan one\051 might define some extra parameters or) 70.88 538.05 P
+(functionality,) 70.88 524.05 T
+1 F
+(iwpriv) 148.66 524.05 T
+0 F
+( is used to manipulate those.) 189.77 524.05 T
+1 14 Q
+(5) 70.88 492.71 T
+( Driver interface & programming issues) 85.05 492.71 T
+0 12 Q
+-0.04 (The implementation of the wireless extensions was designed to minimise the) 99.22 474.05 P
+(number of changes in the kernel and to have a simple and extensible solution.) 70.88 460.05 T
+1.93 (All the wireless interface \050types and constants\051 is defined in the file) 99.22 442.05 P
+524.42 440.85 499.53 440.85 2 L
+V
+0.6 H
+0 Z
+N
+1.93 (/usr/) 499.53 442.05 P
+202.66 426.85 70.88 426.85 2 L
+V
+N
+(include/linux/wireless.h) 70.88 428.05 T
+(. This is the central piece of the wireless extension.) 202.66 428.05 T
+1 F
+(5.1 /proc/net/wireless) 70.88 404.05 T
+0 F
+5.36 (This) 99.22 387.05 P
+159.47 385.85 132.59 385.85 2 L
+V
+N
+5.36 (/proc) 132.59 387.05 P
+5.36 ( entry is a clone of the) 159.47 387.05 P
+393.42 385.85 322.54 385.85 2 L
+V
+N
+5.36 (/proc/net/dev) 322.54 387.05 P
+5.36 ( entry and has been) 393.42 387.05 P
+(implemented in exactly the same way.) 70.88 373.05 T
+0.54 (The Linux networking stack uses a structure \050) 99.22 355.05 P
+2 F
+0.54 (struct device) 359.94 355.05 P
+0 F
+0.54 (\051 to keep track of) 429.12 355.05 P
+3.07 (each device in the system. The first part of it is standardised, and contains) 70.88 341.05 P
+-0.57 (parameters \050for example the base I/O address and the IP address of the device\051 and) 70.88 327.05 P
+(callbacks \050the procedure to start the device, to send a packet...\051.) 70.88 313.05 T
+0.36 (I\325ve added to this structure another standard callback \050) 99.22 295.05 P
+2 F
+0.36 (get_wireless_stats) 408.11 295.05 P
+0 F
+0.36 (\051 to) 506.06 295.05 P
+1.31 (get the wireless statistics that) 70.88 281.05 P
+345.01 279.85 248.12 279.85 2 L
+V
+N
+1.31 (/proc/net/wireless) 248.12 281.05 P
+1.31 ( needs. When the) 345.01 281.05 P
+476.02 279.85 449.14 279.85 2 L
+V
+N
+1.31 (/proc) 449.14 281.05 P
+1.31 ( entry is) 476.02 281.05 P
+-0.08 (read, it calls this callback for all the devices present in the system and display the) 70.88 267.05 P
+(information it gets. If a device doesn\325t define this callback, it is ignored.) 70.88 253.05 T
+4.18 (When called, the) 99.22 235.05 P
+2 F
+4.18 (get_wireless_stats) 208 235.05 P
+0 F
+4.18 ( callback returns a structure \050) 305.96 235.05 P
+2 F
+4.18 (struct) 492.66 235.05 P
+-0.64 (iw_statistics) 70.88 221.05 P
+0 F
+-0.64 (\051 containing all the fields that will be displayed by the) 139.07 221.05 P
+461.24 219.85 434.36 219.85 2 L
+V
+N
+-0.64 (/proc) 434.36 221.05 P
+-0.64 ( entry. This) 461.24 221.05 P
+(structure is of course defined in the file) 70.88 207.05 T
+448.2 205.85 291.53 205.85 2 L
+V
+N
+(/usr/include/linux/wireless.h) 291.53 207.05 T
+(.) 448.2 207.05 T
+1 F
+(5.2 ioctl) 70.88 183.05 T
+0 F
+-0.31 (The usual method in Unix to set and get parameters from a network device is) 99.22 166.05 P
+-0.06 (through) 70.88 152.05 P
+1 F
+-0.06 (ioctl) 118.59 152.05 P
+0 F
+-0.06 (. Ioctl are usually operations performed on a file descriptor, but they) 146.37 152.05 P
+0.14 (also apply on network sockets. The ioctl is a kernel system call. The arguments of) 70.88 138.05 P
+0.39 (the ioctl define the operations to be done, the parameters of these operations and) 70.88 124.05 P
+(the device they applies to.) 70.88 110.05 T
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "5" 5
+%%Page: "6" 6
+595.3 841.9 0 FMBEGINPAGE
+[0 0 0 1 0 0 0]
+[ 0 1 1 0 1 0 0]
+[ 1 0 1 0 0 1 0]
+[ 1 1 0 0 0 0 1]
+[ 1 0 0 0 0 1 1]
+[ 0 1 0 0 1 0 1]
+[ 0 0 1 0 1 1 0]
+ 7 FrameSetSepColors
+FrameNoSep
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+0 0 0 1 0 0 0 K
+72.86 793.47 522.44 805.47 R
+7 X
+0 0 0 1 0 0 0 K
+V
+0 12 Q
+0 X
+(< Linux Wireless LAN Howto >) 210.48 797.47 T
+72.86 50.57 522.44 62.57 R
+7 X
+V
+0 X
+(6) 294.31 54.57 T
+70.88 90.86 524.42 751.05 R
+7 X
+V
+0 X
+3.26 (For example, to change the IP address on device) 99.22 743.05 P
+2 F
+3.26 (eth2) 399.06 743.05 P
+0 F
+3.26 (, a program \050like) 422.61 743.05 P
+1 F
+4.88 (ifconfig) 70.88 729.05 P
+0 F
+4.73 (\051 would make an ioctl call with the following parameters) 118.65 729.05 P
+4.73 (:) 476.79 729.05 P
+2 F
+4.73 (\322eth2\323,) 488.19 729.05 P
+0.59 (SIOCSIFADDR, new address) 70.88 715.05 P
+0 F
+0.59 (. The structure defining the parameters layout may) 234.72 715.05 P
+0.24 (be found in) 70.88 701.05 P
+256.05 699.85 136.93 699.85 2 L
+V
+0.6 H
+0 Z
+N
+0.24 (/usr/include/linux/if.h) 136.93 701.05 P
+0.24 ( and the ioctl call \050the constant) 256.05 701.05 P
+2 F
+0.24 (SIOCSIFADDR) 432.63 701.05 P
+0 F
+0.24 (\051) 520.42 701.05 P
+(is defined in) 70.88 687.05 T
+292.89 685.85 142.22 685.85 2 L
+V
+N
+(/usr/include/linux/sockios.h) 142.22 687.05 T
+(.) 292.89 687.05 T
+0.5 (For the wireless extensions, I\325ve defined a new set of ioctl calls \050for example) 99.22 669.05 P
+2 F
+-0.65 (SIOCSIWFREQ) 70.88 655.05 P
+0 F
+-0.65 ( to change the frequency\051. I\325ve also defined the parameters to those) 160.66 655.05 P
+0.56 (calls \050see) 70.88 641.05 P
+282.01 639.85 125.34 639.85 2 L
+V
+N
+0.56 (/usr/include/linux/wireless.h) 125.34 641.05 P
+0.56 (\051. In fact those new calls map closely to the) 282.01 641.05 P
+(functionality offered by the wireless tools.) 70.88 627.05 T
+-0.32 (There is another popular way to set parameters in a network driver in Linux,) 99.22 609.05 P
+-0.25 (which is initialisation parameters \050either passed on the kernel command line or at) 70.88 595.05 P
+-0.61 (module initialisation\051. This method has the disadvantage that the parameters may) 70.88 581.05 P
+0.8 (only be set \050and not read\051 and only at initialisation time, which offers much less) 70.88 567.05 P
+1.53 (flexibility than the current solution. The other advantage of ioctl is that it is a) 70.88 553.05 P
+0.31 (programming interface \050and not only a user interface\051, so any program \050such as a) 70.88 539.05 P
+(Mobile IP implementation\051 may manipulate them directly.) 70.88 525.05 T
+1 F
+(5.3 More details) 70.88 501.05 T
+0 F
+0.61 (For people who needs more details on the actual implementation, the list of) 99.22 484.05 P
+0.16 (ioctl calls or the parameters definitions, the ultimate reference is the source code.) 70.88 470.05 P
+-0.18 (The file) 70.88 456.05 P
+272.76 454.85 116.08 454.85 2 L
+V
+N
+-0.18 (/usr/include/linux/wireless.h) 116.08 456.05 P
+-0.18 ( defines all the necessary pieces. The wireless) 272.76 456.05 P
+1.77 (tools offer some good examples on how to use the ioctl calls. To know how the) 70.88 442.05 P
+1.53 (wireless extensions are used on the driver side, the Wavelan driver source will) 70.88 428.05 P
+(answer most questions.) 70.88 414.05 T
+1 14 Q
+(6) 70.88 382.71 T
+( Areas of improvement) 85.05 382.71 T
+1 12 Q
+(6.1 Other drivers) 70.88 358.05 T
+0 F
+2.76 (For now, only the Wavelan driver supports the wireless extensions. The) 99.22 341.05 P
+3.03 (implementation of the Wireless Extensions in other wireless network drivers) 70.88 327.05 P
+4.02 (might help to validate the Wireless Extensions genericity and to refine its) 70.88 313.05 P
+2.62 (definition. The problem is that quite few wireless devices have Linux drivers) 70.88 299.05 P
+(available.) 70.88 285.05 T
+-0.05 (Also the implementation of wireless extensions in some case is not that easy.) 99.22 267.05 P
+-0.31 (For example, the code to change the frequency in the Wavelan driver is quite large) 70.88 253.05 P
+(and complex.) 70.88 239.05 T
+1 F
+(6.2 Users tools) 70.88 215.05 T
+0 F
+-0.46 (They should be extended and refined. We could also imagine the development) 99.22 198.05 P
+1.5 (of a graphical interface \050for example to have a small graph bar like for battery) 70.88 184.05 P
+(charge and system load\051.) 70.88 170.05 T
+1 F
+(6.3 Wireless Aware applications) 70.88 146.05 T
+0 F
+-0.55 (The development of wireless aware applications will allow to demonstrate the) 99.22 129.05 P
+-0.58 (concept and to expand the wireless extensions with the needs of those applications.) 70.88 115.05 P
+1 F
+(Mobile IP) 70.88 101.05 T
+0 F
+( seems an obvious target.) 131.19 101.05 T
+0 0 0 1 0 0 0 K
+FMENDPAGE
+%%EndPage: "6" 6
+%%Trailer
+%%BoundingBox: 0 0 595.3 841.9
+%%PageOrder: Ascend
+%%Pages: 6
+%%DocumentFonts: NewCenturySchlbk-Roman
+%%+ NewCenturySchlbk-Bold
+%%+ NewCenturySchlbk-Italic
+%%+ Courier
+%%EOF

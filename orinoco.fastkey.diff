@@ -1,0 +1,118 @@
+--- orinoco.h.orig	Thu Sep 12 22:58:40 2002
++++ orinoco.h	Mon Sep 30 13:13:04 2002
+@@ -60,6 +60,7 @@
+ 	int has_pm;
+ 	int has_preamble;
+ 	int has_sensitivity;
++	int has_fastkey;
+ 	int nicbuf_size;
+ 	int broken_cor_reset;
+ 	u16 channel_mask;
+--- orinoco.c.orig	Thu Sep 12 22:58:40 2002
++++ orinoco.c	Wed Oct  2 11:30:04 2002
+@@ -500,7 +500,7 @@
+ static int __orinoco_program_rids(struct orinoco_private *priv);
+ 
+ static int __orinoco_hw_set_bitrate(struct orinoco_private *priv);
+-static int __orinoco_hw_setup_wep(struct orinoco_private *priv);
++static int __orinoco_hw_setup_wep(struct orinoco_private *priv, int fastkey);
+ static int orinoco_hw_get_bssid(struct orinoco_private *priv, char buf[ETH_ALEN]);
+ static int orinoco_hw_get_essid(struct orinoco_private *priv, int *active,
+ 				char buf[IW_ESSID_MAX_SIZE+1]);
+@@ -821,7 +821,7 @@
+ 
+ 	/* Set up encryption */
+ 	if (priv->has_wep) {
+-		err = __orinoco_hw_setup_wep(priv);
++		err = __orinoco_hw_setup_wep(priv, 0);
+ 		if (err) {
+ 			printk(KERN_ERR "%s: Error %d activating WEP\n",
+ 			       dev->name, err);
+@@ -1000,15 +1000,27 @@
+ }
+ 
+ 
+-static int __orinoco_hw_setup_wep(struct orinoco_private *priv)
++static int __orinoco_hw_setup_wep(struct orinoco_private *priv, int fastkey)
+ {
+ 	hermes_t *hw = &priv->hw;
+ 	int err = 0;
+ 	int	master_wep_flag;
+ 	int	auth_flag;
++	u16	wep_enabled;
+ 
++	if (fastkey && priv->has_fastkey == 0)
++		return -EAGAIN;
++	
+ 	switch (priv->firmware_type) {
+ 	case FIRMWARE_TYPE_AGERE: /* Agere style WEP */
++		if (fastkey) {
++			err = hermes_read_wordrec(hw, USER_BAP, HERMES_RID_CNFWEPENABLED_AGERE,
++						  &wep_enabled);
++			if (wep_enabled != priv->wep_on) {
++				return -EAGAIN;
++			}
++		}
++
+ 		if (priv->wep_on) {
+ 			err = hermes_write_wordrec(hw, USER_BAP,
+ 						   HERMES_RID_CNFTXKEY_AGERE,
+@@ -1022,11 +1034,13 @@
+ 			if (err)
+ 				return err;
+ 		}
+-		err = hermes_write_wordrec(hw, USER_BAP,
+-					   HERMES_RID_CNFWEPENABLED_AGERE,
+-					   priv->wep_on);
+-		if (err)
+-			return err;
++
++		if (!fastkey) {
++			err = hermes_write_wordrec(hw, USER_BAP, HERMES_RID_CNFWEPENABLED_AGERE,
++						   priv->wep_on);
++			if (err)
++				return err;
++		}
+ 		break;
+ 
+ 	case FIRMWARE_TYPE_INTERSIL: /* Intersil style WEP */
+@@ -1728,6 +1742,7 @@
+ 	priv->has_wep = 0;
+ 	priv->has_big_wep = 0;
+ 	priv->broken_cor_reset = 0;
++	priv->has_fastkey = 0;
+ 
+ 	/* Determine capabilities from the firmware version */
+ 	switch (priv->firmware_type) {
+@@ -1748,6 +1763,7 @@
+ 		priv->has_mwo = (firmver >= 0x60000);
+ 		priv->has_pm = (firmver >= 0x40020); /* Don't work in 7.52 ? */
+ 		priv->ibss_port = 1;
++		priv->has_fastkey = (firmver >= 0x60000);
+ 
+ 		/* FIXME: Which firmware really do have a broken reset */
+ 		priv->broken_cor_reset = (firmver < 0x60000);
+@@ -3449,10 +3465,20 @@
+ 			err = -EOPNOTSUPP;
+ 			break;
+ 		}
+-
++		
+ 		err = orinoco_ioctl_setiwencode(dev, &wrq->u.encoding);
+-		if (! err)
+-			changed = 1;
++		if (! err && netif_running(dev)) {
++			/* Try fastkeying.  If fastkeying is not not
++			 *  available or supported, we allow the
++			 *  orinoco_reconfigure() to run below.  */
++			orinoco_lock(priv, &flags);
++			err = __orinoco_hw_setup_wep(priv, 1);
++			orinoco_unlock(priv, &flags);
++			if (err == -EAGAIN) {
++				changed = 1;
++				err = 0;
++			}
++		}
+ 		break;
+ 
+ 	case SIOCGIWENCODE:

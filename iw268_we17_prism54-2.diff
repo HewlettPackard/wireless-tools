@@ -1,0 +1,109 @@
+diff -u -p linux/drivers/net/wireless.we16/prism54/isl_ioctl.c linux/drivers/net/wireless/prism54/isl_ioctl.c
+--- linux/drivers/net/wireless.we16/prism54/isl_ioctl.c	Mon Jun 28 16:32:46 2004
++++ linux/drivers/net/wireless/prism54/isl_ioctl.c	Mon Jun 28 17:27:35 2004
+@@ -484,6 +484,15 @@ prism54_get_range(struct net_device *nde
+ 	/* txpower is supported in dBm's */
+ 	range->txpower_capa = IW_TXPOW_DBM;
+ 
++#if WIRELESS_EXT > 16
++	/* Event capability (kernel + driver) */
++	range->event_capa[0] = (IW_EVENT_CAPA_K_0 |
++				IW_EVENT_CAPA_MASK(SIOCGIWTHRSPY) |
++				IW_EVENT_CAPA_MASK(SIOCGIWAP));
++	range->event_capa[1] = IW_EVENT_CAPA_K_1;
++	range->event_capa[4] = IW_EVENT_CAPA_MASK(IWEVCUSTOM);
++#endif /* WIRELESS_EXT > 16 */
++
+ 	if (islpci_get_state(priv) < PRV_STATE_INIT)
+ 		return 0;
+ 
+@@ -690,19 +699,33 @@ prism54_get_scan(struct net_device *ndev
+ 	rvalue = mgt_get_request(priv, DOT11_OID_NOISEFLOOR, 0, NULL, &r);
+ 	noise = r.u;
+ 
+-	/* Ask the device for a list of known bss. We can report at most
+-	 * IW_MAX_AP=64 to the range struct. But the device won't repport anything
+-	 * if you change the value of IWMAX_BSS=24.
++	/* Ask the device for a list of known bss.
++	 * The old API, using SIOCGIWAPLIST, had a hard limit of IW_MAX_AP=64.
++	 * The new API, using SIOCGIWSCAN, is only limited by the buffer size.
++	 * WE-14->WE-16, the buffer is limited to IW_SCAN_MAX_DATA bytes.
++	 * Starting with WE-17, the buffer can be as big as needed.
++	 * But the device won't repport anything if you change the value
++	 * of IWMAX_BSS=24.
+ 	 */
+ 	rvalue |= mgt_get_request(priv, DOT11_OID_BSSLIST, 0, NULL, &r);
+ 	bsslist = r.ptr;
+ 
+ 	/* ok now, scan the list and translate its info */
+-	for (i = 0; i < min(IW_MAX_AP, (int) bsslist->nr); i++)
++	for (i = 0; i < (int) bsslist->nr; i++) {
+ 		current_ev = prism54_translate_bss(ndev, current_ev,
+-						   extra + IW_SCAN_MAX_DATA,
++						   extra + dwrq->length,
+ 						   &(bsslist->bsslist[i]),
+ 						   noise);
++#if WIRELESS_EXT > 16
++		/* Check if there is space for one more entry */
++		if((extra + dwrq->length - current_ev) <= IW_EV_ADDR_LEN) {
++			/* Ask user space to try again with a bigger buffer */
++			rvalue = -E2BIG;
++			break;
++		}
++#endif /* WIRELESS_EXT > 16 */
++	}
++
+ 	kfree(bsslist);
+ 	dwrq->length = (current_ev - extra);
+ 	dwrq->flags = 0;	/* todo */
+@@ -2248,7 +2271,12 @@ const struct iw_handler_def prism54_hand
+ 	.standard = (iw_handler *) prism54_handler,
+ 	.private = (iw_handler *) prism54_private_handler,
+ 	.private_args = (struct iw_priv_args *) prism54_private_args,
++#if WIRELESS_EXT == 15
+ 	.spy_offset = offsetof(islpci_private, spy_data),
++#endif /* WIRELESS_EXT == 15 */
++#if WIRELESS_EXT > 16
++	.get_wireless_stats = prism54_get_wireless_stats,
++#endif /* WIRELESS_EXT > 16 */
+ };
+ 
+ /* For ioctls that don't work with the new API */
+diff -u -p linux/drivers/net/wireless.we16/prism54/islpci_dev.c linux/drivers/net/wireless/prism54/islpci_dev.c
+--- linux/drivers/net/wireless.we16/prism54/islpci_dev.c	Mon Jun 28 16:32:46 2004
++++ linux/drivers/net/wireless/prism54/islpci_dev.c	Mon Jun 28 17:26:50 2004
+@@ -793,7 +793,9 @@ islpci_setup(struct pci_dev *pdev)
+ 	ndev->open = &islpci_open;
+ 	ndev->stop = &islpci_close;
+ 	ndev->get_stats = &islpci_statistics;
++#if WIRELESS_EXT <= 16
+ 	ndev->get_wireless_stats = &prism54_get_wireless_stats;
++#endif /* WIRELESS_EXT <= 16 */
+ 	ndev->do_ioctl = &prism54_ioctl;
+ 	ndev->wireless_handlers =
+ 	    (struct iw_handler_def *) &prism54_handler_def;
+@@ -817,6 +819,11 @@ islpci_setup(struct pci_dev *pdev)
+ 	priv->monitor_type = ARPHRD_IEEE80211;
+ 	priv->ndev->type = (priv->iw_mode == IW_MODE_MONITOR) ?
+ 		priv->monitor_type : ARPHRD_ETHER;
++#if WIRELESS_EXT > 16
++	/* Add pointers to enable iwspy support. */
++	priv->wireless_data.spy_data = &priv->spy_data;
++	ndev->wireless_data = &priv->wireless_data;
++#endif /* WIRELESS_EXT > 16 */
+ 
+ 	/* save the start and end address of the PCI memory area */
+ 	ndev->mem_start = (unsigned long) priv->device_base;
+diff -u -p linux/drivers/net/wireless.we16/prism54/islpci_dev.h linux/drivers/net/wireless/prism54/islpci_dev.h
+--- linux/drivers/net/wireless.we16/prism54/islpci_dev.h	Mon Jun 28 16:32:46 2004
++++ linux/drivers/net/wireless/prism54/islpci_dev.h	Mon Jun 28 17:25:27 2004
+@@ -99,6 +99,9 @@ typedef struct {
+ 	struct iw_statistics iwstatistics;
+ 
+ 	struct iw_spy_data spy_data; /* iwspy support */
++#if WIRELESS_EXT > 16
++	struct iw_public_data wireless_data;
++#endif /* WIRELESS_EXT > 16 */
+ 
+ 	int monitor_type; /* ARPHRD_IEEE80211 or ARPHRD_IEEE80211_PRISM */
+ 

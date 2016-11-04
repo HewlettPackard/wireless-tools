@@ -1,0 +1,272 @@
+<HTML>
+<HEAD>
+<TITLE>Wireless Overview - Anatomy of a radio LAN</TITLE>
+<LINK rel="Next"  href="Linux.Wireless.modem.html" title="The radio modem">
+<LINK rel="Prev"  href="Linux.Wireless.lexicon.html" title="Lexicon">
+<LINK rel="First" href="Linux.Wireless.intro.html" title="Introduction">
+<LINK rel="Last"  href="Linux.Wireless.std.html" title="Standards">
+<LINK rel="Up"    href="Wireless.html" title="Linux Wireless LAN Howto">
+
+<LINK rel="Contents" href="Linux.Wireless.Overview.html" title="Technology
+overview">
+<LINK rel="section" href="#modem" title="The radio modem">
+<LINK rel="section" href="#mac" title="The MAC controller">
+<LINK rel="section" href="#host" title="The host interface">
+<LINK rel="section" href="#driver" title="The driver">
+<LINK rel="section" href="#notalan" title="Wireless LAN or not">
+<LINK rel="section" href="#home" title="Professional and Home Wireless LANs">
+<LINK rel="section" href="#changing" title="Digital radios and changing
+the protocol">
+</HEAD>
+
+<BODY>
+
+<H2>3	Anatomy of a radio LAN</H2>
+
+A <B>radio network</B> is a collection of nodes communicating together
+through radio devices, using radio waves to carry the information
+exchanged (obvious, isn't it ?). It is sometime called a <I>radio
+Ethernet</I>, by analogy of the wired technology. Most <B>radio
+devices</B> are a card (ISA, Pcmcia) to plug in a PC (or workstation),
+and interact directly with the standard networking stack on it (no
+need of PPP or any specific protocol stack).
+
+<A NAME="modem">
+<H3>3.1	The radio modem</H3>
+</A>
+
+A radio device is composed of two main parts. The first is the
+<B>radio modem</B>. This is the part transmitting (modulating) the
+data onto the frequency and receiving other transmissions. It is
+composed of <I>antenna(s)</I>, <I>amplificators</I>, <I>frequency
+synthesisers</I>, <I>filters</I> and other bits of magic. These are
+mainly analog parts, and a bit of digital (in an ASIC, the
+<I>Baseband</I>).
+<p>
+Usually, you can't see all those analog bits (and the cleverness of
+the board layout) because all the modem is encapsulated in a metal
+shield to protect your PC from those high frequency radiations.
+<p>
+The modem main characteristics are the <I>frequency band</I>, the
+<I>signalling rate</I>, the <I>modulation</I> and the <I>transmitted
+power</I>. People building modems are also talking a lot of SNR and
+dB...
+
+<A NAME="mac">
+<H3>3.2	The MAC controller</H3>
+</A>
+
+The second part of the radio device is the <B>MAC controller</B>,
+responsible to run the MAC protocol. This is implemented mainly in an
+ASIC and/or a microcontroler on the card, but some functionalities of
+the MAC may be as well in the driver on the PC. The card also includes
+some memory for the MAC controller to store incoming and outgoing
+packets (buffers) and other data (configuration, statistics).
+<p>
+Most of the time the few most time critical parts are handled in the
+radio modem ASIC (the baseband), the bulk of the MAC in a
+microcontroller and only some management functionality in the
+driver. But, the different manufacturers place the boundary between
+the different functionalities differently (cost/performance tradeoff),
+and some have implemented driver only MACs for lower cost.
+<p>
+The main characteristics of the MAC are the <I>packet format</I>
+(size, headers), the <I>channel access mechanisms</I> and the
+<I>network management</I> features. The amount of on-board memory is
+also important, because the MAC may need a significant number of
+buffers to compensate the PC and interface latencies.
+<p>
+
+<CENTER><I>Functional diagram of a Wireless device&nbsp;:</I>
+<p>
+<IMG SRC="Anatomy.png" ALT="graphical figure"></CENTER>
+
+<A NAME="host">
+<H3>3.3	The host interface</H3>
+</A>
+
+The card <B>interface</B> to the PC through one of its buses (<I>ISA,
+PCI, Pcmcia</I>...) or communication ports (<I>serial, parallel,
+USB</I> or <I>Ethernet</I>). This interface allows the software
+(mostly the driver) to communicate with the MAC controller and most of
+the time directly to the on board memory (the software writes packets
+to a specific location of it, then the controller reads them and sends
+them).
+<p>
+The main characteristic of the interface is mainly the speed (i/o,
+shared memory or DMA) and the ability to process requests in
+parallel. The flexibility and functionality of it are usually more a
+concern for the person writing the driver&nbsp;:-)
+
+<A NAME="driver">
+<H3>3.4	The driver</H3>
+</A>
+
+With all modern operating systems, the end application doesn't access
+directly the hardware but use a standard API. The operating system
+needs a <B>driver</B> to interface the hardware to the network stack
+(<I>TCP/IP, NetBeui, IPX</I>...). The main function of the driver is
+to manage the hardware and to answer its request (to service
+interrupts). In most of the Wireless LANs, the driver also implements
+some parts of the MAC protocol.
+<p>
+The main characteristic of the driver is the bugs&nbsp;:-(
+
+<A NAME="notalan">
+<H3>3.5	Wireless LAN or not</H3>
+</A>
+
+Wireless LANs are not the only devices to make use of wireless
+technology, and it's easy to get confused between the different
+products (especially that sometimes they call themselves incorrectly
+wireless networks). Some example are <I>wireless bridges</I>,
+<I>wireless distribution systems</I> and <I>cable replacement</I>, and
+they are quite different from local area networking. There is also
+<I>wide area wireless</I> network products, which are again quite
+different from LANs.
+<p>
+<B>Wireless Bridges</B> are used to connect two different LAN segments
+via radio, for example between two buildings across the
+street. <B>Wireless distribution systems</B> is what are used by ISP
+to connect multiple independant customers to a base station, like
+houses in a neighbourhood. <B>Cable replacement</B> is mostly like
+IrDA (Infrared data link) to transfer data between two computers
+without a serial or parallel cable.
+<p>
+Sometimes those products use standard Wireless LAN modules, and most
+of the time they are based on the same technologies as Wireless LANs
+but with restricted functionality (like no broadcasting) and only
+allow a set of point to point links (so, no native TCP/IP
+topology). They interface to the serial port (cable replacement) or
+ethernet port (wireless bridges, wireless distribution system).
+<p>
+In this document we mostly restrict ourselves to true wireless LANs,
+because what doesn't run natively TCP/IP is not
+&quot;fun&quot;&nbsp;:-)
+
+<A NAME="home">
+<H3>3.6	Professional and Home Wireless LANs</H3>
+</A>
+
+Now that Wireless LANs are getting towards lower price, Wireless LAN
+manufacturers are no longer targeting mobile commercial users only but
+also the home market. Some vendors, such as Proxim, offer two distinct
+line of product based on the same technology (and same protocol), the
+RangeLan2 for professionals and Symphony for home users.
+<p>
+As the business version of those Wireless LANs are more expensive than
+the home products, one might wonder what justify the price difference
+apart from the packaging, the marketing and software bundle.
+<p>
+The radio modems <U>may</U> present <B>different performances</B>. The
+modem is usually the most expensive part of the device, and replacing
+analog parts by less performant ones may reduce the price. The result
+may be a lower sensitivity, or less filtering of the adjacent bands or
+channels, which may reduce range and performance, especially for high
+number of nodes or collocated networks (which matter most for business
+environment).
+<p>
+The host interface may be different. The business line may offer more
+options, such as Ethernet, Serial and PCI, whereas home version may
+offer USB. The home line may also lack security (through encryption)
+or power management.
+<p>
+But in most cases, the hardware between the two lines is exactly the
+same. In fact, most of the differences usually reside in the <B>Access
+Points</B>. This is why Lucent offer 4 different Access Points
+depending on usage and targeted at different kind of users, but only
+one type of card for all types of users.
+<p>
+Access Points for home users are mostly designed to interface with a
+phone line (or ISDN, DSL or cable modem) and provide a proxy or
+masquerading feature, allowing the user to share its ISP access
+between the nodes of the network.
+<p>
+On the other hand, Access Points for businesses connect directly to
+the LAN via Ethernet or act as wireless repeaters, with optimised
+bridge functionality, higher performance, offer a wide range of
+management features (diagnostic, statistics, access control...)
+roaming and out of range forwarding (see <A
+HREF="Linux.Wireless.mac.html#ap"><I>chapter&nbsp;5.3.2</I></A>).
+<p>
+So, before investing your money, you have to ask yourself what network
+configuration you are really after and which features you really do
+need...
+
+<A NAME="changing">
+<H3>3.7	Digital radios and changing the protocol</H3>
+</A>
+
+One question popping up in my mailbox is the ability of doing protocol
+`X' (TDMA, Wireless ATM) with device `Y' (a well known Wireless
+LAN). A variant of this question is people trying to implement a
+specific scheme or optimisation in the 802.11 protocol.
+<p>
+This is usually not possible. As we have seen above, most of the MAC
+protocol is actually embedded in the device and only a few non
+performance critical functions are handled by the driver on the
+host. Usually, manufacturers don't tell you how to reprogram the
+firmware of their devices, but even if it was possible, it would not
+be enough.
+<p>
+The very low part of the MAC protocol, which is time critical, is
+implemented in the baseband ASIC, so quite a challenge to change. For
+example the carrier sense and MAC acknowledgement need reaction in the
+order of a dozen microseconds, so are prime candidate for the
+ASIC. Unfortunately, these are precisely the functions that those
+people want to change.
+<p>
+In fact, many people have been thinking of universal radios, which can
+be simply reprogrammed to receive (and transmit) any radio
+standard. The main idea is having a big block of reprogrammable logic
+on the card and to download a new configuration for each protocol that
+the system wants to use, making it a fully <B>digital radio</B>.
+<p>
+To achieve that goal, we need to go one step further down, and be able
+to adapt to any modulation and bit rate. Most implementations of
+common Wireless LANs use fixed analog components in the modem, so are
+not suitable. So, a digital radio needs to digitise (with a fast AtoD)
+the whole bandwidth and to feed that the a fast super DSP or EPLD
+(Electric Programable Logic Device, like a Xilinx or Altera) and to
+work entirely in the digital domain to demodulate (and modulate) the
+signal. Unfortunately this is not really cost effective and doesn't
+work that well at the frequency we are talking about (GHz).
+
+<p ALIGN=right>
+<A HREF="Linux.Wireless.modem.html"><I>next</I></A>
+<HR>
+<CENTER><TABLE BORDER=0 CELLPADDING=0><TR><TD valign="top" align="center">
+<ADDRESS>
+<A HREF="Wireless.html">Linux Wireless LAN Howto</A> -
+jt&#064;hpl.hp.com
+<br>Converted to html from Frame Maker - 25 August 98
+<br>Updated 3 August 00
+<br>Copyright &#169; 1996-2004 Jean Tourrilhes
+</ADDRESS>
+</TD><TD>
+&nbsp;&nbsp;&nbsp;
+</TD><TD valign="top" align="center">
+Project hosted and sponsored by :
+<br>
+<A HREF="http://www.hpl.hp.com"><IMG SRC="../hplogo.png" HEIGHT=34
+WIDTH=141 ALT="HP home page"></A>
+</TD></TR></TABLE></CENTER>
+
+<!-- Keep Webmaster happy -->
+<script type="text/javascript" language="JavaScript">
+var s_prop7="us"
+var s_prop8="eng"
+var s_prop9="corp"
+var s_prop10="us|eng|corp"
+var s_prop13="hphqglobal,hphqwwhplabs"
+</script>
+
+<!-- Begin METRICS JavaScript -->
+<!-- <script type="text/javascript" language="JavaScript"
+src="http://welcome.hp-ww.com/country/us/eng/js/metrics.js"></script> -->
+<script type="text/javascript" language="JavaScript"
+src="http://www.hpl.hp.com/dev/hplabsmetrics.js"></script>
+<!-- End METRICS JavaScript -->
+
+</BODY>
+</HTML>

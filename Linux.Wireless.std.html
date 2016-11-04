@@ -1,0 +1,396 @@
+<HTML>
+<HEAD>
+<TITLE>Wireless Overview - Some Wireless LAN standards</TITLE>
+<LINK rel="Next"  href="Linux.Wireless.std.html" title="Standards">
+<LINK rel="Prev"  href="Linux.Wireless.mac.html" title="The MAC level">
+<LINK rel="First" href="Linux.Wireless.intro.html" title="Introduction">
+<LINK rel="Last"  href="Linux.Wireless.std.html" title="Standards">
+<LINK rel="Up"    href="Wireless.html" title="Linux Wireless LAN Howto">
+
+<LINK rel="Contents" href="Linux.Wireless.Overview.html" title="Technology
+overview">
+<LINK rel="section" href="#802.11" title="IEEE 802.11">
+<LINK rel="section" href="#802.11ab" title="802.11-b and 802.11-a">
+<LINK rel="section" href="#Hiperlan" title="HiperLan">
+<LINK rel="section" href="#Hiperlan2" title="HiperLan II">
+<LINK rel="section" href="#OpenAir" title="OpenAir">
+<LINK rel="section" href="#swap" title="HomeRF & SWAP">
+<LINK rel="section" href="#mclink" title="BlueTooth">
+</HEAD>
+
+<BODY>
+
+<H2>6	Some Wireless LAN standards</H2>
+
+A short gallery of the most famous Wireless LAN standard (but
+unfortunately not necessarily the most widespread...).
+
+<A NAME="802.11">
+<H3>6.1	IEEE 802.11</H3>
+</A>
+
+The main problem of radio networks acceptance in the market place is
+that there is not <B>one unique standard</B> like Ethernet with a
+guaranteed compatibility between all devices, but many proprietary
+standards pushed by each independent vendor and incompatible between
+themselves. Because corporate customers require an established unique
+standard, most of the vendors have joined the IEEE in a effort to
+create a standard for radio LANs. This is <B>IEEE 802.11</B> (like
+<I>Ethernet</I> is <I>IEEE 802.3</I>, <I>Token Ring</I> is <I>IEEE
+802.5</I> and <I>100vg</I> is <I>IEEE 802.12</I>).
+<p>
+Of course, once in the 802.11 committee, each vendor has pushed its
+own technologies and specificities in the standard to try to make the
+standard closer to its product. The result is a standard which took
+far too much time to complete, which is overcomplicated and bloated
+with features, and might be obsoleted before products come to market
+by newer technologies. But it is a standard based on experience,
+versatile and well designed and including all of the optimisations and
+clever techniques developed by the different vendors.
+<p>
+The 802.11 standard specifies one MAC protocol and 3 physical
+layers&nbsp;: Frequency Hopping 1 Mb/s (only), Direct Sequence 1 and 2
+Mb/s and diffuse infrared (can we really call it a
+&quot;standard&quot; when in includes 3 incompatible physical
+layers&nbsp;?). Since then, it has been extended to support 2 Mb/s for
+Frequency Hopping and 5.5 and 11 Mb/s for Direct Sequence
+(802.11b). The MAC has two main standards of operation, a distributed
+mode (CSMA/CA), and a coordinated mode (polling mode - not much used
+in practice). 802.11 of course uses MAC level retransmissions, and
+also RTS/CTS and fragmentation.
+<p>
+The optional power management features are quite complex. The 802.11
+MAC protocol also includes optional authentication and encryption
+(using the WEP, Wired Equivalent Privacy, which is RC4 40 bits - some
+vendors do offer 128 bits RC4 as well). On the other hand, 802.11
+lacks to defines some area (multirate, roaming, inter AP
+communication...), that might be covered by future developments of the
+standard or complementary standards. Some 802.11 products also
+implement proprietary extensions (bit-rate adaptation, additional
+modulation schemes, stronger encryption...), those extensions may or
+may not be added to the standard over time.
+<p>
+When 802.11 was finalised (september 97), most vendors were slow to
+implement 802.11 products because of the complexity of the standard
+and the number of mandatory features (and in some cases they also need
+to provide backward compatibility with their own previous line of
+products). Some of the optional features (encryption and power saving)
+did only appear months after the initial release of the product. But
+things seem to be sorted out and we now have fully featured products
+on the market. The complexity of the specification, the tightness of
+the requirements and the level of investment required made 802.11
+products expensive compared to the previous generation of wireless
+LANs, but because of the higher standardisation and higher volumes,
+prices are now dropping.
+<p>
+Even if vendors eventually have launched 802.11 products, the standard
+doesn't fully guarantee inter-operability&nbsp;: the products have to
+use at least the same physical layer, the same bit rate and the same
+mode of operation (and there is so many other little important
+details...). The most cooperative vendors have been busy lately
+sorting out interoperability issues with independent testing labs, but
+it is still a touchy subject...
+
+<A NAME="802.11ab">
+<H3>6.2	802.11-b and 802.11-a (802.11 at 5 GHz)</H3>
+</A>
+
+After 7 years of arguing in sub-committees making 802.11, you would
+think that most people would had enough of it. In fact no, the 802.11
+committee is now busy pushing a new standard at 5 GHz, and also higher
+speed at 2.4 GHz (by tweaking the Direct Sequence physical
+layer). Both standard makes changes only to the physical layer, so
+that the 802.11 MAC can be reused totally unmodified, saving costs.
+<p>
+<B>802.11-a</B> (802.11 at 5&nbsp;GHz) was standardised first (spring
+99), based on <I>OFDM</I> (see <A
+HREF="Linux.Wireless.modem.html#ofdm" ><I>chapter&nbsp;4.7.4</I></A>),
+and using the UNII band (see <A HREF="Linux.Wireless.modem.html#unii"
+><I>chapter&nbsp;4.2</I></A> - so it won't be available in Europe and
+Japan). The OFDM physical layer is a very close copy of the one used
+in <I>HiperLan II</I> (so they might be some sort of compatibility -
+see <A
+HREF="Linux.Wireless.std.html#Hiperlan2"><I>chapter&nbsp;6.4</I></A>),
+using 52 subcarriers in a 20 MHz channel, offering 6, 12 and 24 Mb/s
+and optional 9, 18, 36, 48 and 54 Mb/s bit-rates. No products are yet
+on the market.
+<p>
+Very soon after, 802.11 did standardise <B>802.11-b</B> (802.11 HR),
+based on a modified DS physical layer (see <A
+HREF="Linux.Wireless.modem.html#cck"><I>chapter&nbsp;4.7.3</I></A>). The
+goal was to extend the life of the 2.4 GHz band by overcoming the
+major drawback&nbsp;: low speed. On top of the original 802.11-DS
+standard, 802.11-b offer additional 5.5 Mb/s and 11 Mb/s bit rates. It
+was approved by the FCC and they are now products on the market (which
+are quite popular).
+
+<A NAME="Hiperlan">
+<H3>6.3	HiperLan</H3>
+</A>
+
+<B>HiperLan</B> is the total opposite of <I>802.11</I>. This standard
+has been designed by a committee of researcher within the <B>ETSI</B>,
+without strong vendors influence, and is quite different from existing
+products. The standard is quite simple, uses some advanced features,
+and has already been ratified a while ago (summer 96 - we are now only
+waiting for the products).
+<p>
+The first main advantage of Hiperlan is that it works in a dedicated
+bandwidth (5.1 to 5.3&nbsp;GHz, allocated only in Europe), and so
+doesn't have to include spread spectrum. The signalling rate is
+23.5&nbsp;Mb/s, and 5 fixed channels are defined. The protocol uses a
+variant of CSMA/CA based on packet time to live and priority, and MAC
+level retransmissions. The protocol includes optional encryption (no
+algorythm mandated) and power saving.
+<p>
+The nicest feature of Hiperlan (apart from the high speed) is the
+ad-hoc routing&nbsp;: if your destination is out of reach,
+intermediate nodes will automatically forward it through the optimal
+route within the Hiperlan network (the routes are regularly
+automatically recalculated). Hiperlan is also totally ad-hoc,
+requiring no configuration and no central controller.
+<p>
+The main deficiency of Hiperlan standard is that it doesn't provide
+real isochronous services (but comes quite close with time to live and
+priority), doesn't fully specify the access point mechanisms and
+hasn't really been proved to work on a large scale in the real
+world. Overhead tends also to be quite large (really big packet
+headers).
+<p>
+HiperLan suffers from the same disease as 802.11&nbsp;: the
+requirements are tight and the protocol complex, making it very
+expensive.
+
+<A NAME="Hiperlan2">
+<H3>6.4	HiperLan II</H3>
+
+<B>HiperLan&nbsp;II</B> is the total opposite of <I>HiperLan</I> (see
+above ;-). The first HiperLan was designed to build ad-hoc networks,
+the second HiperLan was designed for managed infrastructure and
+wireless distribution systems. The only similarities is the HiperLan
+II is being specified by the ETSI (Broadband Radio Access Network
+group), operate at 5 GHz (5.4 to 5.7 GHz) and the band is dedicated in
+europe.
+<p>
+HiperLan&nbsp;II was the first standard to be based on <B>OFDM</B>
+modulation (see <A HREF="Linux.Wireless.modem.html#ofdm"
+><I>chapter&nbsp;4.7.4</I></A>). Each sub-carrier may be modulated by
+different modulations (and use different convolutional code, a sort of
+FEC), which allow to offer multiple bit-rates (6, 9, 12, 18, 27 and 36
+Mb/s, with optional 54 Mb/s), with likely performance around 25 Mb/s
+bit-rate. The channel width is 20 MHz and includes 48 OFDM carriers
+used to carry data and 4 additional are used as references (pilot
+carriers - total is 52 carriers, 312.5 kHz spacing).
+<p>
+HiperLan&nbsp;II is a <B>Wireless ATM</B> system (see <A
+HREF="Linux.Wireless.mac.html#watm"><I>chapter&nbsp;5.1.4</I></A>),
+and the MAC protocol is a TDMA scheme centrally coordinated with
+reservation slots. Each slot has a 54&nbsp;B payload, and the MAC
+provide SAR (segmentation and reassembly - fragment large packets into
+54&nbsp;B cells, see <A
+HREF="Linux.Wireless.mac.html#frags"><I>chapter&nbsp;5.2.2</I></A>)
+and ARQ (Automatic Request - MAC retransmissions, see <A
+HREF="Linux.Wireless.mac.html#retry"><I>chapter&nbsp;5.2.1</I></A>). The
+scheduler (in the central coordinator) is flexible and adaptive, with
+a call admission control, and the content of the TDMA frame change on
+a frame basis to accommodate traffic needs. HiperLan&nbsp;II also
+defines power saving and security features.
+<p>
+HiperLan&nbsp;II is designed to carry ATM cells, but also IP packets, Firewire
+packets (IEEE 1394) and digital voice (from cellular phones). The main
+advantage of HiperLan II is that it can offer better quality of
+service (low latency) and differentiated quality of service (guarantee
+of bandwidth), which is what people deploying wireless distribution
+system want. On the other hand, I'm worried about the protocol
+overhead, especially for IP traffic.
+
+<A NAME="OpenAir">
+<H3>6.5	OpenAir</H3>
+</A>
+
+OpenAir is the proprietary protocol from <B>Proxim</B>. As Proxim is
+one of the largest Wireless LAN manufacturer (if not the largest, but
+it depends which numbers you are looking at), they are trying to push
+OpenAir as an alternative to 802.11 through the <B>WLIF</B> (Wireless
+LAN Interoperability Forum). Proxim is the only one having all the
+detailed informations on OpenAir, and strangely enough all the OpenAir
+products are based on Proxim's module.
+<p>
+OpenAir is a pre-802.11 protocol, using Frequency Hopping and 0.8 and
+1.6&nbsp;Mb/s bit rate (2FSK and 4FSK). The radio turnaround (size of
+contention slots and between packets) is much larger than in 802.11,
+which allow a cheaper implementation but reduces performance.
+<p>
+The OpenAir MAC protocol is CSMA/CA with MAC retransmissions, and
+heavily based on RTS/CTS, each contention slot contains a full RTS/CTS
+exchange, which offer good robustness but some overhead. A nice
+feature of the protocol is that the access point can send all its
+traffic contention free at the beginning of each dwell and then switch
+the channel back to contention access mode.
+<p>
+OpenAir doesn't implement any encryption at the MAC layer, but
+generates Network ID based on a password (Security ID). This provide
+some security only because Proxim controls the way all the
+implementation behave (they don't provide a way to synchronise to any
+network as 802.11 manufacturers do). OpenAir also provide coarse power
+saving.
+
+<A NAME="swap">
+<H3>6.6	HomeRF &amp; SWAP</H3>
+</A>
+
+<I>NOTE&nbsp;: this chapter&nbsp;was written when I was finishing
+writing the SWAP 1.0 specification in December 98. After I left the
+HomeRF, a lot of big political game did happen, which triggered some
+critical changes to the specification (SWAP 1.1). I don't really know
+how much of it is still accurate, but I believe that the standard is
+no longer as open and vendor neutral as it was and that performance
+has been dramatically reduced.</I>
+<p>
+The <B>HomeRF</B> is a group of big companies from different
+background formed to push the usage of Wireless LAN in the home and
+the small office. This group is developing and promoting a new Radio
+Lan standard&nbsp;: <B>SWAP</B>.
+<p>
+The Home is a good market for Wireless LAN because very few houses are
+nowadays cabled with Ethernet wire between the different rooms, and
+because mobility in the home is desired (browse the web on the
+sofa). The use of the 2.4 GHz band allows a free worldwide deployment
+of the system.
+<p>
+The HomeRF has decided to tackle the main obstacle preventing the
+deployment of Wireless LAN&nbsp;: the <B>cost</B>. Most users just
+can't afford to spend the money required to buy a couple of Radio LAN
+cards to connect their PCs (without talking of the access point).
+<p>
+The main cost of a radio LAN is the modem. As this is analog and high
+power electronics, it doesn't follows <I>Moore's law</I> (the market
+trend that allow you to buy a <I>Cray</I> at the price of a calculator
+after a few years) and modems tend to be fairly stable in
+price. <I>Frequency Hopping</I> modems tend to be less expensive, but
+the <I>802.11</I> specification impose tight constraints on the modem
+(timing and filtering), making it high cost. The <B>SWAP</B>
+specification, by releasing slightly those constraints, allows for a
+much cheaper implementation, but still keeps a good performance.
+<p>
+The MAC protocol is implemented in software and digital, so doesn't
+contribute that much to the final cost of the product (except in term
+of development cost). Releasing some hardware constraints prevented
+the use of the 802.11, which anyway was much too complex and including
+too many features not necessary for the task.
+<p>
+The main killer application that the HomeRF group envisages is the
+integration of digital cordless telephony and the computing word,
+allowing the PC to reroute the phone calls in the home or to offer
+voice services to the users.
+<p>
+A new MAC protocol has been designed, much simpler, combining the best
+feature of DECT (an ETSI digital cordless phone standard) and IEEE
+802.11&nbsp;: a digital cordless phone and ad-hoc data network,
+integrated together.
+<p>
+The voice service is carried over a classical <I>TDMA</I> protocol
+(with interference protection, as the band is unlicensed) and reuse
+the standard DECT architecture and voice codec. The data part use a
+<I>CSMA/CA</I> access mechanism similar to 802.11 (with MAC level
+retransmission, fragmentation...) to offer a service very similar to
+Ethernet.
+<p>
+The 1&nbsp;Mb/s Frequency Hopping physical layer (with optional
+2&nbsp;Mb/s using 4FSK) allows 6 voice connections and enough data
+throughput for most users in the Home. The voice quality should be
+equivalent to DECT in Europe and much better than any current digital
+phone in the US. Data performance should be slightly lower than
+802.11. The MAC protocol has also been designed in a very flexible
+way, allowing to develop very cheap handset or data terminals and high
+performance multimedia cards for PCs...
+<p>
+The <B>SWAP</B> specification is an open standard (in fact, more open
+than 802.11, because there should be no royalty or patent issues),
+quite simple and straightforward. In fact, the combination of voice
+and data gets already most marketing people drooling ! The only
+drawback is that you will have to wait a bit before seeing SWAP
+products in your favourite supermarket...
+
+<A NAME="mclink">
+<H3>6.7	BlueTooth</H3>
+</A>
+
+BlueTooth should not even be mentioned in this document, but people
+keep thinking that BlueTooth is a Wireless LAN. BlueTooth is a
+<B>cable replacement</B> technology mostly developed and promoted by
+<B>Ericsson</B> with the help of <B>Intel</B>, offering point to point
+links and no native support for IP (need to use PPP). It may be good
+for some applications, but not for Wireless LANs.
+<p>
+I personally read the BlueTooth specification, and I was not
+impressed, expect by the size of the thing (more than 1500
+pages&nbsp;!). My take is that BlueTooth offers the functionality of a
+<B>Wireless USB</B>, and in fact looking into the huge specification
+we can see some similarities in the design.
+<p>
+BlueTooth offers the possibility to create a set of point to point
+wireless serial pipes (<I>RfComm</I>) between a master and up to 6
+slaves, with a protocol (<I>SDP</I>) to bind those pipes to a specific
+application or driver. The BlueTooth mindset is very vertical, with
+various profiles defining every details from bit level to application
+level. TCP/IP is only one profile, implemented through PPP in a
+specific pipe. There are other pipes for audio, Obex... With
+BlueTooth, nodes need to be explicitely connected, but they remember
+bindings from one time to another.
+<p>
+This is miles away from the current wireless LAN approach
+(connectionless broadcast interface, native IP support, cellular
+deployement, horizontal play), so BlueTooth doesn't fit TCP/IP and
+wireless LAN applications too well. On the other hand, as a wireless
+USB, it fulfil a role that regular wireless LANs can't, because TCP/IP
+discovery and binding protocols are more heavyweight.
+<p>
+Currently, BlueTooth is moving very slow (my first reading of the spec
+was autumn&nbsp;97 - then called MC-Link) due to its complexity and
+the inherent limits due to the protocol design (people are learning
+how to workaround "features"), but eventually some products should
+reach the market and later on software support should come...
+<p>
+In summary, if all you want is to run TCP/IP, you may find it cheaper
+and more effective to NOT wait for BlueTooth and live without the
+hype.
+
+<p ALIGN=right>
+<A HREF="Linux.Wireless.Overview.html"><I>up</I></A>
+<HR>
+<CENTER><TABLE BORDER=0 CELLPADDING=0><TR><TD valign="top" align="center">
+<ADDRESS>
+<A HREF="Wireless.html">Linux Wireless LAN Howto</A> -
+jt&#064;hpl.hp.com
+<br>Converted to html from Frame Maker - 25 August 98
+<br>Updated 3 August 00
+<br>Copyright &#169; 1996-2004 Jean Tourrilhes
+</ADDRESS>
+</TD><TD>
+&nbsp;&nbsp;&nbsp;
+</TD><TD valign="top" align="center">
+Project hosted and sponsored by :
+<br>
+<A HREF="http://www.hpl.hp.com"><IMG SRC="../hplogo.png" HEIGHT=34
+WIDTH=141 ALT="HP home page"></A>
+</TD></TR></TABLE></CENTER>
+
+<!-- Keep Webmaster happy -->
+<script type="text/javascript" language="JavaScript">
+var s_prop7="us"
+var s_prop8="eng"
+var s_prop9="corp"
+var s_prop10="us|eng|corp"
+var s_prop13="hphqglobal,hphqwwhplabs"
+</script>
+
+<!-- Begin METRICS JavaScript -->
+<!-- <script type="text/javascript" language="JavaScript"
+src="http://welcome.hp-ww.com/country/us/eng/js/metrics.js"></script> -->
+<script type="text/javascript" language="JavaScript"
+src="http://www.hpl.hp.com/dev/hplabsmetrics.js"></script>
+<!-- End METRICS JavaScript -->
+
+</BODY>
+</HTML>

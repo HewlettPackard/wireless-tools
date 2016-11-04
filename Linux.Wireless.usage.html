@@ -1,0 +1,1007 @@
+<HTML>
+<HEAD>
+<TITLE>Wireless LANs in use</TITLE>
+<LINK rel="Next"  href="Linux.Wireless.Extensions.html" title="Wireless
+Extensions">
+<LINK rel="Prev"  href="Linux.Wireless.drivers.other.html" title="Drivers - other">
+<LINK rel="First" href="Linux.Wireless.intro.html" title="Introduction">
+<LINK rel="Last"  href="Linux.Wireless.std.html" title="Standards">
+<LINK rel="Up"    href="Wireless.html" title="Linux Wireless LAN Howto">
+
+<LINK rel="Contents" href="Wireless.html#howto" title="Linux Wireless LAN Howto">
+<LINK rel="section" href="#choice" title="Choice and selection of a Wireless LAN">
+<LINK rel="section" href="#features" title="Features of the hardware">
+<LINK rel="section" href="#interop" title="Interoperability">
+<LINK rel="section" href="#vendor" title="Which vendor to select">
+<LINK rel="section" href="#identify" title="How to identify a card">
+<LINK rel="section" href="#install" title="Driver installation">
+<LINK rel="section" href="#loading" title="Driver loading & parameters">
+<LINK rel="section" href="#wparam" title="Wireless configuration">
+<LINK rel="section" href="#ipconfig" title="Network configuration">
+<LINK rel="section" href="#deploy" title="Wireless LAN deployment">
+<LINK rel="section" href="#bridge" title="Access Points, Home Gateways and Ethernet bridging">
+<LINK rel="section" href="#ptp" title="Point to point links">
+<LINK rel="section" href="#speed" title="Performance (speed)">
+<LINK rel="section" href="#reliability" title="Reliability">
+<LINK rel="section" href="#mobile" title="Mobility">
+<LINK rel="section" href="#secure" title="Security and Privacy">
+<LINK rel="section" href="#benchmark" title="Benchmarks">
+<LINK rel="section" href="#tuning" title="Tuning">
+</HEAD>
+
+<BODY>
+
+<H1 ALIGN=center>Wireless LANs in use</H1>
+<HR width=25%>
+<H3 ALIGN=center>Jean Tourrilhes</H3>
+<H3 ALIGN=center>25 July 07</H3>
+<br><br>
+<BLOCKQUOTE><I>
+"Why can't I receive the FM on my Wireless LAN ?"
+</I></BLOCKQUOTE>
+
+<br>
+Installing and using a Wireless LAN is not such a big deal, and is not
+much different from other kind of networks. In this chapter, I will
+give you a few tricks on how to install those beast and will mostly
+redirect you to a lot of literature explaining the things much better
+than I would do.
+<p>
+Then, I will explain some of the difference of Wireless LANs compared
+to wired technology from the user point of view and why it reacts
+sometime differently. For more curious people, see the <A
+HREF="Linux.Wireless.Overview.html"><I>section 5</I></A>.
+
+<A NAME="choice">
+<H2>1	Choice and selection of a Wireless LAN</H2>
+</A>
+
+There is far too many people buying a Wireless LAN and discovering
+only after that it is not supported under Linux. So, please, check
+that a driver is <B>available</B> for the hardware you plan to use.
+<p>
+Most Wireless LANs are designed to work well in most configurations,
+but my experience tells that some Wireless LANs or some environment
+may be capricious. Of course, the vendor won't advertise this, so it's
+your responsibility to check that the Wireless LAN is working with
+your particular setup. If you intend to cover a large range,
+<B>test</B> as many physical locations and combinations as possible to
+avoid surprises. Know the limits of your hardware.
+<p>
+The performance of different Wireless LANs may vary widely, depending
+on may factors. The throughput of two Wireless LANs advertising the
+same bit rate may vary by a factor 5 (I won't give the names). Range
+also can have wide variations, even between similar cards. So, be
+warned and <B>benchmark</B> your Wireless LAN...
+<p>
+If you are not happy with your choice of Wireless LAN, don't hesitate
+and <B>return</B> it to where you bough it for a refund.
+
+<A NAME="features">
+<H2>2	Features of the hardware</H2>
+</A>
+
+Obviously, I don't need to tell you to check the <B>price</B> of the
+Wireless LAN you plan to buy, but however consider checking the price
+in different places, especially on the Internet. Some hardware are
+still difficult to find and impossible to get directly from the
+manufacturer, and a bit of research always pay off...
+<p>
+Then, the second issue is the <b>form factor</B>, and the interface
+use to connect the card to your PC. Most cards nowadays are in
+<I>Cardbus</I> form factor and <I>USB</I> form factor, most vendors
+offer as well <I>PCI</I> or <I>Mini-PCI</I> versions of their
+cards. Older cards may come in <I>ISA</I>, <I>Pcmcia</I> (16 bits) and
+<I>CF</I> form factor. In some cases, it is possible to plug a Pcmcia
+or Cardbus card in a desktop using ISA-to-Pcmcia or PCI-to-Cardbus
+bridges, but those are not always properly supported. I've seen some
+old cards in <I>PC104</I> form factor (for embedded applications).
+<p>
+Often, people do wonder about <B>Access Points</B> and <B>residential
+gateways</B> and if they need some for their network. In most cases,
+the Access Point is a bridge and allow to connect the wireless network
+to an <I>Ethernet backbone</I>, whereas the Residential Gateway
+connect it to an <I>ISP</I> (via dialup/cable/DSL), and those two kind
+of products are usually not fully interchangeable. However, most
+Wireless LAN cards work in ad-hoc mode (so without Access Point), and
+a Linux box can offer connectivity to other networks (routing+proxy
+ARP, or masquerading).
+<p>
+For people who plan to establish point to point links, they will
+likely need the card to offer a <B>connector</B> for an <B>external
+antenna</B>. Quite often those connectors are small and not really
+standard. Of course, if the card doesn't offer such a connector, it's
+always possible to butcher it...
+<p>
+Then, you may care about all the usual performance characteristics,
+such as <B>speed</B>, <B>range</B>, and <B>power
+consumption</B>. However, be aware that it's quite difficult to
+compare products, for the speed read my various comments about
+<I>overhead</I> and <I>benchmarking</I>, and for range pay mostly
+attention to the <I>transmit power</I> and the <I>sensitivity</I>.
+<p>
+Finally, each implementation may offer more or less <B>wireless
+parameters</B>. Having those parameters will allow to tune the card
+for specific environments and configurations. With that, you probably
+want some deployment and diagnostic tools from the vendor...
+<p>
+Personally, I believe that the number one consideration in making your
+choice should be the range (coverage), and that raw speed is the least
+important of the things mentioned above. If you need speed, you should
+use Gigabit Ethernet. Wireless enables mobility, and you want to make
+sure to retain network connection wherever you are.
+
+<A NAME="interop">
+<H2>3	Interoperability</H2>
+</A>
+
+For people having dealt with Ethernet, it may seem absurd to see all
+the interoperability worries that we have to go through for Wireless
+LANs. But such is life, and product A may not communicate with product
+B. To their defense, Wireless MAC protocols are a few order of
+magnitude more complex than Ethernet and have not been around for as
+long.
+<p>
+For most of the old hardware, and for all the <B>proprietary</B>
+products, interoperability is none. In other word, those products
+communicate only with products from the same vendor. The risk for you
+is that you are locked with this vendor to upgrade your network. That
+is still OK if the vendor is strong and has been around in the
+business for a long time.
+<p>
+The only two standards that have been demonstrated to be interoperable
+across different implementations are <B>802.11-FH</B> and
+<B>802.11-DS</B> (other standards may be interoperable due to a single
+implementation). I must there applaud the various vendors which have
+gone through great pain to make sure that their hardware was playing
+nice with others and fixing their interoperability problems. Note that
+802.11-FH products are not interoperable with 802.11-DS products, and
+vice versa, so you can only mix products of the same kind of
+802.11.
+<p>
+As the <B>802.11-b</B> specification is just a simple extension of
+802.11-DS (adding 5.5 and 11&nbsp;Mb/s speeds), all products
+interoperate at least at 2&nbsp;Mb/s (802.11-DS mode), and all
+products I have seen also interoperate at 11&nbsp;Mb/s.
+<p>
+In general, all <B>proprietary extensions</B> of 802.11 have poor
+interoperability, they will only work if all devices are from the same
+vendor, however those devices will interoperate at standard speeds
+with other products. <B>802.11+</B> is a semi-proprietary extension of
+802.11b, adding the 22&nbsp;Mb/s speed. All products are based on the
+same chipset, and they also interoperate with 802.11b products.
+<p>
+The <B>802.11g</B> standard is a non straightforward extension of
+802.11b. Early products from different vendors did <B>not</B> always
+interoperate properly with each other at higher speeds (but will
+interoperate at 802.11b speeds), and sometime they did <B>not</B>
+interoperate with 802.11b products and may actually disrupt 802.11b
+networks. Recent 802.11g products are much better, except for Ad-Hoc
+mode which is usually poorly supported.
+<p>
+Early <B>802.11a</B> products (5&nbsp;GHz) are interoperable, because
+they were based on the exact same chipset, recent products have good
+interoperability. They do not interoperate with 802.11b products,
+because using a different frequency band, but some products doing both
+802.11b and 802.11a are available.
+<p>
+<B>Pre-802.11n</B> products have a poor track record at
+interoperability so far, however it will get better as we get closer
+to the final standard.
+<p>
+<B>Other standards</B> (such as HiperLan, HiperLan2 and SWAP) are
+interoperable in theory. As there is very few vendors using those
+standards (or even none) and the products are often too recent, we
+can't say much about interoperability. Note that compliance doesn't
+mean interoperability and vice versa...
+<p>
+Note that in some cases, the <B>Linux driver</B> of a device doesn't
+implement all the features of the corresponding Windows driver
+(typically security), limiting the interoperability.
+
+<A NAME="vendor">
+<H2>4	Which vendor to select</H2>
+</A>
+
+Buying a Wireless LAN card used to be relatively straightforward,
+because there was a limited choice, but has now become very complex
+and confusing.
+<p>
+The first problems is that there are now lot's of <B>different vendors
+and brands</B>, and most I've never heard off (and they tend to be the
+cheapest, so the most popular). It's almost impossible to track down
+all of them. Fortunately, there is only a limited number of chipset,
+so most of those vendors sell the same hardware (or minor derivation)
+and there is a good probability that it works with an existing Linux
+driver.
+<p>
+The other issue is that some vendors use <B>different chipsets</B> in
+their various products, so some of their cards might be supported and
+some might not be. They can switch their entire product line to a new
+chipset pretty quickly, so a "brand" is not a safe bet. Some vendor
+even sell different chipset under the <B>same model number</B>
+(example D-Link and Linksys), making it very difficult to know in
+advance if the card is supported or not.
+<p>
+In the past, most of the "generic" brands selling 802.11b cards were
+using the <B>Intersil PrismII</B> chipset, which is well supported
+under Linux (various drivers), so it was not a problem. A lot of them
+have recently moved to non-supported chipset. Plain 802.11g cards are
+nowadays usually supported, but in most case require work to get the
+driver going. Laptop with <B>Centrino</B> cards are a very good
+choice. It's usually easy to identify <B>Atheros</B> cards, they
+usually advertise SuperG and 108 Mb/s. Pre-802.11n cards are usually
+not supported.
+<p>
+There are various <B>hardware surveys</B> that attempt to capture the
+latest list of compatible cards (see <A
+HREF="Wireless.html#whard">Wireless Howto front page</A>). You can
+also search the various mailing list archives and the web for
+information.
+
+<A NAME="identify">
+<H2>5	How to identify a card</H2>
+</A>
+
+Let assume you already have a wireless card plugged in your PC, and
+want to know which one it is and which driver you need. Linux has
+usually a way to display a <B>card identification</B>, but this depend
+on the type of card.
+<p>
+If the card is an <B>ISA</B> card, you are usually out of luck.
+<p>
+If the card is a <B>PCI</B> card, you need to use the command
+"<I>lspci</I>" to display the card identification strings.
+<p>
+If the hardware is a <B>USB</B> dongle, you need to use the command
+"<I>lsusb</I>" to display the dongle identification strings. In some
+case, "<I>lsusb</I>" doesn't work (for example if usbfs is not
+mounted), and you can get the identification strings from the kernel
+log using "<I>dmesg</I>" (or in
+<U>/var/log/messages</U>).
+<p>
+If the card is a <B>Cardbus</B> card (32 bits Pcmcia), and if you are using
+<B>kernel 2.6.X</B> or kernel 2.4.X with the kernel Pcmcia subsystem,
+you need to use the command "<I>lspci</I>" to display the card
+identification strings. If the card is a <B>Cardbus</B> card (32 bits
+Pcmcia), and if you are using an older kernel with the standalone
+Pcmcia subsystem, you need to use the command "<I>cardctl ident</I>"
+display the card identification strings. Try both and see what comes
+out.
+<p>
+If the card is a true <B>Pcmcia</B> card (16 bits), and if you are
+using <B>kernel 2.6.14</B> or later, you need to use the command
+"<I>pccardctl ident</I>" to display the card identification
+strings. If the card is a true Pcmcia card (16 bits), and if you are
+using an older kernel, you need to use the command "<I>cardctl
+ident</I>" display the card identification strings. Note that cardmgr
+will also write some identification strings in the message logs
+(<U>/var/log/daemon.log</U>) that may be different from the real card
+identification strings.
+<p>
+The card identification usually helps to identify the <B>chipset</B>
+inside the hardware, and in some other cases it does not, because the
+vendor has changed the identity. Once you have identified the chipset,
+it is usually straightforward to check if the hardware is supported
+and which driver to use.
+<p>
+Most Linux drivers knows about some of those card identifications, and
+will automatically bind to the hardware. It is usually simple to add
+new identification to a driver.
+<p>
+<I>Jacek Pliszka</I> recommend to get the FCC-ID written at the back
+of the hardware and to run it through the FCC database. He also
+recommend to check the Windows driver (both identification and file
+name) for some clues.
+
+<H2>6	Wireless hardware compatibility</H2>
+
+<TABLE>
+<TR>
+<TD><A HREF="Wireless.html#howto">Linux Wireless Howto</A>
+<TD>- Second section, organised by chipset
+</TR><TR>
+<TD><A HREF="Wireless.html#whard">Linux hardware surveys</A>
+<TD>- Not always complete
+</TR><TR>
+<TD><A HREF="Wireless.html#wnets">Community wireless web sites</A>
+<TD>- Usually most up-to-date, by vendor
+</TR><TR>
+<TD><A HREF="Tools.html#links">Linux wireless tools web sites</A>
+<TD>- List cards compatible with the specific tool
+</TR><TR>
+<TD><A HREF="Wireless.html#howto">Mailing list archives</A>
+<TD>- Use a search engine
+</TR>
+</TABLE>
+
+<A NAME="install">
+<H2>7	Driver installation</H2>
+</A>
+The reader should be familiar with some of the documents listed in the
+<I>Useful readings chapter</I> below, because the information here
+mainly acts as a complement to them. A good knowledge of your Wireless
+LAN is also a prerequisite before switching to Linux.
+<p>
+Most Wireless LAN vendors have tried to make things easy and offer
+product with an interface as similar as possible as <B>Ethernet</B>,
+and which work mostly the same way. So, a bit of background on
+Ethernet and the general Linux networking is welcomed (see below).
+<p>
+The operating system need a piece of software to interface to the
+hardware. That is the role of the <B>driver</B>. Basically, when Linux
+gives to the driver a packet to send, the driver have to copy the
+packet to the hardware and toggle the correct bits in the correct
+register on the card to send it. It is the same when the card
+generates an interrupt, the driver go and read the packet and give it
+to Linux. Of course, the driver needs to know about the specific
+hardware details and the specific operating system ways.
+<p>
+In conclusion, you must check first if the driver for your Wireless
+LAN exists (see <A HREF="Linux.Wireless.drivers.html"><I>previous
+section</I></A>), because in many case it proves to be quite useful...
+<p>
+With Linux, you normally have to <B>compile</B> the driver source code, however most Linux distribution offer precompiled modules for the most popular drivers. There is usually
+two compilation options : drivers compiled staticaly in the
+<B>kernel</B> and as a <B>module</B>. If the driver is already in the
+kernel sources, the compilation is quite simple (you have to enable it
+in the kernel configuration, static or module). If it is in the
+<B>Pcmcia package</B>, you just need to install the
+package.
+<p>
+Otherwise, see the installation instructions coming with the
+driver which should detail the procedure to install it.
+<p>
+Once you've got the driver compiled and installed, you must tell your
+system about it. This involve getting the driver to load (see <A
+HREF="#loading"><I>section 9</I></A>), wireless configuration (see <A
+HREF="#wparam"><I>section 10</I></A>) and network configuration (see <A
+HREF="#ipconfig"><I>section 12</I></A>).
+
+<H2>8	Useful Linux related readings</H2>
+
+<TABLE>
+<TR>
+<TD><A HREF="http://www.linuxdoc.org/docs.html#howto">Ethernet HowTo</A></TD>
+<TD>- How to install and configure most of the network drivers</TD>
+</TR><TR>
+<TD><A HREF="http://www.linuxdoc.org/docs.html#howto">Net2 HowTo</A></TD>
+<TD>- The network stack story</TD>
+</TR><TR>
+<TD><A HREF="http://www.linuxdoc.org/docs.html#howto">Module HowTo</A></TD>
+<TD>- To compile you driver as a module</TD>
+</TR><TR>
+<TD><A HREF="http://pcmcia-cs.sourceforge.net/">Pcmcia HowTo</A></TD>
+<TD>- An excellent medicine for pcmcia drivers</TD>
+</TR><TR>
+<TD><A HREF="http://www.linuxdoc.org/docs.html#howto">AX25 HowTo</A></TD>
+<TD>- AX25 and Radio Amateur users should enjoy this one</TD>
+</TR>
+</TABLE>
+<TABLE>
+<TR>
+<TD><A HREF="http://www.linuxdoc.org/docs.html#guide"> The Linux Network
+Administration guide</A> - A lot of background and tips about networking
+and Linux</TD>
+</TR>
+<TR>
+<TD>Your distribution documentation or FAQ (if any)</TD>
+</TR>
+</TABLE>
+
+<A NAME="loading">
+<H2>9	Driver loading and driver parameters</H2>
+</A>
+
+If your card is removable (Pcmcia, USB), you usually want the system
+to <B>automatically load</B> the driver when the card is plugged or
+activated. The Pcmcia subsystem is usually very good at doing this,
+and has it's own scripts or uses the Hotplug scripts. The USB
+subsystem uses HotPlug scripts.
+<p>
+For non-removable cards, things are simpler. If the driver is compiled
+staticaly in the kernel, it will be loaded at boot time. If it's a
+module, you can use <B>Hotplug</B> or <B>udev</B> to automatically
+load the driver, or you can load it as needed using
+<U>/etc/modules.conf</U> (see below).
+<p>
+Some older drivers (typically ISA) may load only with some required
+<B>driver parameters</B>. Those parameters usually allow to specify
+the base address and interrupt of the hardware to avoid scanning, but
+also might be used for multi-device configuration or wireless specific
+parameters (see below). Note that for all modern Plug-and-Play cards
+(PCI), those extra parameters are no longer necessary, as the system
+figure things by itself, so you can omit them (or set them to 0).
+<p>
+A lot of users are confused when it comes to set driver loading and
+parameters. As it is explained nowhere correctly, I disgress a bit and
+give you a few hints on how to load drivers with and without
+parameters...
+<p>
+For driver compiled <B>staticaly in the kernel</B>, the parameters are
+passed on the kernel command line. The syntax is
+"ether=<I>irq,base,name</I>" where <I>base</I> is the base address,
+<I>irq</I> the interrupt and <I>name</I> the device logical name (ex :
+<I>eth0</I>). The kernel command line is passed by <I>lilo</I> (or
+<I>loadlin</I>) itself, so in fact it means that you add in
+<U>/etc/lilo.conf</U> a line which look like this :
+
+<pre>
+append="reboot=warm ether=0,0,eth1 ether=10,0x3E0,eth2 ether=11,0x390,eth3"
+</pre>
+
+For drivers compiled as <B>modules</B> (but which are not for
+removable devices), the parameter interface is much more flexible and
+each driver may be different, so you must look in the documentation.
+Basically, the driver define a set of parameters by their name and you
+may set for each keyword an array (one value for each instance of the
+hardware). The module configuration is usually done in
+<U>/etc/conf.modules</U> like this :
+
+<pre>
+alias eth1 hp100
+alias eth2 wavelan
+options wavelan io=0x3E0,0x390 name=eth2,eth3 irq=10,11
+</pre>
+
+For <B>Pcmcia modules</B>, the configuration is usually done in the
+pcmcia scripts in the directory <U>/etc/pcmcia/</U>, and you should
+check the Pcmcia Howto for details. Note that some distributions may
+use the HotPlug scripts. Usually, you don't need extra driver
+parameters, as Pcmcia is Plug-and-Play, and all driver part of the
+Pcmcia package are already preconfigured for proper auto-loading.
+<p>
+However, you need to make sure the Pcmcia subsystem load the driver
+you desire, if there are multiple drivers bound to the same device you
+may end up with an unexpected driver. In this case, you need to edit
+the various Pcmcia config files (in <U>/etc/pcmcia/</U> - <I>grep</I>
+is your friend).
+<p>
+For <B>USB modules</B>, you may use the HotPlug scripts. USB usually
+don't require any driver parameters, but again, you need to make sure
+the proper driver is loaded.
+<p>
+Before following up with the wireless configuration, you may want to
+make sure the driver is properly loaded, recognise the hardware and
+can initialise it. This can be done by checking the message logs (with
+<I>dmesg</I>).
+
+<A NAME="wparam">
+<H2>10	Wireless configuration (more parameters to configure</H2>
+</A>
+The most obvious difference with Ethernet cards is that there are
+<B>more parameters</B> to configure. In order to communicate, all
+nodes of the network must have those parameters configured the
+same. Some examples are : <I>frequency</I> or <I>hopping pattern</I>,
+<I>network id</I>, <I>domain</I> or <I>essid</I>, <I>encryption
+key</I> (for security)...
+<p>
+Under <I>Windows</I>, the installation program usually opens a nice
+window and asks the user to enter these parameters, or sets them to a
+default value. Some drivers set those parameters in a permanent
+storage in the device (<I>EEprom</I>), so the Linux driver is able to
+reuse them. But, the current tendency is to scrap the EEprom and to
+use the Windows <I>registry</I> to save those parameters instead. Of
+course, the Linux driver can't retrieve the parameters in those
+conditions.
+<p>
+The <B>Wireless Extensions</B> (see <A
+HREF="Linux.Wireless.Extensions.html"><I>next section</I></A>) has
+been designed to simplify the process of setting those parameters
+under Linux by providing an unified interface across drivers, but not
+all drivers support (yet) the Wireless Extensions...
+<p>
+For the majority of drivers that support it, Wireless Extensions allow
+to change parameters at run time (using various tools - see my web
+pages) or be use at boot time or card insertion time through various
+initialisation scripts (this is usually distribution specific). Most
+Linux distributions nowadays fully integrate wireless configuration in
+their network configuration. The <B>Wireless Tools</B> package
+contains additional documentation on all this.
+<p ALIGN=center>
+<A HREF="http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Tools.html">
+http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Tools.html</A>
+<p>
+The Wireless Tools also allow you to <B>diagnose</B> various basic
+problems (configuration not applied, not connected to the Access
+Point, invalid encryption key) and monitor the link. You need to make
+sure that the wireless link is established if you want your network
+setup to be successful.
+<p>
+Advanced security configuration, either 802.1x or WPA configuration,
+is done through <B>wpa_supplicant</B> or <B>xsupplicant</B>, which are
+daemons/applications handling those protocols. For those that prefer
+GUI, <B>NetworkManager</B> is a tools that allow to configure both the
+Wireless Extensions and wpa_supplicant graphically.
+<p>
+Drivers that don't use Wireless Extensions can use a variety of
+methods for configuration. Some have their own dedicated tools, some
+use a /proc interface and some use modules parameters, or a
+combination of these. The <A
+HREF="Linux.Wireless.drivers.html"><I>previous sections</I></A> of the
+Wireless Howto should give you some hints on the subject.
+<p>
+In conclusion, you must read your documentation to know what
+parameters need to be set, what they are used for, and look the Linux
+driver documentation to know how to set them under Linux. See below
+for a suggested list of information sources.
+<p>
+It is usually quite a good idea to install the Wireless Lan first
+under some mainstream operating system with the official vendors
+driver and tools, to have a feeling of how the beast does work. You
+might also compare the performance before and after :-)
+<p>
+Once you've got all those new parameters set, your Wireless LAN should
+be up and running.11
+<H2>8	Where to get information about your Wireless LAN configuration</H2>
+
+<UL>
+<LI>The official documentation that come with your product.
+<LI>Manufacturer web page and support.
+<LI>Linux driver source code, documentation (headers, man pages), maintainer.
+<LI>Documentation and man pages in the Wireless Tools package.
+<LI>Network configuration documentation for your specific Linux distribution
+</UL>
+
+<A NAME="ipconfig">
+<H2>12	Network configuration</H2>
+</A>
+
+After having setup the wireless parameters, you need to configure the
+regular network parameters. At the minimum, you need to tell the
+system to use DHCP or not. Very often, you may have to configure an IP
+address, Gateway and a DNS server. More complex setup (such as a
+Wireless Router) will require some route and firewall configuration.
+<p>
+All this is exactly similar to standard Ethernet cards, and often
+specific to each distribution, so please check the relevant
+documentation. Note however that bridging very often won't work (see
+section <A HREF="#bridge"><I>section 14</I></A>).
+
+<A NAME="deploy">
+<H2>13	Wireless LAN deployment</H2>
+</A>
+From the network administrator point of view, the main problem with
+Wireless LANs is that the <B>medium is shared</B>. If on a cable you
+can physically know who is connected, anybody and anything can use the
+radio band.
+<p>
+To try to separate everyone out there, most products define some
+<I>network identifier</I> (802.11 calls it ESSID). This
+is a number or character string which is used to identify all the
+people wanting to be one the same <B>logical network</B>. Networks
+using different <I>network identifiers</I> still share the bandwidth,
+but are logically separate and ignore each other.
+<p>
+This situation is not totally ideal, so that's why usually you have
+some <B>distinct channels</B> (or <I>frequencies</I>, or <I>hopping
+patterns</I>). People on distinct channels use different part of the
+bandwidth, so don't interfere at all. If you want to install multiple
+independent networks in the same area, this is the way to go.
+<p>
+The Wireless LAN has only a limited range, so you may reach only
+device within that range. This is usually why you should define some
+cells where everybody is in range. If you want those cells to
+communicate or a node to move across cells, you should install an
+<B>access point</B> in each of those and configure those with the same
+<I>network identifier</I> (and add an Ethernet segment between the
+access points).
+<p>
+On the other hand, some time you just want to quickly set up a network
+between a group of nodes and don't want to build an
+infrastructure. Most Wireless LANs offer <B>ad-hoc networking</B>,
+allowing you to just do that (apart from TCP configuration).
+<p>
+Some network administrators are also a bit scared by security problem
+over the medium. The only solution is to use <B>encryption</B>.
+
+<A NAME="bridge">
+<H2>14  Access Points, Home Gateways and Ethernet bridging</H2>
+</A>
+Most <B>Access Points</B> act as a MAC level bridge, allowing the
+Wireless LAN to be a natural extension of a wired network. They are
+deployed in a cellular fashion, and provide extended security,
+management and roaming.
+<p>
+On the other hand, the <B>Home Gateways</B> allow a single cell to be
+connected to a WAN, like a modem, a cable modem or a DSL access. The
+set of features is quite different, and they offer NAT/masquerading
+and PPP configuration. Most Home Gateways also have an internal
+Ethernet switch and act as a MAC level bridge between their wireless
+and internal wired side.
+<p>
+The conventional <B>Ethernet bridging</B> method (promiscuous
+sniffing) doesn't work with most wireless LAN standard, because of the
+header encapsulation and the interactions with link layer
+retransmissions. In other word, most often, when you use a software
+bridge on a wireless LAN card (such as the Linux bridge on a 802.11
+card), it doesn't work (moreover, quite often promiscuous is broken as
+well).
+<p>
+The driver could work around this restriction by creating its own MAC
+headers (802.11 headers instead of 802.3, and putting the right bits
+in the right place), but in fact most vendors don't provide the
+specification on how to this with their hardware (when they don't
+explicitely prevent it in hardware, to force you to buy their Access
+Points).
+<p>
+In other words, don't expect to use your Linux PC as a wireless bridge
+or wireless Access Points with most products out there, and forget
+about turning it into an Access Point. Of course, there is some
+exceptions that are listed in the driver descriptions (<A
+HREF="Linux.Wireless.drivers.html"><I>section 2</I></A>).
+<p>
+The workaround is to set the wireless LAN in <B>ad-hoc mode</B> and to
+use other methods, such as routing, masquerading, IP bridging, ARP
+proxying...
+
+<A NAME="ptp">
+<H2>15	Point to point links (connecting different LANs by wireless)</H2>
+</A>
+
+Most Wireless LANs are designed to be used as a local area network,
+where all the nodes can see each other or can see an access point, and
+each node is attached to other networks through a single access point
+(or not at all in ad-hoc mode).
+<p>
+Some people have asked me question on how to use Wireless LANs to
+connect different LANs together using wireless technology, usually
+those LANs are in <B>distant places</B> (across the street). Most of
+the time, you can't use a Wireless LAN because you don't have a fully
+connected topology (some node can't see each other, it's more a set of
+point to point links) and you may need to use <I>directional
+antennas</I> to overcome the distance.
+<p>
+I've never personally tried this, but I see 2 ways to achieve this.
+<p>
+The first solution is to use <B>Wireless Bridges</B>. Each Wireless
+Bridge is connected to one of the LAN section and redirect the traffic
+over the air to the correct destination. There is many products on the
+market, they are a bit expensive but very flexible, transparent and
+optimised for the task.
+<p>
+The second is to use normal Wireless LAN cards, and to plug them in a
+<B>router</B> (for example a Linux PC). I recommend to use a Wireless
+LAN supporting <I>RTS/CTS</I> if you have more than one link, and to
+set them in ad-hoc mode (no access point). Each LAN segment must have
+a different <I>IP subnet</I>, and the wireless link must have it's own
+subnet (it can be a private subnet if you use masquerading). After
+much configuration of the routing tables of your network, you should
+be able to get it working.
+<p>
+Some people using the Aironet Arlan cards for this kind of application
+have made a very nice <B>Arlan Wireless Routing Howto</B>, and I
+believe it can apply to most other Wireless LANs as well&nbsp;:
+<p ALIGN=center>
+<A HREF="http://www.rage.net/wireless/wireless-howto.html">
+http://www.rage.net/wireless/wireless-howto.html</A>
+<p>
+Note that it is not always possible to use a <B>bridging software</B>
+on top of a Wireless LAN card, and that is why I do recommend routing
+(or proxy-ARP + IP forwarding). Setting the card in promiscuous mode
+won't give the behavior expected by the bridge, because of the
+interaction with MAC level retransmissions. Some drivers are clever
+enough, and by playing directly with the 802.11 headers (if the
+hardware allows it), they can allow bridging to work, but most drivers
+are not.
+
+<A NAME="speed">
+<H2>16	Performance (speed)</H2>
+</A>
+
+Most people want to know how fast it goes, their first surprise after
+benchmarking is that they can't get the speed written on the box, and
+that the number seems low. Even when converting the byte per seconds
+to bit per seconds, it is obvious that the <B>TCP throughput</B> is
+much lower than the <B>signalling rate</B>. This is because the
+Wireless LANs are slower to start with, may not use their fastest
+speed and on top of that have higher overhead.
+<p>
+Most Wireless LANs products only specify their highest <B>signalling
+rate</B> (also called bitrate). The signalling rate is the speed the
+bits are send over the air (802.11b is up to 11&nbsp;Mb/s, 802.11g is
+up to 54&nbsp;Mb/s) and it doesn't account of all the overhead of the
+various protocols.
+<p>
+Most protocols have <B>multiple rates</B> and adapt the signalling
+rate depending on the quality of the link (for example 802.11b can run
+at 1, 2, 5.5 and 11&nbsp;Mb/s). When the link is clear and reception
+is strong, it uses the fastest rate, but when there is
+noise/interference or the devices are further away, it downgrades to a
+more robust rate, which is slower. The throughput that you will get
+will depend on which rate you are using, for example the highest speed
+might be only usable in line of sight. The environment conditions
+constantly change, so most products adjust their rate continuously,
+and the bandwith available can be unpredictable.
+<p>
+The Wireless LAN protocols also have usually a <B>higher overhead</B>
+than their wired counterpart (such as Ethernet) because of some
+technological limitations and to improve the reliability and the
+coverage of the Wireless LAN (optimisation trade-offs). Wireless
+protocols have a lot more protocol overhead, such as contention, large
+headers, encryption, management frames... Retransmissions are needed
+to overcome various radio conditions. Part of the protocol overhead is
+fixed and does not scale with the bit rate, which means that at the
+highest rate this overhead is becoming proportionally larger. At 11
+Mb/s the TCP throughput can be almost reduced to 50%.
+
+<A NAME="reliability">
+<H2>17	Reliability</H2>
+</A>
+Most Wireless LANs protocols include mechanisms to improve the
+<B>reliability</B> of the packet transmissions to be at the same level
+or even better than Ethernet (<I>MAC level retransmissions</I> for
+example). Anyway, if you are using a protocol such as TCP (the default
+under Linux), you will be fully protected again any loss or corruption
+of data over the air. In other word, when you copy a file across the
+radio, it can't be corrupted (but it might fail completely).
+
+<A NAME="coverage">
+<H2>18	Coverage</H2>
+</A>
+
+As said earlier, people get excited about speed, and they often don't
+realise that the main measure of performance of a wireless LAN is the
+<B>coverage</B>, and by a wide margin. This includes maximum distance
+between nodes, resistance to interferences and ability to keep
+connectivity in a wide range of conditions.
+<p>
+The <B>propagation</B> of radio transmissions is influenced by many
+factors. Walls and floors tend to decrease and reflect the signal, and
+background noise make it more difficult to extract. The channel
+quality vary quite a lot over the time (<I>fading</I>).
+<p>
+Depending on the quality of reception, the error rate will change
+(forcing packet retransmissions), or the system may switch to a more
+robust (and slower) mode (fragmentation or modulation), so the actual
+throughput will vary from good to nothing.
+<p>
+Because of the way radio transmission are affected by the environment,
+it is quite difficult to predict the comportment of the system and to
+define a range. You will have some good, fair and bad area/period, the
+closer you are the more likely you are to be in a good one.
+
+<A NAME="mobile">
+<H2>19	Mobility</H2>
+</A>
+One of the main advantage of Wireless LANs is that they offer
+<B>mobility</B>. It mean that even when moving around, you retain your
+connection to the network.
+<p>
+Of course, this mobility is limited by the range of the Wireless
+LAN. To extend the range, you must cover the area with <B>access
+points</B>, which very often include <B>roaming</B> : you switch
+transparently to the closer access point which provide you a
+connection to the rest of the world and nodes out of range.
+<p>
+Note that most cheap Access Point don't include roaming (to force you
+to buy the more expensive Access Point version), and that Access
+Points of different vendors usually don't fully interoperate (the
+Access Points don't talk to each other).
+<p>
+If you want to move across IP subnets, this is time to try <B> Mobile
+IP</B> :-)
+
+<A NAME="secure">
+<H2>20	Security and Privacy</H2>
+</A>
+
+Because they use radio waves, wireless LANs are usually perceived as a
+security problem. In fact, it's much more likely that you will get
+hacked from the Internet or that somebody will tap your phone line at
+the back of your house. It is also possible to read your screen and
+your Ethernet cable from across the street, with the correct
+equipment, so nothing is bullet proof. But it's important to assess
+the security threat and the possible remedies.
+<p>
+First of all, any <B>attack</B> on a Wireless LAN will be necessary
+<B>local</B> (physical proximity), because of the limited range of
+radio. Most "attacks" will be your neighbor accidentally connecting to
+your network due to improper configuration. Directional antennas will
+allow the attacker to be further away than regular nodes, but only
+with line of sight. But this limit greatly the scope of the risk.
+<p>
+Wireless LAN, because they use digital transmissions, can <I>not</I>
+be listen to with a regular radio scanner. The only practical way to
+attack a Wireless LAN is to use another Wireless card compatible with
+it. The attacker may mostly try to do two things, snoop on your
+communications (for example to read the e-mail you are sending) or
+access your resources (for example your access to the Internet).
+<p>
+For most users, the <B>network identifier (ESSID)</B> will be enough
+protection against casual users : other people can't accidentally join
+your network by mistake, unless they guess the correct network
+identifier or really try to attack you. Obviously, you should change
+the default network identifier, and most products allow you to hide
+it, which you should.
+<p>
+Some people are more concerned about those issues or may want to
+increase the security of their system. Most Wireless LANs offer <B>MAC
+level encryption</B>. There is different levels of encryption, and not
+all security protocols are equal. A simple encryption like WEP was
+designed to offer security equivalent to a having a shared Ethernet
+cable (i.e. not much). Complex encryption like WPA are much more
+secure, and impossible to break-in in practice, but they are usually
+more complex to set up and manage. Finally, for high security, various
+techniques are available at the higher layers of the protocol stack.
+<p>
+The basis of all MAC level encryption scheme is that each packet
+transmitted over the network is individually encrypted with a secret
+key, and the card refuses unencrypted data or data encrypted with a
+different key. This encryption is totally transparent to the higher
+layer, everything is handled at the MAC layer, as opposed to VPN
+solutions that create encrypted tunnels at higher layers.
+<p>
+Simple encryption schemes, such as WEP, are widely available and
+supported, and are usually <B>easy to set-up</B>, the same encryption
+key is set up in the access point and all nodes of the network, no
+central authority is needed. However, these schemes are considered
+weak because they use a single key distributed to all nodes, don't
+have key management facility and lacks per-packet authentication. On
+top of that, the encryption algorithm, RC4, is not considered very
+strong. Over the years, various attacks have been found on <B>WEP</B>,
+the MAC level encryption scheme of 802.11, which illustrate that WEP
+is not more secure than what it was designed for (and probably
+less). In any case, enabling WEP is better than nothing, it can be
+seen as putting a "do not enter" sign on your network.
+<p>
+Various encryption schemes have been released for 802.11 to address
+the shortcomings of WEP. The initial version of <B>802.1x</B> adds
+elaborated key management to WEP, and changes the WEP key
+frequently. Today, this is not considered very secure, because it is
+still based on WEP. <B>WPA</B> and <B>WPA2</B> improve on 802.1x by
+having better key management and using AES instead of RC4. Those are
+considered state of the art and are beginning to be well supported and
+interoperable, but they are more complex to deploy and require a
+central authority (usually implemented in an Access Point or a
+Wireless Controller).
+<p>
+For higher level of security, I would advise to use a <B>security
+solution independent of the wireless link</B> (like IPsec or a regular
+VPN, see below). This separation of wireless and security has other
+advantages, for example the security solution can be updated
+independently of the hardware as needed, and hardware from different
+vendors can be mixed.
+<p>
+I would still argue that most home users don't really need security
+beyond preventing people accidentally joining their network. Most web
+site that you will access over wireless and that handle critical
+information already use <B>SSL</B> to encrypt those transactions,
+which is proven to be very secure, and there exist secure versions of
+POP or IMAP (still using SSL). Users that access remote Intranets most
+often already uses VPN software. So all critical transactions are
+often already protected, or easy to protect.
+<p>
+For those who need it, like if you are paranoid, your life depends on
+it, or if the wireless link is already behind a firewall, you need to
+set up a <B>encrypted tunnel</B> above the wireless link with a VPN
+protocol. Various VPN protocols can be used with Linux, such as
+<B>IPsec</B>, <B>PPTP</B> and <B>SSH</B> (IPsec considered is the
+ultimate security solution). You will need to setup a VPN gateway on
+the other side of the Access Points and the VPN software on every
+wireless device. That's usually complicated to setup, but that's the
+price for security.
+
+<A NAME="benchmark">
+<H2>21	Benchmarks</H2>
+</A>
+
+For all the reasons described above, I think it is quite tricky to
+<B>benchmark</B> Wireless LANs, and measuring coverage or throughput
+in isolation is not fair. Remember that <B>coverage</B> matters much
+more than raw performance in real life. This is why I don't give any
+performance numbers. Some computer magazine publish from time to time
+some extensive review of all those products and try to do some
+performance comparison more or less real life.
+<p>
+If you want to test the throughput of your device, you should use a
+tool called <I>Netperf</I>. You might want to submit your results in the
+database...
+<p ALIGN=center>
+<A HREF="http://www.netperf.org/netperf/NetperfPage.html">
+http://www.netperf.org/netperf/NetperfPage.html</A>
+<p>
+
+<A NAME="tuning">
+<H2>22	Tuning</H2>
+</A>
+
+Quite often, vendors are delivering products in configuration that
+look good in benchmarks and doesn't perform as well in real life. This
+is where you need to tune a few parameters to get better usability and
+performance, in those cases where the hardware does not do that for
+you automatically.
+<p>
+Most 802.11g and 802.11n Access Points have two modes, <B>mixed
+mode</B> and exclusive mode. Mixed mode makes sure that the Access
+Point interoperate well with legacy and older devices, but is slower
+than the exclusive mode. Obviously, you want all your devices to get
+the best performance, not a selected few, so you need to set the mode
+appropriate for your device mix.
+<p>
+Many vendors have <B>proprietary extensions</B>, that enable them to
+claim very high speeds. These extensions, especially channel bonding
+(wider channels), may confuse other devices, so in some cases you may
+want to turn them off.
+<p>
+Some vendors ship products with <B>RTS/CTS disabled</B>. This is the
+best setting if you have only two nodes, but when you have a fair
+number of nodes active at the same time, RTS/CTS can increase the
+performance. And of course, if you have hidden nodes, you can not get
+away without it...
+<p>
+Some vendors also tend to set the <B>number of MAC retransmissions</B>
+a bit low for my taste. If you use TCP, this might improve your
+performance slightly under good conditions, because TCP do its own
+retransmissions. However, all applications not using TCP (ping, RTP,
+NFS...) might suffer from the packet losses.
+<p>
+On a related note, you can play with the <B>bit-rate</B> setting of
+the card. Most cards nowadays include a rate-adaptation scheme, which
+adapt the bit-rate to the range&nbsp;: basically the card try
+transmitting at the highest rate and decrease the rate in case of
+packet losses. However, in configuration with large number of active
+nodes, packet losses also come from the contention process, so
+disabling this rate adaptation scheme (forcing the highest rate) can
+increase performance in some cases.
+<p>
+If you have <B>interferers</B> in the band, you might need to enable
+fragmentation (send smaller packet to fit between interferences) and
+to raise the sensibility (tell the card to ignore the noise). Of
+course, the best thing is to eliminate the interferer, if possible.
+<p>
+If you have different Access Points and have enabled roaming, you
+should also set carefully the <B>roaming threshold</B>, which is the
+point (in signal strength) at which the card search for a new Access
+Point. If you set it too low, the card will spend to much time with a
+non optimal AP (getting a poorer throughput), and if you set it too
+high the card will waste time searching for a new AP too often.
+<p>
+To finish, all this fine tuning and optimisation could/should be done
+in the card itself, not by the end user, the card itself has most of
+the information it needs to optimise those settings and the algorithms
+are not that complex (I describe some in my latest papers). This
+ensure that users automatically get the best performance in any
+condition. Most modern wireless hardware is now getting much better at
+doing this <B>automatic tuning</B>, and nowadays you need less and
+less to do any manual tuning (and actually tuning may be
+counter-productive in some cases).
+
+<p ALIGN=right>
+<A HREF="Linux.Wireless.Extensions.html"><I>next</I></A>
+<HR>
+<CENTER><TABLE BORDER=0 CELLPADDING=0><TR><TD valign="top" align="center">
+<ADDRESS>
+<A HREF="Wireless.html">Linux Wireless LAN Howto</A> -
+jt&#064;hpl.hp.com
+<br>Converted to html from Frame Maker - 1 May 97
+<br>Updated 25 July 07
+<br>Copyright &#169; 1996-2007 Jean Tourrilhes
+</ADDRESS>
+</TD><TD>
+&nbsp;&nbsp;&nbsp;
+</TD><TD valign="top" align="center">
+Project hosted and sponsored by :
+<br>
+<A HREF="http://www.hpl.hp.com"><IMG SRC="../hplogo.png" HEIGHT=34
+WIDTH=141 ALT="HP home page"></A>
+</TD></TR></TABLE></CENTER>
+
+<!-- Keep Webmaster happy -->
+<script type="text/javascript" language="JavaScript">
+var s_prop7="us"
+var s_prop8="eng"
+var s_prop9="corp"
+var s_prop10="us|eng|corp"
+var s_prop13="hphqglobal,hphqwwhplabs"
+</script>
+
+<!-- Begin METRICS JavaScript -->
+<!-- <script type="text/javascript" language="JavaScript"
+src="http://welcome.hp-ww.com/country/us/eng/js/metrics.js"></script> -->
+<script type="text/javascript" language="JavaScript"
+src="http://www.hpl.hp.com/dev/hplabsmetrics.js"></script>
+<!-- End METRICS JavaScript -->
+
+</BODY>
+</HTML>

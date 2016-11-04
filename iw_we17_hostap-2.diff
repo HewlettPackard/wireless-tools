@@ -1,0 +1,130 @@
+diff -u -p hostap-driver-0.2.3/driver/modules.we16/hostap.c hostap-driver-0.2.3/driver/modules/hostap.c
+--- hostap-driver-0.2.3/driver/modules.we16/hostap.c	Sun Feb 15 17:08:34 2004
++++ hostap-driver-0.2.3/driver/modules/hostap.c	Mon Jun 28 18:04:18 2004
+@@ -921,10 +921,20 @@ void hostap_setup_dev(struct net_device 
+ 
+ 	/* kernel callbacks */
+ 	dev->get_stats = hostap_get_stats;
++#if WIRELESS_EXT <= 16
+ 	if (main_dev || (iface && iface->type == HOSTAP_INTERFACE_MAIN))
+ 		dev->get_wireless_stats =  hostap_get_wireless_stats;
++#endif /* WIRELESS_EXT <= 16 */
+ 	dev->wireless_handlers =
+ 		(struct iw_handler_def *) &hostap_iw_handler_def;
++#if WIRELESS_EXT > 16
++	if(iface) {
++		/* Currently, we point to the proper spy_data only on
++		 * the main_dev. This could be fixed. Jean II */
++		iface->wireless_data.spy_data = &iface->spy_data;
++		dev->wireless_data = &iface->wireless_data;
++	}
++#endif /* WIRELESS_EXT > 16 */
+ 	dev->do_ioctl = hostap_ioctl;
+ 	dev->open = prism2_open;
+ 	dev->stop = prism2_close;
+diff -u -p hostap-driver-0.2.3/driver/modules.we16/hostap_ioctl.c hostap-driver-0.2.3/driver/modules/hostap_ioctl.c
+--- hostap-driver-0.2.3/driver/modules.we16/hostap_ioctl.c	Tue Mar 23 19:47:59 2004
++++ hostap-driver-0.2.3/driver/modules/hostap_ioctl.c	Mon Jun 28 18:11:03 2004
+@@ -13,6 +13,12 @@ static struct iw_statistics *hostap_get_
+ 	local_info_t *local = iface->local;
+ 	struct iw_statistics *wstats;
+ 
++#if WIRELESS_EXT > 16
++	/* Why are we doing that ? Jean II */
++	if (iface->type != HOSTAP_INTERFACE_MAIN)
++		return NULL;
++#endif /* WIRELESS_EXT > 16 */
++
+ 	wstats = &local->wstats;
+ 
+ 	wstats->status = 0;
+@@ -1031,6 +1037,19 @@ static int prism2_ioctl_giwrange(struct 
+ 	range->min_frag = 256;
+ 	range->max_frag = 2346;
+ 
++#if WIRELESS_EXT > 16
++	/* Event capability (kernel + driver) */
++	range->event_capa[0] = (IW_EVENT_CAPA_K_0 |
++				IW_EVENT_CAPA_MASK(SIOCGIWTHRSPY) |
++				IW_EVENT_CAPA_MASK(SIOCGIWAP) |
++				IW_EVENT_CAPA_MASK(SIOCGIWSCAN));
++	range->event_capa[1] = IW_EVENT_CAPA_K_1;
++	range->event_capa[4] = (IW_EVENT_CAPA_MASK(IWEVTXDROP) |
++				IW_EVENT_CAPA_MASK(IWEVCUSTOM) |
++				IW_EVENT_CAPA_MASK(IWEVREGISTERED) |
++				IW_EVENT_CAPA_MASK(IWEVEXPIRED));
++#endif /* WIRELESS_EXT > 16 */
++
+ 	return 0;
+ }
+ 
+@@ -1856,13 +1875,14 @@ static char * __prism2_translate_scan(lo
+ 
+ /* Translate scan data returned from the card to a card independant
+  * format that the Wireless Tools will understand - Jean II */
+-static inline int prism2_translate_scan(local_info_t *local, char *buffer)
++static inline int prism2_translate_scan(local_info_t *local,
++					char *buffer, int buflen)
+ {
+ 	struct hfa384x_scan_result *scan;
+ 	struct hfa384x_hostscan_result *hscan;
+ 	int entries, entry, hostscan;
+ 	char *current_ev = buffer;
+-	char *end_buf = buffer + IW_SCAN_MAX_DATA;
++	char *end_buf = buffer + buflen;
+ 	u8 *bssid;
+ 	struct list_head *ptr;
+ 
+@@ -1896,6 +1916,14 @@ static inline int prism2_translate_scan(
+ 				local, scan, hscan, hostscan, NULL, bssid,
+ 				current_ev, end_buf);
+ 		}
++#if WIRELESS_EXT > 16
++		/* Check if there is space for one more entry */
++		if((end_buf - current_ev) <= IW_EV_ADDR_LEN) {
++			/* Ask user space to try again with a bigger buffer */
++			spin_unlock_bh(&local->lock);
++			return -E2BIG;
++		}
++#endif /* WIRELESS_EXT > 16 */
+ 	}
+ 
+ 	spin_unlock_bh(&local->lock);
+@@ -1932,7 +1960,7 @@ static inline int prism2_ioctl_giwscan_s
+ 	}
+ 	local->scan_timestamp = 0;
+ 
+-	res = prism2_translate_scan(local, extra);
++	res = prism2_translate_scan(local, extra, data->length);
+ 
+ 	if (res >= 0) {
+ 		data->length = res;
+@@ -3511,9 +3539,12 @@ static const struct iw_handler_def hosta
+ 	.standard	= (iw_handler *) prism2_handler,
+ 	.private	= (iw_handler *) prism2_private_handler,
+ 	.private_args	= (struct iw_priv_args *) prism2_priv,
+-#if WIRELESS_EXT > 15
++#if WIRELESS_EXT == 15
+ 	.spy_offset	= offsetof(struct hostap_interface, spy_data),
+-#endif /* WIRELESS_EXT > 15 */
++#endif /* WIRELESS_EXT == 15 */
++#if WIRELESS_EXT > 16
++	.get_wireless_stats = hostap_get_wireless_stats,
++#endif /* WIRELESS_EXT > 16 */
+ };
+ 
+ 
+diff -u -p hostap-driver-0.2.3/driver/modules.we16/hostap_wlan.h hostap-driver-0.2.3/driver/modules/hostap_wlan.h
+--- hostap-driver-0.2.3/driver/modules.we16/hostap_wlan.h	Tue Mar 23 19:47:59 2004
++++ hostap-driver-0.2.3/driver/modules/hostap_wlan.h	Wed Jun 23 14:52:36 2004
+@@ -936,6 +936,10 @@ struct hostap_interface {
+ 	 * shared by all virtual interfaces. Currently, only the main data
+ 	 * device (wlan#) is used for iwspy entries. */
+ 	struct iw_spy_data spy_data; /* iwspy support */
++#if WIRELESS_EXT > 16
++	/* This is the fix for the problem described above. Jean II */
++	struct iw_public_data	wireless_data;
++#endif /* WIRELESS_EXT > 16 */
+ #endif /* WIRELESS_EXT > 15 */
+ 
+ 	enum {

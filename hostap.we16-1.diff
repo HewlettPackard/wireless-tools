@@ -1,0 +1,127 @@
+diff -u -p driver/modules.scanmaster/hostap_cs.c driver/modules/hostap_cs.c
+--- driver/modules.scanmaster/hostap_cs.c	Sat Oct 12 07:28:23 2002
++++ driver/modules/hostap_cs.c	Fri Dec  6 11:39:41 2002
+@@ -8,12 +8,15 @@
+ #include <linux/module.h>
+ #include <linux/init.h>
+ #include <linux/if.h>
+-#include <linux/wireless.h>
+ #include <linux/wait.h>
+ #include <linux/timer.h>
+ #include <linux/skbuff.h>
+ #include <linux/netdevice.h>
+ #include <linux/tqueue.h>
++#include <linux/wireless.h>
++#if WIRELESS_EXT > 12
++#include <net/iw_handler.h>
++#endif /* WIRELESS_EXT > 12 */
+ 
+ #include <pcmcia/version.h>
+ #include <pcmcia/cs_types.h>
+diff -u -p driver/modules.scanmaster/hostap_hw.c driver/modules/hostap_hw.c
+--- driver/modules.scanmaster/hostap_hw.c	Sat Oct 12 08:01:16 2002
++++ driver/modules/hostap_hw.c	Fri Dec  6 11:29:29 2002
+@@ -2504,6 +2504,22 @@ static int prism2_rx(struct net_device *
+ 	if (local->frame_dump & PRISM2_DUMP_RX_HDR)
+ 		hostap_dump_rx_header(dev->name, rxdesc);
+ 
++#if WIRELESS_EXT > 15
++	/* Put this code here so that we avoid duplicating it in all
++	 * Rx paths. - Jean II */
++#ifdef IW_WIRELESS_SPY		/* defined in iw_handler.h */
++	/* If spy monitoring on */
++	if (local->spy_data.spy_number > 0) {
++		struct iw_quality wstats;
++		wstats.level = HFA384X_LEVEL_TO_dBm(rxdesc->signal);
++		wstats.noise = HFA384X_LEVEL_TO_dBm(rxdesc->silence);
++		wstats.updated = 6;	/* No qual value */
++		/* Update spy records */
++		wireless_spy_update(dev, rxdesc->addr2, &wstats);
++	}
++#endif /* IW_WIRELESS_SPY */
++#endif /* WIRELESS_EXT > 15 */
++
+ 	if (macport != 0) {
+ 		if (macport == 7) {
+ 			monitor_rx(dev, rxdesc);
+diff -u -p driver/modules.scanmaster/hostap_ioctl.c driver/modules/hostap_ioctl.c
+--- driver/modules.scanmaster/hostap_ioctl.c	Thu Dec  5 18:18:08 2002
++++ driver/modules/hostap_ioctl.c	Fri Dec  6 11:06:00 2002
+@@ -2824,10 +2824,17 @@ static const iw_handler prism2_handler[]
+ 	(iw_handler) NULL /* kernel code */,		/* SIOCGIWPRIV */
+ 	(iw_handler) NULL /* not used */,		/* SIOCSIWSTATS */
+ 	(iw_handler) NULL /* kernel code */,		/* SIOCGIWSTATS */
++#if WIRELESS_EXT > 15
++	iw_handler_set_spy,				/* SIOCSIWSPY */
++	iw_handler_get_spy,				/* SIOCGIWSPY */
++	iw_handler_set_thrspy,				/* SIOCSIWTHRSPY */
++	iw_handler_get_thrspy,				/* SIOCGIWTHRSPY */
++#else /* WIRELESS_EXT > 15 */
+ 	(iw_handler) NULL,				/* SIOCSIWSPY */
+ 	(iw_handler) prism2_ioctl_giwspy,		/* SIOCGIWSPY */
+ 	(iw_handler) NULL,				/* -- hole -- */
+ 	(iw_handler) NULL,				/* -- hole -- */
++#endif /* WIRELESS_EXT > 15 */
+ 	(iw_handler) prism2_ioctl_siwap,		/* SIOCSIWAP */
+ 	(iw_handler) prism2_ioctl_giwap,		/* SIOCGIWAP */
+ 	(iw_handler) NULL,				/* -- hole -- */
+@@ -2877,6 +2884,10 @@ static const struct iw_handler_def hosta
+ 	.standard	= (iw_handler *) prism2_handler,
+ 	.private	= (iw_handler *) prism2_private_handler,
+ 	.private_args	= (struct iw_priv_args *) prism2_priv,
++#if WIRELESS_EXT > 15
++	.spy_offset	= ((void *) (&((local_info_t *) NULL)->spy_data) -
++			   (void *) NULL),
++#endif /* WIRELESS_EXT > 15 */
+ };
+ #endif	/* WIRELESS_EXT > 12 */
+ 
+diff -u -p driver/modules.scanmaster/hostap_pci.c driver/modules/hostap_pci.c
+--- driver/modules.scanmaster/hostap_pci.c	Sat Oct 12 07:28:23 2002
++++ driver/modules/hostap_pci.c	Fri Dec  6 11:40:45 2002
+@@ -9,10 +9,13 @@
+ #include <linux/module.h>
+ #include <linux/init.h>
+ #include <linux/if.h>
+-#include <linux/wireless.h>
+ #include <linux/skbuff.h>
+ #include <linux/netdevice.h>
+ #include <linux/tqueue.h>
++#include <linux/wireless.h>
++#if WIRELESS_EXT > 12
++#include <net/iw_handler.h>
++#endif /* WIRELESS_EXT > 12 */
+ 
+ #include <linux/ioport.h>
+ #include <linux/pci.h>
+diff -u -p driver/modules.scanmaster/hostap_plx.c driver/modules/hostap_plx.c
+--- driver/modules.scanmaster/hostap_plx.c	Sat Oct 12 07:28:23 2002
++++ driver/modules/hostap_plx.c	Fri Dec  6 11:41:09 2002
+@@ -12,10 +12,13 @@
+ #include <linux/module.h>
+ #include <linux/init.h>
+ #include <linux/if.h>
+-#include <linux/wireless.h>
+ #include <linux/skbuff.h>
+ #include <linux/netdevice.h>
+ #include <linux/tqueue.h>
++#include <linux/wireless.h>
++#if WIRELESS_EXT > 12
++#include <net/iw_handler.h>
++#endif /* WIRELESS_EXT > 12 */
+ 
+ #include <linux/ioport.h>
+ #include <linux/pci.h>
+diff -u -p driver/modules.scanmaster/hostap_wlan.h driver/modules/hostap_wlan.h
+--- driver/modules.scanmaster/hostap_wlan.h	Sat Sep 21 05:43:43 2002
++++ driver/modules/hostap_wlan.h	Fri Dec  6 11:38:41 2002
+@@ -1099,6 +1099,9 @@ struct local_info {
+ #if WIRELESS_EXT > 13
+ 	unsigned long scan_timestamp; /* Time started to scan */
+ #endif /* WIRELESS_EXT > 13 */
++#if WIRELESS_EXT > 15
++	struct iw_spy_data	spy_data;	/* iwspy support */
++#endif /* WIRELESS_EXT > 15 */
+ #endif /* WIRELESS_EXT */
+ 	enum {
+ 		PRISM2_MONITOR_80211 = 0, PRISM2_MONITOR_PRISM = 1

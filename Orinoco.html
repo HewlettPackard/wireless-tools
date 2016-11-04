@@ -1,0 +1,711 @@
+<HTML>
+<HEAD>
+<TITLE>The Wavelan IEEE/Orinoco and its friends</TITLE>
+<LINK rel="up" href="Wireless.html" title="Linux Wireless LAN Howto">
+
+<LINK rel="chapter" href="#intro" title="Introduction">
+<LINK rel="chapter" href="#drivers" title="Orinoco drivers">
+<LINK rel="chapter" href="#links" title="Orinoco links">
+<LINK rel="chapter" href="#patches" title="Orinoco patches & download">
+<LINK rel="chapter" href="#issues" title="Orinoco issues">
+
+<LINK rel="Related" href="Wireless.html" title="Linux Wireless LAN Howto">
+<LINK rel="Related" href="Tools.html" title="Wireless Tools for Linux">
+<LINK rel="Related" href="Wavelan.html" title="Linux Wavelan drivers">
+<LINK rel="Related" href="Wavelan-IEEE.html" title="Linux Wavelan-IEEE driver">
+<LINK rel="Related" href="../IrDA/IrDA.html" title="Linux-IrDA stack">
+<LINK rel="Related" href="../bt/" title="BlueTooth notes">
+<LINK rel="Related" href="../Papers/papers.html" title="Papers & Publications">
+</HEAD>
+
+<BODY>
+
+<H1 ALIGN=center>MPL/GPL drivers for the Wavelan IEEE/Orinoco and others</H1>
+
+<br>
+
+<HR>
+<CENTER>
+<TABLE>
+<TR>
+<TD><A HREF="Wireless.html">Linux & Wireless LANs</A></TD>
+<TD><A HREF="Wavelan-IEEE.html">Wavelan IEEE drivers</A></TD>
+<TD><A HREF="Wavelan.html">Wavelan drivers</A></TD>
+<TD><A HREF="Tools.html">Wireless Tools</A></TD>
+<TD><A HREF="../Papers/papers.html">Papers</A></TD>
+<TD><A HREF="../index.html">Main page</A></TD>
+</TR>
+</TABLE>
+
+<HR>
+
+<TABLE>
+<TR>
+<TD><I><A HREF="#intro">Introduction</A></I></TD>
+<TD><I><A HREF="#drivers">Various drivers</A></I></TD>
+<TD><I><A HREF="#download">Download</A></I></TD>
+<TD><I><A HREF="#links">Patches & Links</A></I></TD>
+<TD><I><A HREF="#issues">Issues</A></I></TD>
+</TR>
+</TABLE>
+</CENTER>
+<HR>
+
+<br>
+
+<A NAME="intro">
+<H2>Introduction</H2>
+</A>
+
+The Linux Wavelan IEEE driver and Linux Orinoco driver are <B>Open
+Source project</B> that had <B>many contributors</B> through their
+turbulent life. I did contribute to it since 1999 thanks to Hewlett
+Packard sponsoring my work. My main contribution was the Wireless
+Extensions support (of course), multi-firmware support and a few bug
+fixes.
+<p>
+The Wavelan IEEE/Orinoco is the current generation of Wireless LAN
+hardware offered by Lucent (and others). A more detailed description
+is available <A HREF="Linux.Wireless.drivers.html#WavelanIEEE">in the
+Wireless Howto</A>. This page describe the state of the new Linux
+MPL/GPL driver for this hardware.
+<p>
+There is still a page for the <A HREF="Wavelan-IEEE.html">old Linux
+GPL driver</A> called <B>wvlan_cs.c</B>. For the good old Wavelan,
+which was not IEEE compliant (a few generations back), go <A
+HREF="Wavelan.html">here</A>. For other wireless LANs types (such as
+the very common PrismII), please read the <A
+HREF="Wireless.html">Linux Wireless Howto</A>.
+
+<p>
+<HR width=25%>
+
+<A NAME="drivers">
+<H2>Wavelan IEEE/Orinoco hardware&nbsp;: One hardware, 3 drivers...</H2>
+</A>
+
+There are three drivers supporting the same Wavelan IEEE hardware. One
+is the new MPL/GPL driver, called <A
+HREF="Linux.Wireless.drivers.html#Orinoco">orinoco_cs</A>. One is the
+old GPL driver, called <A
+HREF="Linux.Wireless.drivers.html#WavelanIEEE">wvlan_cs</A>. The last
+one is based on a binary library and supported by Lucent, called <A
+HREF="Linux.Wireless.drivers.html#WavelanIEEEbin">wavelan2_cs</A>.
+<p>
+For all problem related to wavelan2_cs, please contact Lucent
+directly. The lack of source code make debugging in most case
+impossible.
+<p>
+On the other hand, this page deals exclusively with <B>orinoco_cs</B>,
+the new MPL/GPL driver, now part of the kernel 2.4. Various people
+outside Lucent are active keeping this driver alive. I still have a
+page for the <A HREF="Wavelan-IEEE.html">old Linux GPL driver</A>
+called <B>wvlan_cs.c</B>.
+<p>
+We are in the process of phasing out gradually <B>wvlan_cs</B> in
+favor of <B>orinoco_cs</B>, which has all the features of the former
+without the bugs. We are recommending people doing a new installation
+to start directly with <B>orinoco_cs</B>.
+<p>
+Why would you use <B>orinoco_cs</B> ? A few reasons&nbsp;:
+
+<UL>
+<LI>Full source code. Some people strongly beleive in the concept of
+Free Software and Open Source, especially when it come to stuff that
+reside in kernel space.
+
+<LI>Not only for i386 platforms. Can be made to work on PPC, Alpha,
+StrongArm, ia64 and your favourite platform (doesn't mean that it will
+work out of the box).
+
+<LI>Multi configuration, using Pcmcia schemes and <A
+HREF="PCMCIA.txt">wireless.opts</A> (see below). This may be also
+achieved using the specific networking scripts of some <A
+HREF="DISTRIBUTIONS.txt">distributions</A>.
+
+<LI>Much better Wireless Extension support.
+
+<LI>Signal strength in ad-hoc mode (see below).
+
+<LI>Multi-firmware (1.16 -> 6.16) and multi-vendor (Lucent, Enterasys
+& ELSA) support.
+
+<LI>Some Prism2 and Symbol card support...
+
+</UL>
+
+Of course, the wavelan2_cs driver does also have its advantages, but
+Lucent can speak for it.
+
+<p>
+<HR width=25%>
+
+<A NAME="hardware">
+<H2>Orinoco driver&nbsp;: One driver, 3 hardwares...</H2>
+</A>
+
+The Orinoco driver support 3 hardware which are very closely related
+but slightly different&nbsp;:
+<UL>
+<LI>Lucent/Agere Orinoco Pcmcia cards and Apple Airport (<A
+HREF="Linux.Wireless.drivers.html#WavelanIEEE">howto</A>)
+<LI>Intersil PrismII Pcmcia/PLX/PCI cards (<A
+HREF="Linux.Wireless.drivers.html#Prism2">howto</A>)
+<LI>Symbol Spectrum24 HR Pcmcia cards (<A
+HREF="Linux.Wireless.drivers.html#Spectrum24">howto</A>)
+</UL>
+
+<p>
+If you look in the <A HREF="Wireless.html">Wireless Howto</A>, you
+will find that each of these hardware have other drivers
+available. For the Orinoco, we list those drivers in the <A
+HREF="#drivers">previous section</A>. For PrismII, there are the
+famous <A HREF="Linux.Wireless.drivers.html#Prism2">linux-wlan-ng</A>
+and <A HREF="Linux.Wireless.drivers.html#Prism2-hostAP">HostAP</A>
+drivers, which have advantages over this driver.
+<p>
+Because Orinoco support all those hardware, people think they are the
+same hardware. However, all those other drivers support <B>only
+one</B> of these hardware, and only the Orinoco driver support <B>all
+three of them</B>. At boot, the Orinoco driver will print in the
+message logs which of the three hardware it has detected, with the
+firmware version number.
+
+<p>
+<HR width=25%>
+
+<A NAME="hardware">
+<H2>Related hardware and drivers.</H2>
+</A>
+
+These are other hardware that people often confuse with the Wavelan
+IEEE/Orinoco, but which are totally different and incompatible&nbsp;:
+
+<UL>
+<LI>The <A HREF="Linux.Wireless.drivers.html#Wavelan">Wavelan</A> was
+a non IEEE compliant hardware that Lucent made before the Wavelan
+IEEE/Orinoco.
+<LI>Proxim is selling an Orinoco 802.11a and Orinoco 802.11g which are
+based on the <A HREF="Linux.Wireless.drivers.html#Atheros">Atheros
+chipset</A>.
+</UL>
+
+<p>
+Those are hardware related to the Wavelan IEEE/Orinoco but which
+require a modified version of the Orinoco driver&nbsp;:
+
+<UL>
+<LI>The USB version of the Orinoco card need the <A
+HREF="Linux.Wireless.drivers.html#OrinocoUSB">Orinoco USB driver</A>.
+<LI>The Symbol CF card need the <A
+HREF="Linux.Wireless.drivers.html#SpectrumCF">spectrum</A> driver.
+</UL>
+<p>
+Those driver are now merged into the main Orinoco driver (at least in
+the CVS).
+
+<p>
+<HR width=25%>
+
+<A NAME="download">
+<H2>Latest version of the driver</H2>
+</A>
+
+<I>Pavel</I> is the new maintainer of the driver, the very latest version of the driver is available in recent Linux kernels&nbsp;:
+
+<UL>
+<LI><A HREF="http://www.kernel.org/pub/">Download</A> the Linux
+Kernel.
+</UL>
+
+<I>Pavel</I> also maintains a version of the driver that can be used
+in many kernel, this is available in the CVS&nbsp;:
+
+<UL>
+<LI><A HREF="http://savannah.nongnu.org/projects/orinoco/">Orinoco
+CVS</A>
+</UL>
+
+<I>David</I> was the main maintainer of the driver, old versions of his drivers are availableon his web site&nbsp;:
+
+<UL>
+<LI><A HREF="http://ozlabs.org/~dgibson/dldwd/">Download</A> old
+versions of the Orinoco driver.
+</UL>
+
+I have an old version of the Pcmcia configuration file&nbsp;:
+<UL>
+<LI><A HREF="hermes.conf">hermes.conf</A>&nbsp;: Pcmcia configuration file
+to put in <U>/etc/pcmcia/</U>.
+</UL>
+
+<p>
+The version in the <B>latest Linux kernel</B> tend to be up somewhat
+to date (both 2.4.X and 2.6.X). The version in the <B>latest Pcmcia
+package</B> is a bit older.
+
+<p>
+<HR width=25%>
+
+<A NAME="links">
+<H2>Patches for orinoco_cs and various web pages related to orinoco_cs</H2>
+</A>
+
+Other people are hacking like crazy on the driver&nbsp;:
+
+<UL>
+<LI><A HREF="http://ozlabs.org/~dgibson/dldwd/">David
+Gibson</A> was the author and maintainer of the <B>Orinoco</B> Linux
+driver.
+
+<LI>David has set up a <A
+HREF="http://sourceforge.net/projects/orinoco/">SourceForge
+Project</A> for the driver, that mostly contains a <A
+HREF="http://sourceforge.net/mail/?group_id=44338">Mailing List</A>.
+
+<LI>Pavel has set up a <A
+HREF="http://savannah.nongnu.org/projects/orinoco/">Savannah
+Project</A> for the driver, that mostly contains the CVS for driver
+development.
+
+<LI><A HREF="http://www.red-bean.com/~proski/symbol/">Pavel Roskin</A>
+maintains the <B>Symbol</B> version of the Orinoco driver. This driver
+is now part of the main Orinoco driver.
+
+<LI><A HREF="http://ranty.ddts.net/~ranty/orinoco/">Manuel Estrada
+Sainz</A> created the <B>Orinoco-USB</B> version of the Orinoco
+driver. This driver can now be found in the Orinoco CVS.
+
+<LI><A HREF="http://airsnort.shmoo.com/orinocoinfo.html">The Shmoo
+group</A> has been hacking the Orinoco driver to all <B>802.11 raw
+frame access (monitor mode)</B>. This patch has now been integrated in
+the latest release. They also have a bunch of <B>Orinoco firmware
+versions</B>.
+
+<LI><A
+HREF="http://www.cs.umd.edu/~moustafa/morinoco/morinoco.html">Moustafa
+A. Youssef</A> is maintaining the patch to add <B>Scanning
+capability</B> to the Orinoco driver (derived from <A
+HREF="Tools.html#newapi">my original version</A>), and also is the
+maintainer of the <A
+HREF="http://www.cs.umd.edu/~moustafa/mwvlan/mwvlan.html">mwvlan</A>
+driver, a modified version of wvlan_cs with scanning support.
+
+<LI><A
+HREF="http://www.math.ucla.edu/~jimc/mathnet_d/download.html">Jim
+Carter</A> has sent me an version of the <A
+HREF="ori.13a.we14.jim.diff">scanning patch for v0.13a</A> (based on
+the version of Moustafa).
+
+<LI><A HREF="http://www.jesusmolina.com/Spectrum.html">Jesus
+Molina</A> has a patch to include <B>Scanning</B> support in the
+<B>Symbol</B> version of the Orinoco driver. This patch has now been
+integrated in the latest release.
+
+<LI><A HREF="http://www.red-bean.com/~proski/">Pavel Roskin</A> has
+sent me an version of the <A HREF="scanning-0.13d-v3.diff">scanning
+patch for v0.13d</A> (based on the version of Moustafa). Also include
+scanning support for Symbol firmwares (from Jesus Molina).  This patch
+has now been integrated in the latest release.
+
+<!-- http://home.attbi.com/~minyard/ (scanning ori 11b -- ++ symbol scanning) -->
+
+<LI><A HREF="http://www.the-axe-effect.de/files.php3">Tobias
+Hoffmann</A> has a version of the Orinoco driver for the <B>Nortel
+PCI</B> card.
+
+<LI><A HREF="http://hunz.org/hermesap.html">Hunz</A> has created
+<B>HermesAP</B>, a modified version of the orinoco driver that support
+Access Point functionality (provided you have a tertiary firmware).
+
+<LI><U>Thomas 'Dent' Mirlacher</U> wrote a couple of patches to move
+the <B>802.11 decapsulation in the network layer</B>, those are old
+patches <A HREF="orinoco.80211.patch">for the Orinoco v0.11 driver</A>
+and <A HREF="orinoco.kernel.patch">for the kernel</A>.
+
+<LI><U>Stano Meduna</U> wrote a patch to add <A
+HREF="orinoco.hostdecrypt.patch">driver based WEP encryption</A> to
+the Orinoco driver to support properly broken PrismII firmwares.
+
+<LI><U>Paul Stewart</U> wrote a patch to add <A
+HREF="orinoco.fastkey.diff">Fast-keying support</A> to the Orinoco
+driver, to support properly <B>802.1x</B> and not drop the session
+while changing the WEP key. This patch has now been integrated in the
+latest release.
+
+<LI><U>Robert J. Moore</U> updated the patch to add <A
+HREF="rjm-orinoco-agere-sharedkey-auth.patch">authentication
+support</A> for Orinoco firmwares.
+
+</UL><UL>
+
+<LI><A
+HREF="http://www.fasta.fh-dortmund.de/users/andy/wvlan/">Andreas
+Neuhaus</A> was the original maintainer of the <B>Wavelan IEEE</B>
+Linux driver (wvlan_cs).
+
+<LI><A HREF="http://www.roelle.com/wvlanPPC/index.html">Harald
+Roelle</A> did the original PPC specific patch (now outdated) and has
+a page on how to set up a <B>Wavelan IEEE under Linux-PPC</B> and how
+to connect it to the "UFO" (the <B>Apple Airport base station</B>).
+
+<LI><U>Anton Blanchard</U> is the did some work on the the Wavelan
+IEEE Linux driver (wvlan_cs), including PPC support.
+
+<LI><A HREF="http://ppclinux.apple.com/~benh/">Benjamin
+Herrenschmidt</A> has modified the Wavelan IEEE driver to make it work
+with the <B>Apple Airport card</B>. This is an incredible hack. He
+has now done with the new Orinoco driver...
+
+</UL>
+
+Help, Howto and other hacks&nbsp;:
+
+<UL>
+
+<LI><A HREF="http://dsmith.dynip.com/dell_3800.html">Dan Smith</A> has
+a page on how to <B>set up orinoco_cs</B> (with driver binding and
+wireless.opts).
+
+<LI><A HREF="http://www.cypherpunks.ca/zaurus/socket.html">Ian
+Goldberg</A> has a pretty complete web page on how to set up the
+<B>Symbol CF card on the Sharp Zaurus</B>.
+
+<LI><A
+HREF="http://jackal.dnsalias.com:8080/public/misc/wireless/wireless.html">Brad
+Allison</A> has a page to workaround some <B>Red-Hat 7.2 quirks with
+orinoco_cs</B>, and how to use <B>Red-Hat 7.3 specific wireless
+configuration</B>.
+
+<LI><A HREF="http://martybugs.net/wireless/router.cgi">Martin Pot</A>
+has a page on how to set up the Orinoco driver with <B>Red-Hat 7.3</B>
+(with many quirks) and build a <B>Wireless Router</B>.
+
+<LI><A
+HREF="http://homepage.mac.com/pauljlucas/personal/powerbook/wireless.html">Paul
+Lucas</A> has a page on how to set up a <B>Wavelan IEEE under
+Linux-PPC</B> with an updated PPC specific patch.
+<!-- http://www.best.com/~pjl/personal/powerbook/wireless.html -->
+
+<LI><A HREF="http://www.orinoco.wlan.webd.pl">Anonymous</A> has a page
+on how to set up a <B>Orinoco USB</B> and various other useful info on
+these cards.  <!-- http://orinoco.host.sk/ -->
+
+<LI><A HREF="http://www.rcbowen.com/~rbowen/imho/wavelan.html">Rich
+Bowen and Dino Lachiusa</A> explain how to setup a Wavelan IEEE card
+with the <B>RG-1000</B>. Note that the same procedure work with
+orinoco_cs and you can also use Wireless Extensions ;-)
+
+<LI>There was <A
+HREF="http://sourceforge.net/forum/forum.php?thread_id=80532&forum_id=33428">a
+thread on the Pcmcia Forums</A> about the <B>RG-1000 and Linux</B>,
+including setting up the RG-1000 from Linux and the Linux clients.
+
+<LI><A
+HREF="http://www.oreillynet.com/pub/a/wireless/2001/03/06/recipe.html">
+Schuyler Erle</A> explain how to set up a <B>Linux Wireless Home
+Gateway</B>, including the wireless setup, SSH, firewalling, NAT and
+DHCPD.
+
+<LI><A
+HREF="http://www.nextechwireless.net/support/silvertogoldwindows.html">NexTechWireless</A>
+details how to change a Orinoco silver card into an Orinoco gold (by
+forcing a firmware upgrade). Of course, this might void your
+waranty...
+
+</UL><UL>
+
+<LI><A HREF="http://gicl.mcs.drexel.edu/sevy/airport">Jon Sevy</A> has
+developped a Java-based <B>AirPort Base Station configurator</B>, that
+should please some people not owning a Mac...
+
+<LI><A HREF="http://www.msrl.com/airport-gold/">Mad Science Research
+labs</A> explain you how to upgrade the <B>Airport UFO to RC4
+128&nbsp;bits</B> (this should apply to the RG-1000 as well).
+
+<LI><A HREF="http://www.vonwentzel.net/ABS/index.html">Constantin Von
+Wentzel</A> explain you how to put an <B>external antenna on the
+Airport UFO</B> (this should apply to the RG-1000 as well).
+
+<LI><A HREF="http://www.bitshift.org/">Mark C. Langston</A> has
+written some Perl script to <B>check the status of the Airport Base
+Station</B>.
+
+<LI><A HREF="http://znouza.cl.anet.cz/projects/wavelan">Tom
+Z. Meinlschmidt</A> has developped an impressive package allowing to
+<B>monitor a Wavelan Access Point</B> using SNMP.
+
+<LI><A HREF="http://www.twoguys.org/~gregh/software/">Greg Hankins</A>
+is porting the above software to work with <B>RoamAbout Access
+Points</B>.
+
+<LI><A HREF="http://www.live.com/wireless/unix-base-station.html">Ross
+Finlayson</A> explain in details how to use Linux as a <B>Wireless
+router</B> for their wireless ISP (LIVE.COM).
+
+</UL>
+
+<p>
+<HR width=25%>
+
+<A NAME="issues">
+<H2>Issues and release notes</H2>
+</A>
+
+Too many for my taste&nbsp;;-(
+
+<UL>
+<LI><B>Maintenance</B>&nbsp;: David is maintaining the
+<U>orinoco_cs</U> driver (I'm helping him as well). <A
+HREF="Wavelan-IEEE.html">wvlan_cs</A> is no longer maintained.
+
+<LI><B>It doesn't work</B>&nbsp;: Yeah, that's a detailed bug
+report&nbsp;! From experience, 95% of the problem are not due to the
+driver but a <I>generic Pcmcia configuration issues</I>. Make sure
+that your Pcmcia socket and setup is functional, and try another
+Pcmcia card before blaming the driver.
+
+<LI><B>Lucent card support</B>&nbsp;: fully functional. All the
+features of the various firmware revisions work properly.
+
+<LI><B>Lucent Firmware revisions</B>&nbsp;: The latest driver should
+work across all firmware revisions, it has been tested with 1.16,
+4.08, 4.52, 6.04, 6.06, 6.16 and 7.28. However, some feature might not
+work well in all firmwares (promiscuous in 6.04) or are even not
+available at all (fragmentation for 6.X, Microwave Oven for
+4.X). Ad-Hoc mode is also different in firmware 4.X and 6.X (see
+below). It seems that with firmware 7.52 the power management setting
+is ineffective.
+
+<LI><B>Lucent Firmware updater</B>&nbsp;: available on <A
+HREF="http://www.wavelan.com/">Lucent web site</A>, not available for
+Linux. Note that most firmware updaters require a specific version of
+the Windows driver to work (always messy for me).
+
+<LI><B>Airport card support</B>&nbsp;: only in driver version 5 and
+above (kernel 2.4.5). Exact same support as for Lucent cards.
+
+<LI><B>Symbol card support</B>&nbsp;: fairly complete in v6. Works
+perfectly for me on an Intel card in Managed mode and Ad-Hoc demo
+mode, up to 11&nbsp;Mb/s with 128&nbsp;bit encryption. IBSS works fine
+as well with my Wavelan card&nbsp;;-). Version 8 recognise the
+firmware properly and disable Power Management in firmware v2.20 and
+later.
+
+<LI><B>PrismII card support</B>&nbsp;: Not yet fully functional. Most
+PrismII cards should work in some form or fashion. Ad-Hoc demo mode,
+IBSS Ad-Hoc mode and bit rate setting have been seen to work on a
+D-Link card. Encryption is quite broken, sometime a tcpdump manages to
+make it work. Note that PrismII firmwares seems to be not as good in
+general, for example they don't support Multicast and WEP is broken in
+most releases...
+
+<LI><B>Driver versions</B>&nbsp;: Most up to date is in Kernel 2.4.12.
+
+<LI><B>Kernel 2.4.X</B>&nbsp;: Works fine with in-kernel Pcmcia driver
+(kernel <B>2.4.3</B> and later). Enable Pcmcia support in kernel,
+recompile and configure normally. You can also use the external Pcmcia
+support 3.1.29 and later.
+
+<LI><B>Kernel 2.2.X</B>&nbsp;: Use Pcmcia package <B>3.1.29</B> or
+later.
+
+<LI><B>PCI adapter</B>&nbsp;: may be the cause of configuration
+troubles, and does not work on most older PCs. Not really orinoco_cs
+related. Use the ISA adapter if possible.
+
+<LI><B>PLX adapter</B>&nbsp;: supported in v8 (kernel 2.4.12 and
+later). Use as a regular PCI network driver.
+
+<LI><B>Prism2.5 PCI cards</B>&nbsp;: not supported, please use
+linux-wlan-ng.
+
+<LI><B>USB adapters</B>&nbsp;: for Lucent/Agere, use the Orinoco-USB
+driver, for PrismII adapters, use linux-wlan-ng.
+
+<LI><B>MiniPCI cards</B>&nbsp;: there is various kind of MiniPCI cards
+in various laptops. Some are based on a PCI-Pcmcia bridge (Dell -
+confirmed working), some are based on a USB adapter (HP - working with
+Orinoco-USB) and some are based on a PCI Prism2.5 card (IBM/HP -
+confirmed working).
+
+<LI><B>Multi-setup (profiles)</B>&nbsp;: use the Pcmcia scheme
+mechanism (see <A
+HREF="http://pcmcia-cs.sourceforge.net/ftp/doc/PCMCIA-HOWTO-5.html#ss5.3">Pcmcia
+Howto</A>) with <U>network.opts</U> and <A
+HREF="PCMCIA.txt">wireless.opts</A>. Better than in Windows, because
+both IP config and Wireless config are changed synchronously. This may
+be also achieved using the specific networking scripts of some <A
+HREF="DISTRIBUTIONS.txt">distributions</A>.
+
+<LI><B>Multi-card</B>&nbsp;: The driver supports it (2 cards in a box)
+and it has been tested successfully. Radio link quality will be
+impacted.
+
+<LI><B>SMP</B>&nbsp;: The driver is fully SMP safe and has been
+successfully tested on a SMP box, including Wireless Extensions.
+
+<LI><B>Configuration</B>&nbsp;: The <I>only</I> way to configure the
+orinoco_cs driver is through the <A HREF="Tools.html">Wireless
+Extensions</A>, using the <A HREF="Tools.html#docu">wireless init
+files</A>.
+
+<LI><B>Ad-hoc modes</B>&nbsp;: for most cards, there is two Ad-Hoc
+mode, the old proprietary Ad-hoc demo mode and the new 802.11
+compliant IBSS Ad-Hoc mode. Those two Ad-Hoc mode are totally
+incompatible and do not interoperate between each other.
+<br>
+For Orinoco cards, IBSS Ad-Hoc mode is available only in firmware 6.06
+and later. For Symbol card, IBSS Ad-Hoc mode is available only in
+firmware 2.00 and later. For PrismII cards, IBSS Ad-Hoc mode is
+available only in firmware 0.08 and later.
+<br>
+The Ad-Hoc mode that the driver will select depend on a few
+factor&nbsp;:
+<UL>
+<LI><I>by default</I>&nbsp;: if IBSS is not available, the standard
+Ad-Hoc mode is the old Ad-Hoc demo mode, if IBSS is available, the
+standard Ad-Hoc mode is 802.11 compliant IBSS Ad-Hoc (same as Windows
+driver).
+<LI><I>iwpriv ethX set_port3 1</I>&nbsp;: Force the standard Ad-Hoc
+mode to be the old Ad-Hoc demo mode.
+<LI><I>iwpriv ethX set_port3 0</I>&nbsp;: Force the standard Ad-Hoc
+mode to be the 802.11 compliant IBSS Ad-Hoc mode (if available).
+</UL>
+Note that you can set those commands in the <A
+HREF="Tools.html#docu">wireless init files</A>. Then, to set the card
+in the standard Ad-Hoc mode that you have selected, you just need to
+do&nbsp;:
+<UL>
+<LI><I>MODE="Ad-Hoc"</I> (in the <A HREF="Tools.html#docu">wireless
+init files</A>)&nbsp;: set the standard Ad-Hoc mode.
+<LI><I>iwconfig ethX mode Ad-Hoc</I>&nbsp;: set the standard Ad-Hoc mode.
+</UL>
+
+<LI><B>Debugging Ad-Hoc mode</B>&nbsp;: the field "Access Point" or
+"Cell" shown by <A HREF="Tools.html">iwconfig</A> is usefull for
+knowing what's happening. If it's all zeros, you are using Ad-Hoc demo
+mode. In IBSS Ad-Hoc mode it indicates the cell the node has
+joined. It should be the MAC address of the first node started and all
+nodes should have the same value (apart if they are out of range).
+
+<LI><B>Encryption keys</B>&nbsp;: Encryption setting is fully
+functional and available in the <A HREF="Tools.html#docu">wireless
+init files</A>. Note that the driver doesn't complain if you set a 128
+bits key on a 40 bits only card (Silver), which won't work...
+
+<LI><B>Fragmentation setting</B>&nbsp;: firmware 6.X and later removed
+direct fragmentation threshold setting in favor of microwave oven
+robustness (automatic fragmentation). For those firmware, the
+fragmentation setting in the driver enable or disable MWO robustness.
+
+<LI><B>Signal strength in ad-hoc mode</B>&nbsp;: set a MAC address in
+the spy list using <B>iwspy</B>, first address in the list will appear
+in <U>/proc/net/wireless</U> as well as with iwspy.
+
+<LI><B>Promiscuous mode</B>&nbsp;: does work with firmware 4.X and
+open network (no encryption). Doesn't seem to work with encryption
+enabled and with firware 6.04. Likely to be firmware issues...
+
+<LI><B>Driver switching</B>&nbsp;: If you want to switch between the 3
+Wavelan-IEEE drivers, everything is controlled in
+<U>/etc/pcmcia</U>. <B>wvlan_cs</B> is bound in <U>config</U>,
+<B>orinoco_cs</B> is bound in <U>hermes.conf</U>, <B>wavelan2_cs</B>
+is bound in <U>wavelan2_cs.conf</U>. Comment those files as needed.
+
+<LI><B>Driver not loading</B>&nbsp;: if after installing the orinoco
+driver the driver doesn't load or another driver loads, make sure you
+added <U>hermes.conf</U> in <U>/etc/pcmcia</U> and check other files
+for driver binding (see above).
+
+<LI><B>Ethernet Bridging</B>&nbsp;: doesn't work due to 802.11
+protocol restriction. You may want to try IP bridging (with ARP proxy)
+or routing.
+
+<LI><B>Tx Timeout</B>&nbsp;: various things can produce Tx Timeout. It
+depends on when they happen and how frequent they are&nbsp;:
+<UL>
+<LI><I>As soon as the card is inserted</I>&nbsp;: interrupts are not
+delivered to the driver (not a driver problem, more a Pcmcia problem -
+check <U>/proc/interrupts</U>). If you have a PCI adapter, try to play
+with "PCIC_OPTS" setting. Also try to <I>exclude</I> the irq currently
+used by the driver in <U>/etc/pcmcia/config.opts</U>.
+
+<LI><I>Under load</I>&nbsp;: This has been fixed in orinoco_cs...
+</UL>
+
+<LI><B>GetNextTuple: No more items</B>&nbsp;: You are using a PrismII
+card in a 5V only Pcmcia slot. PrismII cards support both 3.3V and 5V
+operation but forget to tell Pcmcia about 5V. Use the
+<I>ignore_cis_vcc</I> module option to workaround this.
+
+<LI><B>Resetting the card</B>&nbsp;: the card may get dead for various
+reasons. The driver include two functionalities to reset the
+card. <I>iwpriv ethX force_reset</I> will do a firmware reset, and
+<I>iwpriv ethX card_reset</I> will do a hard Pcmcia reset of the card.
+
+<LI><B>802.3 encapsualtion</B>&nbsp;: various Access Points and
+drivers interpret the 802.3 specification in different way. Older
+driver would not work with specific Access Points (Linksys), and in
+theory, the latest driver works around those gotchas. If you can
+<I>receive but not transmit</I> with your Access Point, try playing
+with the <I>use_old_encaps</I> module option.
+
+<LI><B>Short preamble</B>&nbsp;: The Orinoco cards don't support short
+preamble, so you need to disable it in your Access Point. The Symbol
+cards support short preamble, and this may be enabled via <I>iwpriv
+ethX set_preamble 1</I>.
+
+<LI><B>Symbol and Ad-Hoc interoperability</B>&nbsp;: Because Symbol
+card enable short preamble by default, you may have interoperability
+problem in Ad-Hoc mode with other vendors, so just do <I>iwpriv ethX
+set_preamble 0</I> (you may also set that in the <A
+HREF="Tools.html#docu">wireless init files</A> using
+<I>IWPRIV="set_preamble 0"</I>).
+
+<LI><B>WEP and PrismII</B>&nbsp;: Most PrismII firmwares are
+completely broken when it come to WEP support, and only firmwares
+<B>1.4.9 and later</B> support WEP properly and will work properly
+with Orinoco. For broken firmwares, it is possible to use <B>driver
+based encryption</B>, which is available in <B>HostAP</B> or as a
+patch for Orinoco (and this will slow down operation).
+
+</UL>
+
+
+<HR>
+<CENTER><TABLE BORDER=0 CELLPADDING=0><TR><TD valign="top" align="center">
+<ADDRESS>
+<A HREF="Wireless.html">Wireless LANs</A> and
+<A HREF="Tools.html">Wireless Tools</A> -
+jt&#064;hpl.hp.com
+<br>Updated 26 May 04
+<br>Copyright &#169; 1996-2004 Jean Tourrilhes
+</ADDRESS>
+</TD><TD>
+&nbsp;&nbsp;&nbsp;
+</TD><TD valign="top" align="center">
+Project hosted and sponsored by :
+<br>
+<A HREF="http://www.hpl.hp.com"><IMG SRC="../hplogo.png" HEIGHT=34
+WIDTH=141 ALT="HP home page"></A>
+</TD></TR></TABLE></CENTER>
+
+<!-- Keep Webmaster happy -->
+<script type="text/javascript" language="JavaScript">
+var s_prop7="us"
+var s_prop8="eng"
+var s_prop9="corp"
+var s_prop10="us|eng|corp"
+var s_prop13="hphqglobal,hphqwwhplabs"
+</script>
+
+<!-- Begin METRICS JavaScript -->
+<!-- <script type="text/javascript" language="JavaScript"
+src="http://welcome.hp-ww.com/country/us/eng/js/metrics.js"></script> -->
+<script type="text/javascript" language="JavaScript"
+src="http://www.hpl.hp.com/dev/hplabsmetrics.js"></script>
+<!-- End METRICS JavaScript -->
+
+</BODY>
+</HTML>

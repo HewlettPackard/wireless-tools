@@ -1,0 +1,12 @@
+diff -u -p linux/drivers/net/wireless/ray_cs.20.c linux/drivers/net/wireless/ray_cs.c
+--- linux/drivers/net/wireless/ray_cs.20.c	2006-04-03 17:05:15.000000000 -0700
++++ linux/drivers/net/wireless/ray_cs.c	2006-04-03 17:05:26.000000000 -0700
+@@ -1175,7 +1175,7 @@ static int ray_set_essid(struct net_devi
+ 		return -EOPNOTSUPP;
+ 	} else {
+ 		/* Check the size of the string */
+-		if(dwrq->length > IW_ESSID_MAX_SIZE + 1) {
++		if(dwrq->length > IW_ESSID_MAX_SIZE) {
+ 			return -E2BIG;
+ 		}
+ 

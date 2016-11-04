@@ -1,0 +1,152 @@
+		New driver API for Wireless Extensions
+		--------------------------------------
+
+Intro :
+-----
+	Over time, I've observed what's good and what's wrong with the
+Wireless Extensions. After listening to complaints and comments from
+various wireless driver developpers (me included), I've decided it's
+time for a new driver API for Wireless Extensions.
+
+Executive summary :
+-----------------
+	In the old driver API, all Wireless Extensions were processed
+in the driver ioctl handler.
+	With the new API, the driver defines a bunch of handler, each
+associated with a specific Wireless Extension, and a kernel wrapper
+make sure to call the appropriate handler with the appropriate
+parameters.
+
+Main advantages :
+---------------
+	o backward compatible with old API, both API can be mixed
+	o easy migration from old API to new API (data structures unchanged)
+	o break huge ioctl function in driver in small handlers
+	o various parameters checks before calling the driver
+	o handle all user-space <-> kernel-space data copy
+	o remove all ioctl assumptions in the driver
+
+Drawback :
+--------
+	o bloat (especially kernel)
+	o need to migrate existing drivers to new API
+
+Comments :
+--------
+	A lot of repetitive code has moved from the driver to the
+kernel (like parameter checks and user/kernel space copy). This means
+that the bugs are grouped into one place instead of scattered all over
+the drivers, and also that things are simpler for people writting
+drivers.
+	The removal of ioctl assumptions from the driver (mostly the
+removal of user/kernel space copy) mean that we are now free to change
+the user space API and that we can call this code from the kernel. In
+particular, it should be now trivial plug APIs like netlink or devfs
+on top of the driver API.
+	The bloat is a concern. The rest of the document look at this
+in some details. Note that those numbers are for my configuration and
+just serve as an estimate.
+	I don't mention performance. Performance is not critical for
+this API. However, I believe the new API is marginally faster (you are
+free to prove me wrong).
+	If you want more details, I'm afraid you will have to look in
+the code.
+
+Kernel bloat :
+------------
+	Size of the core networking object (without the protocols) as
+found in linux/net/core :
+		core.o after :		100133 bytes
+		core.o before:		 97008 bytes
+		bloat :			  3125 bytes -> +3%
+	Of course, Wireless Extension is optional, and if you disable
+the CONFIG_NET_RADIO and CONFIG_NET_PCMCIA_RADIO options, you don't
+compile any of the stuff :
+		core.o no-wireless :	 96803 bytes
+	So, the Wireless Extensions overhead went from 205 bytes to
+3330 bytes (0.2% to 3%).
+	Note : the whole networking stack in my case is 603714 bytes,
+and my vmlinux over 2 Mbytes, so for most kernels this bloat will be
+lost in the noise...
+
+Old Wavelan driver :
+------------------
+	I've chosen the old Wavelan driver because the old API
+implementation has been really optimised in this driver and it uses
+mostly simple extensions.
+		wavelan.o after :	24900 bytes
+		wavelan.o before :	24856 bytes
+		bloat :			   44 bytes -> +0.2%
+	Well, I'm disapointed. I guess I could squeeze more with the
+new API by putting psa_checksum in a commit handler.
+
+Orinoco driver :
+--------------
+	The Orinoco driver is representative of a modern 802.11 driver
+and support a wide range of Wireless Extensions. I took version 0.9 of
+the driver for this test.
+		orinoco.o after :	42420 bytes
+		orinoco.o before :	47180 bytes
+		bloat :			-4760 bytes -> -10%
+	That's good news. The saving is mostly the removal of
+copy_to/from_user and the removal of the big switch.
+
+Old Wavelan_cs driver :
+---------------------
+	Another driver converted :
+		wavelan_cs.o after :	27864 bytes
+		wavelan_cs.o before :	27520 bytes
+		bloat :			  344 bytes -> +1.2%
+	This driver seems to be a worst case so far. On the flip side,
+please note that the original driver was doing copy_to/from_user with
+interrupt disabled, which is illegal, and that the new code fixes
+that, so the comparison is not totally fair.
+
+	For fun, I also looked at the driver with the options
+WAVELAN_ROAMING_EXT and HISTOGRAM enabled (those are normally
+disabled) :
+		wavelan_cs.o +H+RE after :	28940 bytes
+		wavelan_cs.o +H+RE before :	30856 bytes
+		bloat :				-1916 bytes -> -6.2%
+	So, the end result really depend on the mix of simple
+extensions (no copy_to/from_user) and complex extensions (that do
+copy_to/from_user). Simple extensions occur a small bloat, which for
+complex extensions we have significant savings.
+
+Old Netwave_cs driver :
+---------------------
+	Another driver converted :
+		netwave_cs.o after :	11704 bytes
+		netwave_cs.o before :	11920 bytes
+		bloat :			 -216 bytes -> -1.8%
+	A pleasant surprise, especially that I didn't remove the ioctl
+funtion ;-) Note that the new code also fixes the copy_to/from_user
+with interrupt disabled...
+
+SMP variations :
+--------------
+	The number above are for my PPro 150 SMP. When the kernel is
+configured for UP, the cost of distributing locking from the ioctl
+handler to each wireless handler is reduced (because spin_{un}lock
+become a NOP).
+	For example, on my laptop (UP kernel), I have the following
+results :
+		wavelan.o after :	23688 bytes
+		wavelan.o before :	23884 bytes
+		orinoco.o after :	38000 bytes
+		orinoco.o before :	42888 bytes
+		wavelan_cs.o after :	26352 bytes
+		wavelan_cs.o before :	26616 bytes
+		netwave_cs.o after :	11320 bytes
+		netwave_cs.o before :	11552 bytes
+	This time, we don't loose anymore ;-)
+
+Conclusion :
+----------
+	Bloat is only a minor issue, and overall I beleive the new API
+is worth the pain of upgrading.
+	Note that the old API is *not* going away (at least, not
+soon), so old drivers are forward compatible and driver maintainers
+can take their time to migrate (i.e. : never).
+
+	Jean II

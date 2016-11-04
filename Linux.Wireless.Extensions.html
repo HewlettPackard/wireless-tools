@@ -1,0 +1,401 @@
+<HTML>
+<HEAD>
+<TITLE>Wireless Extensions for Linux</TITLE>
+<LINK rel="Next"  href="Linux.Wireless.Overview.html" title="Technology
+overview">
+<LINK rel="Prev"  href="Linux.Wireless.usage.html" title="Usage">
+<LINK rel="First" href="Linux.Wireless.intro.html" title="Introduction">
+<LINK rel="Last"  href="Linux.Wireless.std.html" title="Standards">
+<LINK rel="Up"    href="Wireless.html" title="Linux Wireless LAN Howto">
+</HEAD>
+
+<BODY>
+
+<H1 ALIGN=center>Wireless Extensions for Linux</H1>
+<HR width=25%>
+<H3 ALIGN=center>Jean Tourrilhes</H3>
+<H3 ALIGN=center>23 January 97</H3>
+<br><br>
+<BLOCKQUOTE><I>
+A Wireless LAN API for the Linux operating system.
+</I></BLOCKQUOTE>
+
+<H2>1	Introduction</H2>
+The purpose of this document is to give an overview of the <B>Wireless
+Extensions</B>. The first part will explain the reason of this
+development and the generals ideas behind this work. Then, we will
+give the current status of the development. The third part will
+explore the user interface. We will finish by some implementation
+details and the possible evolution of the Wireless Extensions.
+<p>
+This document is a part of the <A HREF="Linux.Wireless.html">Linux
+Wireless LAN Howto</A>. Please refer to it for details.
+
+<H2>2	Philosophy &amp; Goal</H2>
+It all started when I tried to install a <B>Wavelan</B> network on
+<B>Linux</B> computers. I was having a ISA and a PCMCIA versions of
+the Wavelan, and the two drivers were using totally different methods
+for the setup and collection of statistics (and in fact fairly
+incomplete...). As my small hard disks didn't allow me to reboot to
+DOS to set up those missing parameters, I started to modify the driver
+code.
+<p>
+I decided to define a wireless API which would allow the user to
+manipulate any wireless networking device in a <B>standard</B> and
+<B>uniform</B> way. Of course, those devices are fundamentally
+different, so the standardisation would only be on the methods but not
+on the values (a Network ID is always a parameter that you may set and
+get and use to distinguish logical networks, but some devices might
+use 4 bits and others 16 bits, and the effect of a change may be
+immediate or delayed after a reconfiguration of the device...).
+<p>
+This interface would need to be flexible and extensible. The primary
+need was for device <B>configuration</B>, but wireless
+<B>statistics</B> and the development of <B>wireless aware
+applications</B> was desirable. I needed also something simple to
+implement and conform to the Linux standard to have something much
+easier to share and maintain. The interface would need to evolve with
+the apparition of new products and with specific needs.
+<p>
+I tried to be as generic as possible, but I was obliged to restrict
+myself on a specific set of devices. I focused on the <B>Wireless
+LAN</B> type of devices (indoor radio networks), which appears in the
+operating system as a normal network device. <B>AX25</B> (Amateur
+Radio) devices are too specific and have already their own specific
+network stack and tools. I also ruled out <B>cellular data</B> (data
+over GSM and mobile phone) and medium and long distance wireless
+communications because their interface are quite different and they
+don't operate in the same way. <B>InfraRed</B> should be similar
+enough to Radio LANs to benefit from this interface (if someday an
+InfraRed network driver for Linux appears).
+<p>
+As it was only an extension to the current Linux networking interface,
+I decided to call it ``Wireless Extensions''. The words interface and
+API are too ambitious for this simple set of tools.
+
+<H2>3	Availability</H2>
+The wireless extensions have been implemented in three complementary
+parts. The first part is the user interface, a set of tools to
+manipulate those extensions. The second part is a modification of the
+Linux kernel to support and define the extensions. The third part is
+the hardware interface and is implemented in each network driver
+itself to map the extensions to the actual hardware manipulations.
+<p>
+The kernel modifications have been included in the last Linux releases
+(from 2.0.30 and 2.1.17) and so the kernel now supports them. Users of
+release 1.2.13 may use a patch to add the support in their kernels. By
+default, the wireless extensions are disabled, and users need to
+enable the <I>CONFIG_NET_RADIO</I> option in the kernel configuration
+(this is the option which enables the choice of radio interfaces in
+the network driver list).
+<p>
+The tools are quite simple and so should be able to compile in any
+Linux system provided that the kernel supports wireless extensions.
+<p>
+The modifications of the wireless network drivers are probably the
+most important. Each driver needs to support wireless extensions and
+to perform the corresponding dialogue with the specific hardware. For
+now, only the Wavelan ISA and the Wavelan PCMCIA drivers support
+wireless extensions, but I'm confident that others will eventually
+follow. The modified Wavelan PCMCIA driver is available in the last
+pcmcia packages (from 2.9.1). The modified Wavelan ISA driver is
+available in the kernel (from 2.0.30 and 2.1.17).
+
+<H2>4	User interface and tools</H2>
+The user interface is composed of 3 programs and a <U>/proc</U>
+entry. The main goal of the Wireless Extension development effort
+wasn't the user interface, so this interface is quite basic.
+
+<H3>4.1  /proc/net/wireless</H3>
+This is a <U>/proc</U> entry. <U>/proc</U> is a pseudo file system
+giving information and statistics about the current system, which is
+usually located in <U>/proc</U>. These entries act as files, so a
+<B>cat</B> on them will give the required information.
+<B>/proc/net/wireless</B> is designed to give some wireless specific
+statistics on each wireless interface in the system. This entry is in
+fact a clone of <U>/proc/net/dev</U> which gives the standard driver
+statistics.
+<p>
+The output looks like this :
+
+<pre>
+&lt;jean@tourrilhes&gt;cat /proc/net/wireless 
+Inter-|sta|  Quality       |  Discarded packets
+ face |tus|link level noise| nwid crypt  misc
+  eth2: f0   15.  24.    4.   181     0     0
+
+</pre>
+
+For each device, the following information is given :
+
+<UL>
+<LI><I>Status</I> : Its current state. This is a device dependent information.
+<LI><I>Quality - link</I> : general quality of the reception.
+<LI><I>Quality - level</I> : signal strength at the receiver.
+<LI><I>Quality - noise</I> : silence level (no packet) at the receiver.
+<LI><I>Discarded - nwid</I> : number of discarded packets due to invalid network id.
+<LI><I>Discarded - crypt</I> : number of packet unable to decrypt.
+<LI><I>Discarded - misc</I> : unused (for now).
+</UL>
+These informations allow the user to have a better feedback about his
+system. A high value of <I>Discarded - nwid</I> packet might indicate
+a nwid configuration problem or an adjacent network. The <I>Quality -
+level</I> might help him to track shadow areas.
+<p>
+The basic difference between <I>Quality - link</I> and <I>Quality -
+level</I> is that the first indicate how good the reception is (for
+example the percentage of correctly received packets) and the second
+how strong the signal is. The <I>Quality - level</I> is some directly
+measurable data that is likely to have the same signification across
+devices.
+<p>
+When the <I>Quality</I> values have been updated since the last read
+of the entry, a dot will follow that value (typically, it mean that a
+new measure has been made).
+
+<H3>4.2  iwconfig</H3>
+This tool is designed to configure all the wireless specific
+parameters of the driver and the hardware. This is a clone of
+<B>ifconfig</B> used for standard device configuration. The following
+parameters are available :
+
+<UL>
+<LI><I>freq</I> or <I>channel</I> : the frequency or the channel sequence.
+<LI><I>nwid</I> : network id or domain, to distinguish different logical networks.
+<LI>the <I>name</I> of the ``protocol'' used on the air.
+<LI><I>sens</I> : this is the signal level threshold to trigger packet reception (sensitivity).
+<LI><I>enc</I> : the encryption or scrambling key used.
+</UL>
+The frequency or channel parameter is the physical separation between
+networks (the keyword <I>freq</I> and <I>channel</I> are
+synonymous). For frequency hopping devices, it might be the hopping
+pattern. On the other hand, the nwid is only a logical (virtual)
+separation between networks which might be on the same frequency.
+<p>
+The name of the protocol is often the generic name of the device
+itself (for example <I>``Wavelan''</I>). This is quite useful because
+these protocols are all incompatible. The apparition of standards such
+as <B>802.11</B> and <B>HiperLan</B> might help a bit in the future.
+<p>
+The encryption setting includes the key itself (up to 64 bits), the
+activation of encryption (<I>on</I>/<I>off</I>) and an optional
+argument (either the type of algorithm or the key number for multi key
+systems).
+<p>
+Without any argument, <B>iwconfig</B> gives the value of these
+parameters (and the content of <U>/proc/net/wireless</U>) :
+
+<pre>
+&lt;jean@tourrilhes&gt;iwconfig
+lo        no wireless extensions.
+
+eth1      no wireless extensions.
+
+eth2      Wavelan  NWID:1234  Frequency:2.422GHz  Sensitivity:4
+          Link quality:15/15  Signal level:22/63  Noise level:0/63
+          Rx invalid nwid:181  invalid crypt:0  invalid misc:0
+
+</pre>
+
+By giving a command line option, the user may change these parameters
+(if it is possible in the driver and if the user is root). For
+example, to change the frequency to <I>2.462 GHz</I> and disable nwid
+checking on the device <I>eth2</I>, the user will do :
+
+<pre>
+#iwconfig eth2 freq 2.462G nwid off
+
+</pre>
+
+The user may also list the available frequencies for a specific device
+or the number of channels defined :
+
+<pre>
+&lt;jean@tourrilhes&gt;iwconfig eth2 list_freq
+10 channels ; available frequencies : 2.422GHz  2.425GHz  2.4305GHz  2.432GHz  2.442GHz  2.452GHz  2.46GHz  2.462GHz 
+
+</pre>
+
+<H3>4.3  iwspy</H3>
+<B>iwspy</B> was designed to test the <B>Mobile IP</B> support. It
+allows the user to set a list of network addresses in the driver. The
+driver will gather quality information for each of those addresses
+(updated each time it receives a packet from that address). The tool
+allows the user to display the information associated with each
+address in the list.
+<p>
+<B>iwspy</B> accept IP address as well as hardware addresses (MAC). IP
+addresses will be converted to hardware addresses before being
+transmitted to the driver. No verification is made on the hardware
+address. On the command line, hardware addresses should be prefixed by
+the keyword <I>hw</I> :
+
+<pre>
+#iwspy eth2 15.144.104.4 hw 08:00:0E:21:3A:1F
+
+</pre>
+
+The tool accept the keyword ``+'' to add the new addresses at the end
+of the list :
+
+<pre>
+#iwspy eth2 + hw 08:00:0E:2A:26:FA
+
+</pre>
+
+To display the list of address :
+
+<pre>
+&lt;jean@tourrilhes&gt;iwspy eth2
+08:00:0E:21:D7:4E : Quality 15 ; Signal 29 ; Noise 0 (updated)
+08:00:0E:21:3A:1F : Quality 0 ; Signal 0 ; Noise 0
+08:00:0E:2A:26:FA : Quality 0 ; Signal 0 ; Noise 0
+
+</pre>
+
+The <I>(updated)</I> indication show that we have received a packet
+since we set the address in the driver. We haven't received anything
+from the second and third address (this explain why the values are
+0). A <B>ping</B> to those address should solve the problem.
+<p>
+The number of addresses is limited to 8, because each address slow
+down the driver (it increases the processing for each received
+packets).
+
+<H3>4.4  iwpriv</H3>
+<B>iwpriv</B> is some experimental support for device specific
+extensions. Some drivers (like the Wavelan one) might define some
+extra parameters or functionality, <B>iwpriv</B> is used to manipulate
+those.
+
+<H2>5	Driver interface &amp; programming issues</H2>
+The implementation of the wireless extensions was designed to minimise
+the number of changes in the kernel and to have a simple and
+extensible solution.
+<p>
+All the wireless interface (types and constants) is defined in the
+file <U>/usr/include/linux/wireless.h</U>. This is the central piece
+of the wireless extension.
+
+<H3>5.1  /proc/net/wireless</H3>
+This <U>/proc</U> entry is a clone of the <U>/proc/net/dev</U> entry
+and has been implemented in exactly the same way.
+<p>
+The Linux networking stack uses a structure (<I>struct device</I>) to
+keep track of each device in the system. The first part of it is
+standardised, and contains parameters (for example the base I/O
+address and the IP address of the device) and callbacks (the procedure
+to start the device, to send a packet...).
+<p>
+I've added to this structure another standard callback
+(<I>get_wireless_stats</I>) to get the wireless statistics that
+<U>/proc/net/wireless</U> needs. When the <U>/proc</U> entry is read,
+it calls this callback for all the devices present in the system and
+display the information it gets. If a device doesn't define this
+callback, it is ignored.
+<p>
+When called, the <I>get_wireless_stats</I> callback returns a
+structure (<I>struct iw_statistics</I>) containing all the fields that
+will be displayed by the <U>/proc</U> entry. This structure is of
+course defined in the file <U>/usr/include/linux/wireless.h</U>.
+
+<H3>5.2  ioctl</H3>
+The usual method in Unix to set and get parameters from a network
+device is through <B>ioctl</B>. Ioctl are usually operations performed
+on a file descriptor, but they also apply on network sockets. The
+ioctl is a kernel system call. The arguments of the ioctl define the
+operations to be done, the parameters of these operations and the
+device they applies to.
+<p>
+For example, to change the IP address on device <I>eth2</I>, a program
+(like <B>ifconfig</B>) would make an ioctl call with the following
+parameters : <I>``eth2'', SIOCSIFADDR, new address</I>. The structure
+defining the parameters layout may be found in
+<U>/usr/include/linux/if.h</U> and the ioctl call (the constant
+<I>SIOCSIFADDR</I>) is defined in <U>/usr/include/linux/sockios.h</U>.
+<p>
+For the wireless extensions, I've defined a new set of ioctl calls
+(for example <I>SIOCSIWFREQ</I> to change the frequency). I've also
+defined the parameters to those calls (see
+<U>/usr/include/linux/wireless.h</U>). In fact those new calls map
+closely to the functionality offered by the wireless tools.
+<p>
+There is another popular way to set parameters in a network driver in
+Linux, which is initialisation parameters (either passed on the kernel
+command line or at module initialisation). This method has the
+disadvantage that the parameters may only be set (and not read) and
+only at initialisation time, which offers much less flexibility than
+the current solution. The other advantage of ioctl is that it is a
+programming interface (and not only a user interface), so any program
+(such as a Mobile IP implementation) may manipulate them directly.
+
+<H3>5.3  More details</H3>
+For people who needs more details on the actual implementation, the
+list of ioctl calls or the parameters definitions, the ultimate
+reference is the source code. The file
+<U>/usr/include/linux/wireless.h</U> defines all the necessary
+pieces. The wireless tools offer some good examples on how to use the
+ioctl calls. To know how the wireless extensions are used on the
+driver side, the Wavelan driver source will answer most questions.
+
+<H2>6	Areas of improvement</H2>
+
+<H3>6.1  Other drivers</H3>
+For now, only the Wavelan driver supports the wireless extensions. The
+implementation of the Wireless Extensions in other wireless network
+drivers might help to validate the Wireless Extensions genericity and
+to refine its definition. The problem is that quite few wireless
+devices have Linux drivers available.
+<p>
+Also the implementation of wireless extensions in some case is not
+that easy. For example, the code to change the frequency in the
+Wavelan driver is quite large and complex.
+
+<H3>6.2  Users tools</H3>
+They should be extended and refined. We could also imagine the
+development of a graphical interface (for example to have a small
+graph bar like for battery charge and system load).
+
+<H3>6.3  Wireless Aware applications</H3>
+The development of wireless aware applications will allow to
+demonstrate the concept and to expand the wireless extensions with the
+needs of those applications. <B>Mobile IP</B> seems an obvious target.
+
+<p ALIGN=right>
+<A HREF="Linux.Wireless.Overview.html"><I>next</I></A>
+<HR>
+<CENTER><TABLE BORDER=0 CELLPADDING=0><TR><TD valign="top" align="center">
+<ADDRESS>
+<A HREF="Wireless.html">Linux Wireless LAN Howto</A> -
+jt&#064;hpl.hp.com
+<br>Converted to html from Frame Maker - 18 March 97
+<br>Updated 23 January 97
+<br>Copyright &#169; 1996-2004 Jean Tourrilhes
+</ADDRESS>
+</TD><TD>
+&nbsp;&nbsp;&nbsp;
+</TD><TD valign="top" align="center">
+Project hosted and sponsored by :
+<br>
+<A HREF="http://www.hpl.hp.com"><IMG SRC="../hplogo.png" HEIGHT=34
+WIDTH=141 ALT="HP home page"></A>
+</TD></TR></TABLE></CENTER>
+
+<!-- Keep Webmaster happy -->
+<script type="text/javascript" language="JavaScript">
+var s_prop7="us"
+var s_prop8="eng"
+var s_prop9="corp"
+var s_prop10="us|eng|corp"
+var s_prop13="hphqglobal,hphqwwhplabs"
+</script>
+
+<!-- Begin METRICS JavaScript -->
+<!-- <script type="text/javascript" language="JavaScript"
+src="http://welcome.hp-ww.com/country/us/eng/js/metrics.js"></script> -->
+<script type="text/javascript" language="JavaScript"
+src="http://www.hpl.hp.com/dev/hplabsmetrics.js"></script>
+<!-- End METRICS JavaScript -->
+
+</BODY>
+</HTML>

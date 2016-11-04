@@ -1,0 +1,54 @@
+*** wvlan_cs.c.orig	Thu Mar  8 09:29:33 2001
+--- wvlan_cs.c	Sun May  6 17:05:18 2001
+***************
+*** 2535,2554 ****
+  	// Align IP on 16b boundary
+  	skb_reserve(skb, 2);
+  	p = skb_put(skb, len);
+  	dev->last_rx = jiffies;
+  
+  	// Add Ethernet-II frame decapsulation, because
+  	// HCF-light doesn't support that.
+! 	if (local->ifb.IFB_RxStat == 0x2000 || local-
+>ifb.IFB_RxStat == 0x4000)
+! 	{
+! 		hcf_get_data(&local->ifb, 0, p, 12);
+! 		hcf_get_data(&local->ifb, 12+sizeof
+(snap_header), p+12, len-12-sizeof(snap_header));
+  		skb_trim(skb, len-sizeof(snap_header));
+  	}
+- 	else
+- 		hcf_get_data(&local->ifb, 0, p, len);
+  
+  	skb->dev = dev;
+  	skb->protocol = eth_type_trans(skb, dev);
+  	skb->ip_summed = CHECKSUM_NONE;
+  
+--- 2535,2556 ----
+  	// Align IP on 16b boundary
+  	skb_reserve(skb, 2);
+  	p = skb_put(skb, len);
+  	dev->last_rx = jiffies;
+  
++ 	hcf_get_data(&local->ifb, 0, p, len);
++ 
+  	// Add Ethernet-II frame decapsulation, because
+  	// HCF-light doesn't support that.
+! 
+! 	/* decapsulate if snap header exists, regardless of 
+RxStat (hgoffin) */
+! 
+! 	if (local->ifb.IFB_RxStat == 0x2000 || local-
+>ifb.IFB_RxStat == 0x4000
+! 			|| memcmp(p+14, snap_header+2, 3) 
+== 0) {
+! 		memmove(p+12, p+12+sizeof(snap_header), len-
+12-sizeof(snap_header));
+  		skb_trim(skb, len-sizeof(snap_header));
+  	}
+  
+  	skb->dev = dev;
+  	skb->protocol = eth_type_trans(skb, dev);
+  	skb->ip_summed = CHECKSUM_NONE;
+  
+

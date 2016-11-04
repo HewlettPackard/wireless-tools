@@ -1,0 +1,334 @@
+--- airo.t1.c	Wed Mar 27 17:58:34 2002
++++ airo.c	Wed Mar 27 17:47:04 2002
+@@ -885,6 +885,7 @@ struct airo_info {
+ 	struct net_device *wifidev;
+ #ifdef WIRELESS_EXT
+ 	struct iw_statistics	wstats;		// wireless stats
++	unsigned long		scan_timestamp;	/* Time started to scan */
+ #ifdef WIRELESS_SPY
+ 	int			spy_number;
+ 	u_char			spy_address[IW_MAX_SPY][6];
+@@ -1122,6 +1123,8 @@ static void get_tx_error(struct airo_inf
+ 	if (test_and_clear_bit(fid, &ai->txerr) == 0)
+ 		return;
+ 
++	// We may be called from the interrupt handler, and in those cases
++	// we should really use BAP0 instead of BAP1 - Jean II
+ 	if (bap_setup(ai, ai->fids[fid] & 0xffff, 4, BAP1) == SUCCESS) {
+ 		bap_read(ai, &status, 2, BAP1);
+ 		if (le16_to_cpu(status) & 2) /* Too many retries */
+@@ -1134,6 +1137,36 @@ static void get_tx_error(struct airo_inf
+ 			ai->stats.tx_carrier_errors++;
+ 		if (le16_to_cpu(status) & 0x20) /* Association lost */
+ 			{ }
++#if WIRELESS_EXT > 13
++		/* We produce a TXDROP event only for retry or lifetime
++		 * exceeded, because that's the only status that really mean
++		 * that this particular node went away.
++		 * Other errors means that *we* screwed up. - Jean II */
++		if ((le16_to_cpu(status) & 2) ||
++		     (le16_to_cpu(status) & 4)) {
++			union iwreq_data	wrqu;
++			char junk[0x18];
++
++			/* Faster to skip over useless data than to do
++			 * another bap_setup(). We are at offset 0x6 and
++			 * need to go to 0x18 and read 6 bytes - Jean II */
++			bap_read(ai, (u16 *) junk, 0x18, BAP1);
++
++			/* Copy 802.11 dest address.
++			 * We use the 802.11 header because the frame may
++			 * not be 802.3 or may be mangled...
++			 * In Ad-Hoc mode, it will be the node address.
++			 * In managed mode, it will be most likely the AP addr
++			 * User space will figure out how to convert it to
++			 * whatever it needs (IP address or else).
++			 * - Jean II */
++			memcpy(wrqu.addr.sa_data, junk + 0x12, ETH_ALEN);
++			wrqu.addr.sa_family = ARPHRD_ETHER;
++
++			/* Send event to user space */
++			wireless_send_event(ai->dev, IWEVTXDROP, &wrqu, NULL);
++		}
++#endif /* WIRELESS_EXT > 13 */
+ 	}
+ }
+ 
+@@ -1631,6 +1664,9 @@ static void airo_interrupt ( int irq, vo
+ 		}
+ 
+ 		if ( status & EV_LINK ) {
++#if WIRELESS_EXT > 13
++			union iwreq_data	wrqu;
++#endif /* WIRELESS_EXT > 13 */
+ 			/* The link status has changed, if you want to put a
+ 			   monitor hook in, do it here.  (Remember that
+ 			   interrupts are still disabled!)
+@@ -1676,6 +1712,25 @@ static void airo_interrupt ( int irq, vo
+ 				if (task)
+ 					wake_up_process (task);
+ 			}
++#if WIRELESS_EXT > 13
++			/* Question : is ASSOCIATED the only status
++			 * that is valid ? We want to catch handover
++			 * and reassociations as valid status
++			 * Jean II */
++			if(newStatus == ASSOCIATED) {
++				/* We can't use readStatusRid because
++				 * it's using the wrong BAP. Also
++				 * faster because no endian */
++				StatusRid status_rid;
++				PC4500_readrid(apriv, RID_STATUS, &status_rid, sizeof(status_rid), BAP0);
++				memcpy(wrqu.ap_addr.sa_data, status_rid.bssid[0], ETH_ALEN);
++			} else
++				memset(wrqu.ap_addr.sa_data, '\0', ETH_ALEN);
++			wrqu.ap_addr.sa_family = ARPHRD_ETHER;
++
++			/* Send event to user space */
++			wireless_send_event(dev, SIOCGIWAP, &wrqu, NULL);
++#endif /* WIRELESS_EXT > 13 */
+ 		}
+ 
+ 		/* Check to see if there is something to receive */
+@@ -2459,6 +2514,7 @@ static int transmit_802_11_packet(struct
+ 		return ERROR;
+ 	}
+ 
++	// This comment is wrong, please fix it - Jean II
+ 	// packet is destination[6], source[6], payload[len-12]
+ 	// write the payload length and dst/src/payload
+ 	if (bap_setup(ai, txFid, 6, BAP1) != SUCCESS) return ERROR;
+@@ -4804,6 +4860,215 @@ static int airo_get_aplist(struct net_de
+ 	return(0);
+ }
+ 
++#if WIRELESS_EXT > 13
++/*------------------------------------------------------------------*/
++/*
++ * Wireless Handler : Initiate Scan
++ */
++static int airo_set_scan(struct net_device *dev,
++			   struct iw_request_info *info,
++			   union iwreq_data *wrqu,
++			   char *extra)
++{
++	struct airo_info *ai = (struct airo_info*) dev->priv;
++	Cmd cmd;
++	Resp rsp;
++
++	/* Note : you may have realised that, as this is a SET operation,
++	 * this is priviledged and therefore a normal user can't
++	 * perform scanning.
++	 * This is not an error, while the device perform scanning,
++	 * traffic doesn't flow, so it's a perfect DoS...
++	 * Jean II */
++
++	/* Initiate a scan command */
++	memset(&cmd, 0, sizeof(cmd));
++	cmd.cmd=CMD_LISTBSS;
++	while (test_and_set_bit(FLAG_LOCK, &ai->flags) != 0)
++		schedule_timeout(HZ/2);
++	issuecommand(ai, &cmd, &rsp);
++	ai->scan_timestamp = jiffies;
++	clear_bit(FLAG_LOCK, &ai->flags);
++	smp_mb__after_clear_bit();
++
++	/* At this point, just return to the user.
++	 * In theory, we should send a Wireless Event to user space when
++	 * the scan is completed, but I could not hook it up, so just let
++	 * userspace poll airo_get_scan...
++	 * I think that to implement Wireless Event we just need to hook
++	 * a handler on EV_CMD, but we should ask Jim.
++	 * Jean II */
++
++	return 0;
++}
++
++/*------------------------------------------------------------------*/
++/*
++ * Translate scan data returned from the card to a card independant
++ * format that the Wireless Tools will understand - Jean II
++ */
++static inline char *airo_translate_scan(struct net_device *dev,
++					char *current_ev,
++					char *end_buf,
++					BSSListRid *list)
++{
++	struct airo_info *ai = (struct airo_info*) dev->priv;
++	struct iw_event		iwe;		/* Temporary buffer */
++	u16			capabilities;
++	char *			current_val;	/* For rates */
++	int			i;
++
++	//printk(KERN_DEBUG "%s: current_ev = %p, end_buf = %p\n", dev->name,
++	//       current_ev, end_buf);
++
++	//printk(KERN_DEBUG "%s: ap_addr = %02x:%02x:%02x:%02x:%02x:%02x\n", dev->name, list->bssid[0], list->bssid[1], list->bssid[2], list->bssid[3], list->bssid[4], list->bssid[5]);
++
++	/* First entry *MUST* be the AP MAC address */
++	iwe.cmd = SIOCGIWAP;
++	iwe.u.ap_addr.sa_family = ARPHRD_ETHER;
++	memcpy(iwe.u.ap_addr.sa_data, list->bssid, ETH_ALEN);
++	current_ev = iwe_stream_add_event(current_ev, end_buf, &iwe, IW_EV_ADDR_LEN);
++
++	/* Other entries will be displayed in the order we give them */
++
++	/* Add the ESSID */
++	iwe.u.data.length = list->ssidLen;
++	if(iwe.u.data.length > 32)
++		iwe.u.data.length = 32;
++	iwe.cmd = SIOCGIWESSID;
++	iwe.u.data.flags = 1;
++	current_ev = iwe_stream_add_point(current_ev, end_buf, &iwe, list->ssid);
++
++	/* Add mode */
++	iwe.cmd = SIOCGIWMODE;
++	capabilities = le16_to_cpu(list->cap);
++	if(capabilities & (CAP_ESS | CAP_IBSS)) {
++		if(capabilities & CAP_ESS)
++			iwe.u.mode = IW_MODE_INFRA;
++		else
++			iwe.u.mode = IW_MODE_ADHOC;
++		current_ev = iwe_stream_add_event(current_ev, end_buf, &iwe, IW_EV_UINT_LEN);
++	}
++
++	/* Add frequency */
++	iwe.cmd = SIOCGIWFREQ;
++	iwe.u.freq.m = le16_to_cpu(list->dsChannel);
++	iwe.u.freq.m = frequency_list[iwe.u.freq.m] * 100000;
++	iwe.u.freq.e = 1;
++	current_ev = iwe_stream_add_event(current_ev, end_buf, &iwe, IW_EV_FREQ_LEN);
++
++	/* Add quality statistics */
++	iwe.cmd = IWEVQUAL;
++	if (ai->rssi)
++		iwe.u.qual.level = 0x100 - ai->rssi[list->rssi].rssidBm;
++	else
++		iwe.u.qual.level = (list->rssi + 321) / 2;
++	iwe.u.qual.noise = 0;
++	iwe.u.qual.qual = 0;
++	current_ev = iwe_stream_add_event(current_ev, end_buf, &iwe, IW_EV_QUAL_LEN);
++
++	/* Add encryption capability */
++	iwe.cmd = SIOCGIWENCODE;
++	if(capabilities & CAP_PRIVACY)
++		iwe.u.data.flags = IW_ENCODE_ENABLED | IW_ENCODE_NOKEY;
++	else
++		iwe.u.data.flags = IW_ENCODE_DISABLED;
++	iwe.u.data.length = 0;
++	current_ev = iwe_stream_add_point(current_ev, end_buf, &iwe, list->ssid);
++
++	/* Rate : stuffing multiple values in a single event require a bit
++	 * more of magic - Jean II */
++	current_val = current_ev + IW_EV_LCP_LEN;
++
++	iwe.cmd = SIOCGIWRATE;
++	/* Those two flags are ignored... */
++	iwe.u.bitrate.fixed = iwe.u.bitrate.disabled = 0;
++	/* Max 8 values */
++	for(i = 0 ; i < 8 ; i++) {
++		/* NULL terminated */
++		if(list->rates[i] == 0)
++			break;
++		/* Bit rate given in 500 kb/s units (+ 0x80) */
++		iwe.u.bitrate.value = ((list->rates[i] & 0x7f) * 500000);
++		/* Add new value to event */
++		current_val = iwe_stream_add_value(current_ev, current_val, end_buf, &iwe, IW_EV_PARAM_LEN);
++	}
++	/* Check if we added any event */
++	if((current_val - current_ev) > IW_EV_LCP_LEN)
++		current_ev = current_val;
++
++	/* The other data in the scan result are not really
++	 * interesting, so for now drop it - Jean II */
++	return(current_ev);
++}
++
++/*------------------------------------------------------------------*/
++/*
++ * Wireless Handler : Read Scan Results
++ */
++static int airo_get_scan(struct net_device *dev,
++			   struct iw_request_info *info,
++			   union iwreq_data *wrqu,
++			   char *extra)
++{
++	struct airo_info *ai = (struct airo_info*) dev->priv;
++	BSSListRid BSSList;
++	int rc;
++	int err;
++	char *current_ev = extra;
++
++	/* I'm confused as when we know a new scan has completed (as
++	 * opposed to reading results from the previous scan).
++	 * For now, let's just make sure enough time has elapsed since
++	 * we started the scan. We can optimise later either by checking
++	 * the real condition or setting a bit when we implement the
++	 * scan event. - Jean II */
++	if((jiffies - ai->scan_timestamp) < 3*HZ) {
++		/* Important note : we don't want to block the caller
++		 * until results are ready for various reasons.
++		 * First, managing wait queues is complex and racy
++		 * (there may be multiple simultaneous callers).
++		 * Second, we grab some rtnetlink lock before comming
++		 * here (in dev_ioctl()).
++		 * Third, the caller can wait on the Wireless Event
++		 * (when implemented) - Jean II */
++		err = -EAGAIN;
++		return(err);
++	}
++
++	/* Locking ? We definitely need locking : We should exclude
++         * the Tx path because we use BAP1. */
++
++	/* Try to read the first entry of the scan result */
++	rc = PC4500_readrid(ai, RID_BSSLISTFIRST,
++			    &BSSList, sizeof(BSSList), BAP1);
++	if((rc) || (BSSList.index == 0xffff)) {
++		/* Client error, no scan results...
++		 * The caller need to restart the scan. */
++		err = -ENODATA;
++		return(err);
++	}
++
++	/* Read and parse all entries */
++	while((!rc) && (BSSList.index != 0xffff)) {
++		/* Translate to WE format this entry */
++		current_ev = airo_translate_scan(dev, current_ev,
++						 extra + IW_SCAN_MAX_DATA,
++						 &BSSList);
++
++		/* Read next entry */
++		rc = PC4500_readrid(ai, RID_BSSLISTNEXT,
++				    &BSSList, sizeof(BSSList), BAP1);
++	}
++	/* Length of data */
++	wrqu->data.length = (current_ev - extra);
++	wrqu->data.flags = 0;	/* todo */
++
++	err = 0;
++	return(err);
++}
++#endif	/* WIRELESS_EXT > 13 */
++
+ #ifdef WIRELESS_SPY
+ /*------------------------------------------------------------------*/
+ /*
+@@ -4936,9 +5201,14 @@ static const iw_handler		airo_handler[] 
+ 	airo_set_wap,			/* SIOCSIWAP */
+ 	airo_get_wap,			/* SIOCGIWAP */
+ 	NULL,				/* -- hole -- */
+-	NULL,				/* SIOCGIWAPLIST */
+-	NULL,				/* -- hole -- */
+-	NULL,				/* -- hole -- */
++	airo_get_aplist,		/* SIOCGIWAPLIST */
++#if WIRELESS_EXT > 13
++	airo_set_scan,			/* SIOCSIWSCAN */
++	airo_get_scan,			/* SIOCGIWSCAN */
++#else	/* WIRELESS_EXT > 13 */
++	NULL,				/* SIOCSIWSCAN */
++	NULL,				/* SIOCGIWSCAN */
++#endif	/* WIRELESS_EXT > 13 */
+ 	airo_set_essid,			/* SIOCSIWESSID */
+ 	airo_get_essid,			/* SIOCGIWESSID */
+ 	airo_set_nick,			/* SIOCSIWNICKN */
