@@ -1788,7 +1788,6 @@ mapping_getsysfs(int			skfd,
 		  /* Check if we suceeded */
 		  if(!linkpath)
 		    {
-		      free(linkpath);
 		      if(verbose)
 			fprintf(stderr, "Error: Can't read parent directory `%s'\n", fname);
 		      /* Next sysfs selector */
