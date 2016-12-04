@@ -205,7 +205,7 @@ iw_print_value_name(unsigned int		value,
 		    const unsigned int		num_names)
 {
   if(value >= num_names)
-    printf(" unknown (%d)", value);
+    printf(" unknown (%u)", value);
   else
     printf(" %s", names[value]);
 }

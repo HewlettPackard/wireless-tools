@@ -307,7 +307,7 @@ print_mode(int		skfd,
 	printf("%s\n", iw_operation_mode[wrq.u.mode]);
       break;
     case FORMAT_RAW:
-      printf("%d\n", wrq.u.mode);
+      printf("%u\n", wrq.u.mode);
       break;
     default:
       printf("%-8.16s  Mode:%s\n", ifname, iw_operation_mode[wrq.u.mode]);

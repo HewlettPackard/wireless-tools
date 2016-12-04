@@ -462,7 +462,7 @@ print_event_token(struct iw_event *	event,		/* Extracted token */
 	{
 	  struct iw_pmkid_cand cand;
 	  memcpy(&cand, event->u.data.pointer, sizeof(cand));
-	  printf("PMKID candidate flags:0x%X index:%d bssid:%s\n",
+	  printf("PMKID candidate flags:0x%X index:%u bssid:%s\n",
 		 cand.flags, cand.index,
 		 iw_saether_ntop(&cand.bssid, buffer));
 	}
