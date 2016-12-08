@@ -1784,11 +1784,11 @@ mapping_getsysfs(int			skfd,
 			linkpath = getcwd(NULL, 0);
 		      /* This may fail, but it's not fatal */
 		      fchdir(cwd_fd);
+		      close(cwd_fd);
 		    }
-		  /* Check if we suceeded */
+		  /* Check if we succeeded */
 		  if(!linkpath)
 		    {
-		      free(linkpath);
 		      if(verbose)
 			fprintf(stderr, "Error: Can't read parent directory `%s'\n", fname);
 		      /* Next sysfs selector */
@@ -1823,6 +1823,9 @@ mapping_getsysfs(int			skfd,
 	    n--;
 	  sdup = strndup(p, n);
 	}
+
+      free(fname);
+
       if(sdup == NULL)
 	{
 	  fprintf(stderr, "Error: Can't allocate SYSFS value\n"); 

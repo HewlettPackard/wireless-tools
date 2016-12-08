@@ -89,7 +89,7 @@ static inline int rtnl_open(struct rtnl_handle *rth, unsigned subscriptions)
 {
 	int addr_len;
 
-	memset(rth, 0, sizeof(rth));
+	memset(rth, 0, sizeof(*rth));
 
 	rth->fd = socket(PF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
 	if (rth->fd < 0) {
@@ -208,6 +208,7 @@ iw_get_interface_data(int	ifindex)
   if(index2name(skfd, ifindex, curr->ifname) < 0)
     {
       perror("index2name");
+      iw_sockets_close(skfd);
       free(curr);
       return(NULL);
     }
@@ -462,7 +463,7 @@ print_event_token(struct iw_event *	event,		/* Extracted token */
 	{
 	  struct iw_pmkid_cand cand;
 	  memcpy(&cand, event->u.data.pointer, sizeof(cand));
-	  printf("PMKID candidate flags:0x%X index:%d bssid:%s\n",
+	  printf("PMKID candidate flags:0x%X index:%u bssid:%s\n",
 		 cand.flags, cand.index,
 		 iw_saether_ntop(&cand.bssid, buffer));
 	}

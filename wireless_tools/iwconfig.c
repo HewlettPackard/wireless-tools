@@ -449,7 +449,7 @@ display_info(struct wireless_info *	info,
       printf("Link %s\n", buffer);
 
       if(info->range.we_version_compiled > 11)
-	printf("          Rx invalid nwid:%d  Rx invalid crypt:%d  Rx invalid frag:%d\n          Tx excessive retries:%d  Invalid misc:%d   Missed beacon:%d\n",
+	printf("          Rx invalid nwid:%u  Rx invalid crypt:%u  Rx invalid frag:%u\n          Tx excessive retries:%u  Invalid misc:%u   Missed beacon:%u\n",
 	       info->stats.discard.nwid,
 	       info->stats.discard.code,
 	       info->stats.discard.fragment,
@@ -457,7 +457,7 @@ display_info(struct wireless_info *	info,
 	       info->stats.discard.misc,
 	       info->stats.miss.beacon);
       else
-	printf("          Rx invalid nwid:%d  invalid crypt:%d  invalid misc:%d\n",
+	printf("          Rx invalid nwid:%u  invalid crypt:%u  invalid misc:%u\n",
 	       info->stats.discard.nwid,
 	       info->stats.discard.code,
 	       info->stats.discard.misc);
