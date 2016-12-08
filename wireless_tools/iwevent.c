@@ -208,6 +208,7 @@ iw_get_interface_data(int	ifindex)
   if(index2name(skfd, ifindex, curr->ifname) < 0)
     {
       perror("index2name");
+      iw_sockets_close(skfd);
       free(curr);
       return(NULL);
     }
