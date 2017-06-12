@@ -738,7 +738,7 @@
  *		(Bug reported by Johan Danielsson <joda11147@gmail.com>)
  *	o Fix OUI type check for WPA 1 IE [iwlist.c]
  *	---
- *		(Bug reported by Florent Daignière)
+ *		(Bug reported by Florent DaigniÃ¨re)
  *	o Don't look for "fixed" out of array in set_txpower_info() [iwconfig]
  */
 

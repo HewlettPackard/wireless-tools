@@ -1,31 +1,31 @@
 .\" Jean II - HPLB - 96
 .\" iwlist.8
 .\"
-.TH IWLIST 8 "23.èerven 2004" "wireless-tools" "Linux - Manuál programátora"
+.TH IWLIST 8 "23.Äerven 2004" "wireless-tools" "Linux - ManuÃ¡l programÃ¡tora"
 .\"
 .\" NAME part
 .\"
-.SH JMÉNO
-iwlist \- Získá podrobnìj¹í bezdrátové informace o bezdrátovém rozhraní
+.SH JMÃ‰NO
+iwlist \- ZÃ­skÃ¡ podrobnÄ›jÅ¡Ã­ bezdrÃ¡tovÃ© informace o bezdrÃ¡tovÃ©m rozhranÃ­
 .\"
 .\" SYNOPSIS part
 .\"
 .SH SYNTAXE
-.BI "iwlist " rozhraní " scanning"
+.BI "iwlist " rozhranÃ­ " scanning"
 .br
-.BI "iwlist " rozhraní " frequency"
+.BI "iwlist " rozhranÃ­ " frequency"
 .br
-.BI "iwlist " rozhraní " rate"
+.BI "iwlist " rozhranÃ­ " rate"
 .br
-.BI "iwlist " rozhraní " key"
+.BI "iwlist " rozhranÃ­ " key"
 .br
-.BI "iwlist " rozhraní " power"
+.BI "iwlist " rozhranÃ­ " power"
 .br
-.BI "iwlist " rozhraní " txpower"
+.BI "iwlist " rozhranÃ­ " txpower"
 .br
-.BI "iwlist " rozhraní " retry"
+.BI "iwlist " rozhranÃ­ " retry"
 .br
-.BI "iwlist " rozhraní " event"
+.BI "iwlist " rozhranÃ­ " event"
 .br
 .BI "iwlist --help"
 .br
@@ -35,12 +35,12 @@ iwlist \- Získá podrobnìj¹í bezdrátové informace o bezdrátovém rozhraní
 .\"
 .SH POPIS
 .B Iwlist
-se pou¾ívá k zobrazení doplòujících informací o bezdrátovém sí»ovém
-rozhraní, které nejsou zobrazovány pøíkazem
+se pouÅ¾Ã­vÃ¡ k zobrazenÃ­ doplÅˆujÃ­cÃ­ch informacÃ­ o bezdrÃ¡tovÃ©m sÃ­Å¥ovÃ©m
+rozhranÃ­, kterÃ© nejsou zobrazovÃ¡ny pÅ™Ã­kazem
 .IR iwconfig (8).
-Hlavní parametr urèuje typ informace, kterou
+HlavnÃ­ parametr urÄuje typ informace, kterou
 .B iwlist
-zobrazí v detailní podobì, vèetnì informace, kterou poskytuje
+zobrazÃ­ v detailnÃ­ podobÄ›, vÄetnÄ› informace, kterou poskytuje
 .IR iwconfig (8).
 .\"
 .\" PARAMETER part
@@ -48,61 +48,61 @@ zobrazí v detailní podobì, vèetnì informace, kterou poskytuje
 .SH PARAMETRY
 .TP
 .BR scan [ning]
-Vypí¹e seznam pøístupovıch bodù a Ad-Hoc buòek v dosahu a 
-volitelnì i spoustu informací o nich (ESSID, kvalita,
-frekvence, re¾im...). Typ zobrazené informace závisí na mo¾nostech karty.
+VypÃ­Å¡e seznam pÅ™Ã­stupovÃ½ch bodÅ¯ a Ad-Hoc buÅˆek v dosahu a 
+volitelnÄ› i spoustu informacÃ­ o nich (ESSID, kvalita,
+frekvence, reÅ¾im...). Typ zobrazenÃ© informace zÃ¡visÃ­ na moÅ¾nostech karty.
 .br
-Spu¹tìní skenování je privilegovaná operace (mù¾e ji provést pouze
+SpuÅ¡tÄ›nÃ­ skenovÃ¡nÃ­ je privilegovanÃ¡ operace (mÅ¯Å¾e ji provÃ©st pouze
 .RI root
-) a normální u¾ivatel mù¾e pouze èíst zbylé vısledky skenování. 
-Jako vıchozí je zpùsob, kterım je skenování provedeno (jeho rozsah)
-ovlivnìn aktuálním nastavením ovladaèe. U tohoto pøíkazu se poèítá s dodateènımi parametry
-pro kontrolu zpùsobu skenování, to ale zatím není implementováno.
+) a normÃ¡lnÃ­ uÅ¾ivatel mÅ¯Å¾e pouze ÄÃ­st zbylÃ© vÃ½sledky skenovÃ¡nÃ­. 
+Jako vÃ½chozÃ­ je zpÅ¯sob, kterÃ½m je skenovÃ¡nÃ­ provedeno (jeho rozsah)
+ovlivnÄ›n aktuÃ¡lnÃ­m nastavenÃ­m ovladaÄe. U tohoto pÅ™Ã­kazu se poÄÃ­tÃ¡ s dodateÄnÃ½mi parametry
+pro kontrolu zpÅ¯sobu skenovÃ¡nÃ­, to ale zatÃ­m nenÃ­ implementovÃ¡no.
 .TP
 .BR freq [uency]/ channel
-Vypí¹e seznam dostupnıch frekvencí pro zaøízení a poèet definovanıch kanálù
-Prosím vìnujte pozornost tomu, ¾e ovladaè obvykle vrací
-celkovı poèet kanálù a pouze frekvence dostupné v aktuálním locale,
-tak¾e mezi zobrazenımi frekvencemi a èísly kanálù není vztah "jedna k jedné".
+VypÃ­Å¡e seznam dostupnÃ½ch frekvencÃ­ pro zaÅ™Ã­zenÃ­ a poÄet definovanÃ½ch kanÃ¡lÅ¯
+ProsÃ­m vÄ›nujte pozornost tomu, Å¾e ovladaÄ obvykle vracÃ­
+celkovÃ½ poÄet kanÃ¡lÅ¯ a pouze frekvence dostupnÃ© v aktuÃ¡lnÃ­m locale,
+takÅ¾e mezi zobrazenÃ½mi frekvencemi a ÄÃ­sly kanÃ¡lÅ¯ nenÃ­ vztah "jedna k jednÃ©".
 .TP
 .BR rate / bit [rate]
-Vypí¹e pøenosové rychlosti podporované zaøízením.
+VypÃ­Å¡e pÅ™enosovÃ© rychlosti podporovanÃ© zaÅ™Ã­zenÃ­m.
 .TP
 .BR key / enc [ryption]
-Vypí¹e podporované velikosti ¹ifrovacích klíèù a zobrazí v¹echny ¹ifrovací
-klíèe dostupné v zaøízení.
+VypÃ­Å¡e podporovanÃ© velikosti Å¡ifrovacÃ­ch klÃ­ÄÅ¯ a zobrazÃ­ vÅ¡echny Å¡ifrovacÃ­
+klÃ­Äe dostupnÃ© v zaÅ™Ã­zenÃ­.
 .TP
 .B power
-Vypí¹e rùzné atributy a re¾imy øízení spotøeby zaøízení.
+VypÃ­Å¡e rÅ¯znÃ© atributy a reÅ¾imy Å™Ã­zenÃ­ spotÅ™eby zaÅ™Ã­zenÃ­.
 .TP
 .B txpower
-vypí¹e dostupné vysílací vıkony zaøízení.
+vypÃ­Å¡e dostupnÃ© vysÃ­lacÃ­ vÃ½kony zaÅ™Ã­zenÃ­.
 .TP
 .B retry
-vypí¹e limity pro transmit retry a retry lifetime na zaøízení.
+vypÃ­Å¡e limity pro transmit retry a retry lifetime na zaÅ™Ã­zenÃ­.
 .TP
 .BR ap / accesspoint / peers
-Vypí¹e pøístupové body v dosahu a volitelnì i kvalitu spoje
+VypÃ­Å¡e pÅ™Ã­stupovÃ© body v dosahu a volitelnÄ› i kvalitu spoje
 Tato volba je 
-.B zastaralá
-a je nyní opu¹tìna ve prospìch skenování (viz vı¹e), vìt¹ina
-ovladaèù ji nepodporuje.
+.B zastaralÃ¡
+a je nynÃ­ opuÅ¡tÄ›na ve prospÄ›ch skenovÃ¡nÃ­ (viz vÃ½Å¡e), vÄ›tÅ¡ina
+ovladaÄÅ¯ ji nepodporuje.
 .br
-Nìkteré ovladaèe mohou s tímto pøíkazem vracet zvlá¹tní seznam peerù
-nebo pøístupovıch bodù, jako napø. seznam peerù asociovaních s/registrovanıch s
-kartou. Více informací obsahuje dokumentace ovladaèù.
+NÄ›kterÃ© ovladaÄe mohou s tÃ­mto pÅ™Ã­kazem vracet zvlÃ¡Å¡tnÃ­ seznam peerÅ¯
+nebo pÅ™Ã­stupovÃ½ch bodÅ¯, jako napÅ™. seznam peerÅ¯ asociovanÃ­ch s/registrovanÃ½ch s
+kartou. VÃ­ce informacÃ­ obsahuje dokumentace ovladaÄÅ¯.
 .TP
 .B event
-Vypí¹e bezdrátové události podporované zaøízením.
+VypÃ­Å¡e bezdrÃ¡tovÃ© udÃ¡losti podporovanÃ© zaÅ™Ã­zenÃ­m.
 .TP
 .B --version
-Zobrazí verzi wireless tools a doporuèenou a aktuální verzi Wireless Extensions
-s ohledem na bezdrátové rozhraní.
+ZobrazÃ­ verzi wireless tools a doporuÄenou a aktuÃ¡lnÃ­ verzi Wireless Extensions
+s ohledem na bezdrÃ¡tovÃ© rozhranÃ­.
 .\"
 .\" TRANSLATION part
 .\"
-.SH PØEKLAD
-Pavel Heimlich \- tropikhajma@seznam.cz, bøezen 2005 (wireless_tools.28pre4).
+.SH PÅ˜EKLAD
+Pavel Heimlich \- tropikhajma@seznam.cz, bÅ™ezen 2005 (wireless_tools.28pre4).
 .\"
 .\" FILES part
 .\"
@@ -111,7 +111,7 @@ Pavel Heimlich \- tropikhajma@seznam.cz, bøezen 2005 (wireless_tools.28pre4).
 .\"
 .\" SEE ALSO part
 .\"
-.SH DAL©Í INFORMACE
+.SH DALÅ Ã INFORMACE
 .BR iwconfig (8),
 .BR iwspy (8).
 .BR iwevent (8),
