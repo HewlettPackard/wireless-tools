@@ -1,99 +1,99 @@
 .\" Jean II - HPLB - 96
 .\" iwspy.8
 .\"
-.TH IWSPY 8 "31.øíjen 1996" "net-tools" "Linux - Manuál programátora"
+.TH IWSPY 8 "31.Å™Ã­jen 1996" "net-tools" "Linux - ManuÃ¡l programÃ¡tora"
 .\"
 .\" NAME part
 .\"
-.SH JMÉNO
-iwspy \- Získá bezdrátové statistiky o urèenıch nodech
+.SH JMÃ‰NO
+iwspy \- ZÃ­skÃ¡ bezdrÃ¡tovÃ© statistiky o urÄenÃ½ch nodech
 .\"
 .\" SYNOPSIS part
 .\"
 .SH SYNTYXE
-.BI "iwspy " rozhraní 
+.BI "iwspy " rozhranÃ­ 
 .br
-.BI "iwspy " rozhraní " [+] " DNSNAME " | " IPADDR " | " HWADDR " [...]"
+.BI "iwspy " rozhranÃ­ " [+] " DNSNAME " | " IPADDR " | " HWADDR " [...]"
 .br
-.BI "iwspy " rozhraní " off"
+.BI "iwspy " rozhranÃ­ " off"
 .br
-.BI "iwspy " rozhraní " setthr " "low high"
+.BI "iwspy " rozhranÃ­ " setthr " "low high"
 .br
-.BI "iwspy " rozhraní " getthr"
+.BI "iwspy " rozhranÃ­ " getthr"
 .\"
 .\" DESCRIPTION part
 .\"
 .SH POPIS
 .B Iwspy
-se pou¾ívá k nastavení seznamu sledovanıch adres na bezdrátovém sí»ovém rozhraní a
-k zpìtnému ètení informací o kvalitì spoje pro ka¾dou z nich. Tyto
-informace jsou stejné jako ty uvedené v
+se pouÅ¾Ã­vÃ¡ k nastavenÃ­ seznamu sledovanÃ½ch adres na bezdrÃ¡tovÃ©m sÃ­Å¥ovÃ©m rozhranÃ­ a
+k zpÄ›tnÃ©mu ÄtenÃ­ informacÃ­ o kvalitÄ› spoje pro kaÅ¾dou z nich. Tyto
+informace jsou stejnÃ© jako ty uvedenÃ© v
 .IR "/proc/net/wireless":
-kvalita spoje, síla signálu, hladina ¹umu.
+kvalita spoje, sÃ­la signÃ¡lu, hladina Å¡umu.
 .PP
-Tyto informace jsou aktualizovány poka¾dé, kdy¾ je pøijat novı paket, tak¾e
-ka¾dá adresa na seznamu zvy¹uje zátì¾ ovladaèe.
+Tyto informace jsou aktualizovÃ¡ny pokaÅ¾dÃ©, kdyÅ¾ je pÅ™ijat novÃ½ paket, takÅ¾e
+kaÅ¾dÃ¡ adresa na seznamu zvyÅ¡uje zÃ¡tÄ›Å¾ ovladaÄe.
 .PP
-Tato funkcionalita platí pouze pro nody v aktuální bezdrátové buòce, není mo¾né 
-sledovat pøístupové body, se kterımi není zaøízení asociováno (k tomu slou¾í skenování)
-, ani nody v jinıch buòkách. V re¾imu Managed procházejí pakety vìt¹inou pøes pøístupovı
-bod a v tom pøípadì je získána síla signálu pøístupového bodu. Proto je tato funkce 
-u¾iteèná víceménì jen v re¾imu Ad-Hoc nebo Master.
+Tato funkcionalita platÃ­ pouze pro nody v aktuÃ¡lnÃ­ bezdrÃ¡tovÃ© buÅˆce, nenÃ­ moÅ¾nÃ© 
+sledovat pÅ™Ã­stupovÃ© body, se kterÃ½mi nenÃ­ zaÅ™Ã­zenÃ­ asociovÃ¡no (k tomu slouÅ¾Ã­ skenovÃ¡nÃ­)
+, ani nody v jinÃ½ch buÅˆkÃ¡ch. V reÅ¾imu Managed prochÃ¡zejÃ­ pakety vÄ›tÅ¡inou pÅ™es pÅ™Ã­stupovÃ½
+bod a v tom pÅ™Ã­padÄ› je zÃ­skÃ¡na sÃ­la signÃ¡lu pÅ™Ã­stupovÃ©ho bodu. Proto je tato funkce 
+uÅ¾iteÄnÃ¡ vÃ­cemÃ©nÄ› jen v reÅ¾imu Ad-Hoc nebo Master.
 .\"
 .\" PARAMETER part
 .\"
 .SH PARAMETRY
-Je mo¾né nastavit a¾ 8 adres.
+Je moÅ¾nÃ© nastavit aÅ¾ 8 adres.
 .TP
 .BR DNSNAME " | " IPADDR
-Nastaví IP adresu nebo, v nìkterıch pøípadech, DNS název (pomocí name
-resolveru). Proto¾e hardware pracuje s hardwarovımi adresami,
+NastavÃ­ IP adresu nebo, v nÄ›kterÃ½ch pÅ™Ã­padech, DNS nÃ¡zev (pomocÃ­ name
+resolveru). ProtoÅ¾e hardware pracuje s hardwarovÃ½mi adresami,
 .B iwspy
-pøelo¾í IP adresu pomocí
+pÅ™eloÅ¾Ã­ IP adresu pomocÃ­
 .IR ARP .
-Mù¾e se stát, ¾e adresa není v ARP cache a
+MÅ¯Å¾e se stÃ¡t, Å¾e adresa nenÃ­ v ARP cache a
 .B iwspy
-neuspìje. V tom pøípadì pou¾ijte
+neuspÄ›je. V tom pÅ™Ã­padÄ› pouÅ¾ijte
 .IR ping (8)
-na toto jméno/adresu a zkuste to znovu.
+na toto jmÃ©no/adresu a zkuste to znovu.
 .TP
 .B HWADDR
-Nastaví hardwarovou (MAC) adresu (tato adresa se nepøekládá ani nekontroluje,
-na rozdíl od IP adresy). Adresa musí obsahuvat dvojteèky
+NastavÃ­ hardwarovou (MAC) adresu (tato adresa se nepÅ™eklÃ¡dÃ¡ ani nekontroluje,
+na rozdÃ­l od IP adresy). Adresa musÃ­ obsahuvat dvojteÄky
 .RB ( : )
-aby byla uznána za hardwarovou adresu.
+aby byla uznÃ¡na za hardwarovou adresu.
 .TP
 .B +
-Pøidá novou sadu adres na konec stávajícího seznamu, místo aby jej nahradil.
-Seznam adres je pro ka¾dé zaøízení jedineènı, proto by tato volba mìla bıt u¾ívána, aby
-se zabránilo konfliktùm.
+PÅ™idÃ¡ novou sadu adres na konec stÃ¡vajÃ­cÃ­ho seznamu, mÃ­sto aby jej nahradil.
+Seznam adres je pro kaÅ¾dÃ© zaÅ™Ã­zenÃ­ jedineÄnÃ½, proto by tato volba mÄ›la bÃ½t uÅ¾Ã­vÃ¡na, aby
+se zabrÃ¡nilo konfliktÅ¯m.
 .TP
 .B off
-Odstraní souèasnı seznam adres a vypne sledovací funkci.
+OdstranÃ­ souÄasnÃ½ seznam adres a vypne sledovacÃ­ funkci.
 .TP
 .B setthr
-Nastaví
+NastavÃ­
 .I low
-(spodní) a
+(spodnÃ­) a
 .I high
-(horní) práh síly signálu, pro spu¹tìní události iwspy (podporuje-li to ovladaè).
+(hornÃ­) prÃ¡h sÃ­ly signÃ¡lu, pro spuÅ¡tÄ›nÃ­ udÃ¡losti iwspy (podporuje-li to ovladaÄ).
 .br
-Poka¾dé, kdy¾ síla signálu jakékoliv z adres sledované iwspy
-poklesne pod spodní práh nebo pøehroèí horní práh, je vygenerována bezdrátová událost.
+PokaÅ¾dÃ©, kdyÅ¾ sÃ­la signÃ¡lu jakÃ©koliv z adres sledovanÃ© iwspy
+poklesne pod spodnÃ­ prÃ¡h nebo pÅ™ehroÄÃ­ hornÃ­ prÃ¡h, je vygenerovÃ¡na bezdrÃ¡tovÃ¡ udÃ¡lost.
 .br
-To je mo¾né pou¾ít ke sledování vıpadkù spoje bez nutnosti pravidelného spou¹tìní iwspy.
+To je moÅ¾nÃ© pouÅ¾Ã­t ke sledovÃ¡nÃ­ vÃ½padkÅ¯ spoje bez nutnosti pravidelnÃ©ho spouÅ¡tÄ›nÃ­ iwspy.
 .TP
 .B getthr
-Získá aktuální
+ZÃ­skÃ¡ aktuÃ¡lnÃ­
 .I low
-(spodní) a 
+(spodnÃ­) a 
 .I high
-(horní) práh síly signálu pro událost iwspy.
+(hornÃ­) prÃ¡h sÃ­ly signÃ¡lu pro udÃ¡lost iwspy.
 .\"
 .\" TRANSLATION part
 .\"
-.SH PØEKLAD
-Pavel Heimlich \- tropikhajma@seznam.cz, bøezen 2005 (wireless_tools.28pre4).
+.SH PÅ˜EKLAD
+Pavel Heimlich \- tropikhajma@seznam.cz, bÅ™ezen 2005 (wireless_tools.28pre4).
 \"
 .\" FILES part
 .\"
@@ -102,7 +102,7 @@ Pavel Heimlich \- tropikhajma@seznam.cz, bøezen 2005 (wireless_tools.28pre4).
 .\"
 .\" SEE ALSO part
 .\"
-.SH DAL©Í INFORMACE
+.SH DALÅ Ã INFORMACE
 .BR iwconfig (8),
 .BR iwlist (8),
 .BR iwevent (8),

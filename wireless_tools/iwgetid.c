@@ -33,7 +33,7 @@
  *
  *	This can also be integrated int he Pcmcia scripts.
  *	Some drivers don't activate the card up to "ifconfig up".
- * Therefore, they wont scan ESSID up to this point, so we can't
+ * Therefore, they won't scan ESSID up to this point, so we can't
  * read it reliably in Pcmcia scripts.
  *	I guess the proper way to write the network script is as follows :
  *			if($scheme == "iwgetid") {

@@ -1,11 +1,11 @@
 .\" Jean Tourrilhes - HPL - 2002 - 2004
 .\" wireless.7
 .\"
-.TH WIRELESS 7 "4.duben 2004" "wireless-tools" "Linux - Manuál programátora"
+.TH WIRELESS 7 "4.duben 2004" "wireless-tools" "Linux - ManuÃ¡l programÃ¡tora"
 .\"
 .\" NAME part
 .\"
-.SH JMÉNO
+.SH JMÃ‰NO
 wireless \- Wireless Tools a Wireless Extensions
 .\"
 .\" SYNOPSIS part
@@ -20,25 +20,25 @@ wireless \- Wireless Tools a Wireless Extensions
 .\"
 .SH POPIS
 .B Wireless Extensions
-jsou API, které umo¾òují manipulovat s bezdrátovımi sí»ovımi rozhraními.
-Skládají se ze souboru nástrojù a konfiguraèních souborù. Podrobnìji
-jsou popsány v Linux Wireless LAN Howto.
+jsou API, kterÃ© umoÅ¾ÅˆujÃ­ manipulovat s bezdrÃ¡tovÃ½mi sÃ­Å¥ovÃ½mi rozhranÃ­mi.
+SklÃ¡dajÃ­ se ze souboru nÃ¡strojÅ¯ a konfiguraÄnÃ­ch souborÅ¯. PodrobnÄ›ji
+jsou popsÃ¡ny v Linux Wireless LAN Howto.
 .br
 .B Wireless Tools
-se pou¾ívají ke zmìnì konfigurace bezdrátovıch sí»ovıch rozhraní za bìhu,
-k získání jejich aktuální konfigurace, statistik a diagnostice.
-Popisují je jejich vlastní manuálové stránky, viz odkazy ní¾e.
+se pouÅ¾Ã­vajÃ­ ke zmÄ›nÄ› konfigurace bezdrÃ¡tovÃ½ch sÃ­Å¥ovÃ½ch rozhranÃ­ za bÄ›hu,
+k zÃ­skÃ¡nÃ­ jejich aktuÃ¡lnÃ­ konfigurace, statistik a diagnostice.
+PopisujÃ­ je jejich vlastnÃ­ manuÃ¡lovÃ© strÃ¡nky, viz odkazy nÃ­Å¾e.
 .br
-.B Nastavení bezdrátového pøipojení
-se v ka¾dé distribuci linuxu li¹í. Tato manuálová stránka bude obsahovat
-postup nastavení pro nìkolik bì¾nıch distribucí. Prozatím se podívejte do 
-souboru DISTRIBUTIONS.txt, kterı je souèástí balíèku Wireless Tools.
+.B NastavenÃ­ bezdrÃ¡tovÃ©ho pÅ™ipojenÃ­
+se v kaÅ¾dÃ© distribuci linuxu liÅ¡Ã­. Tato manuÃ¡lovÃ¡ strÃ¡nka bude obsahovat
+postup nastavenÃ­ pro nÄ›kolik bÄ›Å¾nÃ½ch distribucÃ­. ProzatÃ­m se podÃ­vejte do 
+souboru DISTRIBUTIONS.txt, kterÃ½ je souÄÃ¡stÃ­ balÃ­Äku Wireless Tools.
 .\"
 .\" DEBIAN 3.0 part
 .\"
 .SH DEBIAN 3.0
-V Debianu 3.0 (a vy¹¹ím) je mo¾né nastavit bezdrátová sí»ová zaøízení
-nástrojem pro nastavení sítì
+V Debianu 3.0 (a vyÅ¡Å¡Ã­m) je moÅ¾nÃ© nastavit bezdrÃ¡tovÃ¡ sÃ­Å¥ovÃ¡ zaÅ™Ã­zenÃ­
+nÃ¡strojem pro nastavenÃ­ sÃ­tÄ›
 .BR ifupdown (8).
 .TP
 .B Soubor:
@@ -51,7 +51,7 @@ wireless\-essid Home
 .br
 wireless\-mode Ad\-Hoc
 .TP
-.B Dal¹í informace:
+.B DalÅ¡Ã­ informace:
 .I /etc/network/if\-pre\-up.d/wireless\-tools
 .br
 .I /usr/share/doc/wireless\-tools/README.Debian
@@ -59,10 +59,10 @@ wireless\-mode Ad\-Hoc
 .\" SuSE 8.0 part
 .\"
 .SH SuSE 8.0
-SuSE 8.0 (a vy¹¹í) integrovalo nastavení bezdrátového pøipojení do svıch
-sí»ovıch skriptù.
+SuSE 8.0 (a vyÅ¡Å¡Ã­) integrovalo nastavenÃ­ bezdrÃ¡tovÃ©ho pÅ™ipojenÃ­ do svÃ½ch
+sÃ­Å¥ovÃ½ch skriptÅ¯.
 .TP
-.B Nástroj:
+.B NÃ¡stroj:
 .B Yast2
 .TP
 .B Soubor:
@@ -77,16 +77,16 @@ WIRELESS_ESSID="Home"
 .br
 WIRELESS_MODE=Ad\-Hoc
 .TP
-.B Dal¹í informace:
+.B DalÅ¡Ã­ informace:
 man ifup
 .br
 info scpm
 .\"
 .\" PCMCIA part
 .\"
-.SH PÙVODNÍ PCMCIA SKRIPTY
-Pokud pou¾íváte pùvodní konfiguraèní skripty z balíèku Pcmcia,
-Mù¾ete pou¾ít tuto metodu.
+.SH PÅ®VODNÃ PCMCIA SKRIPTY
+Pokud pouÅ¾Ã­vÃ¡te pÅ¯vodnÃ­ konfiguraÄnÃ­ skripty z balÃ­Äku Pcmcia,
+MÅ¯Å¾ete pouÅ¾Ã­t tuto metodu.
 .TP
 .B Soubor:
 .I /etc/pcmcia/wireless.opts
@@ -100,12 +100,12 @@ MODE="Ad-Hoc"
 .br
 ;;
 .TP
-.B Dal¹í informace:
+.B DalÅ¡Ã­ informace:
 .I /etc/pcmcia/wireless
 .br
 Soubor
 .IR "PCMCIA.txt" ,
-kterı je souèástí balíèku Wireless Tools
+kterÃ½ je souÄÃ¡stÃ­ balÃ­Äku Wireless Tools
 .\"
 .\" AUTHOR part
 .\"
@@ -116,12 +116,12 @@ Jean Tourrilhes \- jt@hpl.hp.com
 .\"
 .\" TRANSLATION part
 .\"
-.SH PØEKLAD
-Pavel Heimlich \- tropikhajma@seznam.cz, bøezen 2005 (wireless_tools.28pre4).
+.SH PÅ˜EKLAD
+Pavel Heimlich \- tropikhajma@seznam.cz, bÅ™ezen 2005 (wireless_tools.28pre4).
 .\"
 .\" SEE ALSO part
 .\"
-.SH DAL©Í INFORMACE
+.SH DALÅ Ã INFORMACE
 .BR iwconfig (8),
 .BR iwlist (8),
 .BR iwspy (8),

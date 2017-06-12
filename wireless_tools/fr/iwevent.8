@@ -3,18 +3,18 @@
 .\"
 .\" Traduction 2003/08/17 Maxime CHARPENNE (voir
 .\" http://www.delafond.org/traducmanfr/)
-.\" 1ère traduction        : version 26
+.\" 1Ã¨re traduction        : version 26
 .\" Manuel identique pour la version 27-pre9 (beta)
-.\" Mise à jour 2004/02/26 : version 27-pre11 (alpha)
-.\" Mise à jour 2004/08/23 : version 27-pre25
+.\" Mise Ã  jour 2004/02/26 : version 27-pre11 (alpha)
+.\" Mise Ã  jour 2004/08/23 : version 27-pre25
 .\"
 .TH IWEVENT 8 "23 juin 2004" "net-tools" "Manuel du Programmeur Linux"
 .\"
 .\" NAME part
 .\"
 .SH NOM
-iwevent \- Affiche les Événements Wireless (Wireless Events) générés par les
-pilotes et les changements de paramètres.
+iwevent \- Affiche les Ã‰vÃ©nements Wireless (Wireless Events) gÃ©nÃ©rÃ©s par les
+pilotes et les changements de paramÃ¨tres.
 .\"
 .\" SYNOPSIS part
 .\"
@@ -26,9 +26,9 @@ pilotes et les changements de paramètres.
 .\"
 .SH DESCRIPTION
 .B iwevent
-affiche les «\ Wireless Events\ » (événements du système Wireless) reçu par le
-socket RTNetlink. Chaque ligne affiche le Wireless Event spécifique qui décrit
-ce qui s'est passé sur l'interface sans fil spécifiée.
+affiche les Â«\ Wireless Events\ Â» (Ã©vÃ©nements du systÃ¨me Wireless) reÃ§u par le
+socket RTNetlink. Chaque ligne affiche le Wireless Event spÃ©cifique qui dÃ©crit
+ce qui s'est passÃ© sur l'interface sans fil spÃ©cifiÃ©e.
 .br
 Cette commande ne prend aucun argument.
 .\"
@@ -37,13 +37,13 @@ Cette commande ne prend aucun argument.
 .SH AFFICHAGE
 Il y a deux classes de Wireless Events.
 .PP
-La première classe regroupe les événements relatifs à un changement des
-paramètres du sans fil sur l'interface (typiquement fait par
+La premiÃ¨re classe regroupe les Ã©vÃ©nements relatifs Ã  un changement des
+paramÃ¨tres du sans fil sur l'interface (typiquement fait par
 .B iwconfig
 ou un script appelant
 .BR iwconfig ).
-Seuls les paramètres qui peuvent entraîner une perturbation de la connectivité
-sont rapportés. Les événements actuellement rapportés changent un des paramètres
+Seuls les paramÃ¨tres qui peuvent entraÃ®ner une perturbation de la connectivitÃ©
+sont rapportÃ©s. Les Ã©vÃ©nements actuellement rapportÃ©s changent un des paramÃ¨tres
 suivants\ :
 .br
 .I "	Network ID"
@@ -56,53 +56,53 @@ suivants\ :
 .br
 .I "	Encryption"
 .br
-Tous ces événements seront générer sur toutes les interfaces sans fil par le
-sous-système «\ wireless\ » du noyau (mais seulement si le pilote a été converti
-àl'API du nouveau pilote).
+Tous ces Ã©vÃ©nements seront gÃ©nÃ©rer sur toutes les interfaces sans fil par le
+sous-systÃ¨me Â«\ wireless\ Â» du noyau (mais seulement si le pilote a Ã©tÃ© converti
+Ã l'API du nouveau pilote).
 .PP
-La deuxième classe d'événements concerne ceux générés par le matériel, lorsque
-quelque chose arrive ou qu'une tâche s'est terminée. Ces événements incluent\ :
+La deuxiÃ¨me classe d'Ã©vÃ©nements concerne ceux gÃ©nÃ©rÃ©s par le matÃ©riel, lorsque
+quelque chose arrive ou qu'une tÃ¢che s'est terminÃ©e. Ces Ã©vÃ©nements incluent\ :
 .TP
 .B New Access Point/Cell address
-L'interface a joint un nouveau point d'accès ou cellule ad hoc, ou perdu son
-association avec. Il s'agit de la même adresse MAC affiché par
+L'interface a joint un nouveau point d'accÃ¨s ou cellule ad hoc, ou perdu son
+association avec. Il s'agit de la mÃªme adresse MAC affichÃ© par
 .BR iwconfig .
 .TP
 .B Scan request completed
-Une requête de balayage (scanning) a été achevée, les résultats du «\ scan\ »
+Une requÃªte de balayage (scanning) a Ã©tÃ© achevÃ©e, les rÃ©sultats du Â«\ scan\ Â»
 sont disponibles (voir
 .BR iwlist ).
 .TP
 .B Tx packet dropped
-Un paquet à destination de cette adresse a été rejeté car l'interface croit que
-ce noeud ne répond plus (habituellement, le seuil maximum des émissions de la
-couche MAC est atteint). C'est habituellement la première indication pouvant
-révéler que le noeud a quitté la cellule ou est hors de portée, mais cela peut
-être due à une atténuation ou une contention excessive.
+Un paquet Ã  destination de cette adresse a Ã©tÃ© rejetÃ© car l'interface croit que
+ce noeud ne rÃ©pond plus (habituellement, le seuil maximum des Ã©missions de la
+couche MAC est atteint). C'est habituellement la premiÃ¨re indication pouvant
+rÃ©vÃ©ler que le noeud a quittÃ© la cellule ou est hors de portÃ©e, mais cela peut
+Ãªtre due Ã  une attÃ©nuation ou une contention excessive.
 .TP
 .B Custom driver event
-Événement spécifique au pilote. Veuillez consulter la documentation du pilote.
+Ã‰vÃ©nement spÃ©cifique au pilote. Veuillez consulter la documentation du pilote.
 .TP
 .B Registered node
-L'interface a réussi à enregistrer un nouveau client/paire sans fil. Sera
-généré la plupart du temps quand l'interface agit comme un point d'accès (mode
+L'interface a rÃ©ussi Ã  enregistrer un nouveau client/paire sans fil. Sera
+gÃ©nÃ©rÃ© la plupart du temps quand l'interface agit comme un point d'accÃ¨s (mode
 master).
 .TP
 .B Expired node
-L'enregistrement d'un client/paire sur cette interface a expiré. Sera généré la
-plupart du temps quand l'interface agit comme un point d'accès (mode master).
+L'enregistrement d'un client/paire sur cette interface a expirÃ©. Sera gÃ©nÃ©rÃ© la
+plupart du temps quand l'interface agit comme un point d'accÃ¨s (mode master).
 .TP
 .B Spy threshold crossed
-La force du signal pour une des adresses de la «\ spy list\ » (NDT\ : voir
-iwspy(8)) est passé en-dessous du seuil bas, ou est passé au-dessus du seuil
+La force du signal pour une des adresses de la Â«\ spy list\ Â» (NDT\ : voir
+iwspy(8)) est passÃ© en-dessous du seuil bas, ou est passÃ© au-dessus du seuil
 haut.
 .PP
-La plupart des pilotes wireless génèrent seulement un sous-ensemble de ces
-événements, pas tous, la liste exacte dépendant de la combinaison spécifique
-matériel/pilote. Veuillez consulter la documentation du pilote pour les détails
-de ce qui les génèrent, et utilisez
+La plupart des pilotes wireless gÃ©nÃ¨rent seulement un sous-ensemble de ces
+Ã©vÃ©nements, pas tous, la liste exacte dÃ©pendant de la combinaison spÃ©cifique
+matÃ©riel/pilote. Veuillez consulter la documentation du pilote pour les dÃ©tails
+de ce qui les gÃ©nÃ¨rent, et utilisez
 .IR iwlist (8)
-pour vérifier ce que le pilote supporte.
+pour vÃ©rifier ce que le pilote supporte.
 .\"
 .\" AUTHOR part
 .\"
@@ -112,12 +112,12 @@ Jean Tourrilhes \- jt@hpl.hp.com
 .\" TRADUCTION part
 .\"
 .SH TRADUCTION
-Maxime CHARPENNE, août 2004 (wireless_tools.27-pre25).
+Maxime CHARPENNE, aoÃ»t 2004 (wireless_tools.27-pre25).
 .\"
 \" AVERTISSEMENT part
 .\"
 .SH AVERTISSEMENT SUR LA TRADUCTION
-Il est possible que cette traduction soit imparfaite ou périmée. En cas de
+Il est possible que cette traduction soit imparfaite ou pÃ©rimÃ©e. En cas de
 doute, veuillez vous reporter au document original en langue anglaise fourni
 avec le programme.
 .\"

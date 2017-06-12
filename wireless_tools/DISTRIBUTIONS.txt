@@ -30,7 +30,7 @@ distribution, please use the PCMCIA method).
 
 	Please remember : I don't use your distribution, and I have
 absolutely no clue about how your distribution works. I'm just
-collecting random information here without beeing able to verify it.
+collecting random information here without being able to verify it.
 
 				-----
 
@@ -200,7 +200,7 @@ PCMCIA, USB, etc. The files network.opts and wireless.opts in
 /etc/pcmcia are not used any longer. There is /sbin/ifup to set up all
 kind of network interface.
 	There is a file /etc/sysconfig/network/wireless where you may
-set most of the options of iwconfig in seperate variables (they are
+set most of the options of iwconfig in separate variables (they are
 named like the options). Additionally you may use
 WIRELESS_IWCONFIG_OPTIONS e.g. for setting key 2, 3 or 4 or
 unsupported iwconfig commands. This file is documented and its
@@ -282,7 +282,7 @@ configuration file have change to include the WIRELESS_ prefix :
 		WIRELESS_ESSID='<essid>'
 		WIRELESS_ENC_KEY='<key>'
 	The underlying configuration files and configurations options
-seems to be indentical to what is done in Mandrake 8.2 (or vice
+seems to be identical to what is done in Mandrake 8.2 (or vice
 versa), so please check the section below. This allow configuration of
 additional wireless settings not available in the GUI.
 

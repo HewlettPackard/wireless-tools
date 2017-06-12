@@ -18,7 +18,7 @@
  * Original CopyRight of version of 'nameif' I used is :
  * -------------------------------------------------------
  * Name Interfaces based on MAC address.
- * Writen 2000 by Andi Kleen.
+ * Written 2000 by Andi Kleen.
  * Subject to the Gnu Public License, version 2.  
  * TODO: make it support token ring etc.
  * $Id: nameif.c,v 1.3 2003/03/06 23:26:52 ecki Exp $
@@ -87,7 +87,7 @@ const int SELECT_PREVNAME	= 13;	/* Select by previous interface name */
 
 #define HAS_MAC_EXACT	1
 #define HAS_MAC_FILTER	2
-#define MAX_MAC_LEN	16	/* Maximum lenght of MAC address */
+#define MAX_MAC_LEN	16	/* Maximum length of MAC address */
 
 const struct ether_addr	zero_mac = {{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}};
 
@@ -1785,7 +1785,7 @@ mapping_getsysfs(int			skfd,
 		      /* This may fail, but it's not fatal */
 		      fchdir(cwd_fd);
 		    }
-		  /* Check if we suceeded */
+		  /* Check if we succeeded */
 		  if(!linkpath)
 		    {
 		      free(linkpath);
@@ -2700,7 +2700,7 @@ main(int	argc,
     }
   else
     {
-      /* Load all the necesary modules */
+      /* Load all the necessary modules */
       if(use_probe)
 	{
 	  if(is_debian)

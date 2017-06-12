@@ -1,12 +1,12 @@
 .\" Jean II - HPL - 2004
 .\" ifrename.8
 .\"
-.TH IFRENAME 8 "1.bøezen 2004" "wireless-tools" "Linux - Manuál programátora"
+.TH IFRENAME 8 "1.bÅ™ezen 2004" "wireless-tools" "Linux - ManuÃ¡l programÃ¡tora"
 .\"
 .\" NAME part
 .\"
-.SH JMÉNO
-ifrename \- Pøejmenuje sí»ová rozhraní v závislosti na rùznıch statickıch kritériích
+.SH JMÃ‰NO
+ifrename \- PÅ™ejmenuje sÃ­Å¥ovÃ¡ rozhranÃ­ v zÃ¡vislosti na rÅ¯znÃ½ch statickÃ½ch kritÃ©riÃ­ch
 .\"
 .\" SYNOPSIS part
 .\"
@@ -19,32 +19,32 @@ ifrename \- Pøejmenuje sí»ová rozhraní v závislosti na rùznıch statickıch kritér
 .\"
 .SH POPIS
 .B Ifrename 
-je nástroj, kterı umo¾òuje pøiøadit stálı název pro ka¾dé
-sí»ové rozhraní.
+je nÃ¡stroj, kterÃ½ umoÅ¾Åˆuje pÅ™iÅ™adit stÃ¡lÃ½ nÃ¡zev pro kaÅ¾dÃ©
+sÃ­Å¥ovÃ© rozhranÃ­.
 .PP
-Ve vıchozím stavu jsou názvy rozhraní dynamické a ka¾dému sí»ovému rozhraní
-je pøiøazen první dostupnı název
+Ve vÃ½chozÃ­m stavu jsou nÃ¡zvy rozhranÃ­ dynamickÃ© a kaÅ¾dÃ©mu sÃ­Å¥ovÃ©mu rozhranÃ­
+je pÅ™iÅ™azen prvnÃ­ dostupnÃ½ nÃ¡zev
 .RI ( eth0 ", " eth1 "...)."
-Poøadí, v kterém jsou sí»ová rozhraní vytváøena, se mù¾e li¹it. U zabudovanıch
-rozhraní závisí na jejich rozpoznání kernelem pøi spou¹tìní. Vımìnná zaøízení mù¾e
-u¾ivatel pøipojit v jakémkoliv poøadí.
+PoÅ™adÃ­, v kterÃ©m jsou sÃ­Å¥ovÃ¡ rozhranÃ­ vytvÃ¡Å™ena, se mÅ¯Å¾e liÅ¡it. U zabudovanÃ½ch
+rozhranÃ­ zÃ¡visÃ­ na jejich rozpoznÃ¡nÃ­ kernelem pÅ™i spouÅ¡tÄ›nÃ­. VÃ½mÄ›nnÃ¡ zaÅ™Ã­zenÃ­ mÅ¯Å¾e
+uÅ¾ivatel pÅ™ipojit v jakÃ©mkoliv poÅ™adÃ­.
 .PP
 .B Ifrename
-umo¾òuje u¾ivateli rozhodnout, jakı název bude sí»ové rozhraní mít.
+umoÅ¾Åˆuje uÅ¾ivateli rozhodnout, jakÃ½ nÃ¡zev bude sÃ­Å¥ovÃ© rozhranÃ­ mÃ­t.
 .B Ifrename 
-mù¾e vyu¾ít celou øadu
+mÅ¯Å¾e vyuÅ¾Ã­t celou Å™adu
 .IR voleb ", "
-aby urèil, jak jsou názvy rozhraní pøiøazovány sí»ovım rozhraním v systému.
-Nejbì¾nìj¹í volbou je  
+aby urÄil, jak jsou nÃ¡zvy rozhranÃ­ pÅ™iÅ™azovÃ¡ny sÃ­Å¥ovÃ½m rozhranÃ­m v systÃ©mu.
+NejbÄ›Å¾nÄ›jÅ¡Ã­ volbou je  
 .IR "MAC adresa" 
-rozhraní.
+rozhranÃ­.
 .PP
 .B Ifrename
-musí bıt spu¹tìn pøedtím, ne¾ jsou rozhraní aktivována, proto je vìt¹inou pou¾íván
-v rùznıch skriptech (init, hotplug), ale jen zøídka pøímo u¾ivatelem.
-Jako vıchozí,
+musÃ­ bÃ½t spuÅ¡tÄ›n pÅ™edtÃ­m, neÅ¾ jsou rozhranÃ­ aktivovÃ¡na, proto je vÄ›tÅ¡inou pouÅ¾Ã­vÃ¡n
+v rÅ¯znÃ½ch skriptech (init, hotplug), ale jen zÅ™Ã­dka pÅ™Ã­mo uÅ¾ivatelem.
+Jako vÃ½chozÃ­,
 .B ifrename 
-pøejmenuje v¹echna rozhraní pøítomná v  systému pou¾itím namapování definovaného v
+pÅ™ejmenuje vÅ¡echna rozhranÃ­ pÅ™Ã­tomnÃ¡ v  systÃ©mu pouÅ¾itÃ­m namapovÃ¡nÃ­ definovanÃ©ho v
 .IR /etc/iftab .
 .\"
 .\" PARAMETER part
@@ -52,88 +52,88 @@ pøejmenuje v¹echna rozhraní pøítomná v  systému pou¾itím namapování definovaného
 .SH PARAMETRY
 .TP
 .BI "-c " konfiguracni_soubor
-Nastaví konfiguraèní soubor, kterı bude pou¾it (vıchozí je 
+NastavÃ­ konfiguraÄnÃ­ soubor, kterÃ½ bude pouÅ¾it (vÃ½chozÃ­ je 
 .IR /etc/iftab ).
-Konfiguraèní soubor definuje namapování voleb a názvù rozhraní
-a je popsán v
+KonfiguraÄnÃ­ soubor definuje namapovÃ¡nÃ­ voleb a nÃ¡zvÅ¯ rozhranÃ­
+a je popsÃ¡n v
 .IR iftab (5).
 .br
 Pokud je
 .I konfiguracni_soubor
-urèen jako "-", je konfigurace naètena ze stdin.
+urÄen jako "-", je konfigurace naÄtena ze stdin.
 .TP
 .B -p
-Pokusí se zavést moduly jádra pøed pøejmenováním rozhraní. Jako vıchozí 
-prochází
+PokusÃ­ se zavÃ©st moduly jÃ¡dra pÅ™ed pÅ™ejmenovÃ¡nÃ­m rozhranÃ­. Jako vÃ½chozÃ­ 
+prochÃ¡zÃ­
 .B ifrename 
-pouze rozhraní, která jsou ji¾ zavedena a nezavádí automaticky po¾adované
-jaderné moduly. Tento pøepínaè umo¾òuje hladkou integraci se systémem, kterı
-nezavádí moduly pøed voláním
+pouze rozhranÃ­, kterÃ¡ jsou jiÅ¾ zavedena a nezavÃ¡dÃ­ automaticky poÅ¾adovanÃ©
+jadernÃ© moduly. Tento pÅ™epÃ­naÄ umoÅ¾Åˆuje hladkou integraci se systÃ©mem, kterÃ½
+nezavÃ¡dÃ­ moduly pÅ™ed volÃ¡nÃ­m
 .BR ifrename .
 .TP
 .B -d
-Povolí rùzné úpravy specifické pro
+PovolÃ­ rÅ¯znÃ© Ãºpravy specifickÃ© pro
 .B Debian. 
 V kombinaci s
 .BR -p
-budou zavedeny pouze moduly pro rozhraní urèená v
+budou zavedeny pouze moduly pro rozhranÃ­ urÄenÃ¡ v
 .I /etc/network/interface
 .
 .TP
-.BI "-i " rozhraní
-Pøejmenuje pouze urèené
-.IR rozhraní ,
-místo v¹ech rozhraní v systému. Vypí¹e novı název rozhraní.
+.BI "-i " rozhranÃ­
+PÅ™ejmenuje pouze urÄenÃ©
+.IR rozhranÃ­ ,
+mÃ­sto vÅ¡ech rozhranÃ­ v systÃ©mu. VypÃ­Å¡e novÃ½ nÃ¡zev rozhranÃ­.
 .TP
 .BI "-n " novy_nazev
-Kdy¾ je pou¾ito spolu s 
+KdyÅ¾ je pouÅ¾ito spolu s 
 .IR -i ,
-urèí novı název rozhraní. Seznam namapování z konfiguraèního
-souboru je ignorován, rozhraní urèené pomocí 
+urÄÃ­ novÃ½ nÃ¡zev rozhranÃ­. Seznam namapovÃ¡nÃ­ z konfiguraÄnÃ­ho
+souboru je ignorovÃ¡n, rozhranÃ­ urÄenÃ© pomocÃ­ 
 .I -i
-je rovnou pøejmenováno na
+je rovnou pÅ™ejmenovÃ¡no na
 .IR novy_nazev 
-Novı název mù¾e bıt ¾olík (wildcard), ale mù¾e obsahovat pouze jedinou "*".
+NovÃ½ nÃ¡zev mÅ¯Å¾e bÃ½t Å¾olÃ­k (wildcard), ale mÅ¯Å¾e obsahovat pouze jedinou "*".
 .br
-Pokud je pou¾it bez
+Pokud je pouÅ¾it bez
 .IR -i ,
-pøejmenuje rozhraní s pou¾itím pouze tìch namapování, která by je pøejmenovala na
+pÅ™ejmenuje rozhranÃ­ s pouÅ¾itÃ­m pouze tÄ›ch namapovÃ¡nÃ­, kterÃ¡ by je pÅ™ejmenovala na
 .IR novy_nazev .
-Novı název nesmí bıt ¾olík. Tento zpùsob pou¾ití ifrename 
+NovÃ½ nÃ¡zev nesmÃ­ bÃ½t Å¾olÃ­k. Tento zpÅ¯sob pouÅ¾itÃ­ ifrename 
 .RI ( -n " bez " -i )
-není doporuèen, proto¾e je neefektivní. Musejí bıt zpracována v¹echna rozhraní systému, 
-a proto není ve vìt¹inì pøípadù rychlej¹í ne¾ kdyby je ifrename pøejmenovalo v¹echny (bez
-.IR -n " a zároveò bez " -i ).
+nenÃ­ doporuÄen, protoÅ¾e je neefektivnÃ­. MusejÃ­ bÃ½t zpracovÃ¡na vÅ¡echna rozhranÃ­ systÃ©mu, 
+a proto nenÃ­ ve vÄ›tÅ¡inÄ› pÅ™Ã­padÅ¯ rychlejÅ¡Ã­ neÅ¾ kdyby je ifrename pÅ™ejmenovalo vÅ¡echny (bez
+.IR -n " a zÃ¡roveÅˆ bez " -i ).
 .TP
 .B -t
-Povolí podporu pøevzetí názvù. To umo¾ní vımìnu názvù rozhraní
-mezi dvìma èi více rozhraními.
+PovolÃ­ podporu pÅ™evzetÃ­ nÃ¡zvÅ¯. To umoÅ¾nÃ­ vÃ½mÄ›nu nÃ¡zvÅ¯ rozhranÃ­
+mezi dvÄ›ma Äi vÃ­ce rozhranÃ­mi.
 .br
-Pøevzetí umo¾òuje rozhraní "ukrást" název jinému rozhraní.
-To funguje pouze s jádrem 2.6.x a pokud druhé rozhraní nebì¾í.
-Tímpádem není kompatibilní s Hotplug. Druhému rozhraní je pøiøazen
-náhodnı název, kterı lze pozdìji pomocí "ifrename" zmìnit.
+PÅ™evzetÃ­ umoÅ¾Åˆuje rozhranÃ­ "ukrÃ¡st" nÃ¡zev jinÃ©mu rozhranÃ­.
+To funguje pouze s jÃ¡drem 2.6.x a pokud druhÃ© rozhranÃ­ nebÄ›Å¾Ã­.
+TÃ­mpÃ¡dem nenÃ­ kompatibilnÃ­ s Hotplug. DruhÃ©mu rozhranÃ­ je pÅ™iÅ™azen
+nÃ¡hodnÃ½ nÃ¡zev, kterÃ½ lze pozdÄ›ji pomocÃ­ "ifrename" zmÄ›nit.
 .br
-Poèet pøevzetí je omezen, aby se zabránilo nekoneènım smyèkám,
-a proto nemusejí bıt nìkteré komplexní vícecestné situace správnì zpracovány.
+PoÄet pÅ™evzetÃ­ je omezen, aby se zabrÃ¡nilo nekoneÄnÃ½m smyÄkÃ¡m,
+a proto nemusejÃ­ bÃ½t nÄ›kterÃ© komplexnÃ­ vÃ­cecestnÃ© situace sprÃ¡vnÄ› zpracovÃ¡ny.
 .br
-V ka¾dém pøípadì není pøevod názvù a ani pou¾ívání této mo¾nosti doporuèeno,
-je lep¹í zvolit pro rozhraní jedineèné a jednoznaèné názvy...
+V kaÅ¾dÃ©m pÅ™Ã­padÄ› nenÃ­ pÅ™evod nÃ¡zvÅ¯ a ani pouÅ¾Ã­vÃ¡nÃ­ tÃ©to moÅ¾nosti doporuÄeno,
+je lepÅ¡Ã­ zvolit pro rozhranÃ­ jedineÄnÃ© a jednoznaÄnÃ© nÃ¡zvy...
 .TP
 .B -D
-Re¾im dry-run ("naneèisto"). Ifrename nezmìní ¾ádné rozhraní, pouze vypí¹e
-novı název rozhraní, pokud je to mo¾né, a skonèí.
+ReÅ¾im dry-run ("naneÄisto"). Ifrename nezmÄ›nÃ­ Å¾Ã¡dnÃ© rozhranÃ­, pouze vypÃ­Å¡e
+novÃ½ nÃ¡zev rozhranÃ­, pokud je to moÅ¾nÃ©, a skonÄÃ­.
 .br
-V re¾imu dry-run nejsou øe¹eny wildcards. Novı název rozhraní je vyti¹tìn
-i v pøípadì, ¾e je stejnı jako pùvodní název.
+V reÅ¾imu dry-run nejsou Å™eÅ¡eny wildcards. NovÃ½ nÃ¡zev rozhranÃ­ je vytiÅ¡tÄ›n
+i v pÅ™Ã­padÄ›, Å¾e je stejnÃ½ jako pÅ¯vodnÃ­ nÃ¡zev.
 .TP
 .B -V
-U¾vanìnı re¾im. Ifrename zobrazí interní vısledky prùchodu svım
-konfiguraèním souborem a dotazy na volby rozhraní. V kombinaci s
-pøepínaèem
+UÅ¾vanÄ›nÃ½ reÅ¾im. Ifrename zobrazÃ­ internÃ­ vÃ½sledky prÅ¯chodu svÃ½m
+konfiguraÄnÃ­m souborem a dotazy na volby rozhranÃ­. V kombinaci s
+pÅ™epÃ­naÄem
 .I dry-run
-pøedstavuje dobrı zpùsob debugování komplexních nastavení nebo triviálních
-problémù.
+pÅ™edstavuje dobrÃ½ zpÅ¯sob debugovÃ¡nÃ­ komplexnÃ­ch nastavenÃ­ nebo triviÃ¡lnÃ­ch
+problÃ©mÅ¯.
 .\"
 .\" AUTHOR part
 .\"
@@ -142,8 +142,8 @@ Jean Tourrilhes \- jt@hpl.hp.com
 .\"
 .\" TRANSLATION part
 .\"
-.SH PØEKLAD
-Pavel Heimlich \- tropikhajma@seznam.cz, bøezen 2005 (wireless_tools.28pre4).
+.SH PÅ˜EKLAD
+Pavel Heimlich \- tropikhajma@seznam.cz, bÅ™ezen 2005 (wireless_tools.28pre4).
 .\"
 .\" FILES part
 .\"
@@ -152,7 +152,7 @@ Pavel Heimlich \- tropikhajma@seznam.cz, bøezen 2005 (wireless_tools.28pre4).
 .\"
 .\" SEE ALSO part
 .\"
-.SH DAL©Í INFORMACE
+.SH DALÅ Ã INFORMACE
 .BR ifconfig (8),
 .BR ip (8),
 .BR iftab (5).

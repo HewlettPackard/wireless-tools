@@ -593,7 +593,7 @@ you should find a section in /etc/hotplug/net.agent looking like the
 patch above. Otherwise, just cut'n'paste the patch above in the right
 place.
 	The path for 'ifrename' is used twice above, so don't forget
-to modify both occurences.
+to modify both occurrences.
 
 
 	9) Loading driver modules

@@ -4,18 +4,18 @@
 .\"
 .\" Traduction 2003/08/17 Maxime CHARPENNE (voir
 .\" http://www.delafond.org/traducmanfr/)
-.\" 1ère traduction        : version 26
-.\" Mise à jour 2004/01/29 : version 27-pre9 (beta)
+.\" 1Ã¨re traduction        : version 26
+.\" Mise Ã  jour 2004/01/29 : version 27-pre9 (beta)
 .\" Manuel identique pour la version 27-pre11 (alpha)
-.\" Mise à jour 2004/08/23 : version 27-pre25
+.\" Mise Ã  jour 2004/08/23 : version 27-pre25
 .\"
-.TH IWGETID 8 "02 décembre 2003" "wireless-tools" "Manuel du Programmeur Linux"
+.TH IWGETID 8 "02 dÃ©cembre 2003" "wireless-tools" "Manuel du Programmeur Linux"
 .\"
 .\" NAME part
 .\"
 .SH NOM
-iwgetid \- Rapporte le ESSID, NWID ou l'Adresse de l'AP/Cell (Point d'Accès/\
-Cellule) du réseau sans fil.
+iwgetid \- Rapporte le ESSID, NWID ou l'Adresse de l'AP/Cell (Point d'AccÃ¨s/\
+Cellule) du rÃ©seau sans fil.
 .\"
 .\" SYNOPSIS part
 .\"
@@ -29,51 +29,51 @@ Cellule) du réseau sans fil.
 .\"
 .SH DESCRIPTION
 .B iwgetid
-est utilisé pour trouver le NWID, ESSID ou l'adresse de l'AP ou cellule du
-réseau sans fil utilisé présentement. L'information rapportée est la même
-que celle montrée par
+est utilisÃ© pour trouver le NWID, ESSID ou l'adresse de l'AP ou cellule du
+rÃ©seau sans fil utilisÃ© prÃ©sentement. L'information rapportÃ©e est la mÃªme
+que celle montrÃ©e par
 .BR iwconfig ", mais " iwgetid
-est plus facile à intégrer dans les scripts.
+est plus facile Ã  intÃ©grer dans les scripts.
 .br
-Par défaut,
+Par dÃ©faut,
 .B iwgetid
 affichera
 .RI l' ESSID
 de la carte, et si la carte n'a pas d'ESSID, il affichera son
 .IR NWID .
 .br
-Le formatage par défaut de la sortie est embelli.
+Le formatage par dÃ©faut de la sortie est embelli.
 .\"
 .\" OPTIONS part
 .\"
 .SH OPTIONS
 .TP
 .B --raw
-Cette option désactive l'embellissement de l'affichage de l'information. Cette
+Cette option dÃ©sactive l'embellissement de l'affichage de l'information. Cette
 option est orthogonale aux autres options (sauf
 .BR --scheme ),
-donc, avec la combinaison appropriée des options, il est possible d'afficher
+donc, avec la combinaison appropriÃ©e des options, il est possible d'afficher
 en brut l'ESSID, l'Adresse de l'AP ou le Mode.
 .br
-Ce format est idéal quand on stocke le résultat de iwgetid comme une variable
+Ce format est idÃ©al quand on stocke le rÃ©sultat de iwgetid comme une variable
 dans les scripts
 .I Shell
 ou
 .IR Perl ,
-ou pour passer le résultat comme argument sur la ligne de commande de
+ou pour passer le rÃ©sultat comme argument sur la ligne de commande de
 .BR iwconfig .
 .TP
 .B --scheme
-Cette option est similaire à la précédente, elle désactive l'embellissement de
-l'affichage des données et supprime tous les caractères non alphanumériques
-(comme les caractères d'espacement, la ponctuation et les caractères de
-contrôle).
+Cette option est similaire Ã  la prÃ©cÃ©dente, elle dÃ©sactive l'embellissement de
+l'affichage des donnÃ©es et supprime tous les caractÃ¨res non alphanumÃ©riques
+(comme les caractÃ¨res d'espacement, la ponctuation et les caractÃ¨res de
+contrÃ´le).
 .br
-La sortie résultante est un identifiant Pcmcia valide («\ Pcmcia scheme
-identifer\ ») (qui peut être utilisé comme argument de la commande
+La sortie rÃ©sultante est un identifiant Pcmcia valide (Â«\ Pcmcia scheme
+identifer\ Â») (qui peut Ãªtre utilisÃ© comme argument de la commande
 .BR "cardctl scheme" ).
-Ce format est aussi idéal quand on utilise le résultat de iwgetid comme un
-sélecteur («\ selector\ ») dans les scripts
+Ce format est aussi idÃ©al quand on utilise le rÃ©sultat de iwgetid comme un
+sÃ©lecteur (Â«\ selector\ Â») dans les scripts
 .I Shell
 ou
 .IR Perl ,
@@ -88,16 +88,16 @@ sans fil.
 .TP
 .B --freq
 Affiche la
-.I fréquence
+.I frÃ©quence
 ou le
 .I canal
-courant utilisé par l'interface.
+courant utilisÃ© par l'interface.
 .TP
 .B --channel
 Affiche le canal
 .RI ( channel )
-courant utilisé par l'interface. Le canal est déterminé en utilisant la
-fréquence courante et la liste de fréquence fournie par l'interface.
+courant utilisÃ© par l'interface. Le canal est dÃ©terminÃ© en utilisant la
+frÃ©quence courante et la liste de frÃ©quence fournie par l'interface.
 .TP
 .B --mode
 Affiche le
@@ -108,22 +108,22 @@ courant de l'interface.
 Affiche le
 .I nom de protocole
 de l'interface. Il permet d'identifer toutes les cartes qui sont compatibles
-entre elles et qui acceptent le même type de configuration.
+entre elles et qui acceptent le mÃªme type de configuration.
 .br
-Cela peut aussi être utilisé pour
-.I vérifier la compatibilité de Wireless Extension
+Cela peut aussi Ãªtre utilisÃ© pour
+.I vÃ©rifier la compatibilitÃ© de Wireless Extension
 sur l'interface, car c'est le seul attribut que tous les pilotes supportant
 Wireless Extension doivent avoir.
 .\"
 .\" TRADUCTION part
 .\"
 .SH TRADUCTION
-Maxime CHARPENNE, août 2004 (wireless_tools.27-pre25).
+Maxime CHARPENNE, aoÃ»t 2004 (wireless_tools.27-pre25).
 .\"
 \" AVERTISSEMENT part
 .\"
 .SH AVERTISSEMENT SUR LA TRADUCTION
-Il est possible que cette traduction soit imparfaite ou périmée. En cas de
+Il est possible que cette traduction soit imparfaite ou pÃ©rimÃ©e. En cas de
 doute, veuillez vous reporter au document original en langue anglaise fourni
 avec le programme.
 .\"

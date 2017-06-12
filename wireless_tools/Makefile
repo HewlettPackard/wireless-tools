@@ -170,7 +170,7 @@ install-static:: $(STATIC)
 	install -m 755 -d $(INSTALL_LIB)
 	install -m 644 $(STATIC) $(INSTALL_LIB)
 
-# All the binaries. Careful, no dependancy on install-dynamic
+# All the binaries. Careful, no dependency on install-dynamic
 install-bin:: all
 	install -m 755 -d $(INSTALL_DIR)
 	install -m 755 $(PROGS) $(INSTALL_DIR)
@@ -225,5 +225,5 @@ uninstall::
 	  $(RM) $(INSTALL_MAN)/man5/$$f; \
 	done
 
-# Include dependancies
+# Include dependencies
 -include *.d

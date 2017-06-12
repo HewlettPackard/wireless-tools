@@ -3,7 +3,7 @@
 .\"
 .\" Traduction 2003/08/17 Maxime CHARPENNE (voir
 .\" http://www.delafond.org/traducmanfr/)
-.\" 1�re traduction     : version 26
+.\" 1Ã¨re traduction     : version 26
 .\" Manuel identique pour version 27-pre9 (beta)
 .\" Manuel identique pour version 27-pre11 (alpha)
 .\"
@@ -12,7 +12,7 @@
 .\" NAME part
 .\"
 .SH NOM
-iwpriv \- configure les param�tres optionnels (priv�s) d'une interface r�seau
+iwpriv \- configure les paramÃ¨tres optionnels (privÃ©s) d'une interface rÃ©seau
 sans fil
 .\"
 .\" SYNOPSIS part
@@ -34,80 +34,80 @@ sans fil
 .\"
 .SH DESCRIPTION
 .B Iwpriv
-est l'outil � utiliser avec
+est l'outil Ã  utiliser avec
 .IR iwconfig (8).
 .B Iwpriv
-traite les param�tres et attributs sp�cifiques � chaque pilote (contrairement
-�
+traite les paramÃ¨tres et attributs spÃ©cifiques Ã  chaque pilote (contrairement
+Ã 
 .I iwconfig
-qui ne s'occupe que des g�n�riques).
+qui ne s'occupe que des gÃ©nÃ©riques).
 .PP
 Sans argument,
 .B iwpriv
-liste les commandes priv�es disponibles sur chaque interface, ainsi que les
-param�tres qu'elles requi�rent. En utilisant ces informations, l'utilisateur
-peut appliquer ces commandes particuli�res sur les interfaces sp�cifi�es.
+liste les commandes privÃ©es disponibles sur chaque interface, ainsi que les
+paramÃ¨tres qu'elles requiÃ¨rent. En utilisant ces informations, l'utilisateur
+peut appliquer ces commandes particuliÃ¨res sur les interfaces spÃ©cifiÃ©es.
 .PP
-En th�orie, la documentation de chaque pilote devrait indiquer comment utiliser
-ces commandes sp�cifiques et leurs effets.
+En thÃ©orie, la documentation de chaque pilote devrait indiquer comment utiliser
+ces commandes spÃ©cifiques et leurs effets.
 .\"
 .\" PARAMETER part
 .\"
-.SH PARAM�TRES
+.SH PARAMÃTRES
 .TP
 .IR private-command " [" private-parameters ]
-Ex�cute la
+ExÃ©cute la
 .I private-command
-(commande priv�e) sp�cifi�e sur l'interface.
+(commande privÃ©e) spÃ©cifiÃ©e sur l'interface.
 .br
-La commande peut �ventuellement prendre ou n�cessiter des arguments, et peut
-afficher de l'information. En cons�quent, les param�tres de la ligne de
-commande peuvent ou peuvent ne pas �tre n�cessaires et doivent correspondre
+La commande peut Ã©ventuellement prendre ou nÃ©cessiter des arguments, et peut
+afficher de l'information. En consÃ©quent, les paramÃ¨tres de la ligne de
+commande peuvent ou peuvent ne pas Ãªtre nÃ©cessaires et doivent correspondre
 aux besoins de la commande. La liste des commandes que
 .B iwpriv
-affiche (quand il est appel� sans param�tre) doit vous donner des indications
-sur ces param�tres.
+affiche (quand il est appelÃ© sans paramÃ¨tre) doit vous donner des indications
+sur ces paramÃ¨tres.
 .br
-Cependant, vous devriez vous reporter � la documentation du pilote du
-p�riph�rique pour utiliser les commandes correctement, ainsi que conna�tre
+Cependant, vous devriez vous reporter Ã  la documentation du pilote du
+pÃ©riphÃ©rique pour utiliser les commandes correctement, ainsi que connaÃ®tre
 leurs effets.
 .TP
 .I "private-command [I]" "[" private-parameters ]
 Idem, sauf que
 .I I
-(un entier) est pass� � la commande en tant que
+(un entier) est passÃ© Ã  la commande en tant que
 .I "Token Index"
-(indication d'index). Seules quelques commandes utiliseront ce �\ Token
-Index\ � (la plupart l'ignoreront), et la documentation du pilote devrait
-pr�ciser quand il est n�cessaire.
+(indication d'index). Seules quelques commandes utiliseront ce Â«\ Token
+Index\ Â» (la plupart l'ignoreront), et la documentation du pilote devrait
+prÃ©ciser quand il est nÃ©cessaire.
 .TP
 .BR -a / --all
-Ex�cute et affiche toutes les commandes priv�es qui ne prennent aucun argument
-(c.-�-d. en lecture seule).
+ExÃ©cute et affiche toutes les commandes privÃ©es qui ne prennent aucun argument
+(c.-Ã -d. en lecture seule).
 .TP
 .B roam
-Active ou d�sactive le �\ roaming\ �, s'il est support�. Appelle la commande
-priv�e
+Active ou dÃ©sactive le Â«\ roaming\ Â», s'il est supportÃ©. Appelle la commande
+privÃ©e
 .IR setroam .
-Trouv� dans le pilote
+TrouvÃ© dans le pilote
 .I wavelan_cs
 .TP
 .B port
-Lit ou configure le type de port. Appelle les commandes priv�es
+Lit ou configure le type de port. Appelle les commandes privÃ©es
 .IR gport_type ", " sport_type ", " get_port " ou " set_port
-trouv�es dans les pilotes
+trouvÃ©es dans les pilotes
 .IR wavelan2_cs " et " wvlan_cs .
 .\"
 .\" DISPLAY part
 .\"
 .SH AFFICHAGE
-Pour chaque mat�riel qui supporte les commandes priv�es,
+Pour chaque matÃ©riel qui supporte les commandes privÃ©es,
 .I iwpriv
-affichera la liste des commandes priv�es disponibles.
+affichera la liste des commandes privÃ©es disponibles.
 .PP
-Cela inclut le nom de la commande priv�e, le nombre d'arguments qui peuvent
-�tre entr�s et leur type, ainsi que le nombre d'arguments qui peuvent �tre
-affich�s et leur type.
+Cela inclut le nom de la commande privÃ©e, le nombre d'arguments qui peuvent
+Ãªtre entrÃ©s et leur type, ainsi que le nombre d'arguments qui peuvent Ãªtre
+affichÃ©s et leur type.
 .PP
 Par exemple, vous pouvez avoir l'affichage suivant\ :
 .br
@@ -117,8 +117,8 @@ Par exemple, vous pouvez avoir l'affichage suivant\ :
 .br
 .B "          gethisto (89F7) : set   0      & get  16 int"
 .PP
-Cela veut dire que vous pouvez fixer le seuil de qualit� et afficher un
-histogramme jusqu'� 16 valeurs avec les commandes suivantes\ :
+Cela veut dire que vous pouvez fixer le seuil de qualitÃ© et afficher un
+histogramme jusqu'Ã  16 valeurs avec les commandes suivantes\ :
 .br
 .I "  iwpriv eth0 setqualthr 20"
 .br
@@ -132,12 +132,12 @@ Jean Tourrilhes \- jt@hpl.hp.com
 .\" TRADUCTION part
 .\"
 .SH TRADUCTION
-Maxime CHARPENNE, ao�t 2003.
+Maxime CHARPENNE, aoÃ»t 2003.
 .\"
 \" AVERTISSEMENT part
 .\"
 .SH AVERTISSEMENT SUR LA TRADUCTION
-Il est possible que cette traduction soit imparfaite ou p�rim�e. En cas de
+Il est possible que cette traduction soit imparfaite ou pÃ©rimÃ©e. En cas de
 doute, veuillez vous reporter au document original en langue anglaise fourni
 avec le programme.
 .\"

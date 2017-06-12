@@ -2,12 +2,12 @@
 .\" Doplnil a opravil Jean Tourrilhes - 2002-2003
 .\" iwgetid.8
 .\"
-.TH IWGETID 8 "2.prosinec 2003" "wireless-tools" "Linux - Manuál programátora"
+.TH IWGETID 8 "2.prosinec 2003" "wireless-tools" "Linux - ManuÃ¡l programÃ¡tora"
 .\"
 .\" NAME part
 .\"
-.SH JMÉNO
-iwgetid \- Zobrazí ESSID, NWID nebo adresu AP/Cell (pøístupového bodu/buòky) v bezdrátové síti
+.SH JMÃ‰NO
+iwgetid \- ZobrazÃ­ ESSID, NWID nebo adresu AP/Cell (pÅ™Ã­stupovÃ©ho bodu/buÅˆky) v bezdrÃ¡tovÃ© sÃ­ti
 .\"
 .\" SYNOPSIS part
 .\"
@@ -21,97 +21,97 @@ iwgetid \- Zobrazí ESSID, NWID nebo adresu AP/Cell (pøístupového bodu/buòky) v b
 .\"
 .SH POPIS
 .B iwgetid
-se pou¾ívá k zji¹tìní NWID, ESSID nebo adresy AP/Cell (pøístupového bodu/buòky)
-v bezdrátové síti, která je právì vyu¾ívána. Zobrazená informace je stejná jako
+se pouÅ¾Ã­vÃ¡ k zjiÅ¡tÄ›nÃ­ NWID, ESSID nebo adresy AP/Cell (pÅ™Ã­stupovÃ©ho bodu/buÅˆky)
+v bezdrÃ¡tovÃ© sÃ­ti, kterÃ¡ je prÃ¡vÄ› vyuÅ¾Ã­vÃ¡na. ZobrazenÃ¡ informace je stejnÃ¡ jako
 ta, kterou ukazuje
 .BR iwconfig ", ale " iwgetid
-se snadnìji integruje do skriptù.
+se snadnÄ›ji integruje do skriptÅ¯.
 .br
-Jako vıchozí,
+Jako vÃ½chozÃ­,
 .B iwgetid
-vypí¹e 
+vypÃ­Å¡e 
 .I ESSID
-zaøízení, pokud zaøízení nemá ¾ádné ESSID, vytiskne jeho
+zaÅ™Ã­zenÃ­, pokud zaÅ™Ã­zenÃ­ nemÃ¡ Å¾Ã¡dnÃ© ESSID, vytiskne jeho
 .IR NWID .
 .br
-Vıchozí formát pro vıstup je pretty-printing (èlovìkem èitelnı).
+VÃ½chozÃ­ formÃ¡t pro vÃ½stup je pretty-printing (ÄlovÄ›kem ÄitelnÃ½).
 .\"
 .\" OPTIONS part
 .\"
 .SH VOLBY
 .TP
 .B --raw
-Tento pøepínaè vypne pretty-printing.
-Je mo¾né jej kombinovat s ostatními pøepínaèi (s vıjimkou
+Tento pÅ™epÃ­naÄ vypne pretty-printing.
+Je moÅ¾nÃ© jej kombinovat s ostatnÃ­mi pÅ™epÃ­naÄi (s vÃ½jimkou
 .BR --scheme ),
-tak¾e se správnou kombinací pøepínaèù lze vytisknout surové
+takÅ¾e se sprÃ¡vnou kombinacÃ­ pÅ™epÃ­naÄÅ¯ lze vytisknout surovÃ©
 ESSID, adresu AP nebo Mode.
 .br
-Tento formát je ideální pro ulo¾ení vısledku iwgetid jako promìnné ve skriptech
+Tento formÃ¡t je ideÃ¡lnÃ­ pro uloÅ¾enÃ­ vÃ½sledku iwgetid jako promÄ›nnÃ© ve skriptech
 .I Shellu
 nebo
 .I Perlu
-nebo pro pøedání vısledku jako parametru pøíkazové øádky pro
+nebo pro pÅ™edÃ¡nÃ­ vÃ½sledku jako parametru pÅ™Ã­kazovÃ© Å™Ã¡dky pro
 .BR iwconfig .
 .TP
 .B --scheme
-Tento pøepínaè je podobnı pøedchozímu, vypne pretty-printing 
-a odstraní v¹echny znaky, které nejsou alfanumerické
-(jako mezery, interpunkci a kontrolní znaky).
+Tento pÅ™epÃ­naÄ je podobnÃ½ pÅ™edchozÃ­mu, vypne pretty-printing 
+a odstranÃ­ vÅ¡echny znaky, kterÃ© nejsou alfanumerickÃ©
+(jako mezery, interpunkci a kontrolnÃ­ znaky).
 .br
-Vıslednı vıstup je validní <<\ Pcmcia scheme identifer\ >> (kterı mù¾e bıt
-pou¾it jako parametr pøíkazu
+VÃ½slednÃ½ vÃ½stup je validnÃ­ <<\ Pcmcia scheme identifer\ >> (kterÃ½ mÅ¯Å¾e bÃ½t
+pouÅ¾it jako parametr pÅ™Ã­kazu
 .BR "cardctl scheme" ).
-Tento formát je také ideální, pokud je vısledek iwgetid pou¾it jako volba ve skriptech
+Tento formÃ¡t je takÃ© ideÃ¡lnÃ­, pokud je vÃ½sledek iwgetid pouÅ¾it jako volba ve skriptech
 .I Shellu
 nebo
 .I Perlu
-nebo jako název souboru.
+nebo jako nÃ¡zev souboru.
 .TP
 .B --ap
-Zobrazí MAC adresu bezdrátového
+ZobrazÃ­ MAC adresu bezdrÃ¡tovÃ©ho
 .I Access Point
-(pøístupového bodu) nebo
+(pÅ™Ã­stupovÃ©ho bodu) nebo
 .IR Cell .
-(buòky)
+(buÅˆky)
 .TP
 .B --freq
-Zobrazí aktuální
+ZobrazÃ­ aktuÃ¡lnÃ­
 .I frequency
 (frekvenci) nebo
 .I channel
-(kanál), pou¾ívanı rozhraním.
+(kanÃ¡l), pouÅ¾Ã­vanÃ½ rozhranÃ­m.
 .TP
 .B --channel
-Zobrazí aktuální
+ZobrazÃ­ aktuÃ¡lnÃ­
 .I channel
-(kanál), pou¾ívanı rozhraním. Kanál je získán z aktuální frekvence
-a seznamu frekvencí dodaného rozhraním.
+(kanÃ¡l), pouÅ¾Ã­vanÃ½ rozhranÃ­m. KanÃ¡l je zÃ­skÃ¡n z aktuÃ¡lnÃ­ frekvence
+a seznamu frekvencÃ­ dodanÃ©ho rozhranÃ­m.
 .TP
 .B --mode
-Zobrazí aktuální
+ZobrazÃ­ aktuÃ¡lnÃ­
 .I mode
-(re¾im) rozhraní.
+(reÅ¾im) rozhranÃ­.
 .TP
 .B --protocol
-Zobrazí
+ZobrazÃ­
 .I protocol name
-(název protokolu) rozhraní. Tak je mo¾né identifikovat v¹echny karty, které
-jsou vzájemnì kompatibilní a akceptují stejnı typ nastavení.
+(nÃ¡zev protokolu) rozhranÃ­. Tak je moÅ¾nÃ© identifikovat vÅ¡echny karty, kterÃ©
+jsou vzÃ¡jemnÄ› kompatibilnÃ­ a akceptujÃ­ stejnÃ½ typ nastavenÃ­.
 .br
-Je to také mo¾nost jak 
-.I ovìøit podporu Wireless Extensions
-na rozhraní, proto¾e je to jedinı atribut,
-kterı v¹echny ovladaèe podporující Wireless Extensions musejí podporovat.
+Je to takÃ© moÅ¾nost jak 
+.I ovÄ›Å™it podporu Wireless Extensions
+na rozhranÃ­, protoÅ¾e je to jedinÃ½ atribut,
+kterÃ½ vÅ¡echny ovladaÄe podporujÃ­cÃ­ Wireless Extensions musejÃ­ podporovat.
 .\"
 .\" TRANSLATION part
 .\"
-.SH PØEKLAD
-Pavel Heimlich \- tropikhajma@seznam.cz, bøezen 2005 (wireless_tools.28pre4).
+.SH PÅ˜EKLAD
+Pavel Heimlich \- tropikhajma@seznam.cz, bÅ™ezen 2005 (wireless_tools.28pre4).
 .\"
 .\" SEE ALSO part
 .\"
-.SH DAL©Í INFORMACE
+.SH DALÅ Ã INFORMACE
 .BR iwconfig (8),
 .BR ifconfig (8),
 .BR iwspy (8),

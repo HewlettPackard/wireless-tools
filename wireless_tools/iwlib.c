@@ -510,7 +510,7 @@ iw_get_range_info(int		skfd,
       memcpy((char *) range,
 	     buffer,
 	     iwr15_off(num_channels));
-      /* Frequencies pushed futher down towards the end */
+      /* Frequencies pushed further down towards the end */
       memcpy((char *) range + iwr_off(num_channels),
 	     buffer + iwr15_off(num_channels),
 	     iwr15_off(sensitivity) - iwr15_off(num_channels));
@@ -541,7 +541,7 @@ iw_get_range_info(int		skfd,
     }
 
   /* We are now checking much less than we used to do, because we can
-   * accomodate more WE version. But, there are still cases where things
+   * accommodate more WE version. But, there are still cases where things
    * will break... */
   if(!iw_ignore_version)
     {

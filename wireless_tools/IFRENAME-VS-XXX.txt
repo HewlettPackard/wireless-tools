@@ -102,7 +102,7 @@ hotplug. 'udev' can't deal with those devices.
 		o It is common practice on embedded system to use a
 static /dev and not 'udev' to save space and boot time. And to not use
 hotplug for the same reasons.
-		o 'ifrename' has now a udev compatiblity mode that
+		o 'ifrename' has now a udev compatibility mode that
 enables to trivially integrate it into 'udev' as an IMPORT rule. This
 requires udev version 107 or better and ifrename 29-pre17 or better.
 

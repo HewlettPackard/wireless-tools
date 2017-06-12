@@ -3,17 +3,17 @@
 .\"
 .\" Traduction 2003/08/17 Maxime CHARPENNE (voir
 .\" http://www.delafond.org/traducmanfr/)
-.\" 1ère traduction        : version 26
-.\" Mise à jour 2004/01/29 : version 27-pre9 (beta)
+.\" 1Ã¨re traduction        : version 26
+.\" Mise Ã  jour 2004/01/29 : version 27-pre9 (beta)
 .\" Manuel identique pour la version 27-pre11 (alpha)
-.\" Mise à jour 2004/08/23 : version 27-pre25
+.\" Mise Ã  jour 2004/08/23 : version 27-pre25
 .\"
 .TH IWLIST 8 "23 juin 2004" "wireless-tools" "Manuel du Programmeur Linux"
 .\"
 .\" NAME part
 .\"
 .SH NOM
-iwlist \- Obtient plus d'informations wireless détaillées depuis une interface wireless
+iwlist \- Obtient plus d'informations wireless dÃ©taillÃ©es depuis une interface wireless
 .\"
 .\" SYNOPSIS part
 .\"
@@ -42,91 +42,91 @@ iwlist \- Obtient plus d'informations wireless détaillées depuis une interface w
 .\"
 .SH DESCRIPTION
 .B Iwlist
-est utilisé pour afficher de l'information additionnelle d'une interface réseau
-wireless qui n'est pas affichée par
+est utilisÃ© pour afficher de l'information additionnelle d'une interface rÃ©seau
+wireless qui n'est pas affichÃ©e par
 .IR iwconfig (8)
-L'argument principal est utilisé pour sélectionner une catégorie d'information,
+L'argument principal est utilisÃ© pour sÃ©lectionner une catÃ©gorie d'information,
 .B iwlist
-affiche dans une forme détaillée toute information relative à cette catégorie,
-y compris les informations déjà montrées par
+affiche dans une forme dÃ©taillÃ©e toute information relative Ã  cette catÃ©gorie,
+y compris les informations dÃ©jÃ  montrÃ©es par
 .IR iwconfig (8).
 .\"
 .\" PARAMETER part
 .\"
-.SH PARAMÈTRES
+.SH PARAMÃˆTRES
 .TP
 .BR scan [ning]
-Donne la liste des Points d'Accès et des cellules Ad-Hoc à portée, et
-optionnellement plein d'autres informations à leur propos (ESSID, Quality,
-Frequency, Mode...). Le type d'information retourné dépend de ce que la carte
+Donne la liste des Points d'AccÃ¨s et des cellules Ad-Hoc Ã  portÃ©e, et
+optionnellement plein d'autres informations Ã  leur propos (ESSID, Quality,
+Frequency, Mode...). Le type d'information retournÃ© dÃ©pend de ce que la carte
 supporte.
 .br
-Le «\ Triggering scanning\ » est une opération nécessitant les privilèges
+Le Â«\ Triggering scanning\ Â» est une opÃ©ration nÃ©cessitant les privilÃ¨ges
 de
 .I root
-et les utilisateurs normaux peuvent juste lire les résultats («\ letf-over scan
-results\ »). Par défaut, les paramètres courants du pilote auront une grande
-incidence sur la manière dont le scan est réalisé (la boucle du scan). Aussi,
-cette commande est supposée prendre des arguments supplémentaires pour contrôler
-le comportement du scan, mais cela n'est actuellement pas implémenté.
+et les utilisateurs normaux peuvent juste lire les rÃ©sultats (Â«\ letf-over scan
+results\ Â»). Par dÃ©faut, les paramÃ¨tres courants du pilote auront une grande
+incidence sur la maniÃ¨re dont le scan est rÃ©alisÃ© (la boucle du scan). Aussi,
+cette commande est supposÃ©e prendre des arguments supplÃ©mentaires pour contrÃ´ler
+le comportement du scan, mais cela n'est actuellement pas implÃ©mentÃ©.
 .TP
 .BR freq [uency]/ channel
-Donne la liste des fréquences disponibles du périphérique et le nombre de canaux
-définis. Veuillez noter que, habituellement, le pilote retourne le nombre total
-de canaux et seulement les fréquences disponibles dans la région considérée,
-donc il n'y a pas correspondance entre le nombre de fréquences affichées et le
+Donne la liste des frÃ©quences disponibles du pÃ©riphÃ©rique et le nombre de canaux
+dÃ©finis. Veuillez noter que, habituellement, le pilote retourne le nombre total
+de canaux et seulement les frÃ©quences disponibles dans la rÃ©gion considÃ©rÃ©e,
+donc il n'y a pas correspondance entre le nombre de frÃ©quences affichÃ©es et le
 nombre de canaux.
 .TP
 .BR rate / bit [rate]
-Liste les débits supportés par le périphérique (en b/s).
+Liste les dÃ©bits supportÃ©s par le pÃ©riphÃ©rique (en b/s).
 .TP
 .BR key / enc [ryption]
-Liste les tailles des clefs de cryptage supportées et affiche toutes
-les clefs de cryptage disponibles dans le périphérique.
+Liste les tailles des clefs de cryptage supportÃ©es et affiche toutes
+les clefs de cryptage disponibles dans le pÃ©riphÃ©rique.
 .TP
 .B power
-Liste les divers attributs et modes d'économie d'énergie («\ Power
-Management\ ») du périphérique.
+Liste les divers attributs et modes d'Ã©conomie d'Ã©nergie (Â«\ Power
+Management\ Â») du pÃ©riphÃ©rique.
 .TP
 .B txpower
-Liste les différentes puissances d'émission («\ Transmit Powers\ »)
-disponibles dans le périphérique.
+Liste les diffÃ©rentes puissances d'Ã©mission (Â«\ Transmit Powers\ Â»)
+disponibles dans le pÃ©riphÃ©rique.
 .TP
 .B retry
-Liste les limites des tentatives de transmissions («\ transmit retry limits\ »)
-et la durée de vie des tentatives («\ retry lifetime\ ») du périphériques
+Liste les limites des tentatives de transmissions (Â«\ transmit retry limits\ Â»)
+et la durÃ©e de vie des tentatives (Â«\ retry lifetime\ Â») du pÃ©riphÃ©riques
 (NDT\ : voir la section
 .B retry
 de iwconfig(8)).
 .TP
 .BR ap / accesspoint / peers
-Donne la liste des Points d'Accès à portée, et optionnellement la qualié de leur
+Donne la liste des Points d'AccÃ¨s Ã  portÃ©e, et optionnellement la qualiÃ© de leur
 lien. Cette option est
-.B obsolète
-et est maintenant dépréciée en faveur du support scan (voir ci-dessus), et la
+.B obsolÃ¨te
+et est maintenant dÃ©prÃ©ciÃ©e en faveur du support scan (voir ci-dessus), et la
 plupart des pilotes ne le supporte pas.
 .br
 Quelques pilotes peuvent utiliser cette commande pour retourner une
-liste spécifique de Paires («\ Peers\ ») ou de Points d'Accès, telle que la
-liste des Paires associés/enregistrés avec la carte. Voir la documentation du
-pilote pour plus de détails.
+liste spÃ©cifique de Paires (Â«\ Peers\ Â») ou de Points d'AccÃ¨s, telle que la
+liste des Paires associÃ©s/enregistrÃ©s avec la carte. Voir la documentation du
+pilote pour plus de dÃ©tails.
 .TP
 .B event
-Liste les événements wireless supportés par le périphérique.
+Liste les Ã©vÃ©nements wireless supportÃ©s par le pÃ©riphÃ©rique.
 .TP
 .B --version
-Affiche la version des outils, ainsi que la version courante et recommandée des
+Affiche la version des outils, ainsi que la version courante et recommandÃ©e des
 Wireless Extensions pour l'outil et les diverses interfaces sans fil.
 .\"
 .\" TRADUCTION part
 .\"
 .SH TRADUCTION
-Maxime CHARPENNE, août 2004 (wireless_tools.27-pre25).
+Maxime CHARPENNE, aoÃ»t 2004 (wireless_tools.27-pre25).
 .\"
 \" AVERTISSEMENT part
 .\"
 .SH AVERTISSEMENT SUR LA TRADUCTION
-Il est possible que cette traduction soit imparfaite ou périmée. En cas de
+Il est possible que cette traduction soit imparfaite ou pÃ©rimÃ©e. En cas de
 doute, veuillez vous reporter au document original en langue anglaise fourni
 avec le programme.
 .\"

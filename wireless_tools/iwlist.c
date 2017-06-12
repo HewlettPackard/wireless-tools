@@ -440,7 +440,7 @@ iw_print_gen_ie(unsigned char *	buffer,
  * Note that we don't use the scanning capability of iwlib (functions
  * iw_process_scan() and iw_scan()). The main reason is that
  * iw_process_scan() return only a subset of the scan data to the caller,
- * for example custom elements and bitrates are ommited. Here, we
+ * for example custom elements and bitrates are omitted. Here, we
  * do the complete job...
  */
 

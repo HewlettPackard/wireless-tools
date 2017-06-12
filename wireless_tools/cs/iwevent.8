@@ -1,12 +1,12 @@
 .\" Jean Tourrilhes - HPL - 2002 - 2004
 .\" iwevent.8
 .\"
-.TH IWEVENT 8 "23.èerven 2004" "net-tools" "Linux - Manuál programátora"
+.TH IWEVENT 8 "23.Äerven 2004" "net-tools" "Linux - ManuÃ¡l programÃ¡tora"
 .\"
 .\" NAME part
 .\"
-.SH JMÉNO
-iwevent \- Zobrazí bezdrátové události vyvolané ovladaèi a zmìnami nastavení
+.SH JMÃ‰NO
+iwevent \- ZobrazÃ­ bezdrÃ¡tovÃ© udÃ¡losti vyvolanÃ© ovladaÄi a zmÄ›nami nastavenÃ­
 .\"
 .\" SYNOPSIS part
 .\"
@@ -18,25 +18,25 @@ iwevent \- Zobrazí bezdrátové události vyvolané ovladaèi a zmìnami nastavení
 .\"
 .SH POPIS
 .B iwevent
-zobrazí bezdrátové události pøijaté prostøednictvím socketu RTNetlink. Ka¾dı
-øádek zobrazuje jednotlivou bezdrátovou událost popisující, co se stalo
-na urèeném bezdrátovém rozhraní.
+zobrazÃ­ bezdrÃ¡tovÃ© udÃ¡losti pÅ™ijatÃ© prostÅ™ednictvÃ­m socketu RTNetlink. KaÅ¾dÃ½
+Å™Ã¡dek zobrazuje jednotlivou bezdrÃ¡tovou udÃ¡lost popisujÃ­cÃ­, co se stalo
+na urÄenÃ©m bezdrÃ¡tovÃ©m rozhranÃ­.
 .br
-Tento pøíkaz nemá ¾ádné parametry.
+Tento pÅ™Ã­kaz nemÃ¡ Å¾Ã¡dnÃ© parametry.
 .\"
 .\" DISPLAY part
 .\"
-.SH ZOBRAZENÍ
-Jsou dva typy bezdrátovıch událostí.
+.SH ZOBRAZENÃ
+Jsou dva typy bezdrÃ¡tovÃ½ch udÃ¡lostÃ­.
 .PP
-První typ jsou události vztahující se ke zmìnì bezdrátovıch nastavení na
-rozhraní (typicky prostøednictvím
+PrvnÃ­ typ jsou udÃ¡losti vztahujÃ­cÃ­ se ke zmÄ›nÄ› bezdrÃ¡tovÃ½ch nastavenÃ­ na
+rozhranÃ­ (typicky prostÅ™ednictvÃ­m
 .B iwconfig
-nebo skriptu volajícího
+nebo skriptu volajÃ­cÃ­ho
 .BR iwconfig ).
-Jsou oznamována pouze nastavení, která mohou vést k naru¹ení spojení.
-V souèasnosti jsou oznamovány události mìnící jedno z následujících
-nastavení:
+Jsou oznamovÃ¡na pouze nastavenÃ­, kterÃ¡ mohou vÃ©st k naruÅ¡enÃ­ spojenÃ­.
+V souÄasnosti jsou oznamovÃ¡ny udÃ¡losti mÄ›nÃ­cÃ­ jedno z nÃ¡sledujÃ­cÃ­ch
+nastavenÃ­:
 .br
 .I "	Network ID"
 .br
@@ -48,55 +48,55 @@ nastavení:
 .br
 .I "	Encryption"
 .br
-V¹echny tyto události jsou generovány na v¹ech bezdrátovıch rozhraních
-bezdrátovım subsystémem jádra (ale jen kdy¾ byl ovladaè pøeveden na
-nové API ovladaèù).
+VÅ¡echny tyto udÃ¡losti jsou generovÃ¡ny na vÅ¡ech bezdrÃ¡tovÃ½ch rozhranÃ­ch
+bezdrÃ¡tovÃ½m subsystÃ©mem jÃ¡dra (ale jen kdyÅ¾ byl ovladaÄ pÅ™eveden na
+novÃ© API ovladaÄÅ¯).
 .PP
-Dal¹ím typem jsou události generované hardwarem, kdy¾ se nìco stane
-nebo byl byla dokonèena úloha. Tyto události zahrnují:
+DalÅ¡Ã­m typem jsou udÃ¡losti generovanÃ© hardwarem, kdyÅ¾ se nÄ›co stane
+nebo byl byla dokonÄena Ãºloha. Tyto udÃ¡losti zahrnujÃ­:
 .TP
 .B New Access Point/Cell address
-(nová adresa pøístupového bodu/buòky) Rozhraní se pøipojilo k novému
-pøístupovému bodu èi AD-Hoc buòce nebo s ním ztratilo spojení. Je to 
-stejná MAC adresa, jako hlásí
+(novÃ¡ adresa pÅ™Ã­stupovÃ©ho bodu/buÅˆky) RozhranÃ­ se pÅ™ipojilo k novÃ©mu
+pÅ™Ã­stupovÃ©mu bodu Äi AD-Hoc buÅˆce nebo s nÃ­m ztratilo spojenÃ­. Je to 
+stejnÃ¡ MAC adresa, jako hlÃ¡sÃ­
 .BR iwconfig .
 .TP
 .B Scan request completed
-(po¾adavek na skenování dokonèen) Po¾adavek na skenování byl dokonèen,
-vısledek je k dispozici (viz
+(poÅ¾adavek na skenovÃ¡nÃ­ dokonÄen) PoÅ¾adavek na skenovÃ¡nÃ­ byl dokonÄen,
+vÃ½sledek je k dispozici (viz
 .BR iwlist 
 ).
 .TP
 .B Tx packet dropped
-(vyslanı paket zahozen) Paket smìrovanı na tuto adresu byl zahozen, proto¾e rozhraní se
-domnívá, ¾e tento node u¾ neodpovídá (obvykle pokud bylo pøekroèeno maximum
-pokusù na úrovni MAC). Toto je obvykle prvotní známka toho, ¾e
-node mohl opustit buòku nebo se ocitl mimo dosah, ale mù¾e to bıt i 
-zeslabením signálu nebo nadmìrnım ru¹ením.
+(vyslanÃ½ paket zahozen) Paket smÄ›rovanÃ½ na tuto adresu byl zahozen, protoÅ¾e rozhranÃ­ se
+domnÃ­vÃ¡, Å¾e tento node uÅ¾ neodpovÃ­dÃ¡ (obvykle pokud bylo pÅ™ekroÄeno maximum
+pokusÅ¯ na Ãºrovni MAC). Toto je obvykle prvotnÃ­ znÃ¡mka toho, Å¾e
+node mohl opustit buÅˆku nebo se ocitl mimo dosah, ale mÅ¯Å¾e to bÃ½t i 
+zeslabenÃ­m signÃ¡lu nebo nadmÄ›rnÃ½m ruÅ¡enÃ­m.
 .TP
 .B Custom driver event
-(Zvlá¹tní událost ovladaèe) Událost specifická pro ovladaè. Prosím prozkoumejte dokumentaci ovladaèe.
+(ZvlÃ¡Å¡tnÃ­ udÃ¡lost ovladaÄe) UdÃ¡lost specifickÃ¡ pro ovladaÄ. ProsÃ­m prozkoumejte dokumentaci ovladaÄe.
 .TP
 .B Registered node
-Rozhraní úspì¹nì zaregistrovalo nového bezdrátového klienta/peer.
-Vìt¹inou je generována, pokud rozhraní pracuje jako pøístupovı bod
-(re¾im master).
+RozhranÃ­ ÃºspÄ›Å¡nÄ› zaregistrovalo novÃ©ho bezdrÃ¡tovÃ©ho klienta/peer.
+VÄ›tÅ¡inou je generovÃ¡na, pokud rozhranÃ­ pracuje jako pÅ™Ã­stupovÃ½ bod
+(reÅ¾im master).
 .TP
 .B Expired node
-Registrace klienta/peer na tomto rozhraní vypr¹ela. 
-Vìt¹inou je generována, pokud rozhraní pracuje jako pøístupovı bod
-(re¾im master).
+Registrace klienta/peer na tomto rozhranÃ­ vyprÅ¡ela. 
+VÄ›tÅ¡inou je generovÃ¡na, pokud rozhranÃ­ pracuje jako pÅ™Ã­stupovÃ½ bod
+(reÅ¾im master).
 .TP
 .B Spy threshold crossed
-(pøekroèen práh pro sledování) Síla signálu u jedné z adres v seznamu iwspy poklesla pod spodní práh nebo
-pøekroèila horní práh.
+(pÅ™ekroÄen prÃ¡h pro sledovÃ¡nÃ­) SÃ­la signÃ¡lu u jednÃ© z adres v seznamu iwspy poklesla pod spodnÃ­ prÃ¡h nebo
+pÅ™ekroÄila hornÃ­ prÃ¡h.
 .PP
-Vìt¹ina bezdrátovıch ovladaèù generuje pouze èást z tìchto událostí, nikoli
-v¹echny. Jejich seznam zále¾í na konkrétní kombinaci hardware a ovladaèe.
-Pro více informací o vytváøení událostí prosím prozkoumejte dokumentaci
-ovladaèe a pou¾ijte
+VÄ›tÅ¡ina bezdrÃ¡tovÃ½ch ovladaÄÅ¯ generuje pouze ÄÃ¡st z tÄ›chto udÃ¡lostÃ­, nikoli
+vÅ¡echny. Jejich seznam zÃ¡leÅ¾Ã­ na konkrÃ©tnÃ­ kombinaci hardware a ovladaÄe.
+Pro vÃ­ce informacÃ­ o vytvÃ¡Å™enÃ­ udÃ¡lostÃ­ prosÃ­m prozkoumejte dokumentaci
+ovladaÄe a pouÅ¾ijte
 .IR iwlist (8)
-k zji¹tìní, co ovladaè podporuje.
+k zjiÅ¡tÄ›nÃ­, co ovladaÄ podporuje.
 .\"
 .\" AUTHOR part
 .\"
@@ -105,12 +105,12 @@ Jean Tourrilhes \- jt@hpl.hp.com
 .\"
 .\" TRANSLATION part
 .\"
-.SH PØEKLAD
-Pavel Heimlich \- tropikhajma@seznam.cz, bøezen 2005 (wireless_tools.28pre4).
+.SH PÅ˜EKLAD
+Pavel Heimlich \- tropikhajma@seznam.cz, bÅ™ezen 2005 (wireless_tools.28pre4).
 .\"
 .\" SEE ALSO part
 .\"
-.SH DAL©Í INFORMACE
+.SH DALÅ Ã INFORMACE
 .BR iwconfig (8),
 .BR iwlist (8),
 .BR iwspy (8),
