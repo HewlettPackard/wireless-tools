@@ -280,7 +280,7 @@
  *		(From Pavel Roskin <proski@gnu.org>)
  *	o Make $(DYNAMIC_LINK) relative (and not absolute) [Makefile]
  *	---
- *	o Replace all float occurence with double [iwlib, iwlist]
+ *	o Replace all float occurrence with double [iwlib, iwlist]
  *	o Implement iwgetid --mode [iwgetid]
  *	o Convert frequency to channel [iwlist, iwlib]
  *		(Suggested by Pavel Roskin <proski@gnu.org> - always him !)
@@ -308,7 +308,7 @@
  * wireless 26 :
  * -----------
  *	o #define IFLA_WIRELESS if needed [iwlib]
- *	o Update man page with SuSE intruction (see below) [wireless.7]
+ *	o Update man page with SuSE instruction (see below) [wireless.7]
  *		(From Alexander Pevzner <pzz@pzz.msk.ru>)
  *	o Allow to display all 8 bit rates instead of 7 [iwlist]
  *	o Fix retry lifetime to not set IW_RETRY_LIMIT flag [iwconfig]
@@ -372,7 +372,7 @@
  * -----------
  *	o Add 'sed' magic to automatically get WT/WE versions [Makefile]
  *	o Change soname of iwlib to libiwWE.so.WT [Makefile]
- *		Now dynamicaly linked versioned install can work
+ *		Now dynamically linked versioned install can work
  *	o Default to dynamic build, don't build static lib [Makefile]
  *	o Update installation instructions [INSTALL]
  *	o fflush(stdout), so that redirect to file/pipe works [iwevent]
@@ -428,7 +428,7 @@
  *	o Accept arbitrary number of private definitions [iwlib/iwpriv]
  *	---
  *	o Added Hotplug documentation [HOTPLUG.txt]
- *	o Add dependancies (gcc way), remove makedepend [Makefile]
+ *	o Add dependencies (gcc way), remove makedepend [Makefile]
  *		(From Maxime Charpenne <maxime.charpenne@free.fr>)
  *	o Traduction en francais des pages manuel [fr/*]
  *	o Fix some incorrect/ambiguous sentences [iwconfig.8/iwevent.8]
@@ -681,7 +681,7 @@
  *		(From Dima Ryazanov <someone@berkeley.edu>)
  *	o Fix iw_scan()/iw_process_scan() for non-root -> EPERM [iwlib]
  *		(Bug reported by Arkadiusz Miskiewicz <arekm@pld-linux.org>)
- *	o Fix "iwconfig nickname" (was abreviated) [iwconfig]
+ *	o Fix "iwconfig nickname" (was abbreviated) [iwconfig]
  *		(Bug reported by Charles Plessy)
  *	o Invalid mode from driver segfault iwlist scan [iwlist]
  *		(From Aurelien Jacobs <aurel@gnuage.org>)

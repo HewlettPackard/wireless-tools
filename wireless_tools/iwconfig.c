@@ -550,7 +550,7 @@ static const struct iwconfig_modifier	iwmod_retry[] = {
 /*
  * Parse command line modifiers.
  * Return error or number arg parsed.
- * Modifiers must be at the beggining of command line.
+ * Modifiers must be at the beginning of command line.
  */
 static int
 parse_modifiers(char *		args[],		/* Command line args */
@@ -1871,7 +1871,7 @@ set_info(int		skfd,		/* The socket */
 	  return(ret);
 	}
 
-      /* Substract consumed args from command line */
+      /* Subtract consumed args from command line */
       args += ret;
       count -= ret;
 
