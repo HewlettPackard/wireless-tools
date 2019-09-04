@@ -108,7 +108,9 @@ get_info(int			skfd,
 
   if((info->has_range) && (info->range.we_version_compiled > 9))
     {
-      /* Get Transmit Power */
+      /* Get Transmit Power 
+       * Clear txpower flags first */
+      wrq.u.txpower.flags = 0;
       if(iw_get_ext(skfd, ifname, SIOCGIWTXPOW, &wrq) >= 0)
 	{
 	  info->has_txpower = 1;
