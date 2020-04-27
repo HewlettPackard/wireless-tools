@@ -538,7 +538,7 @@ if_takeover_name(int			skfd,
 	    victimname, autoname);
 
   /* Prepare request */
-  bzero(&ifr, sizeof(struct ifreq));
+  memset(&ifr, 0, sizeof(struct ifreq));
   strncpy(ifr.ifr_name, victimname, IFNAMSIZ); 
   strncpy(ifr.ifr_newname, autoname, IFNAMSIZ); 
 
@@ -584,7 +584,7 @@ if_set_name(int			skfd,
     }
 
   /* Prepare request */
-  bzero(&ifr, sizeof(struct ifreq));
+  memset(&ifr, 0, sizeof(struct ifreq));
   strncpy(ifr.ifr_name, oldname, IFNAMSIZ); 
   strncpy(ifr.ifr_newname, newname, IFNAMSIZ); 
 
@@ -744,7 +744,7 @@ mapping_getmac(int			skfd,
   int		i;
 
   /* Get MAC address */
-  bzero(&ifr, sizeof(struct ifreq));
+  memset(&ifr, 0, sizeof(struct ifreq));
   strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
   ret = ioctl(skfd, SIOCGIFHWADDR, &ifr);
   if(ret < 0)
@@ -1037,8 +1037,8 @@ mapping_getdriverbusinfo(int			skfd,
     return(0);
 
   /* Prepare request */
-  bzero(&ifr, sizeof(struct ifreq));
-  bzero(&drvinfo, sizeof(struct ethtool_drvinfo));
+  memset(&ifr, 0, sizeof(struct ifreq));
+  memset(&drvinfo, 0, sizeof(struct ethtool_drvinfo));
   strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
   drvinfo.cmd = ETHTOOL_GDRVINFO;
   ifr.ifr_data = (caddr_t) &drvinfo;
@@ -1203,8 +1203,8 @@ mapping_getbaseaddrirq(int			skfd,
     return(0);
 
   /* Prepare request */
-  bzero(&ifr, sizeof(struct ifreq));
-  bzero(&map, sizeof(struct ifmap));
+  memset(&ifr, 0, sizeof(struct ifreq));
+  memset(&map, 0, sizeof(struct ifmap));
   strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
 
   /* Do it */
@@ -2047,7 +2047,7 @@ mapping_readfile(const char *	filename)
   struct add_extra	extrainfo;
 
   /* Reset the list of filters */
-  bzero(selector_active, sizeof(selector_active));
+  memset(selector_active, 0, sizeof(selector_active));
 
   /* Check filename */
   if(!strcmp(filename, "-"))
